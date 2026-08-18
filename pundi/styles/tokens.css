@@ -1,0 +1,111 @@
+/* ============================================================
+   PUNDI — Design Tokens (DESIGN.md § 4.2 – 4.3 source of truth)
+   Jangan tambah hex/font baru di luar file ini.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* General Sans via Fontshare CDN */
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+
+/* ── Color Tokens ─────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --color-paper:   #EEF1EF;   /* background utama */
+  --color-surface: #FFFFFF;   /* background kartu/panel */
+
+  /* Text */
+  --color-ink:       #16201D; /* teks utama (hampir hitam, undertone hijau) */
+  --color-ink-muted: #5B655F; /* teks sekunder, label, caption */
+
+  /* Semantic – hanya untuk makna, BUKAN dekorasi */
+  --color-pine:    #1B4B3F;   /* primary: aksi, positif, income, aman */
+  --color-pine-10: #E8F0EE;   /* tint pine sangat terang (bg chip/badge) */
+  --color-pine-20: #C8DDD8;   /* tint pine terang */
+  --color-pine-40: #7AADA4;   /* tint pine sedang */
+
+  --color-ember:    #9C4A2E;  /* secondary: negatif, expense, lewat limit */
+  --color-ember-10: #F5EAE6;  /* tint ember sangat terang */
+  --color-ember-20: #E5BDB0;  /* tint ember terang */
+
+  --color-brass:    #B08A3E;  /* accent: jarang, goal tercapai, badge penting */
+  --color-brass-10: #F6F0E4;  /* tint brass sangat terang */
+
+  --color-warning:  #B8862E;  /* status "mendekati limit anggaran" */
+  --color-warning-10: #F6EFE1; /* tint warning */
+
+  /* Structural */
+  --color-rule:    #C8CDC7;   /* garis hairline: border kartu, baseline chart, divider */
+
+  /* ── Typography Tokens ─────────────────────────────────── */
+  --font-display: 'Fraunces', Georgia, serif;         /* headline, angka saldo besar */
+  --font-ui:      'General Sans', system-ui, sans-serif; /* nav, label, body, tombol */
+  --font-mono:    'IBM Plex Mono', 'Courier New', monospace; /* SEMUA angka nominal */
+
+  /* Type Scale (base 16px, ratio ~1.25) */
+  --text-display-xl: 2.5rem;    /* 40px – angka saldo utama */
+  --text-display-l:  1.75rem;   /* 28px – judul halaman */
+  --text-heading:    1.25rem;   /* 20px – judul kartu/section */
+  --text-body:       1rem;      /* 16px – teks umum */
+  --text-small:      0.875rem;  /* 14px – label, caption */
+  --text-data-l:     1.5rem;    /* 24px mono – angka besar summary card */
+  --text-data-m:     1rem;      /* 16px mono – angka tabel transaksi */
+
+  /* Line Heights */
+  --leading-display-xl: 2.75rem;  /* 44px */
+  --leading-display-l:  2.125rem; /* 34px */
+  --leading-heading:    1.625rem; /* 26px */
+  --leading-body:       1.5rem;   /* 24px */
+  --leading-small:      1.25rem;  /* 20px */
+  --leading-data-l:     1.75rem;  /* 28px */
+  --leading-data-m:     1.375rem; /* 22px */
+
+  /* ── Spacing Tokens (base 8px) ──────────────────────────── */
+  --space-1:  0.5rem;    /* 8px */
+  --space-2:  1rem;      /* 16px */
+  --space-3:  1.5rem;    /* 24px */
+  --space-4:  2rem;      /* 32px */
+  --space-6:  3rem;      /* 48px */
+  --space-8:  4rem;      /* 64px */
+
+  /* ── Layout Tokens ──────────────────────────────────────── */
+  --sidebar-width:          15rem;   /* 240px */
+  --sidebar-width-collapsed: 4rem;   /* 64px icon-only */
+  --container-max:          80rem;   /* 1280px */
+  --gutter:                 1.5rem;  /* 24px */
+  --card-padding:           1.5rem;  /* 24px desktop */
+  --card-padding-mobile:    1rem;    /* 16px mobile */
+
+  /* ── Radius Tokens ──────────────────────────────────────── */
+  --radius-card:  6px;  /* kartu, panel */
+  --radius-sm:    4px;  /* badge, input, elemen kecil */
+  --radius-full:  9999px; /* pill/chip */
+
+  /* ── Shadow Tokens ──────────────────────────────────────── */
+  /* Kartu: hairline border, BUKAN shadow tebal */
+  --shadow-card:   none;
+  --shadow-float:  0 4px 12px rgba(22, 32, 29, 0.08); /* modal, dropdown saja */
+  --shadow-focus:  0 0 0 2px var(--color-pine);        /* focus ring */
+
+  /* ── Border ─────────────────────────────────────────────── */
+  --border-hairline: 1px solid var(--color-rule);
+  --border-active:   1.5px solid var(--color-pine);
+
+  /* ── Motion Tokens ──────────────────────────────────────── */
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   500ms;
+  --ease-standard:   cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Chart Tokens ───────────────────────────────────────── */
+  --chart-baseline-color:     var(--color-rule);
+  --chart-baseline-width:     1.5px;
+  --chart-income-color:       var(--color-pine);
+  --chart-expense-color:      var(--color-ember);
+  --chart-networth-color:     var(--color-pine);
+  --chart-category-1:         var(--color-pine);
+  --chart-category-2:         var(--color-pine-40);
+  --chart-category-3:         var(--color-ink-muted);
+  --chart-category-4:         var(--color-brass);
+  --chart-category-5:         var(--color-pine-20);
+  --chart-category-6:         var(--color-ember-20);
+}

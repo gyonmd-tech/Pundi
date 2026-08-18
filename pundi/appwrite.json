@@ -1,0 +1,140 @@
+{
+  "projectId": "pundi-production",
+  "projectName": "Pundi",
+  "databases": [
+    {
+      "$id": "pundi-db",
+      "name": "pundi-db",
+      "enabled": true,
+      "collections": [
+        {
+          "$id": "accounts",
+          "name": "accounts",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "name", "type": "string", "size": 100, "required": true },
+            { "key": "type", "type": "enum", "elements": ["bank", "ewallet", "cash", "credit_card", "investment"], "required": true },
+            { "key": "balance", "type": "integer", "required": true },
+            { "key": "colorTag", "type": "string", "size": 16, "required": false, "default": "#1B4B3F" },
+            { "key": "isActive", "type": "boolean", "required": false, "default": true }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] }
+          ]
+        },
+        {
+          "$id": "categories",
+          "name": "categories",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "name", "type": "string", "size": 100, "required": true },
+            { "key": "type", "type": "enum", "elements": ["income", "expense"], "required": true },
+            { "key": "icon", "type": "string", "size": 50, "required": false, "default": "circle" },
+            { "key": "color", "type": "string", "size": 16, "required": false, "default": "#1B4B3F" },
+            { "key": "parentId", "type": "string", "size": 36, "required": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] }
+          ]
+        },
+        {
+          "$id": "transactions",
+          "name": "transactions",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "accountId", "type": "string", "size": 36, "required": true },
+            { "key": "categoryId", "type": "string", "size": 36, "required": false },
+            { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
+            { "key": "amount", "type": "integer", "required": true },
+            { "key": "date", "type": "datetime", "required": true },
+            { "key": "note", "type": "string", "size": 500, "required": false },
+            { "key": "tags", "type": "string", "size": 50, "required": false, "array": true }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_user_date", "type": "key", "attributes": ["userId", "date"] },
+            { "key": "idx_user_acc", "type": "key", "attributes": ["userId", "accountId"] }
+          ]
+        },
+        {
+          "$id": "budgets",
+          "name": "budgets",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "categoryId", "type": "string", "size": 36, "required": true },
+            { "key": "period", "type": "string", "size": 7, "required": true },
+            { "key": "limitAmount", "type": "integer", "required": true }
+          ],
+          "indexes": [
+            { "key": "idx_user_period", "type": "key", "attributes": ["userId", "period"] }
+          ]
+        },
+        {
+          "$id": "goals",
+          "name": "goals",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "name", "type": "string", "size": 100, "required": true },
+            { "key": "targetAmount", "type": "integer", "required": true },
+            { "key": "currentAmount", "type": "integer", "required": false, "default": 0 },
+            { "key": "targetDate", "type": "datetime", "required": true },
+            { "key": "linkedAccountId", "type": "string", "size": 36, "required": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] }
+          ]
+        },
+        {
+          "$id": "assets",
+          "name": "assets",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "type", "type": "enum", "elements": ["stock", "mutual_fund", "crypto", "gold", "property"], "required": true },
+            { "key": "name", "type": "string", "size": 100, "required": true },
+            { "key": "units", "type": "double", "required": true },
+            { "key": "buyPrice", "type": "integer", "required": true },
+            { "key": "currentPrice", "type": "integer", "required": true }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] }
+          ]
+        },
+        {
+          "$id": "insights",
+          "name": "insights",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "type", "type": "enum", "elements": ["budget_warning", "goal_progress", "trend", "tip"], "required": true },
+            { "key": "message", "type": "string", "size": 500, "required": true },
+            { "key": "isRead", "type": "boolean", "required": false, "default": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_user_read", "type": "key", "attributes": ["userId", "isRead"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

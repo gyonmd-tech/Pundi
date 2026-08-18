@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────────────────────────
+
+enum AccountType {
+  BANK
+  EWALLET
+  CASH
+  CREDIT_CARD
+  INVESTMENT
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum AssetType {
+  STOCK
+  MUTUAL_FUND
+  CRYPTO
+  GOLD
+  PROPERTY
+}
+
+enum InsightType {
+  BUDGET_WARNING
+  GOAL_PROGRESS
+  TREND
+  TIP
+}
+
+// ── Models ────────────────────────────────────────────────────────────────
+
+model Account {
+  id           String      @id @default(cuid())
+  userId       String
+  name         String
+  type         AccountType
+  balance      Decimal     @db.Decimal(15, 2)
+  colorTag     String      @default("#1B4B3F")
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  transactions Transaction[]
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Category {
+  id       String       @id @default(cuid())
+  userId   String
+  name     String
+  type     CategoryType
+  icon     String       @default("circle")
+  color    String       @default("#1B4B3F")
+  parentId String?
+  parent   Category?    @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[]   @relation("CategoryHierarchy")
+
+  budgets      Budget[]
+  transactions Transaction[]
+
+  @@index([userId])
+  @@map("categories")
+}
+
+model Transaction {
+  id         String          @id @default(cuid())
+  userId     String
+  accountId  String
+  categoryId String?
+  type       TransactionType
+  amount     Decimal         @db.Decimal(15, 2)
+  date       DateTime
+  note       String?
+  tags       String[]        @default([])
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  account  Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([userId])
+  @@index([userId, date])
+  @@index([userId, accountId])
+  @@index([userId, categoryId])
+  @@map("transactions")
+}
+
+model Budget {
+  id          String   @id @default(cuid())
+  userId      String
+  categoryId  String
+  period      String   // format "YYYY-MM"
+  limitAmount Decimal  @db.Decimal(15, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, period])
+  @@index([userId, period])
+  @@map("budgets")
+}
+
+model Goal {
+  id              String    @id @default(cuid())
+  userId          String
+  name            String
+  targetAmount    Decimal   @db.Decimal(15, 2)
+  currentAmount   Decimal   @default(0) @db.Decimal(15, 2)
+  targetDate      DateTime
+  linkedAccountId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("goals")
+}
+
+model Asset {
+  id           String    @id @default(cuid())
+  userId       String
+  type         AssetType
+  name         String
+  units        Decimal   @db.Decimal(20, 8)
+  buyPrice     Decimal   @db.Decimal(15, 2)
+  currentPrice Decimal   @db.Decimal(15, 2)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("assets")
+}
+
+model Insight {
+  id        String      @id @default(cuid())
+  userId    String
+  type      InsightType
+  message   String
+  isRead    Boolean     @default(false)
+  createdAt DateTime    @default(now())
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@map("insights")
+}
