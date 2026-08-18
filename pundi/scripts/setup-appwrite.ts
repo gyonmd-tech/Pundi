@@ -5,13 +5,37 @@
  */
 
 import { Client, Databases } from "node-appwrite";
-import * as dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 import schema from "../appwrite.json";
 
-dotenv.config({ path: ".env.local" });
-dotenv.config({ path: ".env" });
+// Helper to load env files without external dependencies
+function loadEnv(file: string) {
+  const envPath = path.resolve(process.cwd(), file);
+  if (fs.existsSync(envPath)) {
+    const content = fs.readFileSync(envPath, "utf-8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx !== -1) {
+        const key = trimmed.slice(0, eqIdx).trim();
+        let val = trimmed.slice(eqIdx + 1).trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    }
+  }
+}
 
-const endpoint   = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://cloud.appwrite.io/v1";
+loadEnv(".env.local");
+loadEnv(".env");
+
+const endpoint   = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://sgp.cloud.appwrite.io/v1";
 const projectId  = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 const apiKey     = process.env.APPWRITE_API_KEY;
 const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "pundi-db";
