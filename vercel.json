@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "cd pundi && npm install",
+  "buildCommand": "cd pundi && npm run build",
+  "outputDirectory": "pundi/.next"
+}
