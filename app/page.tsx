@@ -171,9 +171,9 @@ export default function HomePage() {
       </header>
 
       {/* ── Hero Section ── */}
-      <section className="relative z-10 flex flex-col items-center justify-center text-center px-4 xs:px-6 pt-16 sm:pt-24 lg:pt-28 pb-12 lg:pb-20">
+      <section className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 lg:pt-24 pb-12 lg:pb-20 max-w-7xl mx-auto w-full">
         {/* Release Pill Tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#1E4D3A]/20 bg-white/80 backdrop-blur-md shadow-2xs mb-6 sm:mb-8 animate-fade-in-up">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#1E4D3A]/20 bg-white/90 backdrop-blur-md shadow-2xs mb-6 sm:mb-8 animate-fade-in-up">
           <span className="flex h-2 w-2 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-[#1E4D3A]"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1E4D3A]"></span>
@@ -184,7 +184,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero Headline */}
-        <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[4.75rem] font-bold mb-6 max-w-5xl tracking-tight leading-[1.12] text-[#16201D] font-display">
+        <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-bold mb-5 max-w-4xl mx-auto tracking-tight leading-[1.12] text-[#16201D] font-display">
           Sistem Operasi untuk <br className="hidden sm:block"/>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1E4D3A] via-[#2D6A4F] to-[#40916C]">
             Keuangan & Masa Depan Anda.
@@ -192,22 +192,22 @@ export default function HomePage() {
         </h1>
 
         {/* Hero Subtitle */}
-        <p className="text-sm xs:text-base sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-3xl text-[#46534E] leading-relaxed px-2">
+        <p className="text-sm xs:text-base sm:text-lg text-[#46534E] mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
           Tinggalkan spreadsheet yang membingungkan. Pundi menyatukan pencatatan mutasi harian, perencanaan anggaran, analisis arus kas visual, dan valuasi aset dalam satu platform yang elegan.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col xs:flex-row items-center gap-3 sm:gap-4 w-full justify-center max-w-md sm:max-w-none">
+        {/* CTA Buttons (Properly constrained on Desktop, Tablet & Mobile) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto">
           <Link
             href="/signup"
-            className="w-full xs:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-full text-small sm:text-body font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#1E4D3A]/15 flex items-center justify-center gap-2 group bg-[#1E4D3A] text-white"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 sm:px-9 sm:py-3.5 rounded-full text-small sm:text-body font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#1E4D3A]/20 gap-2 group bg-[#1E4D3A] text-white shadow-md active:scale-95 text-center"
           >
             <span>Mulai Secara Gratis</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/dashboard"
-            className="w-full xs:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-full text-small sm:text-body font-semibold border border-emerald-950/15 bg-white text-[#16201D] hover:bg-emerald-50 transition-all shadow-2xs hover:border-[#1E4D3A]/40"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 sm:px-9 sm:py-3.5 rounded-full text-small sm:text-body font-semibold border border-emerald-950/15 bg-white text-[#16201D] hover:bg-slate-50 transition-all shadow-xs hover:border-[#1E4D3A]/40 text-center"
           >
             Buka Live Demo Dashboard
           </Link>
@@ -224,9 +224,30 @@ export default function HomePage() {
           <span>Desain responsif di semua perangkat</span>
         </div>
 
-        {/* ── Interactive Hero Mockup ── */}
-        <div className="mt-12 sm:mt-16 w-full max-w-5xl mx-auto px-2 sm:px-4 relative">
-          <div className="w-full rounded-2xl md:rounded-[1.75rem] border border-emerald-950/15 bg-white/90 backdrop-blur-2xl shadow-xl shadow-emerald-950/5 overflow-hidden flex flex-col">
+        {/* ── Interactive Hero Mockup Window ── */}
+        <div className="mt-12 sm:mt-16 w-full max-w-5xl mx-auto relative">
+          {/* Floating Feature Badges on Desktop (adds SaaS Polish) */}
+          <div className="hidden lg:flex absolute -top-5 -right-4 z-20 bg-white border border-emerald-950/10 px-4 py-2.5 rounded-2xl shadow-lg items-center gap-3 text-xs animate-in fade-in zoom-in-95">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#1E4D3A] flex items-center justify-center font-bold">
+              <TrendingUp size={16} />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-[#16201D]">Pemasukan Gaji</p>
+              <p className="font-mono text-[#1E4D3A] font-bold">+Rp 25.500.000</p>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex absolute -bottom-5 -left-4 z-20 bg-white border border-emerald-950/10 px-4 py-2.5 rounded-2xl shadow-lg items-center gap-3 text-xs animate-in fade-in zoom-in-95">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+              <Target size={16} />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-[#16201D]">Target Dana Darurat</p>
+              <p className="font-mono text-amber-700 font-bold">80% Tercapai (Rp 20jt)</p>
+            </div>
+          </div>
+
+          <div className="w-full rounded-2xl md:rounded-[1.75rem] border border-emerald-950/15 bg-white/95 backdrop-blur-2xl shadow-xl shadow-emerald-950/5 overflow-hidden flex flex-col">
             {/* Fake Browser Window Header */}
             <div className="h-11 sm:h-12 border-b border-emerald-950/10 flex items-center justify-between px-3.5 sm:px-5 bg-[#F2F5F3]/80 flex-shrink-0">
               <div className="flex items-center gap-2">
@@ -623,7 +644,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Final Call to Action ── */}
-      <section className="px-4 xs:px-6 py-20 sm:py-28 text-center bg-white border-t border-emerald-950/10 relative overflow-hidden">
+      <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center bg-white border-t border-emerald-950/10 relative overflow-hidden">
         <div className="max-w-3xl mx-auto relative z-10">
           <h2 className="text-3xl xs:text-4xl sm:text-5xl font-bold mb-4 font-display text-[#16201D] tracking-tight">
             Kendalikan Keuangan Anda Hari Ini.
@@ -631,17 +652,17 @@ export default function HomePage() {
           <p className="text-small sm:text-body text-[#46534E] mb-8 max-w-xl mx-auto leading-relaxed">
             Mulai catat mutasi harian, rencanakan anggaran, dan wujudkan tujuan finansial Anda bersama Pundi.
           </p>
-          <div className="flex flex-col xs:flex-row justify-center gap-3.5">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto">
             <Link
               href="/signup"
-              className="px-8 py-4 rounded-full text-small sm:text-body font-bold transition-all hover:scale-105 shadow-md shadow-[#1E4D3A]/20 bg-[#1E4D3A] text-white flex items-center justify-center gap-2"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 sm:px-9 sm:py-4 rounded-full text-small sm:text-body font-semibold transition-all hover:scale-105 shadow-md shadow-[#1E4D3A]/20 bg-[#1E4D3A] text-white gap-2 active:scale-95 text-center"
             >
               <span>Buat Akun Gratis Sekarang</span>
               <ArrowRight size={16} />
             </Link>
             <Link
               href="/dashboard"
-              className="px-8 py-4 rounded-full text-small sm:text-body font-semibold border border-emerald-950/15 bg-white text-[#16201D] hover:bg-emerald-50 transition-all shadow-2xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 sm:px-9 sm:py-4 rounded-full text-small sm:text-body font-semibold border border-emerald-950/15 bg-white text-[#16201D] hover:bg-slate-50 transition-all shadow-xs text-center"
             >
               Eksplorasi Live Demo
             </Link>
