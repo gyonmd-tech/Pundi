@@ -89,11 +89,12 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
 
   return (
     <header
-      className="sticky top-0 z-20 h-16 flex items-center justify-between px-4 lg:px-6 border-b select-none transition-all"
+      className="sticky top-0 z-20 h-16 flex items-center justify-between px-3 xs:px-4 lg:px-6 border-b select-none transition-all w-full max-w-full overflow-hidden"
       style={{
         backgroundColor: "rgba(255, 255, 255, 0.85)",
         borderColor: "var(--color-rule)",
         backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
       }}
     >
       {/* ── Left: Sidebar Toggle, App Status & Account Selector ────── */}

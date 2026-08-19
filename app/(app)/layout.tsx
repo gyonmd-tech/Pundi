@@ -27,7 +27,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="min-h-screen flex flex-col relative text-ink transition-colors duration-300"
+      className="min-h-screen flex flex-col relative text-ink transition-colors duration-300 w-full max-w-full overflow-x-clip"
       style={{ backgroundColor: "var(--color-paper)" }}
     >
       {/* Subtle Material & Particle Texture */}
@@ -39,7 +39,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Main Content Area — Offset Dynamically by Sidebar State */}
       <div
         className={cn(
-          "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out relative z-10",
+          "flex-1 flex flex-col min-w-0 w-full max-w-full overflow-x-clip transition-all duration-300 ease-in-out relative z-10",
           isCollapsed ? "md:pl-[72px]" : "md:pl-[240px]"
         )}
       >
@@ -51,7 +51,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         />
 
         {/* Main Content Container */}
-        <main className="flex-1 px-3 xs:px-4 sm:px-6 py-4 lg:p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0.5rem))] md:pb-8 max-w-7xl w-full mx-auto animate-in fade-in duration-300">
+        <main className="flex-1 min-w-0 w-full max-w-7xl mx-auto px-3.5 sm:px-6 py-4 lg:p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0.5rem))] md:pb-8 animate-in fade-in duration-300 overflow-x-clip">
           {children}
         </main>
       </div>

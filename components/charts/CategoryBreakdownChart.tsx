@@ -12,6 +12,7 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { formatRupiah } from "@/lib/utils/formatter";
+import { cn } from "@/lib/utils/cn";
 
 interface CategoryDataPoint {
   name:   string;
@@ -97,7 +98,7 @@ export function CategoryBreakdownChart({ data, className, loading = false }: Cat
   const sorted = [...data].sort((a, b) => b.amount - a.amount).slice(0, 6);
 
   return (
-    <div className={className}>
+    <div className={cn("w-full min-w-0 overflow-hidden", className)}>
       {/* Donut Chart */}
       <ResponsiveContainer width="100%" height={140}>
         <PieChart>

@@ -17,6 +17,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatRupiahShort, formatRupiah } from "@/lib/utils/formatter";
+import { cn } from "@/lib/utils/cn";
 
 interface NetWorthDataPoint {
   month:    string;
@@ -56,15 +57,16 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
 export function NetWorthTrendChart({ data, className, loading = false }: NetWorthTrendChartProps) {
   if (loading) {
     return (
-      <div className={`w-full h-40 animate-pulse rounded-card ${className}`}
+      <div className={cn("w-full h-40 animate-pulse rounded-card", className)}
         style={{ backgroundColor: "var(--color-rule)", opacity: 0.15 }}
       />
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={160} className={className}>
-      <LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+    <div className={cn("w-full min-w-0 overflow-hidden", className)}>
+      <ResponsiveContainer width="100%" height={160}>
+        <LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <CartesianGrid
           strokeDasharray="3 0"
           horizontal={true}
@@ -109,5 +111,6 @@ export function NetWorthTrendChart({ data, className, loading = false }: NetWort
         />
       </LineChart>
     </ResponsiveContainer>
+  </div>
   );
 }

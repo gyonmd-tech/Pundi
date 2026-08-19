@@ -146,10 +146,10 @@ export default function AsetPage() {
       </div>
 
       {/* Summary Metrics & Net Worth Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 w-full min-w-0">
         {/* Left: Summary Metrics */}
-        <div className="lg:col-span-2 space-y-3">
-          <div className="card p-4 transition-all hover:border-pine/30" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="lg:col-span-2 space-y-3 w-full min-w-0">
+          <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
             <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
               Total Nilai Portofolio
             </p>
@@ -158,29 +158,29 @@ export default function AsetPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="card p-3.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+          <div className="grid grid-cols-2 gap-3 w-full min-w-0">
+            <div className="card p-3.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Total P&L</p>
               <div className="flex items-center gap-1.5">
                 {totalPnL >= 0
                   ? <TrendingUp size={16} style={{ color: "var(--color-pine)" }} />
                   : <TrendingDown size={16} style={{ color: "var(--color-ember)" }} />}
-                <p className="tabular-nums font-mono font-bold text-body" style={{ color: totalPnL >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
+                <p className="tabular-nums font-mono font-bold text-body truncate" style={{ color: totalPnL >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
                   {totalPnL >= 0 ? "+" : "−"}{formatRupiah(Math.abs(totalPnL))}
                 </p>
               </div>
             </div>
 
-            <div className="card p-3.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+            <div className="card p-3.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Return Portofolio</p>
-              <p className="tabular-nums font-mono font-bold text-body" style={{ color: totalPnLPct >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
+              <p className="tabular-nums font-mono font-bold text-body truncate" style={{ color: totalPnLPct >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
                 {totalPnLPct >= 0 ? "+" : ""}{totalPnLPct.toFixed(2)}%
               </p>
             </div>
           </div>
 
           {/* Allocation Progress Breakdown */}
-          <div className="card p-4 space-y-2.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+          <div className="card p-4 space-y-2.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
             <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Alokasi Kelas Aset</p>
             {(Object.keys(assetTypeConfig) as AssetType[]).map((t) => {
               const typeAssets = assets.filter(a => a.type === t);
@@ -210,7 +210,7 @@ export default function AsetPage() {
         </div>
 
         {/* Right: Net Worth Trend Chart */}
-        <div className="lg:col-span-3 card p-4 sm:p-5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="lg:col-span-3 card p-4 sm:p-5 w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
               Tren Net Worth (6 Bulan)

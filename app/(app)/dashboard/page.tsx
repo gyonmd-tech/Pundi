@@ -110,8 +110,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 2: Charts (Cash Flow with Ledger Baseline + Category Donut) */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5">
-        <div className="lg:col-span-3 card p-4 sm:p-5 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5 w-full min-w-0">
+        <div className="lg:col-span-3 card p-4 sm:p-5 hover:border-pine/30 transition-all w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
@@ -129,7 +129,7 @@ export default function DashboardPage() {
           <CashFlowChart data={cashFlow} />
         </div>
 
-        <div className="lg:col-span-2 card p-4 sm:p-5 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="lg:col-span-2 card p-4 sm:p-5 hover:border-pine/30 transition-all w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
@@ -149,9 +149,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 3: Transaksi + Budget & Goals */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5 w-full min-w-0">
         {/* Transaksi terbaru */}
-        <div className="lg:col-span-3 card p-4 sm:p-5 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="lg:col-span-3 card p-4 sm:p-5 hover:border-pine/30 transition-all w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-rule">
             <div>
               <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>

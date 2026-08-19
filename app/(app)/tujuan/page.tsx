@@ -150,18 +150,18 @@ export default function TujuanPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="card p-4 transition-all hover:border-pine/30" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
+        <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Total Target</p>
           <p className="tabular-nums font-mono font-bold text-heading text-ink">{formatRupiah(totalTarget)}</p>
         </div>
 
-        <div className="card p-4 transition-all hover:border-pine/30" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Total Terkumpul</p>
           <p className="tabular-nums font-mono font-bold text-heading text-pine">{formatRupiah(totalSaved)}</p>
         </div>
 
-        <div className="card p-4 transition-all hover:border-pine/30" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Kemajuan Kolektif</p>
           <p className="tabular-nums font-mono font-bold text-heading text-brass">
             {totalTarget > 0 ? calcProgress(totalSaved, totalTarget) : 0}% ({completedCount}/{goals.length} tercapai)
@@ -171,7 +171,7 @@ export default function TujuanPage() {
 
       {/* Goals Grid */}
       {goals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center card p-6" style={{ borderColor: "var(--color-rule)" }}>
+        <div className="flex flex-col items-center justify-center py-16 text-center card p-6 w-full min-w-0" style={{ borderColor: "var(--color-rule)" }}>
           <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
             <Target size={24} strokeWidth={1.5} />
           </div>
@@ -189,7 +189,7 @@ export default function TujuanPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full min-w-0">
           {goals.map((g) => (
             <div key={g.id} className="group relative">
               <GoalCard {...g} monthlySavings={MONTHLY_SAVINGS} />

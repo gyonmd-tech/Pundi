@@ -360,11 +360,12 @@ export function SidebarNav({ onQuickAdd }: SidebarNavProps) {
 
       {/* ── Mobile Bottom Navigation Bar ───────────────────────── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t shadow-float pb-safe"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t shadow-float pb-safe w-full max-w-[100vw] select-none touch-manipulation"
         style={{
           borderColor: "var(--color-rule)",
           backgroundColor: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
         }}
       >
         <ul className="flex items-center justify-around h-16 px-1 xs:px-2">

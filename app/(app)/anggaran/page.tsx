@@ -137,8 +137,8 @@ export default function AnggaranPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="card p-4 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
+        <div className="card p-4 hover:border-pine/30 transition-all w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
             Total Batas Anggaran
           </p>

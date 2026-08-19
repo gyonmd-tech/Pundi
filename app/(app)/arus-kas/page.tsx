@@ -66,7 +66,7 @@ export default function ArusKasPage() {
       </div>
 
       {/* Main Cash Flow Chart Card with Ledger Baseline */}
-      <div className="card p-4 sm:p-5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+      <div className="card p-4 sm:p-5 w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
@@ -91,11 +91,11 @@ export default function ArusKasPage() {
       </div>
 
       {/* Month Selector Tabs */}
-      <div>
+      <div className="w-full min-w-0 overflow-hidden">
         <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-2 font-ui">
           Pilih Bulan Analisis Mendalam
         </p>
-        <div className="flex gap-2 overflow-x-auto pb-1 touch-pan-x">
+        <div className="flex gap-2 overflow-x-auto pb-1 touch-pan-x overscroll-x-contain max-w-full">
           {MONTHS.map((m, i) => {
             const isSelected = i === selectedIdx;
             return (
@@ -121,9 +121,9 @@ export default function ArusKasPage() {
       </div>
 
       {/* Selected Month Detail Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 w-full min-w-0">
         {/* Left: Summary Metrics Column */}
-        <div className="lg:col-span-2 space-y-3">
+        <div className="lg:col-span-2 space-y-3 w-full min-w-0">
           {/* Net Cash Flow Highlight Card */}
           <div
             className="card p-4 transition-all"

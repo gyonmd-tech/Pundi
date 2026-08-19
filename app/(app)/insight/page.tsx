@@ -86,7 +86,7 @@ export default function InsightPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 touch-pan-x">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 touch-pan-x overscroll-x-contain w-full max-w-full">
         {filterTabs.map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.key;

@@ -22,6 +22,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { formatRupiahShort, formatRupiah } from "@/lib/utils/formatter";
+import { cn } from "@/lib/utils/cn";
 
 interface CashFlowDataPoint {
   month:   string;  // "Jan", "Feb", ...
@@ -133,7 +134,7 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
   }
 
   return (
-    <div className={className}>
+    <div className={cn("w-full min-w-0 overflow-hidden", className)}>
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart
           data={data}
