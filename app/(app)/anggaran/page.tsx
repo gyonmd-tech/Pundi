@@ -229,34 +229,16 @@ export default function AnggaranPage() {
         ) : (
           <div className="space-y-1">
             {thisPeriodBudgets.map((b) => (
-              <div key={b.id} className="relative group">
-                <BudgetProgress
-                  categoryName={b.category?.name ?? "Kategori"}
-                  categoryIcon={b.category?.icon}
-                  categoryColor={b.category?.color}
-                  spent={b.spent}
-                  limit={b.limitAmount}
-                />
-                {/* Inline Action Buttons */}
-                <div className="absolute right-3 top-3.5 flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-surface/90 sm:bg-surface px-1 py-0.5 rounded border border-rule shadow-xs">
-                  <button
-                    onClick={() => handleEdit(b)}
-                    className="p-1.5 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
-                    title="Edit batas anggaran"
-                    aria-label="Edit batas anggaran"
-                  >
-                    <Edit2 size={13} strokeWidth={2} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(b.id)}
-                    className="p-1.5 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
-                    title="Hapus anggaran"
-                    aria-label="Hapus anggaran"
-                  >
-                    <Trash2 size={13} strokeWidth={2} />
-                  </button>
-                </div>
-              </div>
+              <BudgetProgress
+                key={b.id}
+                categoryName={b.category?.name ?? "Kategori"}
+                categoryIcon={b.category?.icon}
+                categoryColor={b.category?.color}
+                spent={b.spent}
+                limit={b.limitAmount}
+                onEdit={() => handleEdit(b)}
+                onDelete={() => setDeleteId(b.id)}
+              />
             ))}
           </div>
         )}

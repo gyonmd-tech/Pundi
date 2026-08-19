@@ -8,7 +8,7 @@
 import React from "react";
 import { cn } from "@/lib/utils/cn";
 import { formatRupiah, calcProgress, getBudgetStatus, type BudgetStatus } from "@/lib/utils/formatter";
-import { CheckCircle2, AlertTriangle, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertTriangle, AlertCircle, Edit2, Trash2 } from "lucide-react";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 interface BudgetProgressProps {
@@ -21,6 +21,7 @@ interface BudgetProgressProps {
   className?:    string;
   loading?:      boolean;
   onEdit?:       () => void;
+  onDelete?:     () => void;
 }
 
 const statusConfig: Record<BudgetStatus, {
@@ -63,6 +64,7 @@ export function BudgetProgress({
   className,
   loading = false,
   onEdit,
+  onDelete,
 }: BudgetProgressProps) {
   if (loading) {
     return (
@@ -85,19 +87,19 @@ export function BudgetProgress({
   return (
     <div
       className={cn(
-        "py-3.5 px-3 rounded-card border-b last:border-b-0 transition-all duration-200",
+        "py-3.5 px-3.5 rounded-card border-b last:border-b-0 transition-all duration-200",
         "hover:bg-paper/80 group",
         className
       )}
       style={{ borderColor: "var(--color-rule)" }}
     >
-      {/* Header: icon + kategori + status badge */}
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <CategoryIcon icon={categoryIcon} color={categoryColor} size={14} containerSize="sm" />
-          <div className="min-w-0">
+      {/* Header: icon + kategori + status badge + action buttons (Inline & Non-overlapping) */}
+      <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <CategoryIcon icon={categoryIcon} color={categoryColor} size={15} containerSize="sm" />
+          <div className="min-w-0 flex-1">
             <span
-              className="text-body font-semibold text-ink truncate block group-hover:text-pine transition-colors"
+              className="text-body font-semibold text-ink truncate block group-hover:text-pine transition-colors leading-snug"
               style={{ fontFamily: "var(--font-ui)" }}
             >
               {categoryName}
@@ -110,28 +112,51 @@ export function BudgetProgress({
           </div>
         </div>
 
-        {/* Status badge pill */}
-        <div
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full flex-shrink-0 shadow-xs"
-          style={{
-            backgroundColor: cfg.bgColor,
-            color: cfg.textColor,
-          }}
-        >
-          <StatusIcon size={12} strokeWidth={2.2} />
-          <span
-            className="text-[11px] font-semibold"
-            style={{ fontFamily: "var(--font-ui)" }}
+        {/* Right side: Badge + Action Buttons side-by-side */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <div
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold shadow-2xs"
+            style={{
+              backgroundColor: cfg.bgColor,
+              color: cfg.textColor,
+            }}
           >
-            {cfg.label} ({progress}%)
-          </span>
+            <StatusIcon size={12} strokeWidth={2.2} />
+            <span style={{ fontFamily: "var(--font-ui)" }}>
+              {cfg.label} ({progress}%)
+            </span>
+          </div>
+
+          {(onEdit || onDelete) && (
+            <div className="flex items-center gap-0.5 ml-1 border-l border-rule/50 pl-1">
+              {onEdit && (
+                <button
+                  onClick={onEdit}
+                  className="p-1 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
+                  title="Edit batas anggaran"
+                  aria-label="Edit batas anggaran"
+                >
+                  <Edit2 size={13} strokeWidth={2} />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  className="p-1 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
+                  title="Hapus anggaran"
+                  aria-label="Hapus anggaran"
+                >
+                  <Trash2 size={13} strokeWidth={2} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Progress Bar with smooth fill */}
       <div
-        className="h-2 rounded-full mb-2 overflow-hidden shadow-inner"
-        style={{ backgroundColor: "var(--color-rule)" }}
+        className="h-2 rounded-full mb-2 overflow-hidden shadow-inner bg-rule/50"
         role="progressbar"
         aria-valuenow={progress}
         aria-valuemin={0}
@@ -147,30 +172,28 @@ export function BudgetProgress({
         />
       </div>
 
-      {/* Numerical Details */}
-      <div className="flex items-center justify-between gap-2 text-xs">
-        <span
-          className="tabular-nums font-mono text-ink-muted"
-        >
+      {/* Numerical Details Row (Crisp, non-broken layout) */}
+      <div className="flex items-center justify-between gap-2 text-xs font-mono">
+        <span className="text-ink-muted truncate">
           Terpakai: <strong className="text-ink font-semibold">{formatRupiah(spent)}</strong>
         </span>
 
-        <div className="flex items-center gap-1.5 font-mono">
-          <span
-            className="tabular-nums font-semibold"
-            style={{
-              color: status === "over" ? "var(--color-ember)" : "var(--color-pine)",
-            }}
-          >
-            {status === "over"
-              ? `+${formatRupiah(spent - limit)} (over)`
-              : `sisa ${formatRupiah(remaining)}`}
+        <span className="text-ink-muted truncate text-right">
+          Batas: <strong className="text-ink font-semibold">{formatRupiah(limit)}</strong>
+        </span>
+      </div>
+
+      {/* Status Sisa / Over sub-label */}
+      <div className="mt-1 flex items-center justify-end text-[11px] font-mono">
+        {status === "over" ? (
+          <span className="text-ember font-semibold bg-ember-10 px-1.5 py-0.5 rounded">
+            Melebihi batas +{formatRupiah(spent - limit)}
           </span>
-          <span className="text-rule">/</span>
-          <span className="tabular-nums text-ink-muted">
-            {formatRupiah(limit)}
+        ) : (
+          <span className="text-pine font-medium bg-pine-10 px-1.5 py-0.5 rounded">
+            Sisa alokasi: {formatRupiah(remaining)}
           </span>
-        </div>
+        )}
       </div>
     </div>
   );

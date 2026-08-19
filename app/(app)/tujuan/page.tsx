@@ -191,29 +191,13 @@ export default function TujuanPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full min-w-0">
           {goals.map((g) => (
-            <div key={g.id} className="group relative">
-              <GoalCard {...g} monthlySavings={MONTHLY_SAVINGS} />
-
-              {/* Action Buttons Toolbar on hover / tap */}
-              <div className="absolute top-3.5 right-3.5 flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-surface/90 sm:bg-surface px-1 py-0.5 rounded border border-rule shadow-xs z-10">
-                <button
-                  onClick={() => openEdit(g)}
-                  className="p-1.5 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
-                  title="Edit tujuan"
-                  aria-label="Edit tujuan"
-                >
-                  <Edit2 size={13} strokeWidth={2} />
-                </button>
-                <button
-                  onClick={() => setDeleteId(g.id)}
-                  className="p-1.5 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
-                  title="Hapus tujuan"
-                  aria-label="Hapus tujuan"
-                >
-                  <Trash2 size={13} strokeWidth={2} />
-                </button>
-              </div>
-            </div>
+            <GoalCard
+              key={g.id}
+              {...g}
+              monthlySavings={MONTHLY_SAVINGS}
+              onEdit={() => openEdit(g)}
+              onDelete={() => setDeleteId(g.id)}
+            />
           ))}
         </div>
       )}

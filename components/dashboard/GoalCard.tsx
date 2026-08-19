@@ -14,7 +14,7 @@ import {
   calcProgress,
   estimateGoalDate,
 } from "@/lib/utils/formatter";
-import { Target, CalendarDays, TrendingUp, CheckCircle2 } from "lucide-react";
+import { Target, CalendarDays, TrendingUp, CheckCircle2, Edit2, Trash2 } from "lucide-react";
 
 interface GoalCardProps {
   name:            string;
@@ -24,6 +24,8 @@ interface GoalCardProps {
   monthlySavings?: number;
   className?:      string;
   loading?:        boolean;
+  onEdit?:         () => void;
+  onDelete?:       () => void;
 }
 
 export function GoalCard({
@@ -34,6 +36,8 @@ export function GoalCard({
   monthlySavings = 1_200_000,
   className,
   loading = false,
+  onEdit,
+  onDelete,
 }: GoalCardProps) {
   if (loading) {
     return (
@@ -64,9 +68,9 @@ export function GoalCard({
         backgroundColor: "var(--color-surface)",
       }}
     >
-      {/* Header: icon + name + progress badge */}
+      {/* Header: icon + name + progress badge + inline actions */}
       <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div
             className="w-8 h-8 rounded-card flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
             style={{
@@ -83,9 +87,9 @@ export function GoalCard({
             )}
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <span
-              className="text-body font-semibold truncate block text-ink group-hover:text-pine transition-colors"
+              className="text-body font-semibold truncate block text-ink group-hover:text-pine transition-colors leading-snug"
               style={{ fontFamily: "var(--font-ui)" }}
             >
               {name}
@@ -96,16 +100,43 @@ export function GoalCard({
           </div>
         </div>
 
-        {/* Progress Percentage Badge */}
-        <span
-          className="tabular-nums text-xs font-mono font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-          style={{
-            backgroundColor: isCompleted ? "var(--color-brass-10)" : "var(--color-pine-10)",
-            color: isCompleted ? "var(--color-brass)" : "var(--color-pine)",
-          }}
-        >
-          {progress}%
-        </span>
+        {/* Right: Progress Percentage Badge + Actions */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <span
+            className="tabular-nums text-xs font-mono font-bold px-2 py-0.5 rounded-full"
+            style={{
+              backgroundColor: isCompleted ? "var(--color-brass-10)" : "var(--color-pine-10)",
+              color: isCompleted ? "var(--color-brass)" : "var(--color-pine)",
+            }}
+          >
+            {progress}%
+          </span>
+
+          {(onEdit || onDelete) && (
+            <div className="flex items-center gap-0.5 border-l border-rule/50 pl-1">
+              {onEdit && (
+                <button
+                  onClick={onEdit}
+                  className="p-1 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
+                  title="Edit tujuan"
+                  aria-label="Edit tujuan"
+                >
+                  <Edit2 size={13} strokeWidth={2} />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  className="p-1 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
+                  title="Hapus tujuan"
+                  aria-label="Hapus tujuan"
+                >
+                  <Trash2 size={13} strokeWidth={2} />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Progress Bar */}

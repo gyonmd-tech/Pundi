@@ -442,73 +442,59 @@ export default function TransaksiPage() {
                 return (
                   <div
                     key={tx.id}
-                    className="p-3.5 flex flex-col gap-2 transition-colors active:bg-paper/80"
+                    className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-paper/60 transition-colors"
                   >
-                    {/* Top Row: Category Icon, Title, & Amount */}
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <CategoryIcon icon={cat?.icon} color={cat?.color} size={15} containerSize="sm" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-small font-semibold text-ink truncate leading-tight" style={{ fontFamily: "var(--font-ui)" }}>
-                            {tx.note || cat?.name || "Transaksi"}
-                          </p>
-                          <p className="text-xs text-ink-muted truncate font-ui mt-0.5">
-                            {cat?.name ?? (tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
-                          </p>
+                    {/* Left: Category Icon + Description & Metadata */}
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <CategoryIcon icon={cat?.icon} color={cat?.color} size={16} containerSize="md" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-small sm:text-body font-semibold text-ink leading-snug break-words" style={{ fontFamily: "var(--font-ui)" }}>
+                          {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
+                        </p>
+                        <div className="flex items-center gap-1.5 text-xs text-ink-muted mt-1 flex-wrap font-ui">
+                          <span className="font-medium text-ink/80">{cat?.name ?? (tx.type === "transfer" ? "Transfer" : "Lainnya")}</span>
+                          <span className="text-rule">·</span>
+                          <span suppressHydrationWarning className="font-mono text-[11px]">{formatDate(tx.date, "short")}</span>
+                          <span className="text-rule">·</span>
+                          <div className="inline-flex items-center gap-1">
+                            <div
+                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
+                            />
+                            <span className="text-[11px] truncate max-w-[110px]">{acc?.name ?? "—"}</span>
+                          </div>
                         </div>
                       </div>
+                    </div>
 
+                    {/* Right: Nominal Amount + Type Badge + Action */}
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                       <span
-                        className="tabular-nums font-mono font-bold text-small xs:text-body flex-shrink-0"
+                        className="tabular-nums font-mono font-bold text-small sm:text-body"
                         style={{
                           color: tx.type === "income" ? "var(--color-pine)" : tx.type === "transfer" ? "var(--color-ink-muted)" : "var(--color-ink)",
                         }}
                       >
-                        {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}
-                        {formatRupiah(tx.amount)}
+                        {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}{formatRupiah(tx.amount)}
                       </span>
-                    </div>
 
-                    {/* Bottom Row: Date, Account Badge, & Delete Action */}
-                    <div className="flex items-center justify-between text-xs pt-1 border-t border-rule/30">
-                      <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <span suppressHydrationWarning className="font-mono text-[11px] text-ink-muted flex-shrink-0">
-                          {formatDate(tx.date, "short")}
-                        </span>
-
-                        <span className="text-[10px] text-rule flex-shrink-0">·</span>
-
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <div
-                            className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
-                          />
-                          <span className="text-[11px] text-ink-muted truncate max-w-[90px] xs:max-w-[120px]">
-                            {acc?.name ?? "—"}
-                          </span>
-                        </div>
-
+                      <div className="flex items-center gap-1.5">
                         <span
-                          className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[10px] font-semibold"
-                          style={{
-                            backgroundColor: typeCfg.bg,
-                            color: typeCfg.color,
-                          }}
+                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                          style={{ backgroundColor: typeCfg.bg, color: typeCfg.color }}
                         >
                           <TypeIcon size={10} strokeWidth={2.2} />
                           {typeCfg.label}
                         </span>
+                        <button
+                          onClick={() => setDeleteId(tx.id)}
+                          className="p-1 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
+                          title="Hapus transaksi"
+                          aria-label="Hapus transaksi"
+                        >
+                          <Trash2 size={13} strokeWidth={1.8} />
+                        </button>
                       </div>
-
-                      {/* Mobile Delete Button */}
-                      <button
-                        onClick={() => setDeleteId(tx.id)}
-                        className="p-1.5 -mr-1 rounded-card text-ink-muted hover:text-ember active:bg-ember-10 transition-colors flex-shrink-0"
-                        title="Hapus transaksi"
-                        aria-label="Hapus transaksi"
-                      >
-                        <Trash2 size={14} strokeWidth={1.8} />
-                      </button>
                     </div>
                   </div>
                 );

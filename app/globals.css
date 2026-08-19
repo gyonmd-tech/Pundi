@@ -40,7 +40,6 @@ body {
 [data-type="number"] {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  text-align: right;
 }
 
 /* ── Ledger Baseline (DESIGN.md § 4.6 signature element) ─── */
