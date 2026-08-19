@@ -128,10 +128,10 @@ export default function TujuanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display-l font-semibold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
             Tujuan Finansial & Tabungan
           </h1>
-          <p className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
+          <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
             Pantau dan alokasikan dana untuk rencana masa depanmu
           </p>
         </div>
@@ -194,12 +194,13 @@ export default function TujuanPage() {
             <div key={g.id} className="group relative">
               <GoalCard {...g} monthlySavings={MONTHLY_SAVINGS} />
 
-              {/* Action Buttons Toolbar on hover */}
-              <div className="absolute top-3.5 right-3.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-surface px-1 py-0.5 rounded border border-rule shadow-xs z-10">
+              {/* Action Buttons Toolbar on hover / tap */}
+              <div className="absolute top-3.5 right-3.5 flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-surface/90 sm:bg-surface px-1 py-0.5 rounded border border-rule shadow-xs z-10">
                 <button
                   onClick={() => openEdit(g)}
                   className="p-1.5 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
                   title="Edit tujuan"
+                  aria-label="Edit tujuan"
                 >
                   <Edit2 size={13} strokeWidth={2} />
                 </button>
@@ -207,6 +208,7 @@ export default function TujuanPage() {
                   onClick={() => setDeleteId(g.id)}
                   className="p-1.5 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
                   title="Hapus tujuan"
+                  aria-label="Hapus tujuan"
                 >
                   <Trash2 size={13} strokeWidth={2} />
                 </button>

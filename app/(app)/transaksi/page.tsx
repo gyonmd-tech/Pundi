@@ -407,7 +407,7 @@ export default function TransaksiPage() {
         </div>
       )}
 
-      {/* Transaction Table Card */}
+      {/* Transaction Records Card / Table */}
       <div className="card overflow-hidden p-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
@@ -430,110 +430,197 @@ export default function TransaksiPage() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tanggal</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Transaksi & Kategori</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted hidden md:table-cell">Sumber Akun</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted hidden sm:table-cell">Tipe</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nominal</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-10"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-rule/60">
-                {filtered.map((tx) => {
-                  const acc = accounts.find(a => a.id === tx.accountId);
-                  const cat = categories.find(c => c.id === tx.categoryId);
-                  const typeCfg = typeLabel[tx.type];
-                  const TypeIcon = typeCfg.icon;
+          <>
+            {/* ── Mobile Card List View (<768px) ── */}
+            <div className="divide-y divide-rule/60 md:hidden">
+              {filtered.map((tx) => {
+                const acc = accounts.find((a) => a.id === tx.accountId);
+                const cat = categories.find((c) => c.id === tx.categoryId);
+                const typeCfg = typeLabel[tx.type];
+                const TypeIcon = typeCfg.icon;
 
-                  return (
-                    <tr
-                      key={tx.id}
-                      className="group transition-colors duration-150 hover:bg-paper/80"
-                    >
-                      {/* Tanggal */}
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span suppressHydrationWarning className="text-small font-mono text-ink-muted">
+                return (
+                  <div
+                    key={tx.id}
+                    className="p-3.5 flex flex-col gap-2 transition-colors active:bg-paper/80"
+                  >
+                    {/* Top Row: Category Icon, Title, & Amount */}
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <CategoryIcon icon={cat?.icon} color={cat?.color} size={15} containerSize="sm" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-small font-semibold text-ink truncate leading-tight" style={{ fontFamily: "var(--font-ui)" }}>
+                            {tx.note || cat?.name || "Transaksi"}
+                          </p>
+                          <p className="text-xs text-ink-muted truncate font-ui mt-0.5">
+                            {cat?.name ?? (tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span
+                        className="tabular-nums font-mono font-bold text-small xs:text-body flex-shrink-0"
+                        style={{
+                          color: tx.type === "income" ? "var(--color-pine)" : tx.type === "transfer" ? "var(--color-ink-muted)" : "var(--color-ink)",
+                        }}
+                      >
+                        {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}
+                        {formatRupiah(tx.amount)}
+                      </span>
+                    </div>
+
+                    {/* Bottom Row: Date, Account Badge, & Delete Action */}
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-rule/30">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <span suppressHydrationWarning className="font-mono text-[11px] text-ink-muted flex-shrink-0">
                           {formatDate(tx.date, "short")}
                         </span>
-                      </td>
 
-                      {/* Deskripsi & Kategori */}
-                      <td className="px-4 py-3.5 max-w-xs">
-                        <div className="flex items-center gap-3">
-                          <CategoryIcon icon={cat?.icon} color={cat?.color} size={15} containerSize="sm" />
-                          <div className="min-w-0">
-                            <p className="text-body font-semibold text-ink truncate group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
-                              {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
-                            </p>
-                            <p className="text-xs text-ink-muted truncate font-ui">
-                              {cat?.name ?? (tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+                        <span className="text-[10px] text-rule flex-shrink-0">·</span>
 
-                      {/* Akun */}
-                      <td className="px-4 py-3.5 hidden md:table-cell">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <div
-                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
                           />
-                          <span className="text-small font-medium text-ink truncate max-w-[130px]" style={{ fontFamily: "var(--font-ui)" }}>
+                          <span className="text-[11px] text-ink-muted truncate max-w-[90px] xs:max-w-[120px]">
                             {acc?.name ?? "—"}
                           </span>
                         </div>
-                      </td>
 
-                      {/* Tipe Badge */}
-                      <td className="px-4 py-3.5 hidden sm:table-cell">
                         <span
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[10px] font-semibold"
                           style={{
                             backgroundColor: typeCfg.bg,
                             color: typeCfg.color,
-                            fontFamily: "var(--font-ui)",
                           }}
                         >
-                          <TypeIcon size={12} strokeWidth={2.2} />
+                          <TypeIcon size={10} strokeWidth={2.2} />
                           {typeCfg.label}
                         </span>
-                      </td>
+                      </div>
 
-                      {/* Nominal */}
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <span
-                          className="tabular-nums font-mono font-bold text-body"
-                          style={{
-                            color: tx.type === "income" ? "var(--color-pine)" : tx.type === "transfer" ? "var(--color-ink-muted)" : "var(--color-ink)",
-                          }}
-                        >
-                          {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}
-                          {formatRupiah(tx.amount)}
-                        </span>
-                      </td>
+                      {/* Mobile Delete Button */}
+                      <button
+                        onClick={() => setDeleteId(tx.id)}
+                        className="p-1.5 -mr-1 rounded-card text-ink-muted hover:text-ember active:bg-ember-10 transition-colors flex-shrink-0"
+                        title="Hapus transaksi"
+                        aria-label="Hapus transaksi"
+                      >
+                        <Trash2 size={14} strokeWidth={1.8} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
-                      {/* Delete Action with tooltip */}
-                      <td className="px-4 py-3.5 text-right">
-                        <button
-                          onClick={() => setDeleteId(tx.id)}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"
-                          title="Hapus transaksi"
-                          aria-label="Hapus transaksi"
-                        >
-                          <Trash2 size={15} strokeWidth={1.8} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+            {/* ── Desktop Data Table (≥768px) ── */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tanggal</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Transaksi & Kategori</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Sumber Akun</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tipe</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nominal</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-10"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-rule/60">
+                  {filtered.map((tx) => {
+                    const acc = accounts.find((a) => a.id === tx.accountId);
+                    const cat = categories.find((c) => c.id === tx.categoryId);
+                    const typeCfg = typeLabel[tx.type];
+                    const TypeIcon = typeCfg.icon;
+
+                    return (
+                      <tr
+                        key={tx.id}
+                        className="group transition-colors duration-150 hover:bg-paper/80"
+                      >
+                        {/* Tanggal */}
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span suppressHydrationWarning className="text-small font-mono text-ink-muted">
+                            {formatDate(tx.date, "short")}
+                          </span>
+                        </td>
+
+                        {/* Deskripsi & Kategori */}
+                        <td className="px-4 py-3.5 max-w-xs">
+                          <div className="flex items-center gap-3">
+                            <CategoryIcon icon={cat?.icon} color={cat?.color} size={15} containerSize="sm" />
+                            <div className="min-w-0">
+                              <p className="text-body font-semibold text-ink truncate group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
+                                {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
+                              </p>
+                              <p className="text-xs text-ink-muted truncate font-ui">
+                                {cat?.name ?? (tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Akun */}
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
+                            />
+                            <span className="text-small font-medium text-ink truncate max-w-[130px]" style={{ fontFamily: "var(--font-ui)" }}>
+                              {acc?.name ?? "—"}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Tipe Badge */}
+                        <td className="px-4 py-3.5">
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                            style={{
+                              backgroundColor: typeCfg.bg,
+                              color: typeCfg.color,
+                              fontFamily: "var(--font-ui)",
+                            }}
+                          >
+                            <TypeIcon size={12} strokeWidth={2.2} />
+                            {typeCfg.label}
+                          </span>
+                        </td>
+
+                        {/* Nominal */}
+                        <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                          <span
+                            className="tabular-nums font-mono font-bold text-body"
+                            style={{
+                              color: tx.type === "income" ? "var(--color-pine)" : tx.type === "transfer" ? "var(--color-ink-muted)" : "var(--color-ink)",
+                            }}
+                          >
+                            {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}
+                            {formatRupiah(tx.amount)}
+                          </span>
+                        </td>
+
+                        {/* Delete Action with tooltip */}
+                        <td className="px-4 py-3.5 text-right">
+                          <button
+                            onClick={() => setDeleteId(tx.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"
+                            title="Hapus transaksi"
+                            aria-label="Hapus transaksi"
+                          >
+                            <Trash2 size={15} strokeWidth={1.8} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

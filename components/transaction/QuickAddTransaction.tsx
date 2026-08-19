@@ -163,7 +163,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
     >
       <div
         className={cn(
-          "w-full sm:max-w-lg rounded-t-2xl sm:rounded-card shadow-float overflow-hidden flex flex-col max-h-[92vh]",
+          "w-full sm:max-w-lg rounded-t-2xl sm:rounded-card shadow-float overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[92vh]",
           "border border-rule animate-in slide-in-from-bottom-4 duration-200"
         )}
         style={{ backgroundColor: "var(--color-surface)" }}
@@ -171,24 +171,24 @@ export function QuickAddTransaction({ open, onClose }: Props) {
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0"
+          className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b flex-shrink-0"
           style={{ borderColor: "var(--color-rule)" }}
         >
           <div className="flex items-center gap-2">
             <div
-              className="w-7 h-7 rounded-sm flex items-center justify-center"
+              className="w-7 h-7 rounded-sm flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: "var(--color-pine-10)", color: "var(--color-pine)" }}
             >
               <Sparkles size={15} />
             </div>
             <div>
               <h2
-                className="text-heading font-semibold leading-tight"
+                className="text-small sm:text-heading font-semibold leading-tight"
                 style={{ fontFamily: "var(--font-ui)", color: "var(--color-ink)" }}
               >
                 Catat Transaksi
               </h2>
-              <p className="text-xs text-ink-muted leading-tight">
+              <p className="text-xs text-ink-muted leading-tight mt-0.5">
                 Simpan mutasi baru ke buku kasmu
               </p>
             </div>
@@ -204,7 +204,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
         </div>
 
         {/* Scrollable Form Body */}
-        <div className="p-6 space-y-4.5 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {/* Transaction Type Segmented Toggle */}
           <div
             className="flex gap-1.5 p-1 rounded-card border"
@@ -220,7 +220,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
                   type="button"
                   onClick={() => { setType(t); setCategoryId(""); }}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2 rounded-card text-small font-medium transition-all duration-200",
+                    "flex-1 flex items-center justify-center gap-1.5 xs:gap-2 py-2 rounded-card text-xs xs:text-small font-medium transition-all duration-200",
                     isActive ? "shadow-xs font-semibold scale-[1.01]" : "hover:text-ink opacity-75"
                   )}
                   style={{
@@ -230,7 +230,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
                     fontFamily: "var(--font-ui)",
                   }}
                 >
-                  <Icon size={15} strokeWidth={2.2} />
+                  <Icon size={14} strokeWidth={2.2} />
                   <span>{cfg.label}</span>
                 </button>
               );
@@ -255,7 +255,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
 
             <div
               className={cn(
-                "flex items-center gap-2 px-4 py-3.5 rounded-card border transition-all duration-200",
+                "flex items-center gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3.5 rounded-card border transition-all duration-200",
                 "focus-within:border-pine focus-within:ring-2 focus-within:ring-pine/15"
               )}
               style={{
@@ -264,7 +264,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
               }}
             >
               <span
-                className="text-body font-mono font-bold select-none"
+                className="text-body font-mono font-bold select-none flex-shrink-0"
                 style={{ color: typeConfig[type].color }}
               >
                 Rp
@@ -276,7 +276,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
                 placeholder="0"
                 value={amount ? parseInt(amount, 10).toLocaleString("id-ID") : ""}
                 onChange={(e) => handleAmountInput(e.target.value)}
-                className="flex-1 bg-transparent outline-none tabular-nums text-right font-mono font-bold tracking-tight text-2xl"
+                className="flex-1 bg-transparent outline-none tabular-nums text-right font-mono font-bold tracking-tight text-xl xs:text-2xl min-w-0"
                 style={{
                   color: "var(--color-ink)",
                   fontFamily: "var(--font-mono)",
@@ -286,7 +286,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
                 <button
                   type="button"
                   onClick={() => setAmount("")}
-                  className="text-ink-muted hover:text-ink p-1 rounded-sm"
+                  className="text-ink-muted hover:text-ink p-1 rounded-sm flex-shrink-0"
                   title="Hapus nominal"
                 >
                   <X size={16} />
@@ -302,7 +302,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
                   key={q}
                   type="button"
                   onClick={() => handleAddQuickAmount(q)}
-                  className="px-2.5 py-1 rounded-card border text-xs font-mono font-medium transition-all hover:border-pine hover:bg-pine-10 hover:text-pine active:scale-95"
+                  className="px-2 xs:px-2.5 py-1 rounded-card border text-[11px] xs:text-xs font-mono font-medium transition-all hover:border-pine hover:bg-pine-10 hover:text-pine active:scale-95"
                   style={{
                     borderColor: "var(--color-rule)",
                     backgroundColor: "var(--color-surface)",
@@ -390,7 +390,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-card border text-small outline-none font-medium bg-paper text-ink transition-colors focus:border-pine"
+                  className="w-full px-3 py-2 rounded-card border text-small outline-none font-medium bg-paper text-ink transition-colors focus:border-pine font-mono"
                   style={{ borderColor: "var(--color-rule)" }}
                 />
               </div>
@@ -465,7 +465,7 @@ export function QuickAddTransaction({ open, onClose }: Props) {
 
         {/* Footer Actions */}
         <div
-          className="flex items-center gap-3 px-6 py-4 border-t flex-shrink-0"
+          className="flex items-center gap-3 px-4 sm:px-6 py-3.5 sm:py-4 border-t flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4"
           style={{
             borderColor: "var(--color-rule)",
             backgroundColor: "var(--color-paper)",

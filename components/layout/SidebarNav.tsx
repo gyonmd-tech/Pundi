@@ -360,43 +360,44 @@ export function SidebarNav({ onQuickAdd }: SidebarNavProps) {
 
       {/* ── Mobile Bottom Navigation Bar ───────────────────────── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t shadow-float"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t shadow-float pb-safe"
         style={{
           borderColor: "var(--color-rule)",
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(12px)",
         }}
       >
-        <ul className="flex items-center justify-around h-16 px-1.5">
+        <ul className="flex items-center justify-around h-16 px-1 xs:px-2">
           {/* Dashboard */}
-          <li>
+          <li className="flex-1 text-center">
             <Link
               href="/dashboard"
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-card transition-all active:scale-95",
+                "flex flex-col items-center justify-center gap-0.5 xs:gap-1 py-1.5 rounded-card transition-all active:scale-95 mx-auto",
                 isActive("/dashboard") ? "text-pine font-semibold" : "text-ink-muted hover:text-ink"
               )}
             >
-              <LayoutDashboard size={19} strokeWidth={isActive("/dashboard") ? 2.2 : 1.7} />
-              <span style={{ fontSize: "10.5px", fontFamily: "var(--font-ui)" }}>Dashboard</span>
+              <LayoutDashboard size={18} strokeWidth={isActive("/dashboard") ? 2.2 : 1.7} />
+              <span className="text-[10px] xs:text-[11px] leading-tight" style={{ fontFamily: "var(--font-ui)" }}>Dashboard</span>
             </Link>
           </li>
 
           {/* Transaksi */}
-          <li>
+          <li className="flex-1 text-center">
             <Link
               href="/transaksi"
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-card transition-all active:scale-95",
+                "flex flex-col items-center justify-center gap-0.5 xs:gap-1 py-1.5 rounded-card transition-all active:scale-95 mx-auto",
                 isActive("/transaksi") ? "text-pine font-semibold" : "text-ink-muted hover:text-ink"
               )}
             >
-              <ArrowLeftRight size={19} strokeWidth={isActive("/transaksi") ? 2.2 : 1.7} />
-              <span style={{ fontSize: "10.5px", fontFamily: "var(--font-ui)" }}>Transaksi</span>
+              <ArrowLeftRight size={18} strokeWidth={isActive("/transaksi") ? 2.2 : 1.7} />
+              <span className="text-[10px] xs:text-[11px] leading-tight" style={{ fontFamily: "var(--font-ui)" }}>Transaksi</span>
             </Link>
           </li>
 
           {/* Elevated FAB: Quick Add Button */}
-          <li className="-mt-5">
+          <li className="-mt-5 flex-shrink-0 px-1">
             <button
               onClick={onQuickAdd}
               className="flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 active:scale-90 hover:scale-105"
@@ -412,35 +413,37 @@ export function SidebarNav({ onQuickAdd }: SidebarNavProps) {
           </li>
 
           {/* Anggaran */}
-          <li>
+          <li className="flex-1 text-center">
             <Link
               href="/anggaran"
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-card transition-all active:scale-95",
+                "flex flex-col items-center justify-center gap-0.5 xs:gap-1 py-1.5 rounded-card transition-all active:scale-95 mx-auto",
                 isActive("/anggaran") ? "text-pine font-semibold" : "text-ink-muted hover:text-ink"
               )}
             >
-              <PieChart size={19} strokeWidth={isActive("/anggaran") ? 2.2 : 1.7} />
-              <span style={{ fontSize: "10.5px", fontFamily: "var(--font-ui)" }}>Anggaran</span>
+              <PieChart size={18} strokeWidth={isActive("/anggaran") ? 2.2 : 1.7} />
+              <span className="text-[10px] xs:text-[11px] leading-tight" style={{ fontFamily: "var(--font-ui)" }}>Anggaran</span>
             </Link>
           </li>
 
           {/* Lainnya */}
-          <li>
+          <li className="flex-1 text-center">
             <Link
               href="/insight"
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-card transition-all active:scale-95 relative",
+                "flex flex-col items-center justify-center gap-0.5 xs:gap-1 py-1.5 rounded-card transition-all active:scale-95 relative mx-auto",
                 (isActive("/insight") || isActive("/aset") || isActive("/tujuan") || isActive("/pengaturan"))
                   ? "text-pine font-semibold"
                   : "text-ink-muted hover:text-ink"
               )}
             >
-              <MoreHorizontal size={19} strokeWidth={1.7} />
-              <span style={{ fontSize: "10.5px", fontFamily: "var(--font-ui)" }}>Lainnya</span>
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-ember" />
-              )}
+              <div className="relative">
+                <MoreHorizontal size={18} strokeWidth={1.7} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-ember animate-pulse" />
+                )}
+              </div>
+              <span className="text-[10px] xs:text-[11px] leading-tight" style={{ fontFamily: "var(--font-ui)" }}>Lainnya</span>
             </Link>
           </li>
         </ul>

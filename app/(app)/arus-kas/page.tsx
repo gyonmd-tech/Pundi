@@ -57,17 +57,17 @@ export default function ArusKasPage() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-display-l font-semibold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+        <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
           Analisis Arus Kas
         </h1>
-        <p className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
+        <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
           Visualisasi tren pemasukan vs pengeluaran dan rasio tabungan
         </p>
       </div>
 
       {/* Main Cash Flow Chart Card with Ledger Baseline */}
       <div className="card p-4 sm:p-5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
               <TrendingUp size={15} />
@@ -95,7 +95,7 @@ export default function ArusKasPage() {
         <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-2 font-ui">
           Pilih Bulan Analisis Mendalam
         </p>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 touch-pan-x">
           {MONTHS.map((m, i) => {
             const isSelected = i === selectedIdx;
             return (
@@ -103,7 +103,7 @@ export default function ArusKasPage() {
                 key={m.period}
                 onClick={() => handleSelectMonth(i)}
                 className={cn(
-                  "flex-shrink-0 px-4 py-2.5 rounded-card text-small font-semibold border transition-all active:scale-95 shadow-2xs",
+                  "flex-shrink-0 px-3.5 xs:px-4 py-2 xs:py-2.5 rounded-card text-xs xs:text-small font-semibold border transition-all active:scale-95 shadow-2xs",
                   isSelected ? "shadow-sm" : "hover:text-ink hover:bg-paper"
                 )}
                 style={{
@@ -137,22 +137,22 @@ export default function ArusKasPage() {
             </p>
             <div className="flex items-center gap-2">
               {netFlow >= 0
-                ? <TrendingUp size={22} style={{ color: "var(--color-pine)" }} />
-                : <TrendingDown size={22} style={{ color: "var(--color-ember)" }} />}
+                ? <TrendingUp size={22} className="flex-shrink-0" style={{ color: "var(--color-pine)" }} />
+                : <TrendingDown size={22} className="flex-shrink-0" style={{ color: "var(--color-ember)" }} />}
               <span
-                className="tabular-nums font-mono font-bold text-display-l"
+                className="tabular-nums font-mono font-bold text-2xl xs:text-3xl sm:text-display-l truncate"
                 style={{ color: netFlow >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}
               >
                 {netFlow >= 0 ? "+" : "−"}{formatRupiah(Math.abs(netFlow))}
               </span>
             </div>
-            <p className="text-xs text-ink-muted mt-1.5 font-ui">
+            <p className="text-xs text-ink-muted mt-1.5 font-ui leading-relaxed">
               {netFlow >= 0 ? "Surplus kas bulan ini dapat dialokasikan ke tujuan tabungan." : "Defisit kas bulan ini. Tinjau kembali pengeluaran terbesar."}
             </p>
           </div>
 
           {/* Income & Expense Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
             <div className="card p-3.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Pemasukan</span>
@@ -160,7 +160,7 @@ export default function ArusKasPage() {
                   {incomeDelta >= 0 ? "▲" : "▼"} {Math.abs(incomeDelta).toFixed(1)}%
                 </span>
               </div>
-              <p className="tabular-nums font-mono font-bold text-heading text-pine">
+              <p className="tabular-nums font-mono font-bold text-heading text-pine truncate">
                 {formatRupiah(summary.income)}
               </p>
             </div>
@@ -172,7 +172,7 @@ export default function ArusKasPage() {
                   {expenseDelta >= 0 ? "▲" : "▼"} {Math.abs(expenseDelta).toFixed(1)}%
                 </span>
               </div>
-              <p className="tabular-nums font-mono font-bold text-heading text-ember">
+              <p className="tabular-nums font-mono font-bold text-heading text-ember truncate">
                 {formatRupiah(summary.expense)}
               </p>
             </div>

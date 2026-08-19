@@ -115,10 +115,10 @@ export default function AnggaranPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display-l font-semibold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
             Perencanaan Anggaran
           </h1>
-          <p suppressHydrationWarning className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
+          <p suppressHydrationWarning className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
             Periode: <strong className="text-ink font-semibold">{formatDate(new Date(), "month")}</strong>
           </p>
         </div>
@@ -238,18 +238,20 @@ export default function AnggaranPage() {
                   limit={b.limitAmount}
                 />
                 {/* Inline Action Buttons */}
-                <div className="absolute right-3 top-3.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-surface px-1 py-0.5 rounded border border-rule shadow-xs">
+                <div className="absolute right-3 top-3.5 flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-surface/90 sm:bg-surface px-1 py-0.5 rounded border border-rule shadow-xs">
                   <button
                     onClick={() => handleEdit(b)}
-                    className="p-1 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
+                    className="p-1.5 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
                     title="Edit batas anggaran"
+                    aria-label="Edit batas anggaran"
                   >
                     <Edit2 size={13} strokeWidth={2} />
                   </button>
                   <button
                     onClick={() => setDeleteId(b.id)}
-                    className="p-1 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
+                    className="p-1.5 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
                     title="Hapus anggaran"
+                    aria-label="Hapus anggaran"
                   >
                     <Trash2 size={13} strokeWidth={2} />
                   </button>

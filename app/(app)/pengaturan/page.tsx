@@ -49,10 +49,10 @@ export default function PengaturanPage() {
     <div className="space-y-5 max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="text-display-l font-semibold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+        <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
           Pengaturan & Preferensi
         </h1>
-        <p className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
+        <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
           Kelola profil pengguna, sumber dana akun, dan katalog kategori
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function PengaturanPage() {
       </div>
 
       {/* Profil Section Card */}
-      <div className="card p-5 space-y-4" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+      <div className="card p-4 sm:p-5 space-y-4" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
         <div className="flex items-center gap-2.5 pb-3 border-b border-rule">
           <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
             <User size={16} />
@@ -95,21 +95,21 @@ export default function PengaturanPage() {
             { label: "Nama Lengkap",   value: "Sarah Dewi",         keyName: "nama" },
             { label: "Alamat Email",   value: "sarah.dewi@email.com", keyName: "email" },
             { label: "Mata Uang Utama", value: "Rupiah Indonesia (IDR)", keyName: "mata uang" },
-            { label: "Format Angka",    value: "1.234.567 (Titik desimal standar ID)", keyName: "format" },
+            { label: "Format Angka",    value: "1.234.567 (Standar ID)", keyName: "format" },
           ].map((item) => (
             <li
               key={item.label}
               onClick={() => handleAction(item.keyName)}
-              className="flex items-center justify-between py-3 cursor-pointer group hover:bg-paper/60 px-2 rounded-card transition-colors"
+              className="flex items-center justify-between py-3 cursor-pointer group hover:bg-paper/60 px-2 rounded-card transition-colors gap-2"
             >
-              <span className="text-small text-ink-muted group-hover:text-ink font-medium" style={{ fontFamily: "var(--font-ui)" }}>
+              <span className="text-xs xs:text-small text-ink-muted group-hover:text-ink font-medium flex-shrink-0" style={{ fontFamily: "var(--font-ui)" }}>
                 {item.label}
               </span>
-              <div className="flex items-center gap-2">
-                <span className="text-small font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+              <div className="flex items-center gap-1.5 min-w-0 justify-end">
+                <span className="text-xs xs:text-small font-semibold text-ink truncate text-right" style={{ fontFamily: "var(--font-ui)" }}>
                   {item.value}
                 </span>
-                <ChevronRight size={15} className="text-ink-muted group-hover:text-pine transition-colors" />
+                <ChevronRight size={15} className="text-ink-muted group-hover:text-pine transition-colors flex-shrink-0" />
               </div>
             </li>
           ))}

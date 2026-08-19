@@ -51,7 +51,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         />
 
         {/* Main Content Container */}
-        <main className="flex-1 p-4 lg:p-6 pb-24 md:pb-8 max-w-7xl w-full mx-auto animate-in fade-in duration-300">
+        <main className="flex-1 px-3 xs:px-4 sm:px-6 py-4 lg:p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0.5rem))] md:pb-8 max-w-7xl w-full mx-auto animate-in fade-in duration-300">
           {children}
         </main>
       </div>

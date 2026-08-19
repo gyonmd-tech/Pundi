@@ -71,11 +71,11 @@ export default function DashboardPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display-l font-semibold tracking-tight"
+          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight"
             style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
             Ringkasan Finansial
           </h1>
-          <p suppressHydrationWarning className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
+          <p suppressHydrationWarning className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
             Periode aktif: <strong className="text-ink font-semibold">{currentMonth}</strong>
           </p>
         </div>

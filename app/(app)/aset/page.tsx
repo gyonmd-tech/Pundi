@@ -124,10 +124,10 @@ export default function AsetPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display-l font-semibold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
             Portofolio Aset & Investasi
           </h1>
-          <p className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
+          <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
             Pantau pertumbuhan nilai bersih (net worth) dan instrumen investasi
           </p>
         </div>
@@ -135,7 +135,7 @@ export default function AsetPage() {
         <button
           onClick={openAdd}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-card text-small font-semibold shadow-sm",
+            "flex items-center gap-2 px-3.5 xs:px-4 py-2 rounded-card text-xs sm:text-small font-semibold shadow-sm",
             "transition-all duration-200 hover:brightness-105 active:scale-95 group"
           )}
           style={{ backgroundColor: "var(--color-pine)", color: "white", fontFamily: "var(--font-ui)" }}
@@ -153,7 +153,7 @@ export default function AsetPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
               Total Nilai Portofolio
             </p>
-            <p className="tabular-nums font-mono font-bold text-display-l text-ink">
+            <p className="tabular-nums font-mono font-bold text-2xl xs:text-3xl sm:text-display-l text-ink truncate">
               {formatRupiah(totalValue)}
             </p>
           </div>
@@ -223,7 +223,7 @@ export default function AsetPage() {
         </div>
       </div>
 
-      {/* Asset Table Card */}
+      {/* Asset Table / Mobile Card View */}
       <div className="card overflow-hidden p-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
         <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-paper)" }}>
           <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
@@ -234,15 +234,108 @@ export default function AsetPage() {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* ── Mobile Card List (<768px) ── */}
+        <div className="divide-y divide-rule/60 md:hidden">
+          {assets.map((asset) => {
+            const { currentVal, pnl, pnlPct } = getAssetPnL(asset);
+            const typeCfg = assetTypeConfig[asset.type];
+            const TypeIcon = typeCfg.icon;
+
+            return (
+              <div key={asset.id} className="p-3.5 flex flex-col gap-2.5">
+                {/* Top Row: Name, Class Badge, Actions */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-body font-semibold text-ink truncate leading-tight" style={{ fontFamily: "var(--font-ui)" }}>
+                      {asset.name}
+                    </p>
+                    <span
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold mt-1"
+                      style={{
+                        backgroundColor: `${typeCfg.color}15`,
+                        color: typeCfg.color,
+                      }}
+                    >
+                      <TypeIcon size={11} strokeWidth={2} />
+                      {typeCfg.label}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => openEdit(asset)}
+                      className="p-1.5 rounded-card text-ink-muted hover:text-pine active:bg-pine-10 transition-colors"
+                      title="Edit aset"
+                      aria-label="Edit aset"
+                    >
+                      <Edit2 size={14} strokeWidth={1.8} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(asset.id)}
+                      className="p-1.5 rounded-card text-ink-muted hover:text-ember active:bg-ember-10 transition-colors"
+                      title="Hapus aset"
+                      aria-label="Hapus aset"
+                    >
+                      <Trash2 size={14} strokeWidth={1.8} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Middle Row: Units & Prices */}
+                <div className="grid grid-cols-3 gap-2 py-1.5 px-2.5 rounded-card bg-paper/60 border border-rule/40 text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase font-semibold text-ink-muted block">Unit</span>
+                    <span className="font-mono font-medium text-ink">
+                      {asset.units % 1 === 0 ? asset.units.toLocaleString("id-ID") : asset.units.toFixed(4)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-semibold text-ink-muted block">Harga Beli</span>
+                    <span className="font-mono text-ink-muted">
+                      {formatRupiah(asset.buyPrice)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-semibold text-ink-muted block">Harga Kini</span>
+                    <span className="font-mono font-medium text-ink">
+                      {formatRupiah(asset.currentPrice)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bottom Row: Valuation & P&L */}
+                <div className="flex items-center justify-between pt-1 border-t border-rule/30">
+                  <div>
+                    <span className="text-[10px] uppercase font-semibold text-ink-muted block">Nilai Portofolio</span>
+                    <span className="tabular-nums font-mono font-bold text-small xs:text-body text-ink">
+                      {formatRupiah(currentVal)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-semibold text-ink-muted block">Keuntungan / Rugi</span>
+                    <span
+                      className="tabular-nums font-mono font-bold text-small"
+                      style={{ color: pnl >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}
+                    >
+                      {pnl >= 0 ? "+" : "−"}{formatRupiah(Math.abs(pnl))} ({pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Desktop Data Table (≥768px) ── */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Instrumen / Aset</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Kelas</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Kepemilikan Unit</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted hidden md:table-cell">Harga Rerata Beli</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted hidden md:table-cell">Harga Saat Ini</th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Harga Rerata Beli</th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Harga Saat Ini</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nilai Portofolio</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Keuntungan / Rugi</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-16"></th>
@@ -282,11 +375,11 @@ export default function AsetPage() {
                       {asset.units % 1 === 0 ? asset.units.toLocaleString("id-ID") : asset.units.toFixed(4)}
                     </td>
 
-                    <td className="px-4 py-3.5 font-mono text-small text-ink-muted hidden md:table-cell">
+                    <td className="px-4 py-3.5 font-mono text-small text-ink-muted">
                       {formatRupiah(asset.buyPrice)}
                     </td>
 
-                    <td className="px-4 py-3.5 font-mono text-small text-ink hidden md:table-cell">
+                    <td className="px-4 py-3.5 font-mono text-small text-ink">
                       {formatRupiah(asset.currentPrice)}
                     </td>
 

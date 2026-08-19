@@ -8,11 +8,22 @@ html {
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
   background-color: var(--color-paper);
+  overflow-x: hidden;
+}
+
+/* ── Safe Area insets for iOS Devices ────────────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0.5rem);
 }
 
 /* ── Tabular Numerals — Non-Negotiable Rule (DESIGN.md § 4.3) */

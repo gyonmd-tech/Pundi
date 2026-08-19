@@ -88,49 +88,49 @@ export default function HomePage() {
           </span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold mb-6 max-w-5xl tracking-tight leading-[1.1] text-slate-900 font-display">
+        <h1 className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold mb-6 max-w-5xl tracking-tight leading-[1.1] text-slate-900 font-display">
           Operating System untuk <br className="hidden lg:block"/>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
              Keuangan Anda.
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl mb-10 max-w-3xl text-slate-600 leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-3xl text-slate-600 leading-relaxed px-2">
           Ucapkan selamat tinggal pada spreadsheet yang rumit. Pundi adalah dashboard finansial tingkat enterprise yang dirancang untuk kejelasan, kecepatan, dan ketenangan pikiran Anda.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+        <div className="flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full justify-center max-w-md sm:max-w-none">
           <Link
             href="/signup"
-            className="w-full sm:w-auto px-8 py-4 rounded-full text-base font-semibold transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10 flex items-center justify-center gap-2 group bg-slate-900 text-white"
+            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-full text-sm sm:text-base font-semibold transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10 flex items-center justify-center gap-2 group bg-slate-900 text-white"
           >
             Mulai Secara Gratis
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/dashboard"
-            className="w-full sm:w-auto px-8 py-4 rounded-full text-base font-semibold border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-all shadow-sm"
+            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-full text-sm sm:text-base font-semibold border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-all shadow-sm"
           >
             Lihat Demo Langsung
           </Link>
         </div>
         
-        <p className="mt-6 text-sm text-slate-500 flex items-center gap-2">
-           <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Tanpa kartu kredit. Setup dalam 2 menit.
+        <p className="mt-5 sm:mt-6 text-xs sm:text-sm text-slate-500 flex items-center gap-2">
+           <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Tanpa kartu kredit. Setup dalam 2 menit.
         </p>
 
-        {/* The Massive Hero Mockup (To fix the "Kopong" feel) */}
-        <div className="mt-16 w-full max-w-6xl mx-auto px-4 relative perspective-[2000px]">
-           <div className="w-full rounded-2xl md:rounded-[2rem] border border-slate-200/60 bg-white/60 backdrop-blur-2xl shadow-2xl shadow-slate-200/50 overflow-hidden transform-gpu rotate-x-12 translate-y-8 scale-95 transition-transform duration-1000 hover:rotate-x-0 hover:translate-y-0 hover:scale-100 flex flex-col" style={{ height: "700px" }}>
+        {/* The Massive Hero Mockup (Responsive height & scalable) */}
+        <div className="mt-12 sm:mt-16 w-full max-w-6xl mx-auto px-2 sm:px-4 relative perspective-[2000px]">
+           <div className="w-full rounded-2xl md:rounded-[2rem] border border-slate-200/60 bg-white/60 backdrop-blur-2xl shadow-2xl shadow-slate-200/50 overflow-hidden transform-gpu rotate-x-12 translate-y-8 scale-95 transition-transform duration-1000 hover:rotate-x-0 hover:translate-y-0 hover:scale-100 flex flex-col h-[380px] xs:h-[460px] sm:h-[540px] md:h-[640px] lg:h-[700px]">
               {/* Fake Browser Header */}
-              <div className="h-12 border-b border-slate-100 flex items-center px-4 gap-2 bg-slate-50/50">
+              <div className="h-10 sm:h-12 border-b border-slate-100 flex items-center px-3 sm:px-4 gap-2 bg-slate-50/50 flex-shrink-0">
                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-200"></div>
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-slate-200"></div>
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-slate-200"></div>
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-slate-200"></div>
                  </div>
-                 <div className="mx-auto flex items-center gap-2 px-24 py-1.5 bg-white border border-slate-200 rounded-md shadow-sm text-xs text-slate-400 font-mono">
-                    <Lock className="w-3 h-3" /> app.pundi.id/dashboard
+                 <div className="mx-auto flex items-center gap-2 px-6 sm:px-24 py-1 sm:py-1.5 bg-white border border-slate-200 rounded-md shadow-sm text-[10px] sm:text-xs text-slate-400 font-mono truncate max-w-[200px] sm:max-w-none">
+                    <Lock className="w-3 h-3 flex-shrink-0" /> app.pundi.id/dashboard
                  </div>
               </div>
               
@@ -255,28 +255,28 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6">
             
             {/* Bento Box 1 - Wide */}
-            <div className="md:col-span-8 p-10 rounded-[2.5rem] border border-slate-200 bg-white shadow-sm relative overflow-hidden group">
+            <div className="md:col-span-8 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-200 bg-white shadow-sm relative overflow-hidden group">
                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white z-0"></div>
                <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center mb-6 shadow-md">
-                     <LineChart className="w-7 h-7" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center mb-5 sm:mb-6 shadow-md">
+                     <LineChart className="w-6 h-6 sm:w-7 sm:h-7" />
                   </div>
-                  <h3 className="text-3xl font-bold mb-4 font-display text-slate-900">Arus Kas Visual yang Presisi</h3>
-                  <p className="text-lg text-slate-600 mb-8 max-w-lg leading-relaxed">
+                  <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 font-display text-slate-900">Arus Kas Visual yang Presisi</h3>
+                  <p className="text-base sm:text-lg text-slate-600 mb-6 sm:mb-8 max-w-lg leading-relaxed">
                      Jangan menebak-nebak ke mana uang Anda pergi. Algoritma visualisasi kami memetakan setiap rupiah dengan *Ledger Baseline* layaknya buku kas profesional.
                   </p>
                   
                   {/* Detailed Inner UI */}
-                  <div className="mt-auto bg-slate-50 rounded-2xl border border-slate-100 p-6 shadow-inner flex items-center justify-between group-hover:shadow-md transition-shadow">
+                  <div className="mt-auto bg-slate-50 rounded-2xl border border-slate-100 p-4 sm:p-6 shadow-inner flex items-center justify-between group-hover:shadow-md transition-shadow">
                      <div className="space-y-4 w-full">
-                        <div className="flex justify-between items-center text-sm font-medium text-slate-500">
+                        <div className="flex justify-between items-center text-xs sm:text-sm font-medium text-slate-500">
                            <span>Trend Pengeluaran (7 Hari)</span>
                            <span className="text-emerald-600">Terjaga</span>
                         </div>
-                        <div className="flex gap-2 h-16 items-end w-full">
+                        <div className="flex gap-1.5 sm:gap-2 h-14 sm:h-16 items-end w-full">
                            {[30, 45, 20, 80, 55, 35, 60].map((h, i) => (
                               <div key={i} className="flex-1 bg-slate-200 rounded-sm hover:bg-slate-300 transition-colors" style={{ height: `${h}%` }}></div>
                            ))}
@@ -287,17 +287,17 @@ export default function HomePage() {
             </div>
 
             {/* Bento Box 2 - Tall */}
-            <div className="md:col-span-4 p-10 rounded-[2.5rem] border border-slate-200 bg-slate-900 text-white shadow-xl relative overflow-hidden">
+            <div className="md:col-span-4 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-200 bg-slate-900 text-white shadow-xl relative overflow-hidden">
                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full blur-[80px] opacity-20"></div>
                <div className="relative z-10 flex flex-col h-full">
-                  <PieChart className="w-10 h-10 mb-6 text-emerald-400" />
-                  <h3 className="text-2xl font-bold mb-4 font-display">Budgeting Real-time</h3>
-                  <p className="text-slate-300 mb-8 leading-relaxed">
+                  <PieChart className="w-8 h-8 sm:w-10 sm:h-10 mb-5 sm:mb-6 text-emerald-400" />
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 font-display">Budgeting Real-time</h3>
+                  <p className="text-slate-300 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
                      Setel batas pengeluaran per kategori. Sistem akan memberi peringatan dini sebelum Anda melewati batas.
                   </p>
-                  <div className="mt-auto space-y-4">
-                     <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <div className="flex justify-between text-sm font-medium mb-2">
+                  <div className="mt-auto space-y-3 sm:space-y-4">
+                     <div className="bg-slate-800/50 rounded-xl p-3.5 sm:p-4 border border-slate-700">
+                        <div className="flex justify-between text-xs sm:text-sm font-medium mb-2">
                            <span>Makanan</span>
                            <span className="text-emerald-400">Aman</span>
                         </div>
@@ -305,8 +305,8 @@ export default function HomePage() {
                            <div className="h-full bg-emerald-400 w-[45%]"></div>
                         </div>
                      </div>
-                     <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 border-l-4 border-l-red-500">
-                        <div className="flex justify-between text-sm font-medium mb-2">
+                     <div className="bg-slate-800/50 rounded-xl p-3.5 sm:p-4 border border-slate-700 border-l-4 border-l-red-500">
+                        <div className="flex justify-between text-xs sm:text-sm font-medium mb-2">
                            <span>Belanja</span>
                            <span className="text-red-400">Kritis</span>
                         </div>
@@ -319,14 +319,14 @@ export default function HomePage() {
             </div>
 
             {/* Bento Box 3 */}
-            <div className="md:col-span-4 p-10 rounded-[2.5rem] border border-slate-200 bg-white shadow-sm">
-               <Target className="w-10 h-10 mb-6 text-slate-900" />
-               <h3 className="text-2xl font-bold mb-4 font-display text-slate-900">Aset & Goal</h3>
-               <p className="text-slate-600 leading-relaxed mb-6">
+            <div className="md:col-span-4 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-200 bg-white shadow-sm">
+               <Target className="w-8 h-8 sm:w-10 sm:h-10 mb-5 sm:mb-6 text-slate-900" />
+               <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 font-display text-slate-900">Aset & Goal</h3>
+               <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-5 sm:mb-6">
                   Hitung *Net Worth* Anda secara otomatis. Buat tujuan tabungan (seperti DP Rumah atau Liburan) dan pantau persentasenya setiap hari.
                </p>
-               <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <div className="w-12 h-12 rounded-full border-4 border-emerald-500 flex items-center justify-center font-bold text-sm text-slate-900">
+               <div className="flex items-center gap-4 bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-100">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-4 border-emerald-500 flex items-center justify-center font-bold text-xs sm:text-sm text-slate-900 flex-shrink-0">
                      75%
                   </div>
                   <div>
@@ -337,21 +337,21 @@ export default function HomePage() {
             </div>
 
             {/* Bento Box 4 */}
-            <div className="md:col-span-4 p-10 rounded-[2.5rem] border border-slate-200 bg-emerald-50 shadow-sm border-emerald-100">
-               <ShieldCheck className="w-10 h-10 mb-6 text-emerald-600" />
-               <h3 className="text-2xl font-bold mb-4 font-display text-slate-900">Privasi Bank-Grade</h3>
-               <p className="text-slate-600 leading-relaxed">
+            <div className="md:col-span-4 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-200 bg-emerald-50 shadow-sm border-emerald-100">
+               <ShieldCheck className="w-8 h-8 sm:w-10 sm:h-10 mb-5 sm:mb-6 text-emerald-600" />
+               <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 font-display text-slate-900">Privasi Bank-Grade</h3>
+               <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
                   Kami menggunakan enkripsi AES-256 untuk memastikan data transaksi Anda tidak dapat dibaca oleh siapapun kecuali Anda sendiri.
                </p>
             </div>
 
             {/* Bento Box 5 */}
-            <div className="md:col-span-4 p-10 rounded-[2.5rem] border border-slate-200 bg-white shadow-sm flex flex-col justify-center text-center items-center hover:bg-slate-50 cursor-pointer transition-colors">
-               <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                  <Plus className="w-8 h-8 text-slate-900" />
+            <div className="md:col-span-4 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-200 bg-white shadow-sm flex flex-col justify-center text-center items-center hover:bg-slate-50 cursor-pointer transition-colors">
+               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                  <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-slate-900" />
                </div>
-               <h3 className="text-xl font-bold font-display text-slate-900">Eksplorasi Semua Fitur</h3>
-               <p className="text-sm text-slate-500 mt-2">Masih banyak lagi di dalam dashboard.</p>
+               <h3 className="text-lg sm:text-xl font-bold font-display text-slate-900">Eksplorasi Semua Fitur</h3>
+               <p className="text-xs sm:text-sm text-slate-500 mt-1.5 sm:mt-2">Masih banyak lagi di dalam dashboard.</p>
             </div>
 
           </div>

@@ -55,12 +55,12 @@ export default function InsightPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2.5">
         <div>
-          <h1 className="text-display-l font-semibold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
             Insight & Notifikasi Finansial
           </h1>
-          <p className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
+          <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
             {unreadCount > 0 ? (
               <span>Ada <strong className="text-ember font-semibold">{unreadCount} notifikasi baru</strong> yang memerlukan perhatian</span>
             ) : (
@@ -73,20 +73,20 @@ export default function InsightPage() {
           <button
             onClick={handleMarkAllRead}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 rounded-card text-small font-semibold border shadow-xs",
+              "flex items-center gap-1.5 xs:gap-2 px-3 xs:px-3.5 py-1.5 xs:py-2 rounded-card text-xs sm:text-small font-semibold border shadow-xs",
               "transition-all duration-200 hover:border-pine hover:bg-pine-10 hover:text-pine active:scale-95",
               "text-ink-muted bg-surface"
             )}
             style={{ borderColor: "var(--color-rule)", fontFamily: "var(--font-ui)" }}
           >
-            <CheckCheck size={16} strokeWidth={2} />
+            <CheckCheck size={15} strokeWidth={2} />
             <span>Tandai Semua Dibaca</span>
           </button>
         )}
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 touch-pan-x">
         {filterTabs.map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.key;

@@ -137,13 +137,13 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
               className="w-2.5 h-2.5 rounded-full flex-shrink-0"
               style={{ backgroundColor: selectedAccount?.colorTag || "var(--color-pine)" }}
             />
-            <span className="truncate max-w-[120px] sm:max-w-[170px] font-semibold text-xs sm:text-small">
+            <span className="truncate max-w-[85px] xs:max-w-[130px] sm:max-w-[170px] font-semibold text-xs sm:text-small">
               {selectedAccount ? selectedAccount.name : "Semua Akun"}
             </span>
             <ChevronDown
               size={14}
               strokeWidth={2}
-              className={cn("transition-transform duration-200", accountMenuOpen && "rotate-180")}
+              className={cn("transition-transform duration-200 flex-shrink-0", accountMenuOpen && "rotate-180")}
               style={{ color: "var(--color-ink-muted)" }}
             />
           </button>
@@ -151,7 +151,7 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
           {/* Account Dropdown Menu Popover */}
           {accountMenuOpen && (
             <div
-              className="absolute left-0 mt-2 w-72 rounded-card border shadow-float p-2 z-50 animate-in fade-in slide-in-from-top-2"
+              className="absolute left-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-card border shadow-float p-2 z-50 animate-in fade-in slide-in-from-top-2"
               style={{
                 backgroundColor: "var(--color-surface)",
                 borderColor: "var(--color-rule)",
@@ -281,7 +281,7 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
           {/* Notification Popover Dropdown */}
           {notificationOpen && (
             <div
-              className="absolute right-0 mt-2 w-80 sm:w-96 rounded-card border shadow-float p-3 z-50 animate-in fade-in slide-in-from-top-2"
+              className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] rounded-card border shadow-float p-3 z-50 animate-in fade-in slide-in-from-top-2"
               style={{
                 backgroundColor: "var(--color-surface)",
                 borderColor: "var(--color-rule)",
@@ -351,8 +351,8 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
         <button
           onClick={onQuickAdd}
           className={cn(
-            "flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-card text-xs sm:text-small font-semibold shadow-sm",
-            "transition-all duration-200 ease-out active:scale-95 group",
+            "flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3.5 sm:px-4 py-2 rounded-card text-xs sm:text-small font-semibold shadow-sm",
+            "transition-all duration-200 ease-out active:scale-95 group flex-shrink-0",
             "hover:shadow-md hover:brightness-105"
           )}
           style={{
@@ -360,9 +360,10 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
             color: "white",
             fontFamily: "var(--font-ui)",
           }}
+          aria-label="Tambah Transaksi Cepat"
         >
-          <Plus size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-90" />
-          <span>Tambah</span>
+          <Plus size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
+          <span className="inline">Tambah</span>
           <kbd
             className="hidden sm:inline-block px-1.5 py-0.2 rounded text-[10px] font-mono border border-white/20 bg-white/10"
           >
