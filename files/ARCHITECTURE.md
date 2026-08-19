@@ -162,3 +162,84 @@ Untuk **akun demo publik**, dokumen milik user demo diberi permission:
 - Halaman `(app)` (dashboard, dsb.) memakai `robots: noindex`.
 - Frontend deploy ke Vercel seperti project lain di Rumah Design.
 - Environment variables: `NEXT_PUBLIC_APPWRITE_ENDPOINT`, `NEXT_PUBLIC_APPWRITE_PROJECT_ID` (dipakai client), `APPWRITE_API_KEY` (server-only, untuk Server Components/Actions dan reset demo).
+
+---
+
+## Update — Wallet System Upgrade (Agustus 2026)
+
+> Perubahan schema ini menambah 1 Collection baru (`accountTypes`) dan memodifikasi Collection `accounts` yang sudah ada. Perubahan ini adalah **prasyarat** sebelum fitur visual di DESIGN.md § Update dapat diimplementasikan.
+
+### 3.1 Collection Baru: `accountTypes`
+
+Collection ini menggantikan enum statis `accounts.type` dengan daftar tipe yang bisa dikustomisasi per user.
+
+**`accountTypes`**
+| Attribute | Type | Ket. |
+|---|---|---|
+| userId | String | required — pemilik tipe |
+| name | String | required — nama tipe, mis. "BCA Tabungan", "Bank Global (USD)" |
+| icon | String | nama Lucide icon (dari set yang sama dengan `categories`) |
+| colorTag | String | warna dari token `tokens.css` (hex value) — bukan free picker |
+| isDefault | Boolean | default `false` — tipe bawaan sistem yang tidak bisa dihapus |
+
+**Index:**
+- `userId` (non-unique) — untuk query daftar tipe milik satu user
+
+**Permissions:** sama dengan Collection data pribadi lainnya — dokumen hanya bisa diakses oleh `userId` pemiliknya.
+
+### 3.2 Modifikasi Collection `accounts`
+
+Kolom `type` (Enum) digantikan dengan `typeId` (String) yang menjadi referensi ke `accountTypes.$id`.
+
+| Attribute | Perubahan | Detail |
+|---|---|---|
+| `type` | **DIHAPUS** | Enum `bank, ewallet, cash, credit_card, investment` tidak lagi dipakai |
+| `typeId` | **BARU — String, required** | Referensi ke `accountTypes.$id` milik user |
+| `currency` | **BARU — String, default `IDR`** | Kode mata uang ISO 4217 (`IDR`, `USD`, `SGD`, `EUR`, dll.) |
+| `exchangeRate` | **BARU — Float, default `1.0`** | Rate konversi manual ke IDR (mis. untuk USD: `16500.0`). Dipakai agregasi di dashboard. Untuk IDR selalu `1.0`. |
+
+**Catatan:** `currency` dan `exchangeRate` diisi manual oleh user. Tidak ada konversi otomatis dari API kurs — sesuai prinsip Non-Goals PRD.md § 6.
+
+### 3.3 Urutan Migrasi & Seed Data
+
+Urutan eksekusi saat pertama kali setup atau saat user mendaftar baru (`actions/seed.ts`):
+
+```
+1. Buat 5 dokumen `accountTypes` default untuk userId baru:
+   - { name: "Bank",        icon: "landmark",     colorTag: "#1B4B3F", isDefault: true }
+   - { name: "E-Wallet",    icon: "wallet",       colorTag: "#B08A3E", isDefault: true }
+   - { name: "Tunai",       icon: "banknote",     colorTag: "#5B655F", isDefault: true }
+   - { name: "Kartu Kredit",icon: "credit-card",  colorTag: "#9C4A2E", isDefault: true }
+   - { name: "Investasi",   icon: "trending-up",  colorTag: "#2D6A4F", isDefault: true }
+
+2. Buat akun-akun demo awal menggunakan `typeId` dari langkah 1
+   (bukan enum lama — gunakan id dokumen yang baru dibuat)
+
+3. Seed transaksi, budget, goal, aset, insight mengikuti flow yang sudah ada.
+```
+
+**Untuk data existing (akun demo):** pemetaan enum lama → `typeId` dilakukan sekali saat migrasi dengan script terpisah (`scripts/migrate-account-types.ts`):
+```
+"bank"        → typeId dari accountType {name: "Bank"}
+"ewallet"     → typeId dari accountType {name: "E-Wallet"}
+"cash"        → typeId dari accountType {name: "Tunai"}
+"credit_card" → typeId dari accountType {name: "Kartu Kredit"}
+"investment"  → typeId dari accountType {name: "Investasi"}
+```
+
+### 3.4 Tambahan ke Folder Structure
+
+```
+app/
+└── (app)/
+    └── aset/
+        └── [accountId]/
+            └── page.tsx          # [NEW] Halaman detail per dompet
+
+actions/
+└── accountTypes.ts               # [NEW] CRUD accountTypes (list, create, update, delete)
+                                  #       termasuk validasi hapus (cek apakah typeId masih dipakai)
+
+scripts/
+└── migrate-account-types.ts      # [NEW] Script migrasi satu kali: enum → typeId
+```

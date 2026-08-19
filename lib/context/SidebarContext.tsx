@@ -5,7 +5,7 @@
  * Context untuk mengelola status buka/tutup (collapse) Sidebar di desktop dan tablet.
  */
 
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import React, { createContext, useContext, useState, type ReactNode } from "react";
 
 interface SidebarContextValue {
   isCollapsed: boolean;
@@ -16,19 +16,17 @@ interface SidebarContextValue {
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-
-  // Load preferred state from localStorage if available
-  useEffect(() => {
+  // Gunakan lazy initializer untuk baca localStorage hanya sekali saat mount,
+  // tanpa perlu useEffect — menghindari cascading render (react-hooks/set-state-in-effect).
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
     try {
       const saved = localStorage.getItem("pundi_sidebar_collapsed");
-      if (saved !== null) {
-        setIsCollapsed(saved === "true");
-      }
+      return saved === "true";
     } catch {
-      // Ignore localStorage errors in SSR or restricted environments
+      return false;
     }
-  }, []);
+  });
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => {

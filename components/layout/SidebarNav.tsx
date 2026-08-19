@@ -25,8 +25,6 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useInsights } from "@/lib/data/store";

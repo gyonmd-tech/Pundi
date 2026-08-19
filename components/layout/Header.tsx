@@ -17,13 +17,10 @@ import {
   ChevronDown,
   Bell,
   Search,
-  Check,
   ExternalLink,
   CheckCheck,
   PanelLeft,
   Calendar,
-  Sparkles,
-  Layers,
 } from "lucide-react";
 import Link from "next/link";
 import { useAccounts, useInsights, useApp } from "@/lib/data/store";

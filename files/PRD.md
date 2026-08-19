@@ -112,3 +112,32 @@ Fokus produk: **kombinasi menyeluruh** — budgeting harian, laporan arus kas, d
 - Responsive penuh sampai lebar mobile (375px).
 - Setiap chart punya label, satuan mata uang (Rupiah), dan baseline yang jelas dibaca tanpa hover.
 - Case study Pundi bisa ditulis dan diupload ke Rumah Design mengikuti format Ringkasan/Masalah/Solusi/Fitur Utama/Pendekatan Teknis/Hasil.
+
+---
+
+## Update — Wallet System Upgrade (Agustus 2026)
+
+> Penambahan ini memperluas Epic A dan Epic D berdasarkan PLAN_CUSTOM_WALLET_RESPONSIVE.md. Prinsip seleksi: setiap sub-fitur harus benar-benar mengubah cara user melihat/mengelola uang sehari-hari — yang kosmetik masuk v2 backlog saja.
+
+### Epic A — Onboarding & Akun (Wallet) — Penambahan Fitur Custom Types
+
+| Item | Prioritas | Detail |
+|---|---|---|
+| Kelola Jenis Dompet Custom | **[MVP]** | Section baru di `/pengaturan`: CRUD tipe akun (nama, ikon Lucide dari set existing, warna dari token `tokens.css`) — bukan color picker bebas agar tetap kohesif dengan palet design system |
+| Collection `accountTypes` | **[MVP]** | Setiap user punya daftar tipe dompet sendiri: `userId`, `name`, `icon` (nama Lucide), `colorTag`, `isDefault` |
+| Migrasi `accounts.type` → `accounts.typeId` | **[MVP]** | Field enum lama diganti dengan relasi ke `accountTypes`. Seed otomatis 5 tipe default saat signup: Bank, E-wallet, Tunai, Kartu Kredit, Investasi — pemetaan enum lama otomatis |
+| Dropdown tipe di form tambah akun | **[MVP]** | Pull dari collection `accountTypes` milik user, bukan enum hardcoded — mendukung tipe custom yang sudah dibuat user |
+| Validasi hapus tipe | **[MVP]** | Tipe yang masih dipakai oleh ≥1 akun aktif tidak bisa dihapus, hanya bisa diedit — mencegah data orphan |
+| Multi-currency per akun | **[MVP — prasyarat]** | Field `currency` (mis. `IDR`, `USD`, `SGD`) + `exchangeRate` (manual input, rate terhadap IDR) per akun. Kartu akun sendiri tampil pakai mata uang asli (`$1,250.00`), tapi agregat dashboard (total saldo, net worth) tetap dikonversi ke IDR |
+| Alert saldo rendah per akun | **[v2]** | Butuh infrastruktur notifikasi tambahan — berbeda dari alert budget yang sudah ada |
+
+### Epic D — Arus Kas & Laporan — Penambahan Fitur per Wallet
+
+| Fitur | Prioritas | Deskripsi |
+|---|---|---|
+| Halaman Detail per Dompet (`/aset/[accountId]`) | **[MVP]** | Versi mini Arus Kas spesifik satu akun: tren saldo 6 bulan, breakdown kategori pengeluaran dari akun ini, mutasi ter-filter — membantu user mengerti ke mana uang di rekening tertentu pergi |
+| Widget Distribusi Saldo (Dashboard) | **[MVP]** | Panel baru di dashboard: \"Di mana uang saya sekarang?\" — Wallet Distribution Ring (lihat DESIGN.md § Update Visual Signature) menampilkan proporsi saldo per dompet |
+| Transfer Antar Akun — Pemisahan di Laporan | **[MVP]** | Transfer sudah ada sebagai tipe transaksi, tapi harus dipisah dari income/expense asli di laporan per akun agar cash flow tidak double-count. Laporan `/arus-kas` per akun harus exclude transfer sebagai income/expense |
+| Money Flow Ribbon (Halaman Arus Kas) | **[MVP]** | Diagram alur Sankey sederhana: Sumber Pemasukan → Dompet → Kategori Pengeluaran — ditempatkan sebagai visual sekunder di bawah chart tren yang sudah ada, bukan pengganti. Di mobile turun jadi stacked bar sederhana |
+| Insight Otomatis per Akun | **[MVP]** | Perluasan `InsightFeed.tsx`: insight spesifik per akun (mis. \"Saldo BCA turun 40% bulan ini, lebih cepat dari biasanya\") — bukan hanya insight level total keseluruhan |
+| Ekspor laporan PDF/CSV formal | **[v2]** | Laporan per bulan bergaya laporan keuangan resmi siap cetak — dipindah ke v2 dari backlog umum |

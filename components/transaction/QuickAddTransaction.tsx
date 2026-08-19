@@ -17,9 +17,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   ArrowLeftRight,
-  Calendar,
   FileText,
-  Wallet,
   Sparkles,
   Check,
 } from "lucide-react";
@@ -61,13 +59,8 @@ export function QuickAddTransaction({ open, onClose }: Props) {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Set default account when available
-  useEffect(() => {
-    if (accounts.length > 0 && !accountId) {
-      setAccountId(accounts[0].id);
-      if (accounts[1]) setToAccountId(accounts[1].id);
-    }
-  }, [accounts, accountId]);
+  // Account default sudah di-set via lazy initializer di useState di atas
+  // (menghindari pola setState sinkron di dalam useEffect / cascading renders)
 
   // Focus amount input when opened
   useEffect(() => {
@@ -125,7 +118,6 @@ export function QuickAddTransaction({ open, onClose }: Props) {
       return;
     }
 
-    const selectedAcc = accounts.find((a) => a.id === accountId);
     const selectedCat = categories.find((c) => c.id === categoryId);
 
     dispatch({

@@ -9,17 +9,19 @@
 import React, { useState, useMemo } from "react";
 import { useApp, useTransactions, useAccounts, useCategories } from "@/lib/data/store";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
+import { buildProfessionalCsv, downloadCsv } from "@/lib/utils/csvExport";
 import { useToast } from "@/lib/context/ToastContext";
 import {
   Search, Filter, Plus, Trash2, ArrowDownLeft, ArrowUpRight,
-  ArrowLeftRight, ChevronDown, ChevronUp, X, Sparkles, Tag, Download,
+  ArrowLeftRight, ChevronDown, ChevronUp, X, Download,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { TransactionType } from "@/lib/data/mock";
 import { QuickAddTransaction } from "@/components/transaction/QuickAddTransaction";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
-const typeLabel: Record<TransactionType, { label: string; icon: any; color: string; bg: string }> = {
+const typeLabel: Record<TransactionType, { label: string; icon: LucideIcon; color: string; bg: string }> = {
   income:   { label: "Pemasukan",   icon: ArrowUpRight,   color: "var(--color-pine)",   bg: "var(--color-pine-10)" },
   expense:  { label: "Pengeluaran", icon: ArrowDownLeft,  color: "var(--color-ember)",  bg: "var(--color-ember-10)" },
   transfer: { label: "Transfer",    icon: ArrowLeftRight, color: "var(--color-brass)",  bg: "var(--color-brass-10)" },
@@ -96,34 +98,96 @@ export default function TransaksiPage() {
   }
 
   function handleExportCSV() {
-    const headers = ["ID", "Tanggal", "Tipe", "Nominal (IDR)", "Akun", "Kategori", "Catatan"];
-    const rows = filtered.map((tx) => {
+    if (filtered.length === 0) {
+      showToast({
+        type: "info",
+        title: "Tidak Ada Data",
+        message: "Tidak ada transaksi untuk diekspor. Sesuaikan filter terlebih dahulu.",
+      });
+      return;
+    }
+
+    // Tentukan label periode berdasarkan filter tanggal
+    let period = "Semua Periode";
+    if (filterFrom && filterTo) {
+      period = `${filterFrom} sampai ${filterTo}`;
+    } else if (filterFrom) {
+      period = `Mulai ${filterFrom}`;
+    } else if (filterTo) {
+      period = `Hingga ${filterTo}`;
+    }
+
+    // Rangkum filter aktif untuk metadata laporan
+    const filterParts: string[] = [];
+    if (filterType !== "all") filterParts.push(`Jenis: ${typeLabel[filterType as TransactionType]?.label ?? filterType}`);
+    if (filterAccount !== "all") {
+      const acc = accounts.find(a => a.id === filterAccount);
+      if (acc) filterParts.push(`Akun: ${acc.name}`);
+    }
+    if (filterCategory !== "all") {
+      const cat = categories.find(c => c.id === filterCategory);
+      if (cat) filterParts.push(`Kategori: ${cat.name}`);
+    }
+    if (search) filterParts.push(`Cari: "${search}"`);
+
+    // Baris data — kolom lengkap + angka Rupiah tanpa prefix "Rp" agar Excel bisa kalkulasi
+    const rows: (string | number)[][] = filtered.map((tx) => {
       const acc = accounts.find(a => a.id === tx.accountId);
       const cat = categories.find(c => c.id === tx.categoryId);
+      const typeIndo =
+        tx.type === "income" ? "Pemasukan" :
+        tx.type === "expense" ? "Pengeluaran" : "Transfer";
+      const tanda =
+        tx.type === "income" ? "+" :
+        tx.type === "expense" ? "-" : "";
+
       return [
-        `"${tx.id}"`,
-        `"${new Date(tx.date).toISOString().slice(0, 10)}"`,
-        `"${tx.type.toUpperCase()}"`,
-        tx.amount,
-        `"${(acc?.name || tx.accountId).replace(/"/g, '""')}"`,
-        `"${(cat?.name || tx.categoryId || '').replace(/"/g, '""')}"`,
-        `"${(tx.note || '').replace(/"/g, '""')}"`,
+        new Date(tx.date).toISOString().slice(0, 10),       // Tanggal (YYYY-MM-DD) — agar Excel auto-format sebagai Date
+        typeIndo,                                            // Jenis Transaksi
+        `${tanda}${tx.amount}`,                             // Nominal (IDR) — angka bersih tanpa Rp
+        acc?.name ?? "-",                                   // Nama Akun
+        cat?.name ?? (tx.type === "transfer" ? "Transfer" : "-"),  // Kategori
+        tx.note ?? "-",                                     // Catatan / Deskripsi
+        tx.tags?.join(" | ") ?? "-",                        // Tags
+        tx.id,                                              // ID Referensi
       ];
     });
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `pundi-mutasi-${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Hitung totals untuk baris ringkasan
+    const totalIncome  = filtered.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
+    const totalExpense = filtered.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+    const netFlow      = totalIncome - totalExpense;
+
+    const csv = buildProfessionalCsv({
+      reportTitle: "Laporan Mutasi Transaksi",
+      period,
+      activeFilters: filterParts.length > 0 ? filterParts.join(" | ") : "Tanpa filter tambahan",
+      headers: [
+        "Tanggal",
+        "Jenis Transaksi",
+        "Nominal (IDR)",
+        "Akun / Dompet",
+        "Kategori",
+        "Catatan / Deskripsi",
+        "Tags",
+        "ID Referensi",
+      ],
+      rows,
+      summaryRows: [
+        { label: "Total Pemasukan (IDR)",   value: `+${totalIncome}` },
+        { label: "Total Pengeluaran (IDR)",  value: `-${totalExpense}` },
+        { label: "Arus Kas Bersih (IDR)",    value: `${netFlow >= 0 ? "+" : ""}${netFlow}` },
+        { label: "Jumlah Transaksi",          value: `${filtered.length} transaksi` },
+      ],
+    });
+
+    const filename = `pundi-mutasi-${new Date().toISOString().slice(0, 10)}.csv`;
+    downloadCsv(csv, filename);
 
     showToast({
       type: "success",
       title: "Ekspor Berhasil",
-      message: `${filtered.length} data transaksi berhasil diunduh dalam file CSV.`,
+      message: `${filtered.length} transaksi berhasil diunduh sebagai ${filename}`,
     });
   }
 

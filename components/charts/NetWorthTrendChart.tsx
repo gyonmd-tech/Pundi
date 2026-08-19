@@ -29,7 +29,13 @@ interface NetWorthTrendChartProps {
   loading?:   boolean;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipProps {
+  active?:  boolean;
+  payload?: Array<{ value: number }>;
+  label?:   string;
+}
+
+function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div

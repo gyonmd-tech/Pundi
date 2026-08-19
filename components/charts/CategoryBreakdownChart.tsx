@@ -11,7 +11,7 @@
  */
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { formatRupiah, formatPercent } from "@/lib/utils/formatter";
+import { formatRupiah } from "@/lib/utils/formatter";
 
 interface CategoryDataPoint {
   name:   string;
@@ -35,7 +35,17 @@ interface CategoryBreakdownChartProps {
   loading?:   boolean;
 }
 
-function CustomTooltip({ active, payload }: any) {
+interface TooltipEntry {
+  name:  string;
+  value: number;
+}
+
+interface TooltipProps {
+  active?:  boolean;
+  payload?: TooltipEntry[];
+}
+
+function CustomTooltip({ active, payload }: TooltipProps) {
   if (!active || !payload?.length) return null;
   const d = payload[0];
   return (

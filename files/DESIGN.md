@@ -176,3 +176,94 @@ Motion dipakai fungsional, bukan dekoratif:
 - Di tablet, grid dashboard turun dari 3 kolom kartu menjadi 2 kolom.
 - Tabel transaksi di mobile berubah jadi list card ringkas per baris (bukan tabel horizontal-scroll).
 - Quick-add transaksi di mobile muncul sebagai bottom sheet, di desktop sebagai modal tengah.
+
+---
+
+## Update — Wallet System Upgrade: Visual Signature & Responsive (Agustus 2026)
+
+> Tiga pola visual baru berikut adalah **penambahan resmi ke Signature "Modern Ledger"** Pundi. Setiap pola harus lulus review terhadap DESIGN.md § 4.6 sebelum dianggap selesai: (1) tabular numerals dipakai, (2) Ledger Baseline eksplisit ada, (3) warna aksen tidak dipakai dekoratif bebas.
+
+### 4.11 Wallet Distribution Ring
+
+**Lokasi:** Widget baru di Dashboard utama — panel "Di mana uang saya sekarang?" di bawah SummaryCard baris pertama.
+
+**Deskripsi visual:**
+Donut chart yang menampilkan proporsi saldo per dompet aktif. Berbeda dari `CategoryBreakdownChart` (yang menampilkan proporsi pengeluaran per kategori):
+
+| Aspek | Ketentuan |
+|---|---|
+| **Highlight segmen** | Dompet dengan saldo terbesar otomatis di-highlight pakai aksen `brass` — maksimal 1 elemen `brass` per layar, konsisten dengan aturan § 4.2 |
+| **Segmen lain** | Gradasi tint `pine` (dari `pine` penuh ke `pine-20`) sesuai urutan saldo dari terbesar ke terkecil |
+| **Pemisah antar segmen** | Garis tipis `rule` 1px — bukan drop-shadow atau gap kosong — konsisten dengan filosofi garis-sebagai-baris-pembukuan |
+| **Legend** | Nama dompet + nominal saldo dalam `IBM Plex Mono` tabular, rata kanan |
+| **Tooltip hover** | Nama dompet, saldo penuh (Rp), persentase dari total |
+| **Loading state** | Skeleton ring dengan proporsi placeholder, bukan spinner |
+
+**Responsive behavior:**
+- Desktop/tablet: donut + legend sejajar horizontal dalam satu card
+- Mobile (<768px): donut di atas, legend di bawah — 1 kolom penuh width
+
+---
+
+### 4.12 Money Flow Ribbon
+
+**Lokasi:** Halaman `/arus-kas` sebagai visual sekunder di bawah `CashFlowChart` yang sudah ada — **bukan pengganti**.
+
+**Deskripsi visual:**
+Diagram alur bergaya Sankey sederhana dengan 3 node:
+
+```
+[Sumber Pemasukan] ──pine ribbon──► [Dompet] ──ember ribbon──► [Kategori Pengeluaran]
+```
+
+| Aspek | Ketentuan |
+|---|---|
+| **Ribbon arus masuk** | Warna `pine` — semantik positif sesuai § 4.2 |
+| **Ribbon arus keluar** | Warna `ember` — semantik negatif sesuai § 4.2 |
+| **Label nominal** | `IBM Plex Mono` tabular di setiap simpul node dan pita — bukan hanya persentase |
+| **Ledger Baseline** | Garis dasar solid `rule` 1.5px di bawah seluruh diagram sebagai base referensi chart — wajib hadir sesuai aturan § 4.6 |
+| **Interaksi hover** | Node yang di-hover mencerahkan semua ribbon yang terhubung dengannya, meredupkan yang tidak terkait |
+
+**Responsive behavior:**
+- Desktop/tablet (≥768px): diagram Sankey penuh dengan ribbon dan label lengkap
+- Mobile (<768px): **turun jadi Stacked Bar Chart** sederhana (Sankey terlalu padat untuk layar sempit). Warna dan palet tetap sama (`pine`/`ember`), Ledger Baseline tetap ada, label nominal tetap tampil
+- Catatan implementasi: cek lebar viewport sebelum render — gunakan komponen berbeda atau conditional rendering, bukan CSS display:none pada Sankey besar
+
+---
+
+### 4.13 Wallet Card — Color Stripe + Sparkline
+
+**Lokasi:** Kartu setiap dompet di halaman `/pengaturan` (section Akun & Wallet) dan widget distribusi di Dashboard.
+
+**Deskripsi visual:**
+
+| Elemen | Ketentuan |
+|---|---|
+| **Color Stripe kiri** | Strip vertikal 3px lebar di sisi kiri kartu, warna dari `colorTag` milik `accountType` dompet tersebut — meniru garis identitas pada kartu bank fisik |
+| **Mini Sparkline** | Grafik garis ultra-compact (tinggi 32px) tren saldo 30 hari terakhir, berdiri di atas Ledger Baseline 1px yang sama seperti chart utama — bukan sparkline generik tanpa baseline |
+| **Baseline sparkline** | `rule` 1px, solid, membentang penuh lebar sparkline — wajib ada, bukan opsional |
+| **Warna garis sparkline** | `pine` jika saldo bulan ini lebih tinggi dari bulan lalu; `ember` jika lebih rendah — semantik otomatis |
+| **Nominal** | Saldo saat ini dalam `IBM Plex Mono` tabular, ukuran Data M (16px/22px), rata kanan |
+| **Currency badge** | Kode mata uang kecil (mis. `USD`) tampil di samping nominal jika currency bukan IDR |
+
+**Responsive behavior:**
+- Desktop/wide (≥1024px): grid 3 kartu per baris
+- Tablet (768–1023px): grid 2 kartu per baris
+- Mobile (<768px): 1 kolom penuh — sparkline tetap tampil dalam versi compact
+
+---
+
+### 6.1 Responsive Notes — Komponen Wallet Baru
+
+Tambahan khusus untuk fitur Wallet System Upgrade:
+
+| Komponen | Desktop/Tablet | Mobile (<768px) |
+|---|---|---|
+| Section "Kelola Jenis Dompet" (`/pengaturan`) | Form tambah/edit sebagai modal tengah | Form sebagai bottom sheet (pola sama seperti `QuickAddTransaction.tsx`) |
+| Icon picker (pilih ikon Lucide) | Grid 5 kolom, scrollable jika banyak | Grid 4 kolom, horizontal scroll wrap rapi — tidak ada overflow di 375px |
+| Color picker (pilih warna token) | Grid 6–8 chip warna, 1 baris | Grid chip wrap 2 baris, tidak overflow |
+| Dropdown tipe akun | Dropdown popover standar | Bottom sheet searchable — scrollable jika daftar tipe >8 item |
+| Wallet Distribution Ring | Donut + legend horizontal | Donut atas, legend bawah, 1 kolom |
+| Money Flow Ribbon | Sankey diagram penuh | Stacked Bar sederhana |
+| Wallet Card | Grid 3 kolom + color stripe + sparkline | Grid 1 kolom, sparkline compact |
+| Halaman `/aset/[accountId]` | Layout 2 kolom (chart kiri, detail kanan) | Layout 1 kolom stacked |

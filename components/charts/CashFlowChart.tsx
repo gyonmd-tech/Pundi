@@ -36,7 +36,19 @@ interface CashFlowChartProps {
 }
 
 // Custom Tooltip
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipEntry {
+  dataKey: string;
+  color:   string;
+  value:   number;
+}
+
+interface TooltipProps {
+  active?:  boolean;
+  payload?: TooltipEntry[];
+  label?:   string;
+}
+
+function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null;
 
   return (
@@ -54,7 +66,7 @@ function CustomTooltip({ active, payload, label }: any) {
       >
         {label}
       </p>
-      {payload.map((entry: any) => (
+      {payload.map((entry) => (
         <div key={entry.dataKey} className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-1.5">
             <div
