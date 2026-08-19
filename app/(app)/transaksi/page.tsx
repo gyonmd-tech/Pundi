@@ -9,11 +9,11 @@
 import React, { useState, useMemo } from "react";
 import { useApp, useTransactions, useAccounts, useCategories } from "@/lib/data/store";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
-import { buildProfessionalCsv, downloadCsv } from "@/lib/utils/csvExport";
+import { downloadExcel } from "@/lib/utils/excelExport";
 import { useToast } from "@/lib/context/ToastContext";
 import {
   Search, Filter, Plus, Trash2, ArrowDownLeft, ArrowUpRight,
-  ArrowLeftRight, ChevronDown, ChevronUp, X, Download,
+  ArrowLeftRight, ChevronDown, ChevronUp, X, FileSpreadsheet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -97,7 +97,7 @@ export default function TransaksiPage() {
     });
   }
 
-  function handleExportCSV() {
+  async function handleExportExcel() {
     if (filtered.length === 0) {
       showToast({
         type: "info",
@@ -107,17 +107,17 @@ export default function TransaksiPage() {
       return;
     }
 
-    // Tentukan label periode berdasarkan filter tanggal
+    // Periode dari filter tanggal
     let period = "Semua Periode";
     if (filterFrom && filterTo) {
-      period = `${filterFrom} sampai ${filterTo}`;
+      period = `${filterFrom} s/d ${filterTo}`;
     } else if (filterFrom) {
       period = `Mulai ${filterFrom}`;
     } else if (filterTo) {
       period = `Hingga ${filterTo}`;
     }
 
-    // Rangkum filter aktif untuk metadata laporan
+    // Rangkum filter aktif
     const filterParts: string[] = [];
     if (filterType !== "all") filterParts.push(`Jenis: ${typeLabel[filterType as TransactionType]?.label ?? filterType}`);
     if (filterAccount !== "all") {
@@ -130,65 +130,61 @@ export default function TransaksiPage() {
     }
     if (search) filterParts.push(`Cari: "${search}"`);
 
-    // Baris data — kolom lengkap + angka Rupiah tanpa prefix "Rp" agar Excel bisa kalkulasi
-    const rows: (string | number)[][] = filtered.map((tx) => {
-      const acc = accounts.find(a => a.id === tx.accountId);
-      const cat = categories.find(c => c.id === tx.categoryId);
-      const typeIndo =
-        tx.type === "income" ? "Pemasukan" :
-        tx.type === "expense" ? "Pengeluaran" : "Transfer";
-      const tanda =
-        tx.type === "income" ? "+" :
-        tx.type === "expense" ? "-" : "";
+    const exportDate = new Intl.DateTimeFormat("id-ID", {
+      day: "numeric", month: "long", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+      timeZone: "Asia/Jakarta",
+    }).format(new Date());
 
-      return [
-        new Date(tx.date).toISOString().slice(0, 10),       // Tanggal (YYYY-MM-DD) — agar Excel auto-format sebagai Date
-        typeIndo,                                            // Jenis Transaksi
-        `${tanda}${tx.amount}`,                             // Nominal (IDR) — angka bersih tanpa Rp
-        acc?.name ?? "-",                                   // Nama Akun
-        cat?.name ?? (tx.type === "transfer" ? "Transfer" : "-"),  // Kategori
-        tx.note ?? "-",                                     // Catatan / Deskripsi
-        tx.tags?.join(" | ") ?? "-",                        // Tags
-        tx.id,                                              // ID Referensi
-      ];
-    });
-
-    // Hitung totals untuk baris ringkasan
     const totalIncome  = filtered.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const totalExpense = filtered.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
     const netFlow      = totalIncome - totalExpense;
 
-    const csv = buildProfessionalCsv({
-      reportTitle: "Laporan Mutasi Transaksi",
-      period,
-      activeFilters: filterParts.length > 0 ? filterParts.join(" | ") : "Tanpa filter tambahan",
-      headers: [
-        "Tanggal",
-        "Jenis Transaksi",
-        "Nominal (IDR)",
-        "Akun / Dompet",
-        "Kategori",
-        "Catatan / Deskripsi",
-        "Tags",
-        "ID Referensi",
-      ],
-      rows,
-      summaryRows: [
-        { label: "Total Pemasukan (IDR)",   value: `+${totalIncome}` },
-        { label: "Total Pengeluaran (IDR)",  value: `-${totalExpense}` },
-        { label: "Arus Kas Bersih (IDR)",    value: `${netFlow >= 0 ? "+" : ""}${netFlow}` },
-        { label: "Jumlah Transaksi",          value: `${filtered.length} transaksi` },
-      ],
+    const transactions = filtered.map(tx => {
+      const acc = accounts.find(a => a.id === tx.accountId);
+      const cat = categories.find(c => c.id === tx.categoryId);
+      const typeIndo =
+        tx.type === "income"  ? "Pemasukan"  :
+        tx.type === "expense" ? "Pengeluaran" : "Transfer";
+      const signedAmount =
+        tx.type === "income"  ?  tx.amount :
+        tx.type === "expense" ? -tx.amount : tx.amount;
+
+      return {
+        date:        new Date(tx.date).toISOString().slice(0, 10),
+        type:        tx.type,
+        typeLabel:   typeIndo,
+        amount:      signedAmount,
+        accountName: acc?.name ?? "-",
+        category:    cat?.name ?? (tx.type === "transfer" ? "Transfer" : "-"),
+        note:        tx.note ?? "-",
+        tags:        tx.tags?.join(" | ") ?? "-",
+        id:          tx.id,
+      } as const;
     });
 
-    const filename = `pundi-mutasi-${new Date().toISOString().slice(0, 10)}.csv`;
-    downloadCsv(csv, filename);
+    try {
+      await downloadExcel({
+        reportTitle:   "Laporan Mutasi Transaksi",
+        period,
+        exportDate,
+        activeFilters: filterParts.length > 0 ? filterParts.join("  |  ") : "Tanpa filter tambahan",
+        transactions,
+        totals: { income: totalIncome, expense: totalExpense, netFlow, count: filtered.length },
+      });
 
-    showToast({
-      type: "success",
-      title: "Ekspor Berhasil",
-      message: `${filtered.length} transaksi berhasil diunduh sebagai ${filename}`,
-    });
+      showToast({
+        type: "success",
+        title: "Unduhan Berhasil",
+        message: `${filtered.length} transaksi berhasil diunduh sebagai file Excel (.xlsx)`,
+      });
+    } catch {
+      showToast({
+        type: "error",
+        title: "Gagal Mengunduh",
+        message: "Terjadi kesalahan saat membuat file Excel. Silakan coba lagi.",
+      });
+    }
   }
 
   return (
@@ -205,19 +201,19 @@ export default function TransaksiPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          {/* Export CSV Button */}
+          {/* Unduh Excel Button */}
           <button
-            onClick={handleExportCSV}
+            onClick={handleExportExcel}
             className={cn(
               "flex items-center gap-2 px-3.5 py-2 rounded-card text-small font-semibold border shadow-2xs",
               "transition-all duration-200 hover:border-pine hover:bg-pine-10 hover:text-pine active:scale-95",
               "text-ink-muted bg-surface"
             )}
             style={{ borderColor: "var(--color-rule)", fontFamily: "var(--font-ui)" }}
-            title="Download mutasi dalam format CSV"
+            title="Unduh mutasi sebagai file Excel (.xlsx) — sudah berformat rapih"
           >
-            <Download size={15} strokeWidth={2} />
-            <span className="hidden sm:inline">Ekspor CSV</span>
+            <FileSpreadsheet size={15} strokeWidth={2} />
+            <span className="hidden sm:inline">Unduh Excel</span>
           </button>
 
           {/* Add Transaction CTA */}
