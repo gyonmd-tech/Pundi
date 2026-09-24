@@ -1,11 +1,6 @@
 "use client";
 
-/**
- * lib/context/SidebarContext.tsx
- * Context untuk mengelola status buka/tutup (collapse) Sidebar di desktop dan tablet.
- */
-
-import React, { createContext, useContext, useState, type ReactNode } from "react";
+import * as React from "react";
 
 interface SidebarContextValue {
   isCollapsed: boolean;
@@ -13,42 +8,47 @@ interface SidebarContextValue {
   toggleSidebar: () => void;
 }
 
-const SidebarContext = createContext<SidebarContextValue | null>(null);
+const SidebarContext = React.createContext<SidebarContextValue | null>(null);
+const STORAGE_KEY = "pundi_sidebar_collapsed";
+const CHANGE_EVENT = "pundi:sidebar-change";
 
-export function SidebarProvider({ children }: { children: ReactNode }) {
-  // Gunakan lazy initializer untuk baca localStorage hanya sekali saat mount,
-  // tanpa perlu useEffect — menghindari cascading render (react-hooks/set-state-in-effect).
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const saved = localStorage.getItem("pundi_sidebar_collapsed");
-      return saved === "true";
-    } catch {
-      return false;
-    }
-  });
+function getSnapshot() {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
 
-  const toggleSidebar = () => {
-    setIsCollapsed((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem("pundi_sidebar_collapsed", String(next));
-      } catch {}
-      return next;
-    });
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(CHANGE_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(CHANGE_EVENT, callback);
   };
+}
 
-  return (
-    <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed, toggleSidebar }}>
-      {children}
-    </SidebarContext.Provider>
-  );
+function updateStoredValue(collapsed: boolean) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, String(collapsed));
+  } catch {}
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+export function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const isCollapsed = React.useSyncExternalStore(subscribe, getSnapshot, () => false);
+  const value = React.useMemo<SidebarContextValue>(() => ({
+    isCollapsed,
+    setIsCollapsed: updateStoredValue,
+    toggleSidebar: () => updateStoredValue(!isCollapsed),
+  }), [isCollapsed]);
+
+  return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
 }
 
 export function useSidebar() {
-  const ctx = useContext(SidebarContext);
-  if (!ctx) {
-    throw new Error("useSidebar harus digunakan di dalam <SidebarProvider>");
-  }
-  return ctx;
+  const context = React.useContext(SidebarContext);
+  if (!context) throw new Error("useSidebar harus digunakan di dalam <SidebarProvider>");
+  return context;
 }

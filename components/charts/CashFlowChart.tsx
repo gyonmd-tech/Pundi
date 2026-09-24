@@ -135,7 +135,7 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
 
   return (
     <div className={cn("w-full min-w-0 overflow-hidden", className)}>
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={240}>
         <AreaChart
           data={data}
           margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
@@ -143,13 +143,13 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
           <defs>
             {/* Income gradient */}
             <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#1B4B3F" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#1B4B3F" stopOpacity={0.01} />
+              <stop offset="5%"  stopColor="#159B78" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="#159B78" stopOpacity={0.01} />
             </linearGradient>
             {/* Expense gradient */}
             <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#9C4A2E" stopOpacity={0.12} />
-              <stop offset="95%" stopColor="#9C4A2E" stopOpacity={0.01} />
+              <stop offset="5%"  stopColor="#E95766" stopOpacity={0.12} />
+              <stop offset="95%" stopColor="#E95766" stopOpacity={0.01} />
             </linearGradient>
           </defs>
 
@@ -200,6 +200,7 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
           <Area
             type="monotone"
             dataKey="income"
+            isAnimationActive={false}
             stroke="var(--color-pine)"
             strokeWidth={2}
             fill="url(#incomeGradient)"
@@ -211,6 +212,7 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
           <Area
             type="monotone"
             dataKey="expense"
+            isAnimationActive={false}
             stroke="var(--color-ember)"
             strokeWidth={2}
             fill="url(#expenseGradient)"

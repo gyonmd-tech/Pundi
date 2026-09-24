@@ -1,266 +1,352 @@
 "use client";
 
-/**
- * app/(app)/dashboard/page.tsx — reactive with AppStore, central mock data,
- * CategoryIcon visual badges, and micro-interactions.
- */
 
-import React from "react";
-import { SummaryCard }            from "@/components/dashboard/SummaryCard";
-import { BudgetProgress }         from "@/components/dashboard/BudgetProgress";
-import { GoalCard }               from "@/components/dashboard/GoalCard";
-import { CashFlowChart }          from "@/components/charts/CashFlowChart";
-import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
-import { InsightFeed }            from "@/components/dashboard/InsightFeed";
-import { CategoryIcon }           from "@/components/ui/CategoryIcon";
-import { Wallet, TrendingUp, TrendingDown, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  WalletCards,
+} from "lucide-react";
+import { CashFlowChart } from "@/components/charts/CashFlowChart";
+import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
+import { AccountBalanceChart } from "@/components/charts/AccountBalanceChart";
+import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
+import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
+import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
+import { GoalCard } from "@/components/dashboard/GoalCard";
+import { InsightFeed } from "@/components/dashboard/InsightFeed";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
 import {
-  getCashFlowData,
-  getCategoryBreakdown,
-  getSpentByCategory,
-  getMonthlySummary,
-} from "@/lib/data/mock";
-import {
-  useTransactions,
+  useAccounts,
   useBudgets,
+  useCategories,
   useGoals,
   useInsights,
-  useAccounts,
-  useCategories,
+  useTransactions,
 } from "@/lib/data/store";
-import { cn } from "@/lib/utils/cn";
+import type { Transaction } from "@/lib/data/mock";
+
+function isSameMonth(date: Date, target: Date) {
+  return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth();
+}
+
+function summarize(transactions: Transaction[], target: Date) {
+  return transactions.reduce(
+    (result, transaction) => {
+      if (!isSameMonth(new Date(transaction.date), target)) return result;
+      if (transaction.type === "income") result.income += transaction.amount;
+      if (transaction.type === "expense") result.expense += transaction.amount;
+      return result;
+    },
+    { income: 0, expense: 0 }
+  );
+}
 
 export default function DashboardPage() {
   const transactions = useTransactions();
-  const budgets      = useBudgets();
-  const goals        = useGoals();
-  const insights     = useInsights();
-  const accounts     = useAccounts();
-  const categories   = useCategories();
+  const budgets = useBudgets();
+  const goals = useGoals();
+  const insights = useInsights();
+  const accounts = useAccounts();
+  const categories = useCategories();
 
-  const cashFlow     = getCashFlowData();
-  const breakdown    = getCategoryBreakdown("2026-08");
-  const thisMonth    = getMonthlySummary(0);
-  const lastMonth    = getMonthlySummary(1);
-  const totalBal     = accounts.reduce((s, a) => s + a.balance, 0);
-  const currentMonth = formatDate(new Date(), "month");
+  const now = new Date();
+  const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const currentPeriod = now.toISOString().slice(0, 7);
+  const currentMonth = formatDate(now, "month");
 
-  const incomeDelta  = lastMonth.income  > 0 ? ((thisMonth.income  - lastMonth.income)  / lastMonth.income)  * 100 : 0;
-  const expenseDelta = lastMonth.expense > 0 ? ((thisMonth.expense - lastMonth.expense) / lastMonth.expense) * 100 : 0;
+  const thisMonth = summarize(transactions, now);
+  const lastMonth = summarize(transactions, previousMonth);
+  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
+  const net = thisMonth.income - thisMonth.expense;
+  const savingsRate = thisMonth.income > 0 ? (net / thisMonth.income) * 100 : 0;
 
-  // Compute budgets with spent
+  const incomeDelta = lastMonth.income
+    ? ((thisMonth.income - lastMonth.income) / lastMonth.income) * 100
+    : 0;
+  const expenseDelta = lastMonth.expense
+    ? ((thisMonth.expense - lastMonth.expense) / lastMonth.expense) * 100
+    : 0;
+
+  const cashFlow = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+    const summary = summarize(transactions, date);
+    return {
+      month: new Intl.DateTimeFormat("id-ID", { month: "short" }).format(date),
+      income: summary.income,
+      expense: summary.expense,
+    };
+  });
+
+  const balanceTrend = cashFlow.map((item) => item.income - item.expense);
+  const incomeTrend = cashFlow.map((item) => item.income);
+  const expenseTrend = cashFlow.map((item) => item.expense);
+  const accountBalanceData = accounts.map((account) => ({
+    name: account.name,
+    balance: account.balance,
+    color: account.colorTag,
+  }));
+
+  const breakdown = categories
+    .filter((category) => category.type === "expense")
+    .map((category) => ({
+      name: category.name,
+      color: category.color,
+      amount: transactions
+        .filter(
+          (transaction) =>
+            transaction.type === "expense" &&
+            transaction.categoryId === category.id &&
+            isSameMonth(new Date(transaction.date), now)
+        )
+        .reduce((sum, transaction) => sum + transaction.amount, 0),
+    }))
+    .filter((item) => item.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+
   const budgetsWithSpent = budgets
-    .filter((b) => b.period === "2026-08")
-    .map((b) => {
-      const cat = categories.find((c) => c.id === b.categoryId);
-      const spent = getSpentByCategory(b.categoryId, "2026-08");
-      return { ...b, category: cat, spent };
+    .filter((budget) => budget.period === currentPeriod)
+    .map((budget) => {
+      const category = categories.find((item) => item.id === budget.categoryId);
+      const spent = transactions
+        .filter(
+          (transaction) =>
+            transaction.type === "expense" &&
+            transaction.categoryId === budget.categoryId &&
+            isSameMonth(new Date(transaction.date), now)
+        )
+        .reduce((sum, transaction) => sum + transaction.amount, 0);
+      return { ...budget, category, spent };
     });
 
-  // Recent transactions with relations
-  const recentTxs = transactions.slice(0, 5).map((tx) => ({
-    ...tx,
-    account:  accounts.find((a) => a.id === tx.accountId),
-    category: categories.find((c) => c.id === tx.categoryId),
+  const recentTransactions = transactions.slice(0, 5).map((transaction) => ({
+    ...transaction,
+    account: accounts.find((account) => account.id === transaction.accountId),
+    category: categories.find((category) => category.id === transaction.categoryId),
   }));
 
   return (
-    <div className="space-y-5">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
+    <div className="dashboard-modern space-y-5 font-ui sm:space-y-6">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight"
-            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
-            Ringkasan Finansial
-          </h1>
-          <p suppressHydrationWarning className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-            Periode aktif: <strong className="text-ink font-semibold">{currentMonth}</strong>
+          <p className="eyebrow">Pusat kendali keuangan</p>
+          <h1 className="page-title mt-1">Halo, selamat datang kembali.</h1>
+          <p className="page-subtitle">
+            Ringkasan kondisi finansialmu untuk <strong className="text-ink">{currentMonth}</strong>.
           </p>
         </div>
-      </div>
+        <Link href="/insight" className="material-button secondary self-start text-small">
+          <Sparkles size={16} className="text-pine" />
+          Lihat rekomendasi
+        </Link>
+      </header>
 
-      {/* Row 1: Summary Cards with count-up animation & delta */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        <SummaryCard
-          title="Total Saldo Kas & Bank"
-          amount={totalBal}
-          delta={2.1}
-          deltaLabel="vs bulan lalu"
-          icon={Wallet}
-          variant="neutral"
-        />
-        <SummaryCard
-          title="Pemasukan Bulan Ini"
-          amount={thisMonth.income}
-          delta={incomeDelta}
-          deltaLabel="vs bulan lalu"
-          icon={TrendingUp}
-          variant="positive"
-        />
-        <SummaryCard
-          title="Pengeluaran Bulan Ini"
-          amount={thisMonth.expense}
-          delta={expenseDelta}
-          deltaLabel="vs bulan lalu"
-          icon={TrendingDown}
-          variant="negative"
-        />
-      </div>
-
-      {/* Row 2: Charts (Cash Flow with Ledger Baseline + Category Donut) */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5 w-full min-w-0">
-        <div className="lg:col-span-3 card p-4 sm:p-5 hover:border-pine/30 transition-all w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-                Arus Kas 6 Bulan Terakhir
-              </h2>
-              <p className="text-xs text-ink-muted">Perbandingan pemasukan dan pengeluaran bulanan</p>
+      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+        <article className="relative overflow-hidden rounded-[1.75rem] border border-pine/15 bg-[linear-gradient(135deg,#EFECFF_0%,#EAF3FF_48%,#E5F8F1_100%)] p-5 text-ink shadow-card sm:p-7 lg:col-span-6 lg:h-full">
+          <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-pine/25 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-sky/25 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-start justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/75 text-pine ring-1 ring-pine/15">
+                <WalletCards size={21} />
+              </div>
+              <span className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-extrabold text-pine ring-1 ring-pine/15">
+                {accounts.length} akun aktif
+              </span>
             </div>
-            <Link
-              href="/arus-kas"
-              className="flex items-center gap-1 text-xs font-semibold text-pine hover:underline px-2.5 py-1 rounded-card hover:bg-pine-10 transition-colors"
-            >
-              Detail Analisis <ArrowRight size={13} strokeWidth={2} />
+            <p className="mt-8 text-small font-semibold text-ink-muted">Total saldo tersedia</p>
+            <p className="mt-1 font-ui tabular-nums tracking-[-0.035em] text-[clamp(1.9rem,4vw,3.25rem)] font-medium tracking-[-0.06em]">
+              {formatRupiah(totalBalance)}
+            </p>
+            <SummarySparkline values={balanceTrend} className="mt-5 text-pine" />
+            <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-pine/10 pt-4">
+              <span className="rounded-full bg-white/70 px-3 py-1.5 text-xs text-ink-muted ring-1 ring-pine/10">
+                Arus kas <strong className="ml-1 text-pine">{net >= 0 ? "+" : ""}{formatRupiah(net)}</strong>
+              </span>
+              <span className="rounded-full bg-white/70 px-3 py-1.5 text-xs text-ink-muted ring-1 ring-pine/10">
+                Rasio tabungan <strong className="ml-1 text-pine">{savingsRate.toFixed(1)}%</strong>
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <article className="card flex h-full flex-col justify-between border-mint/15 bg-[linear-gradient(145deg,#F8FFFC,#E5F8F1)] lg:col-span-3">
+          <div className="flex items-center justify-between">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-mint text-white shadow-card">
+              <TrendingUp size={19} />
+            </div>
+            <span className="flex items-center gap-1 text-xs font-bold text-mint">
+              <ArrowUpRight size={14} /> {incomeDelta >= 0 ? "+" : ""}{incomeDelta.toFixed(1)}%
+            </span>
+          </div>
+          <SummarySparkline values={incomeTrend} className="mt-5 h-24 text-mint" />
+          <div className="mt-2">
+            <p className="text-small font-semibold text-ink-muted">Pemasukan bulan ini</p>
+            <p className="mt-2 font-ui tabular-nums tracking-[-0.035em] text-data-l font-medium text-ink">{formatRupiah(thisMonth.income)}</p>
+            <p className="mt-1 text-xs text-ink-muted">dibanding bulan lalu</p>
+          </div>
+        </article>
+
+        <article className="card flex h-full flex-col justify-between border-ember/15 bg-[linear-gradient(145deg,#FFF9FA,#FFF0F1)] lg:col-span-3">
+          <div className="flex items-center justify-between">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-ember text-white shadow-card">
+              <TrendingDown size={19} />
+            </div>
+            <span className="flex items-center gap-1 text-xs font-bold text-ember">
+              {expenseDelta >= 0 ? "+" : ""}{expenseDelta.toFixed(1)}%
+            </span>
+          </div>
+          <SummarySparkline values={expenseTrend} className="mt-5 h-24 text-ember" />
+          <div className="mt-2">
+            <p className="text-small font-semibold text-ink-muted">Pengeluaran bulan ini</p>
+            <p className="mt-2 font-ui tabular-nums tracking-[-0.035em] text-data-l font-medium text-ink">{formatRupiah(thisMonth.expense)}</p>
+            <p className="mt-1 text-xs text-ink-muted">dibanding bulan lalu</p>
+          </div>
+        </article>
+      </section>
+
+      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+        <article className="card min-w-0 border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F3F8FF)] lg:col-span-8">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div>
+              <p className="eyebrow">Analitik</p>
+              <h2 className="mt-1 text-heading font-bold text-ink">Arus kas enam bulan</h2>
+            </div>
+            <Link href="/arus-kas" className="flex items-center gap-1 text-xs font-bold text-pine hover:underline">
+              Detail <ArrowRight size={14} />
             </Link>
           </div>
           <CashFlowChart data={cashFlow} />
-        </div>
+        </article>
 
-        <div className="lg:col-span-2 card p-4 sm:p-5 hover:border-pine/30 transition-all w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <div className="flex items-center justify-between mb-4">
+        <article className="card min-w-0 border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)] lg:col-span-4">
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-                Kategori Pengeluaran
-              </h2>
-              <p className="text-xs text-ink-muted">{currentMonth}</p>
+              <p className="eyebrow">Komposisi</p>
+              <h2 className="mt-1 text-heading font-bold text-ink">Pengeluaran</h2>
             </div>
-            <Link
-              href="/anggaran"
-              className="text-xs font-semibold text-pine hover:underline px-2 py-1 rounded-card hover:bg-pine-10 transition-colors"
-            >
-              Kelola
-            </Link>
+            <Link href="/anggaran" className="text-xs font-bold text-pine hover:underline">Kelola</Link>
           </div>
           <CategoryBreakdownChart data={breakdown} />
-        </div>
-      </div>
+        </article>
+      </section>
 
-      {/* Row 3: Transaksi + Budget & Goals */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5 w-full min-w-0">
-        {/* Transaksi terbaru */}
-        <div className="lg:col-span-3 card p-4 sm:p-5 hover:border-pine/30 transition-all w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <div className="flex items-center justify-between pb-3 mb-2 border-b border-rule">
+      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+        <div className="h-full lg:col-span-5">
+          <DashboardCalendar transactions={transactions} />
+        </div>
+        <article className="card h-full min-w-0 border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F0FBF7)] lg:col-span-7">
+          <div className="mb-5 flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-                Mutasi Transaksi Terbaru
-              </h2>
-              <p className="text-xs text-ink-muted">Catatan pemasukan & pengeluaran terkini</p>
+              <p className="eyebrow">Distribusi dana</p>
+              <h2 className="mt-1 text-lg font-extrabold tracking-[-0.02em] text-ink">Saldo per rekening</h2>
+              <p className="mt-1 text-xs font-medium text-ink-muted">Perbandingan dana likuid dan investasi aktif.</p>
             </div>
-            <Link
-              href="/transaksi"
-              className="flex items-center gap-1 text-xs font-semibold text-pine hover:underline px-2.5 py-1 rounded-card hover:bg-pine-10 transition-colors"
-            >
-              Lihat Semua ({transactions.length}) <ArrowRight size={13} strokeWidth={2} />
+            <span className="rounded-full bg-sky-10 px-3 py-1.5 text-[11px] font-bold text-sky">{accounts.length} rekening</span>
+          </div>
+          <AccountBalanceChart data={accountBalanceData} />
+        </article>
+      </section>
+
+      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+        <article className="card flex h-full flex-col border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F6F9FF)] lg:col-span-7">
+          <div className="mb-2 flex items-center justify-between border-b border-rule pb-4">
+            <div>
+              <p className="eyebrow">Aktivitas terbaru</p>
+              <h2 className="mt-1 text-heading font-bold text-ink">Transaksi terkini</h2>
+            </div>
+            <Link href="/transaksi" className="flex items-center gap-1 text-xs font-bold text-pine hover:underline">
+              Semua <ArrowRight size={14} />
             </Link>
           </div>
-
-          <div className="divide-y divide-rule/60">
-            {recentTxs.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between gap-3 py-3 group hover:bg-paper/80 px-2 rounded-card transition-colors"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <CategoryIcon icon={tx.category?.icon} color={tx.category?.color} size={15} containerSize="sm" />
+          <div className="flex flex-1 flex-col divide-y divide-rule/80">
+            {recentTransactions.map((transaction) => (
+              <div key={transaction.id} className="flex flex-1 items-center justify-between gap-3 py-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <CategoryIcon
+                    icon={transaction.category?.icon}
+                    color={transaction.category?.color}
+                    size={15}
+                    containerSize="sm"
+                  />
                   <div className="min-w-0">
-                    <p className="text-body font-semibold text-ink truncate group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
-                      {tx.note || tx.category?.name || "Transaksi"}
+                    <p className="truncate text-body font-bold text-ink">
+                      {transaction.note || transaction.category?.name || "Transfer dana"}
                     </p>
-                    <p className="text-xs text-ink-muted truncate font-ui">
-                      {tx.category?.name ?? "Transfer"} · <span className="font-mono">{formatDate(tx.date, "time")}</span>
+                    <p className="truncate text-xs text-ink-muted">
+                      {transaction.account?.name || "Akun"} · {formatDate(transaction.date, "time")}
                     </p>
                   </div>
                 </div>
-
-                <span
-                  className="tabular-nums font-mono font-bold text-body flex-shrink-0"
-                  style={{ color: tx.type === "income" ? "var(--color-pine)" : "var(--color-ink)" }}
-                >
-                  {tx.type === "income" ? "+" : "−"}{formatRupiah(tx.amount)}
+                <span className={`shrink-0 font-ui tabular-nums tracking-[-0.035em] text-small font-medium ${
+                  transaction.type === "income" ? "text-mint" : "text-ink"
+                }`}>
+                  {transaction.type === "income" ? "+" : "−"}{formatRupiah(transaction.amount)}
                 </span>
               </div>
             ))}
           </div>
-        </div>
+        </article>
 
-        {/* Budget & Goals Column */}
-        <div className="lg:col-span-2 space-y-3.5">
-          {/* Anggaran Ringkas */}
-          <div className="card p-4 sm:p-5 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-rule">
-              <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-                Alokasi Anggaran
-              </h2>
-              <Link href="/anggaran" className="text-xs font-semibold text-pine hover:underline">
-                Lihat Semua
-              </Link>
+        <div className="grid h-full gap-4 lg:col-span-5 lg:grid-rows-[auto_1fr]">
+          <article className="card border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)]">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="eyebrow">Kontrol</p>
+                <h2 className="mt-1 text-heading font-bold text-ink">Anggaran utama</h2>
+              </div>
+              <Link href="/anggaran" className="text-xs font-bold text-pine hover:underline">Atur</Link>
             </div>
             <div className="space-y-1">
-              {budgetsWithSpent.slice(0, 3).map((b) => (
+              {budgetsWithSpent.slice(0, 3).map((budget) => (
                 <BudgetProgress
-                  key={b.id}
-                  categoryName={b.category?.name ?? "Lainnya"}
-                  categoryIcon={b.category?.icon}
-                  categoryColor={b.category?.color}
-                  spent={b.spent}
-                  limit={b.limitAmount}
+                  key={budget.id}
+                  categoryName={budget.category?.name ?? "Lainnya"}
+                  categoryIcon={budget.category?.icon}
+                  categoryColor={budget.category?.color}
+                  spent={budget.spent}
+                  limit={budget.limitAmount}
                 />
               ))}
             </div>
-          </div>
+          </article>
 
-          {/* Tujuan Tabungan Ringkas */}
-          <div className="card p-4 sm:p-5 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-rule">
-              <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-                Tujuan Finansial
-              </h2>
-              <Link href="/tujuan" className="text-xs font-semibold text-pine hover:underline">
-                Lihat Semua
-              </Link>
+          <article className="card h-full border-pine/15 bg-[linear-gradient(145deg,#FFFFFF,#F7F4FF)]">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="eyebrow">Target</p>
+                <h2 className="mt-1 text-heading font-bold text-ink">Tujuan terdekat</h2>
+              </div>
+              <Link href="/tujuan" className="text-xs font-bold text-pine hover:underline">Semua</Link>
             </div>
-            <div className="space-y-3">
-              {goals.slice(0, 2).map((g) => (
-                <GoalCard key={g.id} {...g} monthlySavings={1_200_000} />
-              ))}
-            </div>
-          </div>
+            {goals.slice(0, 1).map((goal) => (
+              <GoalCard key={goal.id} {...goal} monthlySavings={1_200_000} />
+            ))}
+          </article>
         </div>
-      </div>
+      </section>
 
-      {/* Row 4: Insight Feed Card */}
-      <div className="card p-4 sm:p-5 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-rule">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
-              <Sparkles size={14} />
+      <section className="card border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F2FCF8)]">
+        <div className="mb-4 flex items-center justify-between border-b border-rule pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-pine-10 text-pine">
+              <Sparkles size={18} />
             </div>
-            <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-              Insight & Rekomendasi Finansial
-            </h2>
+            <div>
+              <p className="eyebrow">Pundi Insight</p>
+              <h2 className="mt-1 text-heading font-bold text-ink">Rekomendasi yang bisa dilakukan</h2>
+            </div>
           </div>
-          <Link
-            href="/insight"
-            className="flex items-center gap-1 text-xs font-semibold text-pine hover:underline px-2.5 py-1 rounded-card hover:bg-pine-10 transition-colors"
-          >
-            Semua Insight <ArrowRight size={13} strokeWidth={2} />
+          <Link href="/insight" className="hidden items-center gap-1 text-xs font-bold text-pine hover:underline sm:flex">
+            Semua insight <ArrowRight size={14} />
           </Link>
         </div>
         <InsightFeed insights={insights.slice(0, 3)} compact />
-      </div>
+      </section>
     </div>
   );
 }

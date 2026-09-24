@@ -81,13 +81,16 @@ export interface Insight {
   createdAt: Date;
 }
 
+export const CURRENT_PERIOD = new Date().toISOString().slice(0, 7);
+const CURRENT_MONTH_LABEL = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date());
+
 // ── Accounts ──────────────────────────────────────────────────────────
 
 export const mockAccounts: Account[] = [
-  { id: "acc-1", name: "BCA Tabungan", type: "bank", balance: 14_350_000, colorTag: "#1B4B3F", isActive: true },
-  { id: "acc-2", name: "OVO", type: "ewallet", balance: 487_500, colorTag: "#B08A3E", isActive: true },
-  { id: "acc-3", name: "Dompet Tunai", type: "cash", balance: 312_000, colorTag: "#5B655F", isActive: true },
-  { id: "acc-4", name: "BCA Investasi (Reksadana)", type: "investment", balance: 9_700_000, colorTag: "#9C4A2E", isActive: true },
+  { id: "acc-1", name: "BCA Tabungan", type: "bank", balance: 14_350_000, colorTag: "#5B4AEF", isActive: true },
+  { id: "acc-2", name: "OVO", type: "ewallet", balance: 487_500, colorTag: "#F0A33B", isActive: true },
+  { id: "acc-3", name: "Dompet Tunai", type: "cash", balance: 312_000, colorTag: "#3E86ED", isActive: true },
+  { id: "acc-4", name: "BCA Investasi (Reksadana)", type: "investment", balance: 9_700_000, colorTag: "#E95766", isActive: true },
 ];
 
 export const totalBalance = mockAccounts.reduce((sum, a) => sum + a.balance, 0);
@@ -97,38 +100,39 @@ export const totalBalance = mockAccounts.reduce((sum, a) => sum + a.balance, 0);
 
 export const mockCategories: Category[] = [
   // Income
-  { id: "cat-i1", name: "Gaji", type: "income", icon: "briefcase", color: "#1B4B3F" },
-  { id: "cat-i2", name: "Freelance", type: "income", icon: "laptop", color: "#1B4B3F" },
-  { id: "cat-i3", name: "Investasi", type: "income", icon: "trending-up", color: "#1B4B3F" },
-  { id: "cat-i4", name: "Lainnya (Masuk)", type: "income", icon: "plus-circle", color: "#7AADA4" },
+  { id: "cat-i1", name: "Gaji", type: "income", icon: "briefcase", color: "#5B4AEF" },
+  { id: "cat-i2", name: "Freelance", type: "income", icon: "laptop", color: "#5B4AEF" },
+  { id: "cat-i3", name: "Investasi", type: "income", icon: "trending-up", color: "#5B4AEF" },
+  { id: "cat-i4", name: "Lainnya (Masuk)", type: "income", icon: "plus-circle", color: "#159B78" },
   // Expense
-  { id: "cat-e1", name: "Makan & Minum", type: "expense", icon: "utensils", color: "#9C4A2E" },
-  { id: "cat-e2", name: "Transportasi", type: "expense", icon: "car", color: "#B08A3E" },
-  { id: "cat-e3", name: "Belanja", type: "expense", icon: "shopping-bag", color: "#5B655F" },
-  { id: "cat-e4", name: "Hiburan", type: "expense", icon: "music", color: "#7AADA4" },
-  { id: "cat-e5", name: "Kesehatan", type: "expense", icon: "heart", color: "#9C4A2E" },
-  { id: "cat-e6", name: "Tagihan & Utilitas", type: "expense", icon: "zap", color: "#B08A3E" },
-  { id: "cat-e7", name: "Pendidikan", type: "expense", icon: "book", color: "#1B4B3F" },
-  { id: "cat-e8", name: "Tabungan & Investasi", type: "expense", icon: "piggy-bank", color: "#1B4B3F" },
-  { id: "cat-e9", name: "Lainnya (Keluar)", type: "expense", icon: "more-horizontal", color: "#C8CDC7" },
+  { id: "cat-e1", name: "Makan & Minum", type: "expense", icon: "utensils", color: "#E95766" },
+  { id: "cat-e2", name: "Transportasi", type: "expense", icon: "car", color: "#F0A33B" },
+  { id: "cat-e3", name: "Belanja", type: "expense", icon: "shopping-bag", color: "#3E86ED" },
+  { id: "cat-e4", name: "Hiburan", type: "expense", icon: "music", color: "#159B78" },
+  { id: "cat-e5", name: "Kesehatan", type: "expense", icon: "heart", color: "#E95766" },
+  { id: "cat-e6", name: "Tagihan & Utilitas", type: "expense", icon: "zap", color: "#F0A33B" },
+  { id: "cat-e7", name: "Pendidikan", type: "expense", icon: "book", color: "#5B4AEF" },
+  { id: "cat-e8", name: "Tabungan & Investasi", type: "expense", icon: "piggy-bank", color: "#5B4AEF" },
+  { id: "cat-e9", name: "Lainnya (Keluar)", type: "expense", icon: "more-horizontal", color: "#9B72E8" },
 ];
 
 // ── Transactions (12 bulan: Sep 2025 – Agu 2026) ──────────────────────
 
 function txDate(monthsAgo: number, day: number): Date {
-  const d = new Date(2026, 7 - monthsAgo, day, 9 + (day % 8), (day * 13) % 60, 0);
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth() - monthsAgo, day, 9 + (day % 8), (day * 13) % 60, 0);
   return d;
 }
 
 export const mockTransactions: Transaction[] = [
   // ── Agustus 2026 (bulan ini) ────────────────────────────────────────
-  { id: "tx-001", accountId: "acc-1", categoryId: "cat-i1", type: "income", amount: 7_500_000, date: txDate(0, 1), note: "Gaji Agustus 2026", tags: [] },
+  { id: "tx-001", accountId: "acc-1", categoryId: "cat-i1", type: "income", amount: 7_500_000, date: txDate(0, 1), note: `Gaji ${CURRENT_MONTH_LABEL}`, tags: [] },
   { id: "tx-002", accountId: "acc-2", categoryId: "cat-i2", type: "income", amount: 700_000, date: txDate(0, 3), note: "Project desain logo Kopi Nusantara", tags: ["freelance"] },
   { id: "tx-003", accountId: "acc-1", categoryId: "cat-e1", type: "expense", amount: 42_500, date: txDate(0, 3), note: "Makan siang ayam penyet", tags: [] },
   { id: "tx-004", accountId: "acc-2", categoryId: "cat-e2", type: "expense", amount: 28_000, date: txDate(0, 4), note: "Grab ke kantor", tags: [] },
   { id: "tx-005", accountId: "acc-1", categoryId: "cat-e3", type: "expense", amount: 387_000, date: txDate(0, 5), note: "Beli baju kerja Tokopedia", tags: ["online"] },
   { id: "tx-006", accountId: "acc-2", categoryId: "cat-e1", type: "expense", amount: 67_000, date: txDate(0, 6), note: "Nongkrong Starbucks weekend", tags: ["weekend"] },
-  { id: "tx-007", accountId: "acc-1", categoryId: "cat-e6", type: "expense", amount: 185_000, date: txDate(0, 7), note: "Listrik & internet Agustus", tags: ["tagihan"] },
+  { id: "tx-007", accountId: "acc-1", categoryId: "cat-e6", type: "expense", amount: 185_000, date: txDate(0, 7), note: `Listrik & internet ${CURRENT_MONTH_LABEL}`, tags: ["tagihan"] },
   { id: "tx-008", accountId: "acc-2", categoryId: "cat-e2", type: "expense", amount: 45_000, date: txDate(0, 8), note: "Bensin motor", tags: [] },
   { id: "tx-009", accountId: "acc-1", categoryId: "cat-e1", type: "expense", amount: 35_000, date: txDate(0, 9), note: "Beli mie ayam + es teh", tags: [] },
   { id: "tx-010", accountId: "acc-1", categoryId: "cat-e3", type: "expense", amount: 856_000, date: txDate(0, 10), note: "Belanja bulanan Indomaret", tags: ["bulanan"] },
@@ -199,12 +203,12 @@ export const mockTransactions: Transaction[] = [
 // ── Budgets (bulan ini: Agustus 2026) ─────────────────────────────────
 
 export const mockBudgets: Budget[] = [
-  { id: "bud-1", categoryId: "cat-e1", period: "2026-08", limitAmount: 2_000_000 },
-  { id: "bud-2", categoryId: "cat-e2", period: "2026-08", limitAmount: 1_000_000 },
-  { id: "bud-3", categoryId: "cat-e3", period: "2026-08", limitAmount: 1_200_000 },
-  { id: "bud-4", categoryId: "cat-e4", period: "2026-08", limitAmount: 600_000 },
-  { id: "bud-5", categoryId: "cat-e5", period: "2026-08", limitAmount: 300_000 },
-  { id: "bud-6", categoryId: "cat-e6", period: "2026-08", limitAmount: 250_000 },
+  { id: "bud-1", categoryId: "cat-e1", period: CURRENT_PERIOD, limitAmount: 2_000_000 },
+  { id: "bud-2", categoryId: "cat-e2", period: CURRENT_PERIOD, limitAmount: 1_000_000 },
+  { id: "bud-3", categoryId: "cat-e3", period: CURRENT_PERIOD, limitAmount: 1_200_000 },
+  { id: "bud-4", categoryId: "cat-e4", period: CURRENT_PERIOD, limitAmount: 600_000 },
+  { id: "bud-5", categoryId: "cat-e5", period: CURRENT_PERIOD, limitAmount: 300_000 },
+  { id: "bud-6", categoryId: "cat-e6", period: CURRENT_PERIOD, limitAmount: 250_000 },
 ];
 
 // ── Goals ──────────────────────────────────────────────────────────────
@@ -240,22 +244,22 @@ export const mockAssets: Asset[] = [
   {
     id: "ast-1", type: "mutual_fund", name: "Reksadana Saham Schroder",
     units: 9_250.47, buyPrice: 950, currentPrice: 1_049,
-    updatedAt: new Date(2026, 7, 18, 10, 0, 0),
+    updatedAt: txDate(0, 18),
   },
   {
     id: "ast-2", type: "gold", name: "Emas Antam",
     units: 10, buyPrice: 1_050_000, currentPrice: 1_168_000,
-    updatedAt: new Date(2026, 7, 18, 10, 0, 0),
+    updatedAt: txDate(0, 18),
   },
   {
     id: "ast-3", type: "stock", name: "BBCA (Bank Central Asia)",
     units: 100, buyPrice: 8_800, currentPrice: 9_475,
-    updatedAt: new Date(2026, 7, 18, 10, 0, 0),
+    updatedAt: txDate(0, 18),
   },
   {
     id: "ast-4", type: "crypto", name: "Bitcoin (BTC)",
     units: 0.0023, buyPrice: 920_000_000, currentPrice: 1_025_000_000,
-    updatedAt: new Date(2026, 7, 18, 10, 0, 0),
+    updatedAt: txDate(0, 18),
   },
 ];
 
@@ -267,35 +271,35 @@ export const mockInsights: Insight[] = [
     type: "budget_warning",
     message: "Pengeluaran Belanja sudah Rp 1.510.000 dari batas Rp 1.200.000 bulan ini (126%). Coba tahan pengeluaran non-esensial hingga akhir bulan.",
     isRead: false,
-    createdAt: new Date(2026, 7, 18, 10, 30, 0),
+    createdAt: txDate(0, 18),
   },
   {
     id: "ins-2",
     type: "trend",
     message: "Makan & Minum bulan ini sudah Rp 398.000 — 8% lebih rendah dari rata-rata 3 bulan terakhir (Rp 1.860.000). Pertahankan kebiasaan ini!",
     isRead: false,
-    createdAt: new Date(2026, 7, 18, 8, 15, 0),
+    createdAt: txDate(0, 18),
   },
   {
     id: "ins-3",
     type: "goal_progress",
     message: "Dana Darurat sudah 61,7% tercapai (Rp 18,5 jt dari Rp 30 jt). Dengan kecepatan menabung saat ini, perkiraan selesai Desember 2026.",
     isRead: true,
-    createdAt: new Date(2026, 7, 17, 14, 20, 0),
+    createdAt: txDate(0, 17),
   },
   {
     id: "ins-4",
     type: "tip",
     message: "Tip: Mengalokasikan 20% penghasilan untuk tabungan/investasi dapat mempercepat pencapaian tujuan keuangan. Saat ini kamu sudah 14,6% — terus tingkatkan!",
     isRead: true,
-    createdAt: new Date(2026, 7, 16, 9, 0, 0),
+    createdAt: txDate(0, 16),
   },
   {
     id: "ins-5",
     type: "budget_warning",
     message: "Anggaran Kesehatan hampir penuh: Rp 125.000 dari batas Rp 300.000 (41,7%). Masih aman, tapi perhatikan sisa bulan.",
     isRead: true,
-    createdAt: new Date(2026, 7, 15, 11, 45, 0),
+    createdAt: txDate(0, 15),
   },
 ];
 
@@ -348,7 +352,7 @@ export function getCashFlowData() {
 }
 
 /** Breakdown pengeluaran per kategori bulan ini untuk donut chart */
-export function getCategoryBreakdown(period: string = "2026-08") {
+export function getCategoryBreakdown(period: string = CURRENT_PERIOD) {
   return mockCategories
     .filter((c) => c.type === "expense")
     .map((c) => ({
@@ -384,7 +388,7 @@ export function getCategoryById(id: string) {
 }
 
 /** Budgets bulan ini dengan spent amount */
-export function getBudgetsWithSpent(period: string = "2026-08") {
+export function getBudgetsWithSpent(period: string = CURRENT_PERIOD) {
   return mockBudgets
     .filter((b) => b.period === period)
     .map((b) => {

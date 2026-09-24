@@ -10,11 +10,12 @@ import React, { useState } from "react";
 import { useApp, useInsights } from "@/lib/data/store";
 import { InsightFeed } from "@/components/dashboard/InsightFeed";
 import { useToast } from "@/lib/context/ToastContext";
-import { CheckCheck, Bell, Sparkles, Filter, AlertTriangle, TrendingUp, Lightbulb, CheckCircle2 } from "lucide-react";
+import { CheckCheck, Bell, Sparkles, AlertTriangle, TrendingUp, Lightbulb, CheckCircle2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { InsightType } from "@/lib/data/mock";
 
-const filterTabs: { key: string; label: string; icon: any }[] = [
+const filterTabs: { key: InsightType | "all"; label: string; icon: LucideIcon }[] = [
   { key: "all",            label: "Semua",    icon: Sparkles },
   { key: "budget_warning", label: "Anggaran", icon: AlertTriangle },
   { key: "trend",          label: "Tren",     icon: TrendingUp },
@@ -57,7 +58,7 @@ export default function InsightPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2.5">
         <div>
-          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="page-title">
             Insight & Notifikasi Finansial
           </h1>
           <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>

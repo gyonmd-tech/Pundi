@@ -93,18 +93,6 @@ function thinBorder(color = COLORS.rule): Partial<ExcelJS.Borders> {
   return { top: c, left: c, bottom: c, right: c };
 }
 
-/** Helper: format number ke Rupiah string */
-function fmtRupiah(amount: number): string {
-  const abs = Math.abs(amount);
-  const formatted = new Intl.NumberFormat("id-ID", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-  }).format(abs);
-  if (amount < 0)  return `-Rp ${formatted}`;
-  if (amount > 0)  return `+Rp ${formatted}`;
-  return `Rp ${formatted}`;
-}
-
 /**
  * Generate Blob berisi file .xlsx dan trigger download di browser.
  */
@@ -132,8 +120,7 @@ export async function downloadExcel(opts: ExcelExportOptions): Promise<void> {
   });
 
   // ── Lebar Kolom ─────────────────────────────────────────────────────────────
-  const COL_COUNT = 9; // A=No, B=Tanggal, C=Jenis, D=Nominal, E=Akun, F=Kategori, G=Catatan, H=Tags, I=ID
-  sheet.columns = [
+sheet.columns = [
     { key: "no",      width: 6  },   // A — No.
     { key: "date",    width: 14 },   // B — Tanggal
     { key: "type",    width: 14 },   // C — Jenis

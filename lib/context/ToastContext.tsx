@@ -87,7 +87,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <aside
         aria-live="polite"
         aria-label="Notifikasi"
-        className="fixed top-4 right-4 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"
+        className="fixed inset-x-4 top-4 z-[9999] flex max-w-sm flex-col gap-2.5 pointer-events-none sm:left-auto sm:right-4 sm:w-full"
       >
         {toasts.map((t) => {
           const cfg = toastConfig[t.type];

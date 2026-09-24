@@ -1,0 +1,209 @@
+.shell {
+  --visual-size: clamp(14rem, 34svh, 20rem);
+  position: relative;
+  height: 100svh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.formsGrid {
+  position: relative;
+  height: 100%;
+  min-height: 100%;
+}
+
+.formPanel {
+  position: absolute;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: calc(100svh - var(--visual-size));
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  background: #ffffff;
+  padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+}
+
+.signupForm {
+  top: var(--visual-size);
+}
+
+.loginForm {
+  top: var(--visual-size);
+}
+
+.inactiveForm {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.visualPanel {
+  position: absolute;
+  z-index: 30;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: var(--visual-size);
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  padding: 1.25rem;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  transition: transform 880ms cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+
+.visualSignup {
+  transform: translate3d(0, 0, 0);
+}
+
+.panelSurface {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(145deg, #624df5 0%, #4635d0 50%, #251a82 100%);
+  box-shadow: 0 16px 44px rgba(38, 27, 137, .22);
+}
+
+.colorSwipe {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  width: 100%;
+  height: 7rem;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(7px) saturate(1.18);
+  mix-blend-mode: normal;
+}
+
+.swipeForward {
+  bottom: -5.5rem;
+  transform-origin: top;
+  background:
+    radial-gradient(ellipse at top, rgba(88, 224, 211, .6), transparent 64%),
+    linear-gradient(180deg, rgba(98, 77, 245, .72), rgba(62, 134, 237, .42) 52%, transparent);
+}
+
+.swipeBackward {
+  top: -5.5rem;
+  transform-origin: bottom;
+  background:
+    radial-gradient(ellipse at bottom, rgba(88, 224, 211, .6), transparent 64%),
+    linear-gradient(0deg, rgba(98, 77, 245, .72), rgba(62, 134, 237, .42) 52%, transparent);
+}
+
+.visualMoving .colorSwipe {
+  animation: color-swipe 880ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.visualMoving .illustrationFloat {
+  animation-play-state: paused;
+}
+
+.illustrationFloat {
+  animation: none;
+}
+
+:global(.auth-underline-input:focus),
+:global(.auth-underline-input:focus-visible) {
+  outline: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+@keyframes color-swipe {
+  0% { opacity: 0; transform: scale(.72); }
+  18% { opacity: .92; }
+  72% { opacity: .5; }
+  100% { opacity: 0; transform: scale(1.14); }
+}
+
+@keyframes illustration-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-.2deg); }
+  50% { transform: translate3d(0, -8px, 0) rotate(.2deg); }
+}
+
+@media (min-width: 1024px) {
+  .illustrationFloat {
+    animation: illustration-float 6s ease-in-out infinite;
+  }
+  .formsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .formPanel {
+    position: relative;
+    inset: auto;
+    height: 100svh;
+    padding: 3rem 5rem;
+  }
+
+  .inactiveForm {
+    visibility: visible;
+  }
+
+  .visualPanel {
+    width: 50%;
+    height: 100%;
+    padding: 2.5rem;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .visualSignup {
+    transform: translate3d(100%, 0, 0);
+  }
+
+  .colorSwipe {
+    top: 0;
+    width: 8rem;
+    height: 100%;
+  }
+
+  .swipeForward {
+    right: -6.25rem;
+    bottom: auto;
+    left: auto;
+    transform-origin: left;
+    background:
+      radial-gradient(ellipse at left, rgba(88, 224, 211, .62), transparent 65%),
+      linear-gradient(90deg, rgba(98, 77, 245, .75), rgba(62, 134, 237, .44) 52%, transparent);
+  }
+
+  .swipeBackward {
+    top: 0;
+    right: auto;
+    left: -6.25rem;
+    transform-origin: right;
+    background:
+      radial-gradient(ellipse at right, rgba(88, 224, 211, .62), transparent 65%),
+      linear-gradient(270deg, rgba(98, 77, 245, .75), rgba(62, 134, 237, .44) 52%, transparent);
+  }
+}
+
+@media (max-width: 1023px) and (max-height: 600px) {
+  .shell {
+    --visual-size: clamp(12rem, 34svh, 15rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visualPanel {
+    transition-duration: 1ms;
+  }
+
+  .visualMoving .colorSwipe,
+  .illustrationFloat {
+    animation: none;
+  }
+}

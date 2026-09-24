@@ -3,120 +3,72 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: "class",
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
-      // ── Color Palette (DESIGN.md § 4.2) ───────────────────
-      // PENTING: Jangan tambah warna baru di sini tanpa referensi DESIGN.md
       colors: {
-        paper:   "#EEF1EF",
+        paper: "#F5F4FB",
         surface: "#FFFFFF",
-        ink: {
-          DEFAULT: "#16201D",
-          muted:   "#5B655F",
-        },
+        ink: { DEFAULT: "#211F32", muted: "#716E82", soft: "#9894A8" },
         pine: {
-          DEFAULT: "#1B4B3F",
-          10:      "#E8F0EE",
-          20:      "#C8DDD8",
-          40:      "#7AADA4",
+          DEFAULT: "#5B4AEF",
+          hover: "#4B3BD1",
+          10: "#EFECFF",
+          20: "#DCD6FF",
+          40: "#978CF7",
         },
-        ember: {
-          DEFAULT: "#9C4A2E",
-          10:      "#F5EAE6",
-          20:      "#E5BDB0",
-        },
-        brass: {
-          DEFAULT: "#B08A3E",
-          10:      "#F6F0E4",
-        },
-        warning: {
-          DEFAULT: "#B8862E",
-          10:      "#F6EFE1",
-        },
-        rule:    "#C8CDC7",
+        ember: { DEFAULT: "#E95766", 10: "#FFF0F1", 20: "#F9BCC2" },
+        brass: { DEFAULT: "#D99418", 10: "#FFF6DC" },
+        warning: { DEFAULT: "#C98010", 10: "#FFF5DD" },
+        mint: { DEFAULT: "#159B78", 10: "#E5F8F1" },
+        sky: { DEFAULT: "#3E86ED", 10: "#EAF3FF" },
+        rule: { DEFAULT: "#E4E0F0", strong: "#D4CEE5" },
       },
-
-      // ── Typography (DESIGN.md § 4.3) ──────────────────────
       fontFamily: {
-        display: ["Fraunces", "Georgia", "serif"],
-        ui:      ["General Sans", "system-ui", "sans-serif"],
-        mono:    ["IBM Plex Mono", "Courier New", "monospace"],
+        display: ["Manrope", "Segoe UI", "system-ui", "sans-serif"],
+        ui: ["Manrope", "Segoe UI", "system-ui", "sans-serif"],
+        mono: ["Manrope", "Segoe UI", "system-ui", "sans-serif"],
       },
       fontSize: {
-        "display-xl": ["2.5rem",    { lineHeight: "2.75rem" }],
-        "display-l":  ["1.75rem",   { lineHeight: "2.125rem" }],
-        "heading":    ["1.25rem",   { lineHeight: "1.625rem" }],
-        "body":       ["1rem",      { lineHeight: "1.5rem" }],
-        "small":      ["0.875rem",  { lineHeight: "1.25rem" }],
-        "data-l":     ["1.5rem",    { lineHeight: "1.75rem" }],
-        "data-m":     ["1rem",      { lineHeight: "1.375rem" }],
+        "display-xl": ["clamp(2.15rem,4vw,3.25rem)", { lineHeight: "1.08" }],
+        "display-l": ["clamp(1.65rem,2.5vw,2.1rem)", { lineHeight: "1.15" }],
+        heading: ["1.125rem", { lineHeight: "1.35" }],
+        body: ["0.9375rem", { lineHeight: "1.6" }],
+        small: ["0.8125rem", { lineHeight: "1.45" }],
+        "data-l": ["clamp(1.45rem,2.5vw,2rem)", { lineHeight: "1.15" }],
+        "data-m": ["0.9375rem", { lineHeight: "1.4" }],
       },
-
-      // ── Spacing (DESIGN.md § 4.4, base 8px) ──────────────
       spacing: {
-        "18": "4.5rem",   /* 72px */
-        "sidebar": "15rem",     /* 240px */
-        "sidebar-sm": "4rem",   /* 64px collapsed */
+        "18": "4.5rem",
+        sidebar: "16.5rem",
+        "sidebar-sm": "5rem",
       },
-
-      // ── Border Radius (DESIGN.md § 4.5) ──────────────────
       borderRadius: {
-        card:  "6px",
-        sm:    "4px",
-        DEFAULT: "6px",
+        card: "1.375rem",
+        sm: "0.875rem",
+        DEFAULT: "0.875rem",
       },
-
-      // ── Box Shadow (DESIGN.md § 4.5) ──────────────────────
-      // Kartu pakai hairline border, BUKAN shadow
       boxShadow: {
-        card:  "none",
-        float: "0 4px 12px rgba(22, 32, 29, 0.08)",
-        focus: "0 0 0 2px #1B4B3F",
+        card: "0 10px 28px rgba(73,61,133,.08)",
+        float: "0 22px 60px rgba(43,35,80,.20)",
+        focus: "0 0 0 4px rgba(91,74,239,.18)",
       },
-
-      // ── Max Width ─────────────────────────────────────────
-      maxWidth: {
-        container: "80rem", /* 1280px */
-      },
-
-      // ── Keyframes for motion (DESIGN.md § 4.8) ────────────
+      maxWidth: { container: "90rem" },
       keyframes: {
-        "count-up": {
-          from: { opacity: "0", transform: "translateY(4px)" },
-          to:   { opacity: "1", transform: "translateY(0)" },
-        },
-        "progress-fill": {
-          from: { width: "0%" },
-          to:   { width: "var(--progress-value, 0%)" },
-        },
-        "fade-in": {
-          from: { opacity: "0" },
-          to:   { opacity: "1" },
-        },
-        "slide-up": {
-          from: { opacity: "0", transform: "translateY(8px)" },
-          to:   { opacity: "1", transform: "translateY(0)" },
-        },
+        "count-up": { from: { opacity: "0", transform: "translateY(5px)" }, to: { opacity: "1", transform: "translateY(0)" } },
+        "progress-fill": { from: { width: "0%" }, to: { width: "var(--progress-value,0%)" } },
+        "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
+        "slide-up": { from: { opacity: "0", transform: "translateY(10px)" }, to: { opacity: "1", transform: "translateY(0)" } },
       },
       animation: {
-        "count-up":     "count-up 0.4s ease-out both",
-        "progress-fill":"progress-fill 0.5s ease-out both",
-        "fade-in":      "fade-in 0.2s ease-out both",
-        "slide-up":     "slide-up 0.3s ease-out both",
+        "count-up": "count-up .4s cubic-bezier(.2,.8,.2,1) both",
+        "progress-fill": "progress-fill .6s cubic-bezier(.2,.8,.2,1) both",
+        "fade-in": "fade-in .2s ease-out both",
+        "slide-up": "slide-up .35s cubic-bezier(.2,.8,.2,1) both",
       },
-
-      // ── Breakpoints (DESIGN.md § 6 & Responsive Optimization) ──
-      screens: {
-        xs:   "375px",
-        sm:   "640px",
-        md:   "768px",
-        lg:   "1024px",
-        xl:   "1280px",
-      },
+      screens: { xs: "375px", sm: "640px", md: "768px", lg: "1024px", xl: "1280px" },
     },
   },
   plugins: [],
