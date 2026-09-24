@@ -35,10 +35,21 @@ function loadEnv(file: string) {
 loadEnv(".env.local");
 loadEnv(".env");
 
-const endpoint   = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://sgp.cloud.appwrite.io/v1";
-const projectId  = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
-const apiKey     = process.env.APPWRITE_API_KEY;
-const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "pundi-db";
+function normalizeEnvironmentValue(value: string | undefined, fallback = "") {
+  let normalized = (value ?? fallback).trim();
+  while (normalized.length >= 2) {
+    const first = normalized.at(0);
+    const last = normalized.at(-1);
+    if (!((first === '"' && last === '"') || (first === "'" && last === "'"))) break;
+    normalized = normalized.slice(1, -1).trim();
+  }
+  return normalized || fallback;
+}
+
+const endpoint = normalizeEnvironmentValue(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT, "https://sgp.cloud.appwrite.io/v1").replace(/\/+$/, "");
+const projectId = normalizeEnvironmentValue(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID);
+const apiKey = normalizeEnvironmentValue(process.env.APPWRITE_API_KEY);
+const databaseId = normalizeEnvironmentValue(process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID, "pundi-db");
 
 if (!projectId || !apiKey || projectId === "pundi-local-demo" || apiKey === "local-demo-api-key") {
   console.log("\n⚠️  [Appwrite Setup] Kredensial Appwrite belum diset di .env.local.");
