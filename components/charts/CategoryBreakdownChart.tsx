@@ -22,12 +22,12 @@ interface CategoryDataPoint {
 
 // Palet terbatas dari token DESIGN.md — maksimal 6 warna
 const CHART_COLORS = [
-  "var(--color-pine)",       // pine utama
-  "var(--color-pine-40)",    // pine sedang
-  "var(--color-ink-muted)",  // abu
-  "var(--color-brass)",      // brass
-  "var(--color-pine-20)",    // pine terang
-  "var(--color-ember-20)",   // ember terang
+  "var(--chart-category-1)",
+  "var(--chart-category-2)",
+  "var(--chart-category-3)",
+  "var(--chart-category-4)",
+  "var(--chart-category-5)",
+  "var(--chart-category-6)",
 ];
 
 interface CategoryBreakdownChartProps {
@@ -105,6 +105,7 @@ export function CategoryBreakdownChart({ data, className, loading = false }: Cat
           <Pie
             data={sorted}
             dataKey="amount"
+            isAnimationActive={false}
             nameKey="name"
             cx="50%"
             cy="50%"

@@ -1,5 +1,9 @@
 "use client";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 /**
  * app/(app)/transaksi/page.tsx
  * Daftar transaksi lengkap dengan search bar, filter panel multi-kriteria,
@@ -18,7 +22,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { TransactionType } from "@/lib/data/mock";
-import { QuickAddTransaction } from "@/components/transaction/QuickAddTransaction";
+import { useQuickAdd } from "@/lib/context/QuickAddContext";
+import { deleteTransactionAction } from "@/actions/transactions";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 const typeLabel: Record<TransactionType, { label: string; icon: LucideIcon; color: string; bg: string }> = {
@@ -33,6 +38,7 @@ export default function TransaksiPage() {
   const accounts      = useAccounts();
   const categories    = useCategories();
   const { showToast } = useToast();
+  const { openQuickAdd } = useQuickAdd();
 
   const [search, setSearch]               = useState("");
   const [filterType, setFilterType]       = useState<TransactionType | "all">("all");
@@ -41,7 +47,6 @@ export default function TransaksiPage() {
   const [filterFrom, setFilterFrom]       = useState("");
   const [filterTo, setFilterTo]           = useState("");
   const [showFilter, setShowFilter]       = useState(false);
-  const [addOpen, setAddOpen]             = useState(false);
   const [deleteId, setDeleteId]           = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -72,8 +77,17 @@ export default function TransaksiPage() {
 
   const activeFilters = [filterType !== "all", filterAccount !== "all", filterCategory !== "all", !!filterFrom, !!filterTo].filter(Boolean).length;
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     const tx = transactions.find(t => t.id === id);
+    const result = await deleteTransactionAction(id);
+    if (!result.success) {
+      showToast({
+        type: "error",
+        title: "Transaksi gagal dihapus",
+        message: result.error || "Koneksi penyimpanan sedang bermasalah.",
+      });
+      return;
+    }
     dispatch({ type: "DELETE_TRANSACTION", payload: id });
     setDeleteId(null);
     showToast({
@@ -192,7 +206,7 @@ export default function TransaksiPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-display-l font-semibold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="page-title">
             Buku Transaksi
           </h1>
           <p className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
@@ -218,7 +232,7 @@ export default function TransaksiPage() {
 
           {/* Add Transaction CTA */}
           <button
-            onClick={() => setAddOpen(true)}
+            onClick={openQuickAdd}
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-card text-small font-semibold shadow-sm",
               "transition-all duration-200 hover:brightness-105 active:scale-95 group"
@@ -267,7 +281,7 @@ export default function TransaksiPage() {
           style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}
         >
           <Search size={16} strokeWidth={1.8} className="text-ink-muted flex-shrink-0" />
-          <input
+          <Input
             type="text"
             placeholder="Cari berdasarkan catatan, kategori, akun..."
             value={search}
@@ -320,7 +334,7 @@ export default function TransaksiPage() {
             <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
               Jenis Mutasi
             </label>
-            <select
+            <Select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
@@ -330,7 +344,7 @@ export default function TransaksiPage() {
               <option value="income">Pemasukan (Masuk)</option>
               <option value="expense">Pengeluaran (Keluar)</option>
               <option value="transfer">Transfer Antar Akun</option>
-            </select>
+            </Select>
           </div>
 
           {/* Filter Akun */}
@@ -338,7 +352,7 @@ export default function TransaksiPage() {
             <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
               Akun / Dompet
             </label>
-            <select
+            <Select
               value={filterAccount}
               onChange={(e) => setFilterAccount(e.target.value)}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
@@ -348,7 +362,7 @@ export default function TransaksiPage() {
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Filter Kategori */}
@@ -356,7 +370,7 @@ export default function TransaksiPage() {
             <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
               Kategori
             </label>
-            <select
+            <Select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
@@ -366,7 +380,7 @@ export default function TransaksiPage() {
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name} ({c.type === "income" ? "Masuk" : "Keluar"})</option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Date range */}
@@ -374,22 +388,9 @@ export default function TransaksiPage() {
             <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
               Rentang Tanggal
             </label>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="date"
-                value={filterFrom}
-                onChange={(e) => setFilterFrom(e.target.value)}
-                className="w-1/2 px-2 py-1.5 rounded-card border text-xs outline-none bg-paper text-ink font-mono focus:border-pine"
-                style={{ borderColor: "var(--color-rule)" }}
-              />
-              <span className="text-xs text-ink-muted">-</span>
-              <input
-                type="date"
-                value={filterTo}
-                onChange={(e) => setFilterTo(e.target.value)}
-                className="w-1/2 px-2 py-1.5 rounded-card border text-xs outline-none bg-paper text-ink font-mono focus:border-pine"
-                style={{ borderColor: "var(--color-rule)" }}
-              />
+            <div className="grid grid-cols-1 gap-2">
+              <DatePicker value={filterFrom} onValueChange={setFilterFrom} ariaLabel="Tanggal mulai" />
+              <DatePicker value={filterTo} onValueChange={setFilterTo} min={filterFrom || undefined} ariaLabel="Tanggal akhir" />
             </div>
           </div>
 
@@ -503,18 +504,18 @@ export default function TransaksiPage() {
 
             {/* ── Desktop Data Table (≥768px) ── */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tanggal</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Transaksi & Kategori</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Sumber Akun</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tipe</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nominal</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-10"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-rule/60">
+              <Table className="w-full text-left border-collapse">
+                <TableHeader>
+                  <TableRow className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
+                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tanggal</TableHead>
+                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Transaksi & Kategori</TableHead>
+                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Sumber Akun</TableHead>
+                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tipe</TableHead>
+                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nominal</TableHead>
+                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-10"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-rule/60">
                   {filtered.map((tx) => {
                     const acc = accounts.find((a) => a.id === tx.accountId);
                     const cat = categories.find((c) => c.id === tx.categoryId);
@@ -522,19 +523,19 @@ export default function TransaksiPage() {
                     const TypeIcon = typeCfg.icon;
 
                     return (
-                      <tr
+                      <TableRow
                         key={tx.id}
                         className="group transition-colors duration-150 hover:bg-paper/80"
                       >
                         {/* Tanggal */}
-                        <td className="px-4 py-3.5 whitespace-nowrap">
+                        <TableCell className="px-4 py-3.5 whitespace-nowrap">
                           <span suppressHydrationWarning className="text-small font-mono text-ink-muted">
                             {formatDate(tx.date, "short")}
                           </span>
-                        </td>
+                        </TableCell>
 
                         {/* Deskripsi & Kategori */}
-                        <td className="px-4 py-3.5 max-w-xs">
+                        <TableCell className="px-4 py-3.5 max-w-xs">
                           <div className="flex items-center gap-3">
                             <CategoryIcon icon={cat?.icon} color={cat?.color} size={15} containerSize="sm" />
                             <div className="min-w-0">
@@ -546,10 +547,10 @@ export default function TransaksiPage() {
                               </p>
                             </div>
                           </div>
-                        </td>
+                        </TableCell>
 
                         {/* Akun */}
-                        <td className="px-4 py-3.5">
+                        <TableCell className="px-4 py-3.5">
                           <div className="flex items-center gap-2">
                             <div
                               className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -559,10 +560,10 @@ export default function TransaksiPage() {
                               {acc?.name ?? "—"}
                             </span>
                           </div>
-                        </td>
+                        </TableCell>
 
                         {/* Tipe Badge */}
-                        <td className="px-4 py-3.5">
+                        <TableCell className="px-4 py-3.5">
                           <span
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
                             style={{
@@ -574,10 +575,10 @@ export default function TransaksiPage() {
                             <TypeIcon size={12} strokeWidth={2.2} />
                             {typeCfg.label}
                           </span>
-                        </td>
+                        </TableCell>
 
                         {/* Nominal */}
-                        <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <TableCell className="px-4 py-3.5 text-right whitespace-nowrap">
                           <span
                             className="tabular-nums font-mono font-bold text-body"
                             style={{
@@ -587,10 +588,10 @@ export default function TransaksiPage() {
                             {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}
                             {formatRupiah(tx.amount)}
                           </span>
-                        </td>
+                        </TableCell>
 
                         {/* Delete Action with tooltip */}
-                        <td className="px-4 py-3.5 text-right">
+                        <TableCell className="px-4 py-3.5 text-right">
                           <button
                             onClick={() => setDeleteId(tx.id)}
                             className="opacity-0 group-hover:opacity-100 p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"
@@ -599,12 +600,12 @@ export default function TransaksiPage() {
                           >
                             <Trash2 size={15} strokeWidth={1.8} />
                           </button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </>
         )}
@@ -614,7 +615,7 @@ export default function TransaksiPage() {
       {deleteId && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
-          style={{ backgroundColor: "rgba(22, 32, 29, 0.6)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
           onClick={() => setDeleteId(null)}
         >
           <div
@@ -652,9 +653,6 @@ export default function TransaksiPage() {
           </div>
         </div>
       )}
-
-      {/* Quick Add Modal */}
-      <QuickAddTransaction open={addOpen} onClose={() => setAddOpen(false)} />
     </div>
   );
 }

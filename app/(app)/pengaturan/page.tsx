@@ -1,243 +1,187 @@
 "use client";
 
-/**
- * app/(app)/pengaturan/page.tsx
- * Pengaturan akun, profil, daftar dompet/wallet, dan katalog kategori
- * dengan CategoryIcon, toast feedback, dan interface terstruktur.
- */
-
-import React, { useState } from "react";
-import { useAccounts, useCategories } from "@/lib/data/store";
+import { useState } from "react";
+import {
+  BellRing,
+  ChevronRight,
+  Database,
+  Info,
+  Languages,
+  Palette,
+  ShieldCheck,
+  Sparkles,
+  Tag,
+  User,
+  Wallet,
+} from "lucide-react";
+import { useAccounts, useApp, useCategories } from "@/lib/data/store";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
-import {
-  User, Wallet, Tag, Info, ChevronRight, ShieldCheck,
-  CheckCircle2, BellRing, Sparkles, ExternalLink, HelpCircle
-} from "lucide-react";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils/cn";
+import { SettingsCard } from "@/components/settings/SettingsCard";
+import { PreferenceToggle } from "@/components/settings/PreferenceToggle";
 
 const accountTypeLabel: Record<string, string> = {
-  bank:        "Rekening Bank",
-  ewallet:     "Dompet Digital (E-Wallet)",
-  cash:        "Uang Tunai (Cash)",
-  credit_card: "Kartu Kredit",
-  investment:  "Rekening Investasi / Sekuritas",
+  bank: "Rekening bank",
+  ewallet: "Dompet digital",
+  cash: "Uang tunai",
+  credit_card: "Kartu kredit",
+  investment: "Investasi",
 };
 
+type CategoryFilter = "all" | "expense" | "income";
+
 export default function PengaturanPage() {
-  const accounts      = useAccounts();
-  const categories    = useCategories();
+  const accounts = useAccounts();
+  const categories = useCategories();
+  const { connection } = useApp();
   const { showToast } = useToast();
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [notifications, setNotifications] = useState(true);
+  const [autoInsights, setAutoInsights] = useState(true);
+  const [compactNumbers, setCompactNumbers] = useState(false);
 
-  const [categoryFilter, setCategoryFilter] = useState<"all" | "expense" | "income">("all");
-
-  const filteredCategories = categories.filter((c) => {
-    if (categoryFilter === "all") return true;
-    return c.type === categoryFilter;
-  });
+  const filteredCategories = categories.filter((category) => categoryFilter === "all" || category.type === categoryFilter);
+  const displayName = connection.userName ?? "Sarah Dewi";
+  const connectionLabel = connection.status === "loading"
+    ? "Menghubungkan data"
+    : connection.status === "error"
+      ? "Mode demo lokal"
+      : connection.mode === "cloud"
+        ? "Tersinkron ke cloud"
+        : "Mode demo lokal";
 
   function handleAction(name: string) {
     showToast({
       type: "info",
-      title: "Pengaturan Demo",
-      message: `Fitur ubah ${name} bersifat statis dalam versi preview ini.`,
+      title: "Pengaturan",
+      message: `${name} siap dikembangkan saat layanan akun cloud aktif.`,
     });
   }
 
   return (
-    <div className="space-y-5 max-w-3xl w-full min-w-0">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
-          Pengaturan & Preferensi
-        </h1>
-        <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-          Kelola profil pengguna, sumber dana akun, dan katalog kategori
-        </p>
-      </div>
-
-      {/* Demo Notice Alert Banner */}
-      <div
-        className="flex items-start gap-3.5 p-4 rounded-card border shadow-xs"
-        style={{
-          backgroundColor: "var(--color-pine-10)",
-          borderColor: "var(--color-pine)",
-          borderLeftWidth: "4px",
-        }}
-      >
-        <div className="w-8 h-8 rounded-full bg-pine/15 flex items-center justify-center flex-shrink-0 text-pine mt-0.5">
-          <ShieldCheck size={18} strokeWidth={2.2} />
+    <div className="w-full min-w-0 max-w-[90rem] space-y-5 font-ui sm:space-y-6">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="eyebrow">Personalisasi Pundi</p>
+          <h1 className="page-title mt-1">Pengaturan &amp; Preferensi</h1>
+          <p className="page-subtitle max-w-2xl">Kelola profil, sumber dana, tampilan, dan kategori transaksi dari satu tempat.</p>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-small font-semibold text-pine leading-tight" style={{ fontFamily: "var(--font-ui)" }}>
-            Mode Portfolio & Preview Aktif
-          </p>
-          <p className="text-xs text-pine/80 mt-1 leading-relaxed" style={{ fontFamily: "var(--font-ui)" }}>
-            Aplikasi berjalan dengan data sintetis terpusat (in-memory). Semua perubahan transaksi, anggaran, aset, dan tujuan tersimpan langsung secara reaktif di browser Anda.
-          </p>
+        <div className="flex w-fit items-center gap-2 rounded-full border border-mint/20 bg-mint-10 px-3.5 py-2 text-xs font-bold text-mint">
+          <span className={cn("h-2 w-2 rounded-full bg-mint", connection.status === "loading" && "animate-pulse bg-brass")} />
+          {connectionLabel}
         </div>
-      </div>
+      </header>
 
-      {/* Profil Section Card */}
-      <div className="card p-4 sm:p-5 space-y-4" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center gap-2.5 pb-3 border-b border-rule">
-          <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
-            <User size={16} />
-          </div>
-          <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-            Profil Pengguna
-          </h2>
-        </div>
-
-        <ul className="divide-y divide-rule/60">
-          {[
-            { label: "Nama Lengkap",   value: "Sarah Dewi",         keyName: "nama" },
-            { label: "Alamat Email",   value: "sarah.dewi@email.com", keyName: "email" },
-            { label: "Mata Uang Utama", value: "Rupiah Indonesia (IDR)", keyName: "mata uang" },
-            { label: "Format Angka",    value: "1.234.567 (Standar ID)", keyName: "format" },
-          ].map((item) => (
-            <li
-              key={item.label}
-              onClick={() => handleAction(item.keyName)}
-              className="flex items-center justify-between py-3 cursor-pointer group hover:bg-paper/60 px-2 rounded-card transition-colors gap-2"
-            >
-              <span className="text-xs xs:text-small text-ink-muted group-hover:text-ink font-medium flex-shrink-0" style={{ fontFamily: "var(--font-ui)" }}>
-                {item.label}
-              </span>
-              <div className="flex items-center gap-1.5 min-w-0 justify-end">
-                <span className="text-xs xs:text-small font-semibold text-ink truncate text-right" style={{ fontFamily: "var(--font-ui)" }}>
-                  {item.value}
-                </span>
-                <ChevronRight size={15} className="text-ink-muted group-hover:text-pine transition-colors flex-shrink-0" />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Accounts & Wallets List Card */}
-      <div className="card p-5 space-y-4" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between pb-3 border-b border-rule">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
-              <Wallet size={16} />
+      <div className="grid items-stretch gap-5 lg:grid-cols-12">
+        <SettingsCard title="Profil pengguna" description="Identitas, keamanan, dan format utama akun Anda." icon={User} tone="violet" className="lg:col-span-7 lg:row-span-2">
+          <div className="mb-4 flex flex-col gap-4 rounded-[22px] border border-white/80 bg-white/75 p-4 sm:flex-row sm:items-center sm:p-5">
+            <div className="grid h-20 w-20 shrink-0 place-items-center rounded-[24px] bg-[linear-gradient(145deg,#7162ff,#4b3bd1)] text-xl font-black text-white shadow-[0_14px_26px_rgba(91,74,239,.24)]">
+              {displayName.split(" ").slice(0, 2).map((name) => name[0]).join("")}
             </div>
-            <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-              Daftar Akun & Dompet
-            </h2>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate text-xl font-extrabold tracking-[-0.025em] text-ink">{displayName}</p>
+                <span className="rounded-full bg-mint-10 px-2.5 py-1 text-[10px] font-extrabold text-mint">Terverifikasi</span>
+              </div>
+              <p className="mt-1 truncate text-sm text-ink-muted">sarah.dewi@email.com</p>
+              <div className="mt-4 flex items-center gap-3">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-pine-10"><div className="h-full w-[88%] rounded-full bg-[linear-gradient(90deg,#5B4AEF,#3E86ED)]" /></div>
+                <span className="text-xs font-extrabold tabular-nums text-pine">88%</span>
+              </div>
+              <p className="mt-1.5 text-[11px] font-semibold text-ink-muted">Kelengkapan profil</p>
+            </div>
           </div>
-          <span className="text-xs font-mono text-ink-muted">
-            {accounts.length} terdaftar
-          </span>
-        </div>
 
-        <div className="space-y-2">
-          {accounts.map((acc) => (
-            <div
-              key={acc.id}
-              className="flex items-center justify-between p-3 rounded-card border bg-paper/60 hover:bg-paper transition-all group"
-              style={{ borderColor: "var(--color-rule)" }}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className="w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-xs"
-                  style={{ backgroundColor: acc.colorTag }}
-                />
-                <div className="min-w-0">
-                  <p className="text-body font-semibold text-ink truncate group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
-                    {acc.name}
-                  </p>
-                  <p className="text-xs text-ink-muted">
-                    {accountTypeLabel[acc.type] ?? acc.type}
-                  </p>
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[18px] border border-pine/10 bg-white/65 p-4">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-ink-muted">Status akun</p>
+              <p className="mt-2 flex items-center gap-2 text-sm font-extrabold text-ink"><ShieldCheck className="h-4 w-4 text-mint" />Data terlindungi</p>
+            </div>
+            <div className="rounded-[18px] border border-sky/10 bg-white/65 p-4">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-ink-muted">Penyimpanan</p>
+              <p className="mt-2 flex items-center gap-2 text-sm font-extrabold text-ink"><Database className="h-4 w-4 text-sky" />{connectionLabel}</p>
+            </div>
+          </div>
+          <div className="flex flex-1 flex-col divide-y divide-rule/70 rounded-[18px] border border-white/80 bg-white/65 px-3">
+            {[
+              ["Nama lengkap", displayName, "nama"],
+              ["Mata uang", "Rupiah Indonesia (IDR)", "mata uang"],
+              ["Format angka", "1.234.567", "format angka"],
+              ["Bahasa", "Bahasa Indonesia", "bahasa"],
+            ].map(([label, value, key]) => (
+              <button key={label} type="button" onClick={() => handleAction(key)} className="group flex min-h-12 flex-1 w-full items-center justify-between gap-3 rounded-[12px] px-1 py-3 text-left hover:text-pine">
+                <span className="text-xs font-semibold text-ink-muted">{label}</span>
+                <span className="flex min-w-0 items-center gap-1.5 text-right text-xs font-extrabold text-ink group-hover:text-pine sm:text-sm">
+                  <span className="truncate">{value}</span>
+                  <ChevronRight className="h-4 w-4 shrink-0" />
+                </span>
+              </button>
+            ))}
+          </div>
+        </SettingsCard>
+
+        <SettingsCard title="Preferensi aplikasi" description="Atur pengalaman harian tanpa meninggalkan halaman." icon={Palette} tone="mint" className="lg:col-span-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <PreferenceToggle label="Notifikasi pengingat" description="Peringatan anggaran dan transaksi penting." icon={BellRing} checked={notifications} onChange={setNotifications} tone="pine" />
+            <PreferenceToggle label="Insight otomatis" description="Ringkasan pola keuangan yang relevan." icon={Sparkles} checked={autoInsights} onChange={setAutoInsights} tone="mint" />
+            <PreferenceToggle label="Angka ringkas" description="Tampilkan jutaan sebagai jt pada ringkasan." icon={Database} checked={compactNumbers} onChange={setCompactNumbers} tone="sky" />
+            <button type="button" onClick={() => handleAction("bahasa aplikasi")} className="flex items-center gap-3 rounded-[18px] border border-white/80 bg-white/70 p-3.5 text-left shadow-2xs transition hover:border-pine/25 sm:p-4">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-sky-10 text-sky"><Languages className="h-4 w-4" /></span>
+              <span className="min-w-0 flex-1"><span className="block text-sm font-extrabold text-ink">Bahasa &amp; wilayah</span><span className="mt-0.5 block text-xs text-ink-muted">Indonesia · Asia/Jakarta</span></span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-ink-muted" />
+            </button>
+          </div>
+        </SettingsCard>
+
+        <SettingsCard title="Akun & dompet" description="Saldo dan status semua sumber dana aktif." icon={Wallet} tone="blue" className="lg:col-span-5" action={<span className="rounded-full border border-sky/15 bg-white/70 px-2.5 py-1 text-[10px] font-extrabold text-sky">{accounts.length} akun</span>}>
+          <div className="grid gap-3">
+            {accounts.map((account) => (
+              <button key={account.id} type="button" onClick={() => handleAction(account.name)} className="group flex min-w-0 items-center gap-3 rounded-[18px] border p-3.5 text-left transition hover:-translate-y-0.5 hover:shadow-card" style={{ backgroundColor: `${account.colorTag}0D`, borderColor: `${account.colorTag}2B` }}>
+                <span className="h-10 w-2 shrink-0 rounded-full" style={{ backgroundColor: account.colorTag }} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-extrabold text-ink">{account.name}</span>
+                  <span className="mt-0.5 block truncate text-[11px] text-ink-muted">{accountTypeLabel[account.type] ?? account.type}</span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <span className="block text-sm font-black tabular-nums text-ink">{formatRupiah(account.balance)}</span>
+                  <span className="text-[10px] font-bold text-mint">Aktif</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </SettingsCard>
+
+        <SettingsCard title="Kategori transaksi" description="Warna dan ikon dipakai di seluruh grafik." icon={Tag} tone="amber" className="lg:col-span-12">
+          <div className="mb-4 flex max-w-full items-center gap-1 overflow-x-auto rounded-[14px] border border-brass/15 bg-white/70 p-1">
+            {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => (
+              <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-8 flex-1 whitespace-nowrap rounded-[10px] px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-white hover:text-ink")}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredCategories.map((category) => (
+              <div key={category.id} className="flex min-w-0 items-center gap-2.5 rounded-[15px] border p-2.5" style={{ backgroundColor: `${category.color}0B`, borderColor: `${category.color}24` }}>
+                <CategoryIcon icon={category.icon} color={category.color} size={15} containerSize="md" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-extrabold text-ink">{category.name}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-ink-muted">{category.type === "income" ? "Pemasukan" : "Pengeluaran"}</p>
                 </div>
               </div>
-
-              <div className="text-right flex-shrink-0">
-                <p className="tabular-nums font-mono font-bold text-body text-ink">
-                  {formatRupiah(acc.balance)}
-                </p>
-                <span className="text-[10px] text-pine font-medium">Aktif</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Categories Catalog Card */}
-      <div className="card p-5 space-y-4" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between pb-3 border-b border-rule flex-wrap gap-2">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
-              <Tag size={16} />
-            </div>
-            <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-              Katalog Kategori Transaksi
-            </h2>
+            ))}
           </div>
-
-          {/* Filter Pills */}
-          <div className="flex items-center gap-1 bg-paper p-1 rounded-card border border-rule">
-            {[
-              { id: "all", label: "Semua" },
-              { id: "expense", label: "Pengeluaran" },
-              { id: "income", label: "Pemasukan" },
-            ].map((f) => {
-              const isSelected = categoryFilter === f.id;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setCategoryFilter(f.id as any)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-card text-xs font-semibold transition-all active:scale-95",
-                    isSelected ? "shadow-xs" : "hover:text-ink"
-                  )}
-                  style={{
-                    backgroundColor: isSelected ? "var(--color-pine)" : "transparent",
-                    color: isSelected ? "#FFFFFF" : "var(--color-ink-muted)",
-                    fontFamily: "var(--font-ui)",
-                  }}
-                >
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-          {filteredCategories.map((cat) => (
-            <div
-              key={cat.id}
-              className="flex items-center gap-2.5 p-2.5 rounded-card border bg-paper/50 hover:bg-paper transition-all group"
-              style={{ borderColor: "var(--color-rule)" }}
-            >
-              <CategoryIcon icon={cat.icon} color={cat.color} size={15} containerSize="sm" />
-              <div className="min-w-0 flex-1">
-                <p className="text-small font-semibold text-ink truncate group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
-                  {cat.name}
-                </p>
-                <p className="text-[10px] text-ink-muted uppercase font-mono tracking-wider">
-                  {cat.type === "income" ? "Pemasukan" : "Pengeluaran"}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        </SettingsCard>
       </div>
 
-      {/* About App Section */}
-      <div className="card p-5 space-y-3 text-xs text-ink-muted" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between font-ui">
-          <span>Pundi Personal Finance Dashboard</span>
-          <span className="font-mono text-ink font-semibold">Versi 1.0.0 (Demo Release)</span>
+      <footer className="flex flex-col gap-3 rounded-[22px] border border-pine/15 bg-[linear-gradient(110deg,rgba(239,236,255,.92),rgba(234,243,255,.8),rgba(229,248,241,.82))] p-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex items-center gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-white text-pine shadow-2xs"><Info className="h-4 w-4" /></span>
+          <div><p className="text-sm font-extrabold text-ink">Pundi Personal Finance</p><p className="text-xs text-ink-muted">Next.js 16 · Appwrite · Versi 1.0.0</p></div>
         </div>
-        <div className="flex items-center justify-between border-t border-rule/50 pt-2 font-ui">
-          <span>Desain & Arsitektur</span>
-          <span className="font-semibold text-ink">Rumah Design · Next.js 16 · Appwrite DB</span>
-        </div>
-      </div>
+        <div className="flex items-center gap-2 rounded-full border border-mint/20 bg-white/70 px-3 py-2 text-xs font-bold text-mint"><ShieldCheck className="h-4 w-4" />Data perangkat terlindungi</div>
+      </footer>
     </div>
   );
 }

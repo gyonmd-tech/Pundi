@@ -104,6 +104,7 @@ export function NetWorthTrendChart({ data, className, loading = false }: NetWort
         <Line
           type="monotone"
           dataKey="netWorth"
+            isAnimationActive={false}
           stroke="var(--color-pine)"
           strokeWidth={2}
           dot={false}

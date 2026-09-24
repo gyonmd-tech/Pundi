@@ -9,20 +9,21 @@
 import React, { useState } from "react";
 import { CashFlowChart }          from "@/components/charts/CashFlowChart";
 import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
-import { formatRupiah, formatDate } from "@/lib/utils/formatter";
+import { formatRupiah } from "@/lib/utils/formatter";
 import { getCashFlowData, getCategoryBreakdown, getMonthlySummary } from "@/lib/data/mock";
 import { useToast } from "@/lib/context/ToastContext";
-import { TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownLeft, Sparkles, PieChart } from "lucide-react";
+import { TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
-const MONTHS = [
-  { label: "Agustus 2026",  period: "2026-08", monthsAgo: 0 },
-  { label: "Juli 2026",     period: "2026-07", monthsAgo: 1 },
-  { label: "Juni 2026",     period: "2026-06", monthsAgo: 2 },
-  { label: "Mei 2026",      period: "2026-05", monthsAgo: 3 },
-  { label: "April 2026",    period: "2026-04", monthsAgo: 4 },
-  { label: "Maret 2026",    period: "2026-03", monthsAgo: 5 },
-];
+const MONTHS = Array.from({ length: 6 }, (_, monthsAgo) => {
+  const date = new Date();
+  date.setMonth(date.getMonth() - monthsAgo);
+  return {
+    label: new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(date),
+    period: date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0"),
+    monthsAgo,
+  };
+});
 
 export default function ArusKasPage() {
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -57,7 +58,7 @@ export default function ArusKasPage() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+        <h1 className="page-title">
           Analisis Arus Kas
         </h1>
         <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
@@ -73,7 +74,7 @@ export default function ArusKasPage() {
               <TrendingUp size={15} />
             </div>
             <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-              Tren Arus Kas (Maret – Agustus 2026)
+              Tren Arus Kas 6 Bulan Terakhir
             </h2>
           </div>
 

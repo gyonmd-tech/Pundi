@@ -1,5 +1,7 @@
 "use client";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { Input } from "@/components/ui/Input";
 /**
  * app/(app)/aset/page.tsx
  * Daftar aset & investasi + tren net worth, live P&L calculation di form modal,
@@ -9,12 +11,12 @@
 import React, { useState } from "react";
 import { useApp, useAssets } from "@/lib/data/store";
 import { NetWorthTrendChart } from "@/components/charts/NetWorthTrendChart";
-import { formatRupiah, formatPercent } from "@/lib/utils/formatter";
+import { formatRupiah } from "@/lib/utils/formatter";
 import { getNetWorthData, getAssetPnL, type AssetType, type Asset } from "@/lib/data/mock";
 import { useToast } from "@/lib/context/ToastContext";
 import {
   TrendingUp, TrendingDown, Plus, X, Edit2, Trash2,
-  PieChart, Sparkles, Building, Coins, CircleDollarSign, Gem, ShieldAlert
+  Sparkles, Building, Coins, CircleDollarSign, Gem
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -124,7 +126,7 @@ export default function AsetPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="page-title">
             Portofolio Aset & Investasi
           </h1>
           <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
@@ -328,37 +330,37 @@ export default function AsetPage() {
 
         {/* ── Desktop Data Table (≥768px) ── */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Instrumen / Aset</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Kelas</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Kepemilikan Unit</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Harga Rerata Beli</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Harga Saat Ini</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nilai Portofolio</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Keuntungan / Rugi</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-16"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-rule/60">
+          <Table className="w-full text-left border-collapse">
+            <TableHeader>
+              <TableRow className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Instrumen / Aset</TableHead>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Kelas</TableHead>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Kepemilikan Unit</TableHead>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Harga Rerata Beli</TableHead>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Harga Saat Ini</TableHead>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nilai Portofolio</TableHead>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Keuntungan / Rugi</TableHead>
+                <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-16"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-rule/60">
               {assets.map((asset) => {
                 const { currentVal, pnl, pnlPct } = getAssetPnL(asset);
                 const typeCfg = assetTypeConfig[asset.type];
                 const TypeIcon = typeCfg.icon;
 
                 return (
-                  <tr
+                  <TableRow
                     key={asset.id}
                     className="group transition-colors duration-150 hover:bg-paper/80"
                   >
-                    <td className="px-4 py-3.5">
+                    <TableCell className="px-4 py-3.5">
                       <p className="text-body font-semibold text-ink group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
                         {asset.name}
                       </p>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5">
+                    <TableCell className="px-4 py-3.5">
                       <span
                         className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
                         style={{
@@ -369,25 +371,25 @@ export default function AsetPage() {
                         <TypeIcon size={12} strokeWidth={2} />
                         {typeCfg.label}
                       </span>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 font-mono text-small text-ink">
+                    <TableCell className="px-4 py-3.5 font-mono text-small text-ink">
                       {asset.units % 1 === 0 ? asset.units.toLocaleString("id-ID") : asset.units.toFixed(4)}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 font-mono text-small text-ink-muted">
+                    <TableCell className="px-4 py-3.5 font-mono text-small text-ink-muted">
                       {formatRupiah(asset.buyPrice)}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 font-mono text-small text-ink">
+                    <TableCell className="px-4 py-3.5 font-mono text-small text-ink">
                       {formatRupiah(asset.currentPrice)}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 text-right font-mono font-bold text-body text-ink">
+                    <TableCell className="px-4 py-3.5 text-right font-mono font-bold text-body text-ink">
                       {formatRupiah(currentVal)}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                    <TableCell className="px-4 py-3.5 text-right whitespace-nowrap">
                       <div className="flex flex-col items-end">
                         <span
                           className="tabular-nums font-mono font-bold text-small"
@@ -402,9 +404,9 @@ export default function AsetPage() {
                           {pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(2)}%
                         </span>
                       </div>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 text-right">
+                    <TableCell className="px-4 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openEdit(asset)}
@@ -421,12 +423,12 @@ export default function AsetPage() {
                           <Trash2 size={14} strokeWidth={1.8} />
                         </button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
 
@@ -434,7 +436,7 @@ export default function AsetPage() {
       {showForm && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          style={{ backgroundColor: "rgba(22, 32, 29, 0.6)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
           onClick={() => setShowForm(false)}
         >
           <div
@@ -492,7 +494,7 @@ export default function AsetPage() {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                   Nama Aset / Ticker Simbol
                 </label>
-                <input
+                <Input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
@@ -508,7 +510,7 @@ export default function AsetPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                     Jumlah Unit
                   </label>
-                  <input
+                  <Input
                     type="number"
                     step="any"
                     value={form.units}
@@ -523,7 +525,7 @@ export default function AsetPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                     Harga Beli (Rp)
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={form.buyPrice ? parseInt(form.buyPrice, 10).toLocaleString("id-ID") : ""}
                     onChange={(e) => setForm(f => ({ ...f, buyPrice: e.target.value.replace(/\D/g, "") }))}
@@ -537,7 +539,7 @@ export default function AsetPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                     Harga Kini (Rp)
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={form.currentPrice ? parseInt(form.currentPrice, 10).toLocaleString("id-ID") : ""}
                     onChange={(e) => setForm(f => ({ ...f, currentPrice: e.target.value.replace(/\D/g, "") }))}
@@ -591,7 +593,7 @@ export default function AsetPage() {
       {deleteId && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in"
-          style={{ backgroundColor: "rgba(22, 32, 29, 0.6)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
           onClick={() => setDeleteId(null)}
         >
           <div

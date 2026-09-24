@@ -1,11 +1,5 @@
 "use server";
 
-/**
- * actions/auth.ts
- * Server actions untuk registrasi, login, logout, dan session check via Appwrite.
- * Dilengkapi graceful fallback untuk mode demo.
- */
-
 import { createAdminServerClient, createSessionServerClient } from "@/lib/appwrite/server";
 import { cookies } from "next/headers";
 import { ID } from "node-appwrite";
@@ -21,41 +15,45 @@ export interface UserSession {
 }
 
 export async function getAuthUserAction(): Promise<UserSession | null> {
-  try {
-    const { account } = await createSessionServerClient();
-    const user = await account.get();
-    return {
-      id: user.$id,
-      name: user.name,
-      email: user.email,
-    };
-  } catch {
-    // If not authenticated or in demo mode
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
+
+  if (!sessionCookie) return null;
+
+  if (sessionCookie.value === "demo-session-token") {
     return {
       id: "demo-user-1",
       name: "Sarah Dewi",
-      email: "sarah.dewi@email.com",
+      email: "demo@pundi.id",
       isDemo: true,
     };
+  }
+
+  try {
+    const { account } = await createSessionServerClient();
+    const user = await account.get();
+    return { id: user.$id, name: user.name, email: user.email };
+  } catch {
+    return null;
   }
 }
 
 export async function loginAction(formData: FormData): Promise<{ success: boolean; error?: string }> {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
     return { success: false, error: "Email dan password wajib diisi." };
   }
 
-  // Demo shortcut
   if (email === "demo@pundi.id" || email === "sarah@email.com") {
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, "demo-session-token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
     });
     return { success: true };
   }
@@ -63,63 +61,71 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
   try {
     const { account } = await createAdminServerClient();
     const session = await account.createEmailPasswordSession(email, password);
-
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, session.secret, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
-
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Gagal masuk. Periksa email & password." };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Gagal masuk. Periksa email dan password.";
+    return { success: false, error: message };
   }
 }
 
 export async function signUpAction(formData: FormData): Promise<{ success: boolean; error?: string }> {
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
 
   if (!name || !email || !password) {
     return { success: false, error: "Semua data formulir wajib diisi." };
+  }
+  if (password.length < 8) {
+    return { success: false, error: "Password minimal 8 karakter." };
   }
 
   try {
     const { account, users } = await createAdminServerClient();
     const userId = ID.unique();
     await users.create(userId, email, undefined, password, name);
-
-    // Auto login session
     const session = await account.createEmailPasswordSession(email, password);
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, session.secret, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
 
-    // Seed default categories
-    await seedDefaultCategoriesAction(userId);
-
+    const seeded = await seedDefaultCategoriesAction(userId);
+    if (!seeded.success) {
+      return { success: false, error: "Akun dibuat, tetapi data awal gagal disiapkan. Silakan masuk kembali." };
+    }
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Gagal mendaftar akun baru." };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Gagal mendaftar akun baru.";
+    return { success: false, error: message };
   }
 }
 
 export async function logoutAction(): Promise<{ success: boolean }> {
-  try {
-    const { account } = await createSessionServerClient();
-    await account.deleteSession("current");
-  } catch {
-    // Ignore error if session expired
+  const cookieStore = await cookies();
+  const session = cookieStore.get(SESSION_COOKIE_NAME);
+
+  if (session && session.value !== "demo-session-token") {
+    try {
+      const { account } = await createSessionServerClient();
+      await account.deleteSession("current");
+    } catch {
+      // Session may already be expired.
+    }
   }
 
-  const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
   return { success: true };
 }

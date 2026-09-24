@@ -1,5 +1,8 @@
 "use client";
 
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 /**
  * app/(app)/tujuan/page.tsx
  * Tujuan tabungan dengan GoalCard, toast notifications,
@@ -9,9 +12,9 @@
 import React, { useState } from "react";
 import { useApp, useGoals, useAccounts } from "@/lib/data/store";
 import { GoalCard } from "@/components/dashboard/GoalCard";
-import { formatRupiah, formatDate, calcProgress } from "@/lib/utils/formatter";
+import { formatRupiah, calcProgress } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
-import { Plus, X, Target, Trash2, Edit2, Sparkles, Calendar, CheckCircle2 } from "lucide-react";
+import { Plus, X, Target, Trash2, Sparkles } from "lucide-react";
 import type { Goal } from "@/lib/data/mock";
 import { cn } from "@/lib/utils/cn";
 
@@ -128,7 +131,7 @@ export default function TujuanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="page-title">
             Tujuan Finansial & Tabungan
           </h1>
           <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
@@ -206,7 +209,7 @@ export default function TujuanPage() {
       {showForm && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          style={{ backgroundColor: "rgba(22, 32, 29, 0.6)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
           onClick={() => setShowForm(false)}
         >
           <div
@@ -234,7 +237,7 @@ export default function TujuanPage() {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                   Nama Tujuan Finansial
                 </label>
-                <input
+                <Input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
@@ -251,7 +254,7 @@ export default function TujuanPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                     Target Nominal (Rp)
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={form.targetAmount ? parseInt(form.targetAmount, 10).toLocaleString("id-ID") : ""}
                     onChange={(e) => setForm(f => ({ ...f, targetAmount: e.target.value.replace(/\D/g, "") }))}
@@ -265,7 +268,7 @@ export default function TujuanPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                     Terkumpul Saat Ini (Rp)
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={form.currentAmount ? parseInt(form.currentAmount, 10).toLocaleString("id-ID") : ""}
                     onChange={(e) => setForm(f => ({ ...f, currentAmount: e.target.value.replace(/\D/g, "") }))}
@@ -308,13 +311,7 @@ export default function TujuanPage() {
                     </button>
                   </div>
                 </div>
-                <input
-                  type="date"
-                  value={form.targetDate}
-                  onChange={(e) => setForm(f => ({ ...f, targetDate: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-card border bg-paper text-small text-ink focus:border-pine outline-none font-mono"
-                  style={{ borderColor: "var(--color-rule)" }}
-                />
+                <DatePicker value={form.targetDate} onValueChange={(value) => setForm((current) => ({ ...current, targetDate: value }))} />
               </div>
 
               {/* Linked Account */}
@@ -322,7 +319,7 @@ export default function TujuanPage() {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
                   Hubungkan ke Rekening Khusus (Opsional)
                 </label>
-                <select
+                <Select
                   value={form.linkedAccountId}
                   onChange={(e) => setForm(f => ({ ...f, linkedAccountId: e.target.value }))}
                   className="w-full px-3 py-2.5 rounded-card border bg-paper text-small text-ink focus:border-pine outline-none font-medium"
@@ -332,7 +329,7 @@ export default function TujuanPage() {
                   {accounts.map((a) => (
                     <option key={a.id} value={a.id}>{a.name} ({formatRupiah(a.balance)})</option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -362,7 +359,7 @@ export default function TujuanPage() {
       {deleteId && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in"
-          style={{ backgroundColor: "rgba(22, 32, 29, 0.6)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
           onClick={() => setDeleteId(null)}
         >
           <div

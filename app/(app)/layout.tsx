@@ -1,66 +1,43 @@
 "use client";
 
-/**
- * app/(app)/layout.tsx
- * App Layout Shell dengan:
- * - SidebarProvider untuk buka/tutup (collapse) sidebar interaktif
- * - ToastProvider untuk floating notifications
- * - BackgroundPattern material texture & subtle particles
- * - Header & SidebarNav yang tersinkronisasi
- * - Global QuickAddTransaction modal
- */
-
 import React, { useState } from "react";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { Header } from "@/components/layout/Header";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 import { AppProvider } from "@/lib/data/store";
 import { ToastProvider } from "@/lib/context/ToastContext";
 import { SidebarProvider, useSidebar } from "@/lib/context/SidebarContext";
-import { QuickAddTransaction } from "@/components/transaction/QuickAddTransaction";
+import { QuickAddProvider, useQuickAdd } from "@/lib/context/QuickAddContext";
 import { BackgroundPattern } from "@/components/ui/BackgroundPattern";
 import { cn } from "@/lib/utils/cn";
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState("all");
   const { isCollapsed } = useSidebar();
+  const { isOpen: quickAddOpen, openQuickAdd, closeQuickAdd } = useQuickAdd();
 
   return (
-    <div
-      className="min-h-screen flex flex-col relative text-ink transition-colors duration-300 w-full max-w-full overflow-x-clip"
-      style={{ backgroundColor: "var(--color-paper)" }}
-    >
-      {/* Subtle Material & Particle Texture */}
+    <div className="app-modern relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip bg-paper text-ink">
       <BackgroundPattern />
+      <SidebarNav onQuickAdd={openQuickAdd} />
 
-      {/* Collapsible Sidebar Navigation */}
-      <SidebarNav onQuickAdd={() => setQuickAddOpen(true)} />
-
-      {/* Main Content Area — Offset Dynamically by Sidebar State */}
-      <div
-        className={cn(
-          "flex-1 flex flex-col min-w-0 w-full max-w-full overflow-x-clip transition-all duration-300 ease-in-out relative z-10",
-          isCollapsed ? "md:pl-[72px]" : "md:pl-[240px]"
-        )}
-      >
-        {/* Interactive Topbar Header */}
+      <div className={cn("relative z-10 flex min-w-0 flex-1 flex-col transition-all duration-300", isCollapsed ? "md:pl-[92px]" : "md:pl-[268px]")}>
         <Header
-          onQuickAdd={() => setQuickAddOpen(true)}
+          onQuickAdd={openQuickAdd}
           selectedAccountId={selectedAccountId}
           onSelectAccount={setSelectedAccountId}
         />
 
-        {/* Main Content Container */}
-        <main className="flex-1 min-w-0 w-full max-w-7xl mx-auto px-3.5 sm:px-6 py-4 lg:p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0.5rem))] md:pb-8 animate-in fade-in duration-300 overflow-x-clip">
-          {children}
-        </main>
+        <div className="flex min-w-0 flex-1">
+          <main className="min-w-0 flex-1 overflow-x-clip px-4 py-5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0.5rem))] sm:px-6 md:pb-8 lg:px-8 lg:py-7">
+            <div className="mx-auto w-full max-w-[90rem] animate-in fade-in duration-300">{children}</div>
+          </main>
+          <RightSidebar
+            quickAddOpen={quickAddOpen}
+            onQuickAddClose={closeQuickAdd}
+          />
+        </div>
       </div>
-
-      {/* Global Quick Add Transaction Modal */}
-      <QuickAddTransaction
-        open={quickAddOpen}
-        onClose={() => setQuickAddOpen(false)}
-      />
     </div>
   );
 }
@@ -70,7 +47,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <ToastProvider>
       <SidebarProvider>
         <AppProvider>
-          <AppLayoutContent>{children}</AppLayoutContent>
+          <QuickAddProvider>
+            <AppLayoutContent>{children}</AppLayoutContent>
+          </QuickAddProvider>
         </AppProvider>
       </SidebarProvider>
     </ToastProvider>

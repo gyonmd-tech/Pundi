@@ -1,5 +1,6 @@
 "use client";
 
+import { Input } from "@/components/ui/Input";
 /**
  * app/(app)/anggaran/page.tsx
  * Manajemen anggaran bulanan per kategori dengan CategoryIcon,
@@ -9,14 +10,14 @@
 import React, { useState } from "react";
 import { useApp, useBudgets, useCategories } from "@/lib/data/store";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
-import { formatRupiah, formatDate, calcProgress, getBudgetStatus } from "@/lib/utils/formatter";
+import { formatRupiah, formatDate, getBudgetStatus } from "@/lib/utils/formatter";
 import { getSpentByCategory } from "@/lib/data/mock";
 import { useToast } from "@/lib/context/ToastContext";
-import { Plus, X, Edit2, AlertTriangle, Trash2, PieChart, Sparkles } from "lucide-react";
+import { Plus, X, AlertTriangle, Trash2, PieChart, Sparkles } from "lucide-react";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils/cn";
 
-const CURRENT_PERIOD = "2026-08";
+const CURRENT_PERIOD = new Date().toISOString().slice(0, 7);
 
 export default function AnggaranPage() {
   const { dispatch }  = useApp();
@@ -29,7 +30,7 @@ export default function AnggaranPage() {
   const [categoryId, setCategoryId]     = useState("");
   const [limitAmount, setLimitAmount]   = useState("");
   const [deleteId, setDeleteId]         = useState<string | null>(null);
-  const [period, setPeriod]             = useState(CURRENT_PERIOD);
+  const period = CURRENT_PERIOD;
 
   const thisPeriodBudgets = budgets
     .filter((b) => b.period === period)
@@ -67,7 +68,7 @@ export default function AnggaranPage() {
     dispatch({
       type: "UPSERT_BUDGET",
       payload: {
-        id:          editId ?? existing?.id ?? `bud-${Date.now()}`,
+        id:          editId ?? existing?.id ?? `bud-${categoryId}-${period}`,
         categoryId,
         period,
         limitAmount: amt,
@@ -115,7 +116,7 @@ export default function AnggaranPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-display-l font-semibold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}>
+          <h1 className="page-title">
             Perencanaan Anggaran
           </h1>
           <p suppressHydrationWarning className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
@@ -248,7 +249,7 @@ export default function AnggaranPage() {
       {showForm && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          style={{ backgroundColor: "rgba(22, 32, 29, 0.6)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
           onClick={resetForm}
         >
           <div
@@ -319,7 +320,7 @@ export default function AnggaranPage() {
                   style={{ borderColor: "var(--color-rule)" }}
                 >
                   <span className="text-small font-mono font-bold text-pine">Rp</span>
-                  <input
+                  <Input
                     type="text"
                     inputMode="numeric"
                     placeholder="0"
@@ -358,7 +359,7 @@ export default function AnggaranPage() {
       {deleteId && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in"
-          style={{ backgroundColor: "rgba(22, 32, 29, 0.6)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
           onClick={() => setDeleteId(null)}
         >
           <div

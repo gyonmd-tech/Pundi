@@ -1,16 +1,7 @@
 "use client";
 
-/**
- * lib/data/store.tsx
- * React Context + useReducer sebagai "in-memory database" untuk demo.
- * Semua CRUD operations (add/edit/delete transaksi, budget, goal, dsb.)
- * dijalankan di sini tanpa server call — pure client state.
- *
- * Saat Appwrite sudah dikonfigurasi, ganti dispatch calls dengan
- * Server Actions yang memanggil Appwrite SDK.
- */
-
-import React, { createContext, useContext, useReducer, type ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useReducer, useState, type ReactNode } from "react";
+import { getAppBootstrapAction, type AppBootstrapData } from "@/actions/bootstrap";
 import {
   mockAccounts,
   mockCategories,
@@ -28,132 +19,159 @@ import {
   type Insight,
 } from "./mock";
 
-// ── State ───────────────────────────────────────────────────────────
-
-interface AppState {
-  accounts:     Account[];
-  categories:   Category[];
+interface AppState extends AppBootstrapData {
+  accounts: Account[];
+  categories: Category[];
   transactions: Transaction[];
-  budgets:      Budget[];
-  goals:        Goal[];
-  assets:       Asset[];
-  insights:     Insight[];
+  budgets: Budget[];
+  goals: Goal[];
+  assets: Asset[];
+  insights: Insight[];
 }
 
 const initialState: AppState = {
-  accounts:     mockAccounts,
-  categories:   mockCategories,
+  accounts: mockAccounts,
+  categories: mockCategories,
   transactions: mockTransactions,
-  budgets:      mockBudgets,
-  goals:        mockGoals,
-  assets:       mockAssets,
-  insights:     mockInsights,
+  budgets: mockBudgets,
+  goals: mockGoals,
+  assets: mockAssets,
+  insights: mockInsights,
 };
 
-// ── Actions ─────────────────────────────────────────────────────────
-
 type Action =
-  // Transaction
-  | { type: "ADD_TRANSACTION";    payload: Transaction }
+  | { type: "HYDRATE"; payload: AppState }
+  | { type: "ADD_TRANSACTION"; payload: Transaction }
   | { type: "UPDATE_TRANSACTION"; payload: Transaction }
   | { type: "DELETE_TRANSACTION"; payload: string }
-  // Budget
-  | { type: "UPSERT_BUDGET";  payload: Budget }
-  | { type: "DELETE_BUDGET";  payload: string }
-  // Goal
-  | { type: "ADD_GOAL";    payload: Goal }
+  | { type: "UPSERT_BUDGET"; payload: Budget }
+  | { type: "DELETE_BUDGET"; payload: string }
+  | { type: "ADD_GOAL"; payload: Goal }
   | { type: "UPDATE_GOAL"; payload: Goal }
   | { type: "DELETE_GOAL"; payload: string }
-  // Asset
-  | { type: "ADD_ASSET";    payload: Asset }
+  | { type: "ADD_ASSET"; payload: Asset }
   | { type: "UPDATE_ASSET"; payload: Asset }
   | { type: "DELETE_ASSET"; payload: string }
-  // Insight
   | { type: "MARK_INSIGHT_READ"; payload: string }
   | { type: "MARK_ALL_READ" }
-  // Category
   | { type: "ADD_CATEGORY"; payload: Category };
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
+    case "HYDRATE":
+      return action.payload;
     case "ADD_TRANSACTION":
       return { ...state, transactions: [action.payload, ...state.transactions] };
     case "UPDATE_TRANSACTION":
       return {
         ...state,
-        transactions: state.transactions.map((t) =>
-          t.id === action.payload.id ? action.payload : t
+        transactions: state.transactions.map((transaction) =>
+          transaction.id === action.payload.id ? action.payload : transaction
         ),
       };
     case "DELETE_TRANSACTION":
-      return { ...state, transactions: state.transactions.filter((t) => t.id !== action.payload) };
-
-    case "UPSERT_BUDGET":
-      const exists = state.budgets.find((b) => b.id === action.payload.id);
+      return {
+        ...state,
+        transactions: state.transactions.filter((transaction) => transaction.id !== action.payload),
+      };
+    case "UPSERT_BUDGET": {
+      const exists = state.budgets.some((budget) => budget.id === action.payload.id);
       return {
         ...state,
         budgets: exists
-          ? state.budgets.map((b) => (b.id === action.payload.id ? action.payload : b))
+          ? state.budgets.map((budget) => budget.id === action.payload.id ? action.payload : budget)
           : [...state.budgets, action.payload],
       };
+    }
     case "DELETE_BUDGET":
-      return { ...state, budgets: state.budgets.filter((b) => b.id !== action.payload) };
-
+      return { ...state, budgets: state.budgets.filter((budget) => budget.id !== action.payload) };
     case "ADD_GOAL":
       return { ...state, goals: [...state.goals, action.payload] };
     case "UPDATE_GOAL":
-      return { ...state, goals: state.goals.map((g) => (g.id === action.payload.id ? action.payload : g)) };
+      return {
+        ...state,
+        goals: state.goals.map((goal) => goal.id === action.payload.id ? action.payload : goal),
+      };
     case "DELETE_GOAL":
-      return { ...state, goals: state.goals.filter((g) => g.id !== action.payload) };
-
+      return { ...state, goals: state.goals.filter((goal) => goal.id !== action.payload) };
     case "ADD_ASSET":
       return { ...state, assets: [...state.assets, action.payload] };
     case "UPDATE_ASSET":
-      return { ...state, assets: state.assets.map((a) => (a.id === action.payload.id ? action.payload : a)) };
+      return {
+        ...state,
+        assets: state.assets.map((asset) => asset.id === action.payload.id ? action.payload : asset),
+      };
     case "DELETE_ASSET":
-      return { ...state, assets: state.assets.filter((a) => a.id !== action.payload) };
-
+      return { ...state, assets: state.assets.filter((asset) => asset.id !== action.payload) };
     case "MARK_INSIGHT_READ":
       return {
         ...state,
-        insights: state.insights.map((i) => (i.id === action.payload ? { ...i, isRead: true } : i)),
+        insights: state.insights.map((insight) =>
+          insight.id === action.payload ? { ...insight, isRead: true } : insight
+        ),
       };
     case "MARK_ALL_READ":
-      return { ...state, insights: state.insights.map((i) => ({ ...i, isRead: true })) };
-
+      return { ...state, insights: state.insights.map((insight) => ({ ...insight, isRead: true })) };
     case "ADD_CATEGORY":
       return { ...state, categories: [...state.categories, action.payload] };
-
     default:
       return state;
   }
 }
 
-// ── Context ─────────────────────────────────────────────────────────
+interface ConnectionState {
+  mode: "guest" | "demo" | "cloud";
+  status: "loading" | "ready" | "error";
+  userName?: string;
+  error?: string;
+}
 
 interface AppContextValue {
-  state:    AppState;
+  state: AppState;
   dispatch: React.Dispatch<Action>;
+  connection: ConnectionState;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [connection, setConnection] = useState<ConnectionState>({
+    mode: "guest",
+    status: "loading",
+  });
+
+  useEffect(() => {
+    let active = true;
+
+    getAppBootstrapAction().then((result) => {
+      if (!active) return;
+      dispatch({ type: "HYDRATE", payload: result.data });
+      setConnection({
+        mode: result.mode,
+        status: result.error ? "error" : "ready",
+        userName: result.userName,
+        error: result.error,
+      });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
+    <AppContext.Provider value={{ state, dispatch, connection }}>
       {children}
     </AppContext.Provider>
   );
 }
 
 export function useApp() {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error("useApp harus digunakan di dalam <AppProvider>");
-  return ctx;
+  const context = useContext(AppContext);
+  if (!context) throw new Error("useApp harus digunakan di dalam <AppProvider>");
+  return context;
 }
-
-// ── Convenience hooks ───────────────────────────────────────────────
 
 export function useTransactions() {
   const { state } = useApp();
@@ -163,31 +181,25 @@ export function useTransactions() {
 }
 
 export function useBudgets() {
-  const { state } = useApp();
-  return state.budgets;
+  return useApp().state.budgets;
 }
 
 export function useGoals() {
-  const { state } = useApp();
-  return state.goals;
+  return useApp().state.goals;
 }
 
 export function useAssets() {
-  const { state } = useApp();
-  return state.assets;
+  return useApp().state.assets;
 }
 
 export function useInsights() {
-  const { state } = useApp();
-  return state.insights;
+  return useApp().state.insights;
 }
 
 export function useAccounts() {
-  const { state } = useApp();
-  return state.accounts;
+  return useApp().state.accounts;
 }
 
 export function useCategories() {
-  const { state } = useApp();
-  return state.categories;
+  return useApp().state.categories;
 }

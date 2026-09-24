@@ -1,111 +1,121 @@
-/* ============================================================
-   PUNDI — Design Tokens (DESIGN.md § 4.2 – 4.3 source of truth)
-   Jangan tambah hex/font baru di luar file ini.
-   ============================================================ */
+/* PUNDI — Modern Material + light claymorphism design tokens */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-/* General Sans via Fontshare CDN */
-@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
 
-/* ── Color Tokens ─────────────────────────────────────────── */
 :root {
-  /* Backgrounds */
-  --color-paper:   #EEF1EF;   /* background utama */
-  --color-surface: #FFFFFF;   /* background kartu/panel */
+  color-scheme: light;
+
+  /* Surfaces */
+  --color-paper: #F5F4FB;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F0EEFA;
+  --color-surface-high: #FAF9FF;
 
   /* Text */
-  --color-ink:       #16201D; /* teks utama (hampir hitam, undertone hijau) */
-  --color-ink-muted: #5B655F; /* teks sekunder, label, caption */
+  --color-ink: #211F32;
+  --color-ink-muted: #716E82;
+  --color-ink-soft: #9894A8;
 
-  /* Semantic – hanya untuk makna, BUKAN dekorasi */
-  --color-pine:    #1B4B3F;   /* primary: aksi, positif, income, aman */
-  --color-pine-10: #E8F0EE;   /* tint pine sangat terang (bg chip/badge) */
-  --color-pine-20: #C8DDD8;   /* tint pine terang */
-  --color-pine-40: #7AADA4;   /* tint pine sedang */
+  /* Primary — mapped to legacy pine aliases for existing components */
+  --color-pine: #5B4AEF;
+  --color-pine-hover: #4B3BD1;
+  --color-pine-10: #EFECFF;
+  --color-pine-20: #DCD6FF;
+  --color-pine-40: #978CF7;
 
-  --color-ember:    #9C4A2E;  /* secondary: negatif, expense, lewat limit */
-  --color-ember-10: #F5EAE6;  /* tint ember sangat terang */
-  --color-ember-20: #E5BDB0;  /* tint ember terang */
+  /* Semantic */
+  --color-ember: #E95766;
+  --color-ember-10: #FFF0F1;
+  --color-ember-20: #F9BCC2;
+  --color-brass: #D99418;
+  --color-brass-10: #FFF6DC;
+  --color-warning: #C98010;
+  --color-warning-10: #FFF5DD;
+  --color-mint: #159B78;
+  --color-mint-10: #E5F8F1;
+  --color-sky: #3E86ED;
+  --color-sky-10: #EAF3FF;
 
-  --color-brass:    #B08A3E;  /* accent: jarang, goal tercapai, badge penting */
-  --color-brass-10: #F6F0E4;  /* tint brass sangat terang */
+  /* Structure */
+  --color-rule: #E4E0F0;
+  --color-rule-strong: #D4CEE5;
+  --color-scrim: rgba(28, 24, 47, 0.56);
 
-  --color-warning:  #B8862E;  /* status "mendekati limit anggaran" */
-  --color-warning-10: #F6EFE1; /* tint warning */
+  /* Type */
+  --font-display: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Manrope", "Segoe UI", system-ui, sans-serif;
 
-  /* Structural */
-  --color-rule:    #C8CDC7;   /* garis hairline: border kartu, baseline chart, divider */
+  --text-display-xl: clamp(2.15rem, 4vw, 3.25rem);
+  --text-display-l: clamp(1.65rem, 2.5vw, 2.1rem);
+  --text-heading: 1.125rem;
+  --text-body: 0.9375rem;
+  --text-small: 0.8125rem;
+  --text-data-l: clamp(1.45rem, 2.5vw, 2rem);
+  --text-data-m: 0.9375rem;
 
-  /* ── Typography Tokens ─────────────────────────────────── */
-  --font-display: 'Fraunces', Georgia, serif;         /* headline, angka saldo besar */
-  --font-ui:      'General Sans', system-ui, sans-serif; /* nav, label, body, tombol */
-  --font-mono:    'IBM Plex Mono', 'Courier New', monospace; /* SEMUA angka nominal */
+  --leading-display-xl: 1.08;
+  --leading-display-l: 1.15;
+  --leading-heading: 1.35;
+  --leading-body: 1.6;
+  --leading-small: 1.45;
+  --leading-data-l: 1.15;
+  --leading-data-m: 1.4;
 
-  /* Type Scale (base 16px, ratio ~1.25) */
-  --text-display-xl: 2.5rem;    /* 40px – angka saldo utama */
-  --text-display-l:  1.75rem;   /* 28px – judul halaman */
-  --text-heading:    1.25rem;   /* 20px – judul kartu/section */
-  --text-body:       1rem;      /* 16px – teks umum */
-  --text-small:      0.875rem;  /* 14px – label, caption */
-  --text-data-l:     1.5rem;    /* 24px mono – angka besar summary card */
-  --text-data-m:     1rem;      /* 16px mono – angka tabel transaksi */
+  /* Spacing */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
 
-  /* Line Heights */
-  --leading-display-xl: 2.75rem;  /* 44px */
-  --leading-display-l:  2.125rem; /* 34px */
-  --leading-heading:    1.625rem; /* 26px */
-  --leading-body:       1.5rem;   /* 24px */
-  --leading-small:      1.25rem;  /* 20px */
-  --leading-data-l:     1.75rem;  /* 28px */
-  --leading-data-m:     1.375rem; /* 22px */
+  /* Layout */
+  --sidebar-width: 16.5rem;
+  --sidebar-width-collapsed: 5rem;
+  --container-max: 90rem;
+  --gutter: clamp(1rem, 2vw, 2rem);
+  --card-padding: clamp(1rem, 2vw, 1.5rem);
+  --card-padding-mobile: 1rem;
 
-  /* ── Spacing Tokens (base 8px) ──────────────────────────── */
-  --space-1:  0.5rem;    /* 8px */
-  --space-2:  1rem;      /* 16px */
-  --space-3:  1.5rem;    /* 24px */
-  --space-4:  2rem;      /* 32px */
-  --space-6:  3rem;      /* 48px */
-  --space-8:  4rem;      /* 64px */
+  /* Shape */
+  --radius-card: 1.375rem;
+  --radius-sm: 0.875rem;
+  --radius-xs: 0.625rem;
+  --radius-full: 9999px;
 
-  /* ── Layout Tokens ──────────────────────────────────────── */
-  --sidebar-width:          15rem;   /* 240px */
-  --sidebar-width-collapsed: 4rem;   /* 64px icon-only */
-  --container-max:          80rem;   /* 1280px */
-  --gutter:                 1.5rem;  /* 24px */
-  --card-padding:           1.5rem;  /* 24px desktop */
-  --card-padding-mobile:    1rem;    /* 16px mobile */
+  /* Material / clay elevation */
+  --shadow-card:
+    0 1px 2px rgba(49, 40, 91, 0.03),
+    0 10px 28px rgba(73, 61, 133, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --shadow-card-hover:
+    0 16px 36px rgba(73, 61, 133, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  --shadow-clay:
+    10px 12px 28px rgba(82, 68, 151, 0.13),
+    -8px -8px 20px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 5px rgba(70, 56, 150, 0.06);
+  --shadow-float: 0 22px 60px rgba(43, 35, 80, 0.2);
+  --shadow-focus: 0 0 0 4px rgba(91, 74, 239, 0.18);
 
-  /* ── Radius Tokens ──────────────────────────────────────── */
-  --radius-card:  6px;  /* kartu, panel */
-  --radius-sm:    4px;  /* badge, input, elemen kecil */
-  --radius-full:  9999px; /* pill/chip */
+  --border-hairline: 1px solid rgba(120, 107, 175, 0.18);
+  --border-active: 1.5px solid var(--color-pine);
 
-  /* ── Shadow Tokens ──────────────────────────────────────── */
-  /* Kartu: hairline border, BUKAN shadow tebal */
-  --shadow-card:   none;
-  --shadow-float:  0 4px 12px rgba(22, 32, 29, 0.08); /* modal, dropdown saja */
-  --shadow-focus:  0 0 0 2px var(--color-pine);        /* focus ring */
+  --duration-fast: 150ms;
+  --duration-normal: 240ms;
+  --duration-slow: 420ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* ── Border ─────────────────────────────────────────────── */
-  --border-hairline: 1px solid var(--color-rule);
-  --border-active:   1.5px solid var(--color-pine);
-
-  /* ── Motion Tokens ──────────────────────────────────────── */
-  --duration-fast:   150ms;
-  --duration-normal: 300ms;
-  --duration-slow:   500ms;
-  --ease-standard:   cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* ── Chart Tokens ───────────────────────────────────────── */
-  --chart-baseline-color:     var(--color-rule);
-  --chart-baseline-width:     1.5px;
-  --chart-income-color:       var(--color-pine);
-  --chart-expense-color:      var(--color-ember);
-  --chart-networth-color:     var(--color-pine);
-  --chart-category-1:         var(--color-pine);
-  --chart-category-2:         var(--color-pine-40);
-  --chart-category-3:         var(--color-ink-muted);
-  --chart-category-4:         var(--color-brass);
-  --chart-category-5:         var(--color-pine-20);
-  --chart-category-6:         var(--color-ember-20);
+  --chart-baseline-color: var(--color-rule);
+  --chart-baseline-width: 1px;
+  --chart-income-color: var(--color-mint);
+  --chart-expense-color: var(--color-ember);
+  --chart-networth-color: var(--color-pine);
+  --chart-category-1: #5B4AEF;
+  --chart-category-2: #3E86ED;
+  --chart-category-3: #159B78;
+  --chart-category-4: #F0A33B;
+  --chart-category-5: #E95766;
+  --chart-category-6: #9B72E8;
 }
