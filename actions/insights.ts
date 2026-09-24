@@ -5,8 +5,9 @@
  * Server Actions untuk pengelolaan insight dan notifikasi finansial.
  */
 
-import { createSessionServerClient } from "@/lib/appwrite/server";
+import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
+import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { Query } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockInsights, type Insight } from "@/lib/data/mock";
@@ -18,7 +19,7 @@ export async function getInsightsAction(): Promise<{ data: Insight[]; error?: st
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     const response = await databases.listDocuments(
       DATABASE_ID,
       COLLECTIONS.INSIGHTS,
@@ -46,7 +47,7 @@ export async function markAllInsightsReadAction() {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     const unread = await databases.listDocuments(
       DATABASE_ID,
       COLLECTIONS.INSIGHTS,
@@ -54,6 +55,7 @@ export async function markAllInsightsReadAction() {
     );
 
     for (const doc of unread.documents) {
+      await getOwnedDocument(databases, COLLECTIONS.INSIGHTS, doc.$id, user.id);
       await databases.updateDocument(DATABASE_ID, COLLECTIONS.INSIGHTS, doc.$id, {
         isRead: true,
       });
