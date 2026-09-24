@@ -1,21 +1,26 @@
 /**
- * lib/appwrite/server.ts
- * Server-side Appwrite client (for Server Components and Server Actions)
+ * Server-side Appwrite clients for Server Components and Server Actions.
  */
-import { Client, Account, Databases, Users } from "node-appwrite";
+import { Account, Client, Databases, Users } from "node-appwrite";
 import { cookies } from "next/headers";
+import {
+  APPWRITE_ENDPOINT,
+  APPWRITE_PROJECT_ID,
+  normalizeEnvironmentValue,
+} from "@/lib/appwrite/config";
+
+function createBaseClient() {
+  return new Client()
+    .setEndpoint(APPWRITE_ENDPOINT)
+    .setProject(APPWRITE_PROJECT_ID);
+}
 
 export async function createSessionServerClient() {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://cloud.appwrite.io/v1")
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "pundi-production");
-
+  const client = createBaseClient();
   const cookieStore = await cookies();
   const session = cookieStore.get("pundi-session");
 
-  if (session) {
-    client.setSession(session.value);
-  }
+  if (session) client.setSession(session.value);
 
   return {
     get account() {
@@ -28,10 +33,8 @@ export async function createSessionServerClient() {
 }
 
 export async function createAdminServerClient() {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://cloud.appwrite.io/v1")
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "pundi-production")
-    .setKey(process.env.APPWRITE_API_KEY || "");
+  const apiKey = normalizeEnvironmentValue(process.env.APPWRITE_API_KEY);
+  const client = createBaseClient().setKey(apiKey);
 
   return {
     get account() {

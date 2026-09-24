@@ -1,16 +1,14 @@
-/**
- * lib/appwrite/collections.ts
- * Database and Collection ID constants
- */
+/** Appwrite database and collection identifiers. */
+import { APPWRITE_DATABASE_ID } from "@/lib/appwrite/config";
 
-export const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "pundi-db";
+export const DATABASE_ID = APPWRITE_DATABASE_ID;
 
 export const COLLECTIONS = {
-  ACCOUNTS:     "accounts",
-  CATEGORIES:   "categories",
+  ACCOUNTS: "accounts",
+  CATEGORIES: "categories",
   TRANSACTIONS: "transactions",
-  BUDGETS:      "budgets",
-  GOALS:        "goals",
-  ASSETS:       "assets",
-  INSIGHTS:     "insights",
+  BUDGETS: "budgets",
+  GOALS: "goals",
+  ASSETS: "assets",
+  INSIGHTS: "insights",
 } as const;

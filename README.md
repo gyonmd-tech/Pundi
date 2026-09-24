@@ -34,10 +34,10 @@ Buka `http://localhost:3000`. Pilih **Mode demo** pada halaman autentikasi untuk
 Isi `.env.local` dengan konfigurasi proyek Anda:
 
 ```env
-NEXT_PUBLIC_APPWRITE_ENDPOINT="https://sgp.cloud.appwrite.io/v1"
-NEXT_PUBLIC_APPWRITE_PROJECT_ID="your_project_id_here"
-NEXT_PUBLIC_APPWRITE_DATABASE_ID="pundi-db"
-APPWRITE_API_KEY="your_api_key_here"
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://sgp.cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_project_id_here
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=pundi-db
+APPWRITE_API_KEY=your_api_key_here
 ```
 
 Setelah kredensial terisi dan proyek Appwrite aktif, buat database serta koleksi dengan:
@@ -47,6 +47,7 @@ npm run db:setup
 ```
 
 API key hanya dipakai oleh skrip setup/server. Jangan memasukkan `.env` atau `.env.local` ke Git; keduanya sudah diabaikan melalui `.gitignore`.
+Di Vercel, masukkan nilai environment sebagai teks polos tanpa tanda kutip pembuka/penutup. Pastikan proyek Appwrite berstatus aktif dan API key memiliki izin `users.write`, `databases.read`, serta `databases.write`.
 
 ## Perintah proyek
 

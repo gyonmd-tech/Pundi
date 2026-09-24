@@ -7,6 +7,29 @@ import { seedDefaultCategoriesAction } from "./seed";
 
 const SESSION_COOKIE_NAME = "pundi-session";
 
+function authErrorMessage(error: unknown, fallback: string) {
+  const raw = error instanceof Error ? error.message : "";
+  const message = raw.toLowerCase();
+
+  if (message.includes("invalid endpoint url")) {
+    return "Konfigurasi layanan akun belum valid. Periksa endpoint Appwrite pada environment deployment.";
+  }
+  if (message.includes("project is paused")) {
+    return "Layanan akun sedang tidak aktif. Aktifkan kembali proyek Appwrite, lalu coba lagi.";
+  }
+  if (message.includes("already exists") || message.includes("user_already_exists")) {
+    return "Email ini sudah terdaftar. Silakan masuk menggunakan akun tersebut.";
+  }
+  if (message.includes("invalid credentials") || message.includes("user_invalid_credentials")) {
+    return "Email atau password tidak cocok.";
+  }
+  if (message.includes("api key") || message.includes("scope") || message.includes("unauthorized")) {
+    return "Layanan akun belum memiliki izin yang diperlukan. Periksa API key Appwrite pada deployment.";
+  }
+
+  return raw || fallback;
+}
+
 export interface UserSession {
   id: string;
   name: string;
@@ -60,7 +83,7 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
 
   try {
     const { account } = await createAdminServerClient();
-    const session = await account.createEmailPasswordSession(email, password);
+    const session = await account.createEmailPasswordSession({ email, password });
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, session.secret, {
       httpOnly: true,
@@ -71,8 +94,7 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
     });
     return { success: true };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal masuk. Periksa email dan password.";
-    return { success: false, error: message };
+    return { success: false, error: authErrorMessage(error, "Gagal masuk. Periksa email dan password.") };
   }
 }
 
@@ -91,8 +113,8 @@ export async function signUpAction(formData: FormData): Promise<{ success: boole
   try {
     const { account, users } = await createAdminServerClient();
     const userId = ID.unique();
-    await users.create(userId, email, undefined, password, name);
-    const session = await account.createEmailPasswordSession(email, password);
+    await users.create({ userId, email, password, name });
+    const session = await account.createEmailPasswordSession({ email, password });
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, session.secret, {
       httpOnly: true,
@@ -108,8 +130,7 @@ export async function signUpAction(formData: FormData): Promise<{ success: boole
     }
     return { success: true };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal mendaftar akun baru.";
-    return { success: false, error: message };
+    return { success: false, error: authErrorMessage(error, "Gagal mendaftar akun baru.") };
   }
 }
 

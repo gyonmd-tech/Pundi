@@ -1,22 +1,17 @@
 /**
- * lib/appwrite/client.ts
- * Browser-side Appwrite client
+ * Browser-side Appwrite client.
  */
-import { Client, Account, Databases } from "appwrite";
+import { Account, Client, Databases } from "appwrite";
+import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID } from "@/lib/appwrite/config";
 
 export function createBrowserAppwriteClient() {
-  const client = new Client();
-
-  const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://cloud.appwrite.io/v1";
-  const project  = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "pundi-production";
-
-  client
-    .setEndpoint(endpoint)
-    .setProject(project);
+  const client = new Client()
+    .setEndpoint(APPWRITE_ENDPOINT)
+    .setProject(APPWRITE_PROJECT_ID);
 
   return {
     client,
-    account:   new Account(client),
+    account: new Account(client),
     databases: new Databases(client),
   };
 }
