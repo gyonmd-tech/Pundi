@@ -6,11 +6,11 @@
  * dengan CategoryIcon, savings rate gauge, dan toast feedback.
  */
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CashFlowChart }          from "@/components/charts/CashFlowChart";
 import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
 import { formatRupiah } from "@/lib/utils/formatter";
-import { getCashFlowData, getCategoryBreakdown, getMonthlySummary } from "@/lib/data/mock";
+import { useCategories, useTransactions } from "@/lib/data/store";
 import { useToast } from "@/lib/context/ToastContext";
 import { TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -28,13 +28,41 @@ const MONTHS = Array.from({ length: 6 }, (_, monthsAgo) => {
 export default function ArusKasPage() {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const { showToast } = useToast();
+  const transactions = useTransactions();
+  const categories = useCategories();
 
-  const cashFlow    = getCashFlowData();
-  const selected    = MONTHS[selectedIdx];
-  const breakdown   = getCategoryBreakdown(selected.period);
-  const summary     = getMonthlySummary(selected.monthsAgo);
-  const prevSummary = getMonthlySummary(selected.monthsAgo + 1);
-  const netFlow     = summary.income - summary.expense;
+  const selected = MONTHS[selectedIdx];
+  const monthlySummary = React.useCallback((period: string) => {
+    return transactions.reduce((total, transaction) => {
+      if (new Date(transaction.date).toISOString().slice(0, 7) !== period) return total;
+      if (transaction.type === "income") total.income += transaction.amount;
+      if (transaction.type === "expense") total.expense += transaction.amount;
+      return total;
+    }, { income: 0, expense: 0 });
+  }, [transactions]);
+  const cashFlow = useMemo(() => [...MONTHS].reverse().map((month) => ({
+    month: new Intl.DateTimeFormat("id-ID", { month: "short" }).format(new Date(`${month.period}-01T12:00:00`)),
+    ...monthlySummary(month.period),
+  })), [monthlySummary]);
+  const summary = monthlySummary(selected.period);
+  const previousDate = new Date(`${selected.period}-01T12:00:00`);
+  previousDate.setMonth(previousDate.getMonth() - 1);
+  const prevSummary = monthlySummary(`${previousDate.getFullYear()}-${String(previousDate.getMonth() + 1).padStart(2, "0")}`);
+  const breakdown = useMemo(() => {
+    const grouped = new Map<string, number>();
+    for (const transaction of transactions) {
+      if (transaction.type !== "expense" || !transaction.categoryId) continue;
+      if (new Date(transaction.date).toISOString().slice(0, 7) !== selected.period) continue;
+      grouped.set(transaction.categoryId, (grouped.get(transaction.categoryId) || 0) + transaction.amount);
+    }
+    return [...grouped.entries()]
+      .map(([categoryId, amount]) => {
+        const category = categories.find((item) => item.id === categoryId);
+        return { name: category?.name || "Lainnya", amount, color: category?.color };
+      })
+      .sort((a, b) => b.amount - a.amount);
+  }, [categories, selected.period, transactions]);
+  const netFlow = summary.income - summary.expense;
 
   function delta(current: number, prev: number) {
     if (prev <= 0) return 0;

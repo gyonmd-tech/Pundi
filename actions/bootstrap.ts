@@ -98,10 +98,13 @@ export async function getAppBootstrapAction(): Promise<{
         transactions: transactions.documents.map((doc: any) => ({
           id: doc.$id,
           accountId: doc.accountId,
+          destinationAccountId: doc.destinationAccountId || undefined,
+          transferKind: doc.transferKind || undefined,
           categoryId: doc.categoryId || undefined,
           type: doc.type,
           amount: Number(doc.amount),
           date: new Date(doc.date),
+          createdAt: new Date(doc.$createdAt),
           note: doc.note || undefined,
           tags: doc.tags || [],
         })),

@@ -52,6 +52,8 @@
           "attributes": [
             { "key": "userId", "type": "string", "size": 36, "required": true },
             { "key": "accountId", "type": "string", "size": 36, "required": true },
+            { "key": "destinationAccountId", "type": "string", "size": 36, "required": false },
+            { "key": "transferKind", "type": "string", "size": 24, "required": false },
             { "key": "categoryId", "type": "string", "size": 36, "required": false },
             { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
             { "key": "amount", "type": "integer", "required": true },
