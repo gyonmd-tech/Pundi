@@ -17,6 +17,7 @@ import { useToast } from "@/lib/context/ToastContext";
 import { Plus, X, Target, Trash2, Sparkles } from "lucide-react";
 import type { Goal } from "@/lib/data/mock";
 import { cn } from "@/lib/utils/cn";
+import { createGoalAction, deleteGoalAction, updateGoalAction } from "@/actions/goals";
 
 const MONTHLY_SAVINGS = 1_200_000;
 
@@ -70,7 +71,7 @@ export default function TujuanPage() {
     setForm(f => ({ ...f, targetDate: d.toISOString().slice(0, 10) }));
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!form.name.trim()) {
       showToast({
         type: "error",
@@ -92,15 +93,21 @@ export default function TujuanPage() {
       return;
     }
 
-    const payload: Goal = {
-      id:              editGoal?.id ?? `goal-${Date.now()}`,
-      name:            form.name.trim(),
-      targetAmount:    targetVal,
-      currentAmount:   currentVal,
-      targetDate:      new Date(form.targetDate || Date.now()),
+    const goalData = {
+      name: form.name.trim(),
+      targetAmount: targetVal,
+      currentAmount: currentVal,
+      targetDate: new Date(`${form.targetDate}T12:00:00`),
       linkedAccountId: form.linkedAccountId || undefined,
     };
-
+    const result = editGoal
+      ? await updateGoalAction({ ...goalData, id: editGoal.id })
+      : await createGoalAction(goalData);
+    if (!result.success) {
+      showToast({ type: "error", title: "Tujuan gagal disimpan", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
+    const payload: Goal = { ...goalData, id: editGoal?.id || (result as unknown as { id: string }).id };
     dispatch({ type: editGoal ? "UPDATE_GOAL" : "ADD_GOAL", payload });
     setShowForm(false);
 
@@ -111,8 +118,13 @@ export default function TujuanPage() {
     });
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     const g = goals.find(item => item.id === id);
+    const result = await deleteGoalAction(id);
+    if (!result.success) {
+      showToast({ type: "error", title: "Tujuan gagal dihapus", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
     dispatch({ type: "DELETE_GOAL", payload: id });
     setDeleteId(null);
     showToast({
