@@ -41,6 +41,9 @@ const initialState: AppState = {
 
 type Action =
   | { type: "HYDRATE"; payload: AppState }
+  | { type: "ADD_ACCOUNT"; payload: Account }
+  | { type: "UPDATE_ACCOUNT"; payload: Account }
+  | { type: "DELETE_ACCOUNT"; payload: string }
   | { type: "ADD_TRANSACTION"; payload: Transaction }
   | { type: "UPDATE_TRANSACTION"; payload: Transaction }
   | { type: "DELETE_TRANSACTION"; payload: string }
@@ -60,6 +63,12 @@ function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "HYDRATE":
       return action.payload;
+    case "ADD_ACCOUNT":
+      return { ...state, accounts: [...state.accounts, action.payload] };
+    case "UPDATE_ACCOUNT":
+      return { ...state, accounts: state.accounts.map((account) => account.id === action.payload.id ? action.payload : account) };
+    case "DELETE_ACCOUNT":
+      return { ...state, accounts: state.accounts.filter((account) => account.id !== action.payload) };
     case "ADD_TRANSACTION":
       return { ...state, transactions: [action.payload, ...state.transactions] };
     case "UPDATE_TRANSACTION":
@@ -123,6 +132,7 @@ interface ConnectionState {
   mode: "guest" | "demo" | "cloud";
   status: "loading" | "ready" | "error";
   userName?: string;
+  userEmail?: string;
   error?: string;
 }
 
@@ -151,6 +161,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         mode: result.mode,
         status: result.error ? "error" : "ready",
         userName: result.userName,
+        userEmail: result.userEmail,
         error: result.error,
       });
     });
