@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/Input";
  */
 
 import React, { useState } from "react";
-import { useApp, useBudgets, useCategories } from "@/lib/data/store";
+import { useApp, useBudgets, useCategories, useTransactions } from "@/lib/data/store";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
 import { formatRupiah, formatDate, getBudgetStatus } from "@/lib/utils/formatter";
-import { getSpentByCategory } from "@/lib/data/mock";
+import { upsertBudgetAction, deleteBudgetAction } from "@/actions/budgets";
 import { useToast } from "@/lib/context/ToastContext";
 import { Plus, X, AlertTriangle, Trash2, PieChart, Sparkles } from "lucide-react";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
@@ -23,6 +23,7 @@ export default function AnggaranPage() {
   const { dispatch }  = useApp();
   const budgets       = useBudgets();
   const categories    = useCategories();
+  const transactions  = useTransactions();
   const { showToast } = useToast();
 
   const [showForm, setShowForm]         = useState(false);
@@ -31,12 +32,15 @@ export default function AnggaranPage() {
   const [limitAmount, setLimitAmount]   = useState("");
   const [deleteId, setDeleteId]         = useState<string | null>(null);
   const period = CURRENT_PERIOD;
+  const spentByCategory = (id: string, selectedPeriod: string) => transactions
+    .filter((transaction) => transaction.type === "expense" && transaction.categoryId === id && new Date(transaction.date).toISOString().slice(0, 7) === selectedPeriod)
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
 
   const thisPeriodBudgets = budgets
     .filter((b) => b.period === period)
     .map((b) => {
       const cat   = categories.find((c) => c.id === b.categoryId);
-      const spent = getSpentByCategory(b.categoryId, period);
+      const spent = spentByCategory(b.categoryId, period);
       return { ...b, category: cat, spent };
     })
     .sort((a, b) => {
@@ -51,7 +55,7 @@ export default function AnggaranPage() {
   const usedCategoryIds = budgets.filter((b) => b.period === period).map((b) => b.categoryId);
   const availableCategories = categories.filter((c) => c.type === "expense" && !usedCategoryIds.includes(c.id));
 
-  function handleSave() {
+  async function handleSave() {
     const amt = parseInt(limitAmount.replace(/\D/g, ""), 10);
     if (!categoryId || !amt || amt <= 0) {
       showToast({
@@ -65,15 +69,18 @@ export default function AnggaranPage() {
     const selectedCat = categories.find((c) => c.id === categoryId);
     const existing = budgets.find((b) => b.categoryId === categoryId && b.period === period);
 
-    dispatch({
-      type: "UPSERT_BUDGET",
-      payload: {
-        id:          editId ?? existing?.id ?? `bud-${categoryId}-${period}`,
-        categoryId,
-        period,
-        limitAmount: amt,
-      },
-    });
+    const draft = {
+      id: editId ?? existing?.id ?? `bud-${categoryId}-${period}`,
+      categoryId,
+      period,
+      limitAmount: amt,
+    };
+    const result = await upsertBudgetAction(draft);
+    if (!result.success) {
+      showToast({ type: "error", title: "Anggaran gagal disimpan", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
+    dispatch({ type: "UPSERT_BUDGET", payload: { ...draft, id: result.id || draft.id } });
 
     showToast({
       type: "success",
@@ -84,8 +91,13 @@ export default function AnggaranPage() {
     resetForm();
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     const bud = thisPeriodBudgets.find((b) => b.id === id);
+    const result = await deleteBudgetAction(id);
+    if (!result.success) {
+      showToast({ type: "error", title: "Anggaran gagal dihapus", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
     dispatch({ type: "DELETE_BUDGET", payload: id });
     setDeleteId(null);
     showToast({
@@ -109,7 +121,7 @@ export default function AnggaranPage() {
     setShowForm(true);
   }
 
-  const selectedCategoryCurrentSpent = categoryId ? getSpentByCategory(categoryId, period) : 0;
+  const selectedCategoryCurrentSpent = categoryId ? spentByCategory(categoryId, period) : 0;
 
   return (
     <div className="space-y-4">

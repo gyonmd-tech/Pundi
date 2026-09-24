@@ -7,6 +7,7 @@ import { useToast } from "@/lib/context/ToastContext";
 import { formatDate } from "@/lib/utils/formatter";
 import { Badge } from "@/components/ui/Badge";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { markAllInsightsReadAction } from "@/actions/insights";
 
 export function NotificationDropdown() {
   const insights = useInsights();
@@ -14,7 +15,12 @@ export function NotificationDropdown() {
   const { dispatch } = useApp();
   const { showToast } = useToast();
 
-  function markAllRead() {
+  async function markAllRead() {
+    const result = await markAllInsightsReadAction();
+    if (!result.success) {
+      showToast({ type: "error", title: "Notifikasi gagal diperbarui", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
     dispatch({ type: "MARK_ALL_READ" });
     showToast({ type: "success", title: "Semua sudah dibaca", message: "Insight terbaru telah ditandai sebagai dibaca." });
   }

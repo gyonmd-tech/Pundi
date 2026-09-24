@@ -19,6 +19,7 @@ import {
   Sparkles, Building, Coins, CircleDollarSign, Gem
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { createAssetAction, deleteAssetAction, updateAssetAction } from "@/actions/assets";
 
 const assetTypeConfig: Record<AssetType, { label: string; icon: any; color: string }> = {
   stock:       { label: "Saham",       icon: TrendingUp,       color: "var(--color-pine)" },
@@ -69,7 +70,7 @@ export default function AsetPage() {
     setShowForm(true);
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!form.name.trim()) {
       showToast({
         type: "error",
@@ -83,16 +84,22 @@ export default function AsetPage() {
     const buyVal   = parseInt(form.buyPrice.replace(/\D/g, ""), 10) || 0;
     const currVal  = parseInt(form.currentPrice.replace(/\D/g, ""), 10) || 0;
 
-    const payload: Asset = {
-      id:           editAsset?.id ?? `ast-${Date.now()}`,
-      type:         form.type,
-      name:         form.name.trim(),
-      units:        unitsVal,
-      buyPrice:     buyVal,
+    const assetData = {
+      type: form.type,
+      name: form.name.trim(),
+      units: unitsVal,
+      buyPrice: buyVal,
       currentPrice: currVal,
-      updatedAt:    new Date(),
+      updatedAt: new Date(),
     };
-
+    const result = editAsset
+      ? await updateAssetAction({ ...assetData, id: editAsset.id })
+      : await createAssetAction(assetData);
+    if (!result.success) {
+      showToast({ type: "error", title: "Aset gagal disimpan", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
+    const payload: Asset = { ...assetData, id: editAsset?.id || (result as unknown as { id: string }).id };
     dispatch({ type: editAsset ? "UPDATE_ASSET" : "ADD_ASSET", payload });
     setShowForm(false);
 
@@ -103,8 +110,13 @@ export default function AsetPage() {
     });
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     const a = assets.find(item => item.id === id);
+    const result = await deleteAssetAction(id);
+    if (!result.success) {
+      showToast({ type: "error", title: "Aset gagal dihapus", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
     dispatch({ type: "DELETE_ASSET", payload: id });
     setDeleteId(null);
     showToast({

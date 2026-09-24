@@ -14,6 +14,7 @@ import { CheckCheck, Bell, Sparkles, AlertTriangle, TrendingUp, Lightbulb, Check
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { InsightType } from "@/lib/data/mock";
+import { markAllInsightsReadAction } from "@/actions/insights";
 
 const filterTabs: { key: InsightType | "all"; label: string; icon: LucideIcon }[] = [
   { key: "all",            label: "Semua",    icon: Sparkles },
@@ -44,7 +45,12 @@ export default function InsightPage() {
   const unreadList = sortedInsights.filter((i) => !i.isRead);
   const readList   = sortedInsights.filter((i) => i.isRead);
 
-  function handleMarkAllRead() {
+  async function handleMarkAllRead() {
+    const result = await markAllInsightsReadAction();
+    if (!result.success) {
+      showToast({ type: "error", title: "Insight gagal diperbarui", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
     dispatch({ type: "MARK_ALL_READ" });
     showToast({
       type: "success",

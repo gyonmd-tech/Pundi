@@ -41,7 +41,7 @@ export async function getBudgetsAction(period?: string): Promise<{ data: Budget[
 export async function upsertBudgetAction(payload: Budget) {
   const user = await getAuthUserAction();
   if (!user || user.isDemo) {
-    return { success: true };
+    return { success: true, id: payload.id || `bud-demo-${Date.now()}` };
   }
 
   try {
@@ -58,21 +58,21 @@ export async function upsertBudgetAction(payload: Budget) {
           limitAmount: payload.limitAmount,
         }
       );
-    } else {
-      await databases.createDocument(
-        DATABASE_ID,
-        COLLECTIONS.BUDGETS,
-        ID.unique(),
-        {
-          userId: user.id,
-          categoryId: payload.categoryId,
-          period: payload.period,
-          limitAmount: payload.limitAmount,
-        }
-      );
+      return { success: true, id: payload.id };
     }
 
-    return { success: true };
+    const document = await databases.createDocument(
+      DATABASE_ID,
+      COLLECTIONS.BUDGETS,
+      ID.unique(),
+      {
+        userId: user.id,
+        categoryId: payload.categoryId,
+        period: payload.period,
+        limitAmount: payload.limitAmount,
+      }
+    );
+    return { success: true, id: document.$id };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
