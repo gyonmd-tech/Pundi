@@ -5,8 +5,9 @@
  * Server Actions untuk pengelolaan alokasi anggaran (Appwrite + Demo Fallback).
  */
 
-import { createSessionServerClient } from "@/lib/appwrite/server";
+import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
+import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { ID, Query } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockBudgets, type Budget } from "@/lib/data/mock";
@@ -18,7 +19,7 @@ export async function getBudgetsAction(period?: string): Promise<{ data: Budget[
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     const queries = [Query.equal("userId", user.id)];
     if (period) queries.push(Query.equal("period", period));
 
@@ -44,8 +45,9 @@ export async function upsertBudgetAction(payload: Budget) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     if (payload.id && !payload.id.startsWith("bud-")) {
+      await getOwnedDocument(databases, COLLECTIONS.BUDGETS, payload.id, user.id);
       await databases.updateDocument(
         DATABASE_ID,
         COLLECTIONS.BUDGETS,
@@ -83,7 +85,8 @@ export async function deleteBudgetAction(id: string) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
+    await getOwnedDocument(databases, COLLECTIONS.BUDGETS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.BUDGETS, id);
     return { success: true };
   } catch (err: any) {

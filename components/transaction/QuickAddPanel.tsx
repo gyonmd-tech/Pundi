@@ -32,7 +32,7 @@ const quickAmounts = [50_000, 100_000, 250_000, 500_000];
 export function QuickAddPanel({ onClose }: { onClose: () => void }) {
   const accounts = useAccounts();
   const categories = useCategories();
-  const { dispatch } = useApp();
+  const { dispatch, connection } = useApp();
   const { showToast } = useToast();
   const amountRef = React.useRef<HTMLInputElement>(null);
   const [type, setType] = React.useState<TransactionType>("expense");
@@ -52,9 +52,25 @@ export function QuickAddPanel({ onClose }: { onClose: () => void }) {
     return () => window.clearTimeout(timer);
   }, []);
 
+  const resolvedAccountId = accounts.some((account) => account.id === accountId)
+    ? accountId
+    : accounts[0]?.id ?? "";
+  const resolvedCategoryId = availableCategories.some((category) => category.id === categoryId)
+    ? categoryId
+    : "";
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!numericAmount || !accountId) {
+    if (connection.status === "loading") {
+      showToast({
+        type: "error",
+        title: "Data rekening masih dimuat",
+        message: "Tunggu sebentar sampai data cloud siap, lalu coba lagi.",
+      });
+      return;
+    }
+
+    if (!numericAmount || !resolvedAccountId) {
       showToast({
         type: "error",
         title: "Data belum lengkap",
@@ -64,8 +80,8 @@ export function QuickAddPanel({ onClose }: { onClose: () => void }) {
     }
 
     const payload = {
-      accountId,
-      categoryId: type === "transfer" ? undefined : categoryId || undefined,
+      accountId: resolvedAccountId,
+      categoryId: type === "transfer" ? undefined : resolvedCategoryId || undefined,
       type,
       amount: numericAmount,
       date: new Date(`${date}T12:00:00`),
@@ -164,7 +180,7 @@ export function QuickAddPanel({ onClose }: { onClose: () => void }) {
         <Field label="Rekening" required>
           <div className="relative">
             <WalletCards className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-ink-muted" />
-            <Select value={accountId} onChange={(event) => setAccountId(event.target.value)} className="pl-10">
+            <Select value={resolvedAccountId} onChange={(event) => setAccountId(event.target.value)} className="pl-10">
               {accounts.map((account) => (
                 <option key={account.id} value={account.id}>{account.name} · {formatRupiah(account.balance)}</option>
               ))}
@@ -174,7 +190,7 @@ export function QuickAddPanel({ onClose }: { onClose: () => void }) {
 
         {type !== "transfer" ? (
           <Field label="Kategori">
-            <Select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+            <Select value={resolvedCategoryId} onChange={(event) => setCategoryId(event.target.value)}>
               <option value="">Pilih kategori</option>
               {availableCategories.map((category) => (
                 <option key={category.id} value={category.id}>{category.name}</option>
@@ -203,7 +219,7 @@ export function QuickAddPanel({ onClose }: { onClose: () => void }) {
 
       <footer className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-rule bg-white/95 p-4 backdrop-blur">
         <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
-        <Button type="submit" loading={submitting}><Check className="h-4 w-4" /> Simpan transaksi</Button>
+        <Button type="submit" loading={submitting} disabled={connection.status === "loading" || !accounts.length}><Check className="h-4 w-4" /> Simpan transaksi</Button>
       </footer>
     </form>
   );

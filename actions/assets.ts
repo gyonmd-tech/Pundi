@@ -5,8 +5,9 @@
  * Server Actions untuk portofolio aset & investasi (Appwrite + Demo Fallback).
  */
 
-import { createSessionServerClient } from "@/lib/appwrite/server";
+import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
+import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { ID, Query } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockAssets, type Asset } from "@/lib/data/mock";
@@ -18,7 +19,7 @@ export async function getAssetsAction(): Promise<{ data: Asset[]; error?: string
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     const response = await databases.listDocuments(
       DATABASE_ID,
       COLLECTIONS.ASSETS,
@@ -48,7 +49,7 @@ export async function createAssetAction(payload: Omit<Asset, "id">) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     const doc = await databases.createDocument(
       DATABASE_ID,
       COLLECTIONS.ASSETS,
@@ -76,7 +77,8 @@ export async function updateAssetAction(payload: Asset) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
+    await getOwnedDocument(databases, COLLECTIONS.ASSETS, payload.id, user.id);
     await databases.updateDocument(
       DATABASE_ID,
       COLLECTIONS.ASSETS,
@@ -103,7 +105,8 @@ export async function deleteAssetAction(id: string) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
+    await getOwnedDocument(databases, COLLECTIONS.ASSETS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.ASSETS, id);
     return { success: true };
   } catch (err: any) {

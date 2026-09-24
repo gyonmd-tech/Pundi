@@ -5,8 +5,9 @@
  * Server Actions untuk tujuan tabungan (Appwrite + Demo Fallback).
  */
 
-import { createSessionServerClient } from "@/lib/appwrite/server";
+import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
+import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { ID, Query } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockGoals, type Goal } from "@/lib/data/mock";
@@ -18,7 +19,7 @@ export async function getGoalsAction(): Promise<{ data: Goal[]; error?: string }
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     const response = await databases.listDocuments(
       DATABASE_ID,
       COLLECTIONS.GOALS,
@@ -47,7 +48,7 @@ export async function createGoalAction(payload: Omit<Goal, "id">) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
     const doc = await databases.createDocument(
       DATABASE_ID,
       COLLECTIONS.GOALS,
@@ -75,7 +76,8 @@ export async function updateGoalAction(payload: Goal) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
+    await getOwnedDocument(databases, COLLECTIONS.GOALS, payload.id, user.id);
     await databases.updateDocument(
       DATABASE_ID,
       COLLECTIONS.GOALS,
@@ -102,7 +104,8 @@ export async function deleteGoalAction(id: string) {
   }
 
   try {
-    const { databases } = await createSessionServerClient();
+    const { databases } = await createAdminServerClient();
+    await getOwnedDocument(databases, COLLECTIONS.GOALS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.GOALS, id);
     return { success: true };
   } catch (err: any) {
