@@ -81,10 +81,9 @@ export async function deleteAccountAction(id: string) {
 
     const transactions = await databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
       Query.equal("userId", user.id),
-      Query.equal("accountId", id),
-      Query.limit(1),
+      Query.limit(500),
     ]);
-    if (transactions.total > 0) throw new Error("Rekening memiliki riwayat transaksi. Nonaktifkan rekening agar riwayat tetap utuh.");
+    if (transactions.documents.some((transaction) => transaction.accountId === id || transaction.destinationAccountId === id)) throw new Error("Rekening memiliki riwayat transaksi. Nonaktifkan rekening agar riwayat tetap utuh.");
 
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, id);
     return { success: true };

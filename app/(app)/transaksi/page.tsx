@@ -17,20 +17,29 @@ import { downloadExcel } from "@/lib/utils/excelExport";
 import { useToast } from "@/lib/context/ToastContext";
 import {
   Search, Filter, Plus, Trash2, ArrowDownLeft, ArrowUpRight,
-  ArrowLeftRight, ChevronDown, ChevronUp, X, FileSpreadsheet,
+  ArrowLeftRight, ChevronDown, ChevronUp, X, FileSpreadsheet, Pencil, Banknote,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import type { TransactionType } from "@/lib/data/mock";
+import type { Transaction, TransactionType } from "@/lib/data/mock";
 import { useQuickAdd } from "@/lib/context/QuickAddContext";
 import { deleteTransactionAction } from "@/actions/transactions";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
+import { QuickAddPanel } from "@/components/transaction/QuickAddPanel";
 
 const typeLabel: Record<TransactionType, { label: string; icon: LucideIcon; color: string; bg: string }> = {
   income:   { label: "Pemasukan",   icon: ArrowUpRight,   color: "var(--color-pine)",   bg: "var(--color-pine-10)" },
   expense:  { label: "Pengeluaran", icon: ArrowDownLeft,  color: "var(--color-ember)",  bg: "var(--color-ember-10)" },
   transfer: { label: "Transfer",    icon: ArrowLeftRight, color: "var(--color-brass)",  bg: "var(--color-brass-10)" },
 };
+
+const cashWithdrawalLabel = { label: "Tarik tunai", icon: Banknote, color: "#2563EB", bg: "#EFF6FF" };
+
+function formatRecordedDate(value: Date) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+  }).format(new Date(value));
+}
 
 export default function TransaksiPage() {
   const { dispatch }  = useApp();
@@ -48,11 +57,12 @@ export default function TransaksiPage() {
   const [filterTo, setFilterTo]           = useState("");
   const [showFilter, setShowFilter]       = useState(false);
   const [deleteId, setDeleteId]           = useState<string | null>(null);
+  const [editTransaction, setEditTransaction] = useState<Transaction | null>(null);
 
   const filtered = useMemo(() => {
     return transactions.filter((tx) => {
       if (filterType !== "all" && tx.type !== filterType) return false;
-      if (filterAccount !== "all" && tx.accountId !== filterAccount) return false;
+      if (filterAccount !== "all" && tx.accountId !== filterAccount && tx.destinationAccountId !== filterAccount) return false;
       if (filterCategory !== "all" && tx.categoryId !== filterCategory) return false;
       if (filterFrom && new Date(tx.date) < new Date(filterFrom)) return false;
       if (filterTo   && new Date(tx.date) > new Date(filterTo + "T23:59:59")) return false;
@@ -87,6 +97,17 @@ export default function TransaksiPage() {
         message: result.error || "Koneksi penyimpanan sedang bermasalah.",
       });
       return;
+    }
+    const balanceChanges = new Map<string, number>();
+    if (tx?.type === "income") balanceChanges.set(tx.accountId, -tx.amount);
+    if (tx?.type === "expense") balanceChanges.set(tx.accountId, tx.amount);
+    if (tx?.type === "transfer" && tx.destinationAccountId) {
+      balanceChanges.set(tx.accountId, tx.amount);
+      balanceChanges.set(tx.destinationAccountId, -tx.amount);
+    }
+    for (const [accountId, delta] of balanceChanges) {
+      const account = accounts.find((item) => item.id === accountId);
+      if (account) dispatch({ type: "UPDATE_ACCOUNT", payload: { ...account, balance: account.balance + delta } });
     }
     dispatch({ type: "DELETE_TRANSACTION", payload: id });
     setDeleteId(null);
@@ -437,7 +458,8 @@ export default function TransaksiPage() {
               {filtered.map((tx) => {
                 const acc = accounts.find((a) => a.id === tx.accountId);
                 const cat = categories.find((c) => c.id === tx.categoryId);
-                const typeCfg = typeLabel[tx.type];
+                const destination = accounts.find((a) => a.id === tx.destinationAccountId);
+                const typeCfg = tx.transferKind === "cash_withdrawal" ? cashWithdrawalLabel : typeLabel[tx.type];
                 const TypeIcon = typeCfg.icon;
 
                 return (
@@ -453,16 +475,18 @@ export default function TransaksiPage() {
                           {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
                         </p>
                         <div className="flex items-center gap-1.5 text-xs text-ink-muted mt-1 flex-wrap font-ui">
-                          <span className="font-medium text-ink/80">{cat?.name ?? (tx.type === "transfer" ? "Transfer" : "Lainnya")}</span>
+                          <span className="font-medium text-ink/80">{cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer" : "Lainnya")}</span>
                           <span className="text-rule">·</span>
-                          <span suppressHydrationWarning className="font-mono text-[11px]">{formatDate(tx.date, "short")}</span>
+                          <span suppressHydrationWarning className="font-mono text-[11px]">Transaksi {formatDate(tx.date, "short")}</span>
+                          <span className="text-rule">·</span>
+                          <span suppressHydrationWarning className="text-[10px]">Dicatat {formatRecordedDate(tx.createdAt || tx.date)}</span>
                           <span className="text-rule">·</span>
                           <div className="inline-flex items-center gap-1">
                             <div
                               className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                               style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
                             />
-                            <span className="text-[11px] truncate max-w-[110px]">{acc?.name ?? "—"}</span>
+                            <span className="text-[11px] truncate max-w-[150px]">{acc?.name ?? "—"}{destination ? ` → ${destination.name}` : ""}</span>
                           </div>
                         </div>
                       </div>
@@ -488,6 +512,14 @@ export default function TransaksiPage() {
                           {typeCfg.label}
                         </span>
                         <button
+                          onClick={() => setEditTransaction(tx)}
+                          className="p-1 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
+                          title="Edit transaksi"
+                          aria-label="Edit transaksi"
+                        >
+                          <Pencil size={13} strokeWidth={1.8} />
+                        </button>
+                        <button
                           onClick={() => setDeleteId(tx.id)}
                           className="p-1 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
                           title="Hapus transaksi"
@@ -507,7 +539,7 @@ export default function TransaksiPage() {
               <Table className="w-full text-left border-collapse">
                 <TableHeader>
                   <TableRow className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tanggal</TableHead>
+                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tanggal transaksi / dicatat</TableHead>
                     <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Transaksi & Kategori</TableHead>
                     <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Sumber Akun</TableHead>
                     <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tipe</TableHead>
@@ -519,7 +551,8 @@ export default function TransaksiPage() {
                   {filtered.map((tx) => {
                     const acc = accounts.find((a) => a.id === tx.accountId);
                     const cat = categories.find((c) => c.id === tx.categoryId);
-                    const typeCfg = typeLabel[tx.type];
+                    const destination = accounts.find((a) => a.id === tx.destinationAccountId);
+                    const typeCfg = tx.transferKind === "cash_withdrawal" ? cashWithdrawalLabel : typeLabel[tx.type];
                     const TypeIcon = typeCfg.icon;
 
                     return (
@@ -529,9 +562,10 @@ export default function TransaksiPage() {
                       >
                         {/* Tanggal */}
                         <TableCell className="px-4 py-3.5 whitespace-nowrap">
-                          <span suppressHydrationWarning className="text-small font-mono text-ink-muted">
-                            {formatDate(tx.date, "short")}
-                          </span>
+                          <div className="space-y-1">
+                            <span suppressHydrationWarning className="block text-small font-mono text-ink">{formatDate(tx.date, "short")}</span>
+                            <span suppressHydrationWarning className="block text-[10px] text-ink-muted">Dicatat {formatRecordedDate(tx.createdAt || tx.date)}</span>
+                          </div>
                         </TableCell>
 
                         {/* Deskripsi & Kategori */}
@@ -543,7 +577,7 @@ export default function TransaksiPage() {
                                 {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
                               </p>
                               <p className="text-xs text-ink-muted truncate font-ui">
-                                {cat?.name ?? (tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
+                                {cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
                               </p>
                             </div>
                           </div>
@@ -556,8 +590,8 @@ export default function TransaksiPage() {
                               className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                               style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
                             />
-                            <span className="text-small font-medium text-ink truncate max-w-[130px]" style={{ fontFamily: "var(--font-ui)" }}>
-                              {acc?.name ?? "—"}
+                            <span className="text-small font-medium text-ink truncate max-w-[190px]" style={{ fontFamily: "var(--font-ui)" }}>
+                              {acc?.name ?? "—"}{destination ? ` → ${destination.name}` : ""}
                             </span>
                           </div>
                         </TableCell>
@@ -592,14 +626,24 @@ export default function TransaksiPage() {
 
                         {/* Delete Action with tooltip */}
                         <TableCell className="px-4 py-3.5 text-right">
-                          <button
-                            onClick={() => setDeleteId(tx.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"
-                            title="Hapus transaksi"
-                            aria-label="Hapus transaksi"
-                          >
-                            <Trash2 size={15} strokeWidth={1.8} />
-                          </button>
+                          <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                            <button
+                              onClick={() => setEditTransaction(tx)}
+                              className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-all duration-150"
+                              title="Edit transaksi"
+                              aria-label="Edit transaksi"
+                            >
+                              <Pencil size={15} strokeWidth={1.8} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteId(tx.id)}
+                              className="p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"
+                              title="Hapus transaksi"
+                              aria-label="Hapus transaksi"
+                            >
+                              <Trash2 size={15} strokeWidth={1.8} />
+                            </button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -610,6 +654,14 @@ export default function TransaksiPage() {
           </>
         )}
       </div>
+
+      {editTransaction && (
+        <div className="fixed inset-0 z-50 bg-[rgba(28,24,47,0.42)] backdrop-blur-[3px]" role="dialog" aria-modal="true" aria-label="Edit transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditTransaction(null); }}>
+          <aside className="absolute inset-y-0 right-0 w-full overflow-hidden bg-white shadow-float sm:bottom-3 sm:right-3 sm:top-3 sm:max-w-[440px] sm:rounded-[26px] sm:border sm:border-pine/10">
+            <QuickAddPanel key={editTransaction.id} transaction={editTransaction} onClose={() => setEditTransaction(null)} />
+          </aside>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteId && (

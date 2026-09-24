@@ -3,13 +3,6 @@
 import React, { createContext, useContext, useEffect, useReducer, useState, type ReactNode } from "react";
 import { getAppBootstrapAction, type AppBootstrapData } from "@/actions/bootstrap";
 import {
-  mockAccounts,
-  mockCategories,
-  mockTransactions,
-  mockBudgets,
-  mockGoals,
-  mockAssets,
-  mockInsights,
   type Account,
   type Category,
   type Transaction,
@@ -30,13 +23,13 @@ interface AppState extends AppBootstrapData {
 }
 
 const initialState: AppState = {
-  accounts: mockAccounts,
-  categories: mockCategories,
-  transactions: mockTransactions,
-  budgets: mockBudgets,
-  goals: mockGoals,
-  assets: mockAssets,
-  insights: mockInsights,
+  accounts: [],
+  categories: [],
+  transactions: [],
+  budgets: [],
+  goals: [],
+  assets: [],
+  insights: [],
 };
 
 type Action =

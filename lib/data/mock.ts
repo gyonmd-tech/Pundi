@@ -39,10 +39,13 @@ export interface Category {
 export interface Transaction {
   id: string;
   accountId: string;
+  destinationAccountId?: string;
+  transferKind?: "account" | "cash_withdrawal";
   categoryId?: string;
   type: TransactionType;
   amount: number;
   date: Date;
+  createdAt?: Date;
   note?: string;
   tags: string[];
 }
