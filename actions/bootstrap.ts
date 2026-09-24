@@ -45,12 +45,13 @@ export async function getAppBootstrapAction(): Promise<{
   mode: "guest" | "demo" | "cloud";
   data: AppBootstrapData;
   userName?: string;
+  userEmail?: string;
   error?: string;
 }> {
   const user = await getAuthUserAction();
 
   if (!user) return { mode: "guest", data: demoData };
-  if (user.isDemo) return { mode: "demo", data: demoData, userName: user.name };
+  if (user.isDemo) return { mode: "demo", data: demoData, userName: user.name, userEmail: user.email };
 
   try {
     const { databases } = await createAdminServerClient();
@@ -76,6 +77,7 @@ export async function getAppBootstrapAction(): Promise<{
     return {
       mode: "cloud",
       userName: user.name,
+      userEmail: user.email,
       data: {
         accounts: accounts.documents.map((doc: any) => ({
           id: doc.$id,
@@ -137,6 +139,6 @@ export async function getAppBootstrapAction(): Promise<{
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Data cloud tidak dapat dimuat.";
-    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [] }, userName: user.name, error: message };
+    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [] }, userName: user.name, userEmail: user.email, error: message };
   }
 }

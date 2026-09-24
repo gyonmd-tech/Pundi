@@ -150,3 +150,21 @@ export async function logoutAction(): Promise<{ success: boolean }> {
   cookieStore.delete(SESSION_COOKIE_NAME);
   return { success: true };
 }
+export async function updateProfileNameAction(nameInput: string): Promise<{ success: boolean; name?: string; error?: string }> {
+  const user = await getAuthUserAction();
+  if (!user) return { success: false, error: "Sesi login telah berakhir." };
+
+  const name = nameInput.trim();
+  if (name.length < 2 || name.length > 100) {
+    return { success: false, error: "Nama harus terdiri dari 2–100 karakter." };
+  }
+  if (user.isDemo) return { success: true, name };
+
+  try {
+    const { users } = await createAdminServerClient();
+    await users.updateName({ userId: user.id, name });
+    return { success: true, name };
+  } catch (error: unknown) {
+    return { success: false, error: authErrorMessage(error, "Nama profil gagal diperbarui.") };
+  }
+}
