@@ -17,6 +17,8 @@ export type CategoryType = "income" | "expense";
 export type AssetType = "stock" | "mutual_fund" | "crypto" | "gold" | "property";
 export type InsightType = "budget_warning" | "goal_progress" | "trend" | "tip";
 export type BudgetStatus = "safe" | "warning" | "over";
+export type DebtDirection = "payable" | "receivable";
+export type DebtStatus = "open" | "paid";
 
 export interface Account {
   id: string;
@@ -41,6 +43,8 @@ export interface Transaction {
   accountId: string;
   destinationAccountId?: string;
   transferKind?: "account" | "cash_withdrawal";
+  recordKind?: "standard" | "balance_adjustment";
+  observedBalance?: number;
   categoryId?: string;
   type: TransactionType;
   amount: number;
@@ -48,6 +52,19 @@ export interface Transaction {
   createdAt?: Date;
   note?: string;
   tags: string[];
+}
+
+export interface Debt {
+  id: string;
+  direction: DebtDirection;
+  person: string;
+  amount: number;
+  remainingAmount: number;
+  dueDate?: Date;
+  note?: string;
+  status: DebtStatus;
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 export interface Budget {
@@ -240,6 +257,8 @@ export const mockGoals: Goal[] = [
     targetDate: new Date("2027-06-30"),
   },
 ];
+
+export const mockDebts: Debt[] = [];
 
 // ── Assets ─────────────────────────────────────────────────────────────
 

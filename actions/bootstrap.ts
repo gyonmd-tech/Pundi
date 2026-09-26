@@ -12,6 +12,7 @@ import {
   mockGoals,
   mockInsights,
   mockTransactions,
+  mockDebts,
   type Account,
   type Asset,
   type Budget,
@@ -19,6 +20,7 @@ import {
   type Goal,
   type Insight,
   type Transaction,
+  type Debt,
 } from "@/lib/data/mock";
 
 export interface AppBootstrapData {
@@ -29,6 +31,7 @@ export interface AppBootstrapData {
   goals: Goal[];
   assets: Asset[];
   insights: Insight[];
+  debts: Debt[];
 }
 
 const demoData: AppBootstrapData = {
@@ -39,6 +42,7 @@ const demoData: AppBootstrapData = {
   goals: mockGoals,
   assets: mockAssets,
   insights: mockInsights,
+  debts: mockDebts,
 };
 
 export async function getAppBootstrapAction(): Promise<{
@@ -56,7 +60,7 @@ export async function getAppBootstrapAction(): Promise<{
   try {
     const { databases } = await createAdminServerClient();
     const userQuery = [Query.equal("userId", user.id), Query.limit(500)];
-    const [accounts, categories, transactions, budgets, goals, assets, insights] = await Promise.all([
+    const [accounts, categories, transactions, budgets, goals, assets, insights, debts] = await Promise.all([
       databases.listDocuments(DATABASE_ID, COLLECTIONS.ACCOUNTS, userQuery),
       databases.listDocuments(DATABASE_ID, COLLECTIONS.CATEGORIES, userQuery),
       databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
@@ -71,6 +75,9 @@ export async function getAppBootstrapAction(): Promise<{
         Query.equal("userId", user.id),
         Query.orderDesc("$createdAt"),
         Query.limit(500),
+      ]),
+      databases.listDocuments(DATABASE_ID, COLLECTIONS.DEBTS, [
+        Query.equal("userId", user.id), Query.orderDesc("$createdAt"), Query.limit(500),
       ]),
     ]);
 
@@ -100,6 +107,8 @@ export async function getAppBootstrapAction(): Promise<{
           accountId: doc.accountId,
           destinationAccountId: doc.destinationAccountId || undefined,
           transferKind: doc.transferKind || undefined,
+          recordKind: doc.recordKind || "standard",
+          observedBalance: doc.observedBalance == null ? undefined : Number(doc.observedBalance),
           categoryId: doc.categoryId || undefined,
           type: doc.type,
           amount: Number(doc.amount),
@@ -138,10 +147,22 @@ export async function getAppBootstrapAction(): Promise<{
           isRead: Boolean(doc.isRead),
           createdAt: new Date(doc.$createdAt),
         })),
+        debts: debts.documents.map((doc: any) => ({
+          id: doc.$id,
+          direction: doc.direction,
+          person: doc.person,
+          amount: Number(doc.amount),
+          remainingAmount: Number(doc.remainingAmount),
+          dueDate: doc.dueDate ? new Date(doc.dueDate) : undefined,
+          note: doc.note || undefined,
+          status: doc.status,
+          createdAt: new Date(doc.$createdAt),
+          updatedAt: new Date(doc.$updatedAt),
+        })),
       },
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Data cloud tidak dapat dimuat.";
-    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [] }, userName: user.name, userEmail: user.email, error: message };
+    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [] }, userName: user.name, userEmail: user.email, error: message };
   }
 }

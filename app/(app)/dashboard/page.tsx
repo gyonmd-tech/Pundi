@@ -9,12 +9,14 @@ import {
   TrendingDown,
   TrendingUp,
   WalletCards,
+  HandCoins,
 } from "lucide-react";
 import { CashFlowChart } from "@/components/charts/CashFlowChart";
 import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
 import { AccountBalanceChart } from "@/components/charts/AccountBalanceChart";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { InsightFeed } from "@/components/dashboard/InsightFeed";
@@ -27,6 +29,7 @@ import {
   useGoals,
   useInsights,
   useTransactions,
+  useDebts,
 } from "@/lib/data/store";
 import type { Transaction } from "@/lib/data/mock";
 
@@ -37,7 +40,7 @@ function isSameMonth(date: Date, target: Date) {
 function summarize(transactions: Transaction[], target: Date) {
   return transactions.reduce(
     (result, transaction) => {
-      if (!isSameMonth(new Date(transaction.date), target)) return result;
+      if (!isSameMonth(new Date(transaction.date), target) || transaction.recordKind === "balance_adjustment") return result;
       if (transaction.type === "income") result.income += transaction.amount;
       if (transaction.type === "expense") result.expense += transaction.amount;
       return result;
@@ -53,6 +56,7 @@ export default function DashboardPage() {
   const insights = useInsights();
   const accounts = useAccounts();
   const categories = useCategories();
+  const debts = useDebts();
 
   const now = new Date();
   const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -100,6 +104,7 @@ export default function DashboardPage() {
         .filter(
           (transaction) =>
             transaction.type === "expense" &&
+            transaction.recordKind !== "balance_adjustment" &&
             transaction.categoryId === category.id &&
             isSameMonth(new Date(transaction.date), now)
         )
@@ -116,6 +121,7 @@ export default function DashboardPage() {
         .filter(
           (transaction) =>
             transaction.type === "expense" &&
+            transaction.recordKind !== "balance_adjustment" &&
             transaction.categoryId === budget.categoryId &&
             isSameMonth(new Date(transaction.date), now)
         )
@@ -145,7 +151,8 @@ export default function DashboardPage() {
         </Link>
       </header>
 
-      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+      <DashboardLayout>
+      <section data-widget-id="summary" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
         <article className="relative overflow-hidden rounded-[1.75rem] border border-pine/15 bg-[linear-gradient(135deg,#EFECFF_0%,#EAF3FF_48%,#E5F8F1_100%)] p-5 text-ink shadow-card sm:p-7 lg:col-span-6 lg:h-full">
           <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-pine/25 blur-3xl" />
           <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-sky/25 blur-3xl" />
@@ -209,7 +216,7 @@ export default function DashboardPage() {
         </article>
       </section>
 
-      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+      <section data-widget-id="cashflow" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
         <article className="card min-w-0 border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F3F8FF)] lg:col-span-8">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
@@ -235,7 +242,7 @@ export default function DashboardPage() {
         </article>
       </section>
 
-      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+      <section data-widget-id="accounts" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
         <div className="h-full lg:col-span-5">
           <DashboardCalendar transactions={transactions} />
         </div>
@@ -252,7 +259,7 @@ export default function DashboardPage() {
         </article>
       </section>
 
-      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
+      <section data-widget-id="activity" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
         <article className="card flex h-full flex-col border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F6F9FF)] lg:col-span-7">
           <div className="mb-2 flex items-center justify-between border-b border-rule pb-4">
             <div>
@@ -330,7 +337,12 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="card border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F2FCF8)]">
+      <section data-widget-id="debts" className="grid gap-4 sm:grid-cols-2">
+        <article className="card border-ember/15 bg-[linear-gradient(145deg,#FFF8F8,#FFECEF)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-10 text-ember"><HandCoins /></div></div></article>
+        <article className="card border-mint/15 bg-[linear-gradient(145deg,#F7FFFC,#E6F8F2)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-10 text-mint"><WalletCards /></div></div></article>
+      </section>
+
+      <section data-widget-id="insights" className="card border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F2FCF8)]">
         <div className="mb-4 flex items-center justify-between border-b border-rule pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-pine-10 text-pine">
@@ -347,6 +359,7 @@ export default function DashboardPage() {
         </div>
         <InsightFeed insights={insights.slice(0, 3)} compact />
       </section>
+      </DashboardLayout>
     </div>
   );
 }

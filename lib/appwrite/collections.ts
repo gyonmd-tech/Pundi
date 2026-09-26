@@ -11,4 +11,5 @@ export const COLLECTIONS = {
   GOALS: "goals",
   ASSETS: "assets",
   INSIGHTS: "insights",
+  DEBTS: "debts",
 } as const;

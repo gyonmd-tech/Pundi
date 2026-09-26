@@ -16,6 +16,8 @@ function transactionFromDocument(document: Record<string, any>): Transaction {
     accountId: document.accountId,
     destinationAccountId: document.destinationAccountId || undefined,
     transferKind: document.transferKind || undefined,
+    recordKind: document.recordKind || "standard",
+    observedBalance: document.observedBalance == null ? undefined : Number(document.observedBalance),
     categoryId: document.categoryId || undefined,
     type: document.type,
     amount: Number(document.amount),
@@ -133,9 +135,98 @@ function documentPayload(userId: string, payload: TransactionInput, clearOptiona
   else if (clearOptional) data.destinationAccountId = null;
   if (payload.type === "transfer") data.transferKind = payload.transferKind || "account";
   else if (clearOptional) data.transferKind = null;
+  if (payload.recordKind) data.recordKind = payload.recordKind;
+  else if (clearOptional) data.recordKind = null;
+  if (payload.observedBalance != null) data.observedBalance = payload.observedBalance;
+  else if (clearOptional) data.observedBalance = null;
   if (payload.note) data.note = payload.note;
   else if (clearOptional) data.note = null;
   return data;
+}
+
+export async function createBalanceAdjustmentAction(payload: {
+  accountId: string;
+  observedBalance: number;
+  date: Date;
+  note?: string;
+}) {
+  const user = await getAuthUserAction();
+  if (!Number.isSafeInteger(payload.observedBalance) || payload.observedBalance < 0) {
+    return { success: false, error: "Saldo nyata harus berupa angka bulat nol atau lebih." };
+  }
+  if (Number.isNaN(payload.date.getTime())) return { success: false, error: "Tanggal kondisi tidak valid." };
+  if (!user || user.isDemo) {
+    return {
+      success: true,
+      id: `adjustment-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      delta: 0,
+      newBalance: payload.observedBalance,
+      type: "income" as const,
+    };
+  }
+
+  try {
+    const { databases } = await createAdminServerClient();
+    const account = await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, payload.accountId, user.id);
+    const snapshotEnd = new Date(payload.date);
+    snapshotEnd.setHours(23, 59, 59, 999);
+    const response = await databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
+      Query.equal("userId", user.id),
+      Query.greaterThan("date", snapshotEnd.toISOString()),
+      Query.limit(500),
+    ]);
+
+    let activityAfterSnapshot = 0;
+    for (const document of response.documents) {
+      const transaction = transactionFromDocument(document);
+      if (transaction.accountId === payload.accountId) {
+        if (transaction.type === "income") activityAfterSnapshot += transaction.amount;
+        if (transaction.type === "expense") activityAfterSnapshot -= transaction.amount;
+        if (transaction.type === "transfer") activityAfterSnapshot -= transaction.amount;
+      }
+      if (transaction.type === "transfer" && transaction.destinationAccountId === payload.accountId) {
+        activityAfterSnapshot += transaction.amount;
+      }
+    }
+
+    const currentBalance = Number(account.balance || 0);
+    const expectedAtSnapshot = currentBalance - activityAfterSnapshot;
+    const delta = payload.observedBalance - expectedAtSnapshot;
+    const type: Transaction["type"] = delta < 0 ? "expense" : "income";
+    const transaction: TransactionInput = {
+      accountId: payload.accountId,
+      type,
+      amount: Math.abs(delta),
+      date: snapshotEnd,
+      note: payload.note?.trim() || "Penyesuaian saldo berdasarkan kondisi nyata",
+      tags: ["rekonsiliasi-saldo"],
+      recordKind: "balance_adjustment",
+      observedBalance: payload.observedBalance,
+    };
+
+    await databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, payload.accountId, {
+      balance: currentBalance + delta,
+    });
+    try {
+      const document = await databases.createDocument(
+        DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, transaction),
+      );
+      return {
+        success: true,
+        id: document.$id,
+        createdAt: document.$createdAt,
+        delta,
+        newBalance: currentBalance + delta,
+        type,
+      };
+    } catch (error) {
+      await databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, payload.accountId, { balance: currentBalance });
+      throw error;
+    }
+  } catch (error: unknown) {
+    return { success: false, error: error instanceof Error ? error.message : "Catatan kondisi gagal disimpan." };
+  }
 }
 
 export async function getTransactionsAction(): Promise<{ data: Transaction[]; error?: string }> {

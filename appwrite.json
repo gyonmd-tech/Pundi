@@ -54,6 +54,8 @@
             { "key": "accountId", "type": "string", "size": 36, "required": true },
             { "key": "destinationAccountId", "type": "string", "size": 36, "required": false },
             { "key": "transferKind", "type": "string", "size": 24, "required": false },
+            { "key": "recordKind", "type": "string", "size": 32, "required": false },
+            { "key": "observedBalance", "type": "integer", "required": false },
             { "key": "categoryId", "type": "string", "size": 36, "required": false },
             { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
             { "key": "amount", "type": "integer", "required": true },
@@ -134,6 +136,27 @@
           "indexes": [
             { "key": "idx_user", "type": "key", "attributes": ["userId"] },
             { "key": "idx_user_read", "type": "key", "attributes": ["userId", "isRead"] }
+          ]
+        },
+        {
+          "$id": "debts",
+          "name": "debts",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "direction", "type": "enum", "elements": ["payable", "receivable"], "required": true },
+            { "key": "person", "type": "string", "size": 100, "required": true },
+            { "key": "amount", "type": "integer", "required": true },
+            { "key": "remainingAmount", "type": "integer", "required": true },
+            { "key": "dueDate", "type": "datetime", "required": false },
+            { "key": "note", "type": "string", "size": 500, "required": false },
+            { "key": "status", "type": "enum", "elements": ["open", "paid"], "required": true }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_user_status", "type": "key", "attributes": ["userId", "status"] }
           ]
         }
       ]

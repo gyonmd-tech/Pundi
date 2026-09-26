@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, LayoutDashboard, MoreHorizontal, PieChart, Plus } from "lucide-react";
+import { ArrowLeftRight, HandCoins, LayoutDashboard, PieChart, Plus } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
-const items = [{ href: "/dashboard", label: "Beranda", icon: LayoutDashboard }, { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight }, { href: "/anggaran", label: "Anggaran", icon: PieChart }, { href: "/insight", label: "Lainnya", icon: MoreHorizontal }];
+const items = [{ href: "/dashboard", label: "Beranda", icon: LayoutDashboard }, { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight }, { href: "/anggaran", label: "Anggaran", icon: PieChart }, { href: "/utang", label: "Utang", icon: HandCoins }];
 
 export function MobileBottomNav({ onQuickAdd }: { onQuickAdd?: () => void }) {
   const pathname = usePathname();
