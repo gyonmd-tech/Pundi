@@ -1,6 +1,6 @@
 /**
  * scripts/setup-appwrite.ts
- * Skrip CLI otomasi untuk inisialisasi Database 'pundi-db', 7 Collections, Attributes, dan Indexes di Appwrite.
+ * Skrip CLI otomasi untuk inisialisasi Database 'pundi-db', Collections, Attributes, dan Indexes di Appwrite.
  * Jalankan: npm run db:setup
  */
 
@@ -145,7 +145,7 @@ async function setup() {
     }
   }
 
-  console.log("\n🎉 Seluruh 7 Collections dan Attributes Appwrite berhasil diinisialisasi!\n");
+  console.log(`\n🎉 Seluruh ${collections.length} Collections dan Attributes Appwrite berhasil diinisialisasi!\n`);
 }
 
 setup().catch((e) => {

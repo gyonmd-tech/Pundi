@@ -34,7 +34,7 @@ export default function ArusKasPage() {
   const selected = MONTHS[selectedIdx];
   const monthlySummary = React.useCallback((period: string) => {
     return transactions.reduce((total, transaction) => {
-      if (new Date(transaction.date).toISOString().slice(0, 7) !== period) return total;
+      if (new Date(transaction.date).toISOString().slice(0, 7) !== period || transaction.recordKind === "balance_adjustment") return total;
       if (transaction.type === "income") total.income += transaction.amount;
       if (transaction.type === "expense") total.expense += transaction.amount;
       return total;

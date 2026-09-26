@@ -475,7 +475,7 @@ export default function TransaksiPage() {
                           {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
                         </p>
                         <div className="flex items-center gap-1.5 text-xs text-ink-muted mt-1 flex-wrap font-ui">
-                          <span className="font-medium text-ink/80">{cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer" : "Lainnya")}</span>
+                          <span className="font-medium text-ink/80">{tx.recordKind === "balance_adjustment" ? "Catatan kondisi saldo" : cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer" : "Lainnya")}</span>
                           <span className="text-rule">·</span>
                           <span suppressHydrationWarning className="font-mono text-[11px]">Transaksi {formatDate(tx.date, "short")}</span>
                           <span className="text-rule">·</span>
@@ -511,14 +511,14 @@ export default function TransaksiPage() {
                           <TypeIcon size={10} strokeWidth={2.2} />
                           {typeCfg.label}
                         </span>
-                        <button
+                        {tx.recordKind !== "balance_adjustment" ? <button
                           onClick={() => setEditTransaction(tx)}
                           className="p-1 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
                           title="Edit transaksi"
                           aria-label="Edit transaksi"
                         >
                           <Pencil size={13} strokeWidth={1.8} />
-                        </button>
+                        </button> : null}
                         <button
                           onClick={() => setDeleteId(tx.id)}
                           className="p-1 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
@@ -577,7 +577,7 @@ export default function TransaksiPage() {
                                 {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
                               </p>
                               <p className="text-xs text-ink-muted truncate font-ui">
-                                {cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
+                                {tx.recordKind === "balance_adjustment" ? `Kondisi saldo${tx.observedBalance != null ? ` · ${formatRupiah(tx.observedBalance)}` : ""}` : cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
                               </p>
                             </div>
                           </div>
@@ -627,14 +627,14 @@ export default function TransaksiPage() {
                         {/* Delete Action with tooltip */}
                         <TableCell className="px-4 py-3.5 text-right">
                           <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-                            <button
+                            {tx.recordKind !== "balance_adjustment" ? <button
                               onClick={() => setEditTransaction(tx)}
                               className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-all duration-150"
                               title="Edit transaksi"
                               aria-label="Edit transaksi"
                             >
                               <Pencil size={15} strokeWidth={1.8} />
-                            </button>
+                            </button> : null}
                             <button
                               onClick={() => setDeleteId(tx.id)}
                               className="p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"

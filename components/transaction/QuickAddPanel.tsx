@@ -9,26 +9,28 @@ import {
   Check,
   ReceiptText,
   WalletCards,
+  ClipboardCheck,
   X,
 } from "lucide-react";
 import { Button, IconButton } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { useAccounts, useApp, useCategories } from "@/lib/data/store";
+import { useAccounts, useApp, useCategories, useTransactions } from "@/lib/data/store";
 import type { Transaction, TransactionType } from "@/lib/data/mock";
 import { useToast } from "@/lib/context/ToastContext";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { cn } from "@/lib/utils/cn";
-import { createTransactionAction, updateTransactionAction } from "@/actions/transactions";
+import { createBalanceAdjustmentAction, createTransactionAction, updateTransactionAction } from "@/actions/transactions";
 
-type EntryMode = TransactionType | "cash_withdrawal";
+type EntryMode = TransactionType | "cash_withdrawal" | "balance_adjustment";
 
 const transactionTypes = [
   { value: "expense" as const, label: "Keluar", icon: ArrowDownLeft, tone: "text-ember bg-ember-10 border-ember/25" },
   { value: "income" as const, label: "Masuk", icon: ArrowUpRight, tone: "text-mint bg-mint-10 border-mint/25" },
   { value: "transfer" as const, label: "Transfer", icon: ArrowLeftRight, tone: "text-brass bg-brass-10 border-brass/25" },
   { value: "cash_withdrawal" as const, label: "Tarik tunai", icon: Banknote, tone: "text-sky-700 bg-sky-50 border-sky-200" },
+  { value: "balance_adjustment" as const, label: "Kondisi", icon: ClipboardCheck, tone: "text-violet-700 bg-violet-50 border-violet-200" },
 ];
 
 const quickAmounts = [50_000, 100_000, 250_000, 500_000];
@@ -60,10 +62,13 @@ interface QuickAddPanelProps {
 export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
   const accounts = useAccounts().filter((account) => account.isActive);
   const categories = useCategories();
+  const transactions = useTransactions();
   const { dispatch, connection } = useApp();
   const { showToast } = useToast();
   const amountRef = React.useRef<HTMLInputElement>(null);
-  const initialMode: EntryMode = transaction?.transferKind === "cash_withdrawal"
+  const initialMode: EntryMode = transaction?.recordKind === "balance_adjustment"
+    ? "balance_adjustment"
+    : transaction?.transferKind === "cash_withdrawal"
     ? "cash_withdrawal"
     : transaction?.type || "expense";
   const [mode, setMode] = React.useState<EntryMode>(initialMode);
@@ -77,7 +82,8 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
   const [note, setNote] = React.useState(transaction?.note || "");
   const [submitting, setSubmitting] = React.useState(false);
   const numericAmount = Number(amount || 0);
-  const type: TransactionType = mode === "cash_withdrawal" ? "transfer" : mode;
+  const isAdjustment = mode === "balance_adjustment";
+  const type: TransactionType = mode === "cash_withdrawal" ? "transfer" : isAdjustment ? "income" : mode;
   const isTransfer = type === "transfer";
   const cashAccounts = accounts.filter((account) => account.type === "cash");
   const sourceOptions = mode === "cash_withdrawal" ? accounts.filter((account) => account.type !== "cash") : accounts;
@@ -117,12 +123,66 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
       showToast({ type: "error", title: "Data rekening masih dimuat", message: "Tunggu sampai data cloud siap, lalu coba lagi." });
       return;
     }
-    if (!numericAmount || !resolvedAccountId || (isTransfer && !resolvedDestinationId)) {
+    if ((!isAdjustment && !numericAmount) || (isAdjustment && numericAmount < 0) || !resolvedAccountId || (isTransfer && !resolvedDestinationId)) {
       showToast({
         type: "error",
         title: "Data belum lengkap",
         message: isTransfer ? "Isi nominal, rekening sumber, dan rekening tujuan." : "Isi nominal dan pilih rekening transaksi.",
       });
+      return;
+    }
+
+    if (isAdjustment) {
+      setSubmitting(true);
+      const selectedDate = new Date(`${date}T23:59:59.999`);
+      const account = accounts.find((item) => item.id === resolvedAccountId);
+      const activityAfter = transactions.reduce((sum, item) => {
+        if (new Date(item.date) <= selectedDate) return sum;
+        let delta = 0;
+        if (item.accountId === resolvedAccountId) {
+          if (item.type === "income") delta += item.amount;
+          if (item.type === "expense" || item.type === "transfer") delta -= item.amount;
+        }
+        if (item.type === "transfer" && item.destinationAccountId === resolvedAccountId) delta += item.amount;
+        return sum + delta;
+      }, 0);
+      const localDelta = numericAmount - ((account?.balance || 0) - activityAfter);
+      const result = await createBalanceAdjustmentAction({
+        accountId: resolvedAccountId,
+        observedBalance: numericAmount,
+        date: selectedDate,
+        note: note.trim() || undefined,
+      });
+      setSubmitting(false);
+      if (!result.success) {
+        showToast({ type: "error", title: "Catatan kondisi gagal", message: result.error || "Saldo belum dapat direkonsiliasi." });
+        return;
+      }
+      const adjustmentResult = result as { id: string; createdAt: string; delta: number; newBalance: number };
+      const delta = connection.mode === "demo" ? localDelta : adjustmentResult.delta;
+      const newBalance = connection.mode === "demo" ? (account?.balance || 0) + localDelta : adjustmentResult.newBalance;
+      if (account) dispatch({ type: "UPDATE_ACCOUNT", payload: { ...account, balance: newBalance } });
+      dispatch({
+        type: "ADD_TRANSACTION",
+        payload: {
+          id: adjustmentResult.id,
+          accountId: resolvedAccountId,
+          type: delta < 0 ? "expense" : "income",
+          amount: Math.abs(delta),
+          date: selectedDate,
+          createdAt: new Date(adjustmentResult.createdAt),
+          note: note.trim() || "Penyesuaian saldo berdasarkan kondisi nyata",
+          tags: ["rekonsiliasi-saldo"],
+          recordKind: "balance_adjustment",
+          observedBalance: numericAmount,
+        },
+      });
+      showToast({
+        type: "success",
+        title: "Saldo berhasil direkonsiliasi",
+        message: `Saldo nyata ${formatRupiah(numericAmount)} pada tanggal pilihan telah diterapkan.`,
+      });
+      onClose();
       return;
     }
 
@@ -196,7 +256,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
       </header>
 
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
-        <div className="grid grid-cols-2 gap-2 rounded-[18px] bg-paper p-1.5 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 rounded-[18px] bg-paper p-1.5 sm:grid-cols-5">
           {transactionTypes.map((item) => {
             const Icon = item.icon;
             const active = mode === item.value;
@@ -223,7 +283,13 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
           </div>
         ) : null}
 
-        <Field label="Nominal" hint={numericAmount ? formatRupiah(numericAmount) : "Wajib"} required>
+        {isAdjustment ? (
+          <div className="rounded-[16px] border border-violet-200 bg-violet-50 px-4 py-3 text-xs leading-relaxed text-violet-800">
+            Masukkan saldo nyata rekening pada akhir tanggal yang dipilih. Pundi menghitung selisih otomatis tanpa memasukkannya ke grafik pemasukan atau pengeluaran.
+          </div>
+        ) : null}
+
+        <Field label={isAdjustment ? "Saldo nyata" : "Nominal"} hint={numericAmount ? formatRupiah(numericAmount) : "Wajib"} required>
           <div className="relative">
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-mono text-sm font-black text-pine">Rp</span>
             <Input
@@ -237,13 +303,13 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
           </div>
         </Field>
 
-        <div className="flex flex-wrap gap-2">
+        {!isAdjustment ? <div className="flex flex-wrap gap-2">
           {quickAmounts.map((value) => (
             <button key={value} type="button" onClick={() => setAmount(String(numericAmount + value))} className="rounded-full border border-rule bg-white px-3 py-1.5 text-[11px] font-bold text-ink-muted transition hover:border-pine/35 hover:bg-pine-10 hover:text-pine">
               +{value >= 1_000_000 ? `${value / 1_000_000} jt` : `${value / 1_000} rb`}
             </button>
           ))}
-        </div>
+        </div> : null}
 
         <Field label={isTransfer ? "Rekening sumber" : "Rekening"} required>
           <div className="relative">
@@ -269,7 +335,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
               </p>
             )}
           </Field>
-        ) : (
+        ) : isAdjustment ? null : (
           <Field label="Kategori">
             <Select value={resolvedCategoryId} onChange={(event) => setCategoryId(event.target.value)}>
               <option value="">Pilih kategori</option>
@@ -278,7 +344,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
           </Field>
         )}
 
-        <Field label="Tanggal transaksi">
+        <Field label={isAdjustment ? "Tanggal kondisi saldo" : "Tanggal transaksi"}>
           <DatePicker value={date} onValueChange={setDate} />
         </Field>
 
@@ -299,7 +365,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
       <footer className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-rule bg-white/95 p-4 backdrop-blur">
         <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
         <Button type="submit" loading={submitting} disabled={connection.status === "loading" || !accounts.length || (isTransfer && !destinationOptions.length)}>
-          <Check className="h-4 w-4" /> {transaction ? "Simpan perubahan" : "Simpan transaksi"}
+          <Check className="h-4 w-4" /> {isAdjustment ? "Terapkan kondisi saldo" : transaction ? "Simpan perubahan" : "Simpan transaksi"}
         </Button>
       </footer>
     </form>
