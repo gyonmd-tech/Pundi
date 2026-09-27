@@ -40,8 +40,8 @@ export function DashboardCalendar({ transactions }: { transactions: Transaction[
       <div className="flex items-center justify-between border-b border-rule bg-[linear-gradient(135deg,#F5F2FF,#EEF8FF)] px-5 py-4">
         <div><p className="eyebrow">Kalender finansial</p><h2 className="mt-1 text-lg font-extrabold tracking-[-0.02em] text-ink capitalize">{monthFormatter.format(month)}</h2></div>
         <div className="flex gap-1.5">
-          <button type="button" aria-label="Bulan sebelumnya" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="grid h-9 w-9 place-items-center rounded-[12px] border border-white bg-white/80 text-ink-muted shadow-sm transition hover:text-pine"><ChevronLeft className="h-4 w-4" /></button>
-          <button type="button" aria-label="Bulan berikutnya" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="grid h-9 w-9 place-items-center rounded-[12px] border border-white bg-white/80 text-ink-muted shadow-sm transition hover:text-pine"><ChevronRight className="h-4 w-4" /></button>
+          <button type="button" aria-label="Bulan sebelumnya" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#5146A5] text-white shadow-clay-soft transition hover:bg-[#392F82]"><ChevronLeft className="h-4 w-4" /></button>
+          <button type="button" aria-label="Bulan berikutnya" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#5146A5] text-white shadow-clay-soft transition hover:bg-[#392F82]"><ChevronRight className="h-4 w-4" /></button>
         </div>
       </div>
 

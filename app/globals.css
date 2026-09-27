@@ -146,9 +146,9 @@ textarea::placeholder {
 
 .material-button.secondary {
   border-color: var(--color-rule);
-  background: white;
+  background: #d8d1ea;
   color: var(--color-ink);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-clay-soft);
 }
 
 .eyebrow {
@@ -259,6 +259,10 @@ textarea::placeholder {
   letter-spacing: 0.14em;
   font-weight: 800;
 }
+
+.dashboard-modern .text-ink-muted {
+  color: #514a67 !important;
+}
 /* Application-wide modern typography */
 .app-modern {
   font-family: var(--font-ui);
@@ -281,6 +285,40 @@ textarea::placeholder {
 .app-modern .eyebrow {
   letter-spacing: 0.14em;
   font-weight: 800;
+}
+
+/* Saturated pastel clay surfaces keep every dashboard block visually distinct. */
+.dashboard-modern [data-widget-id="balance"] { background: linear-gradient(135deg, #cec8fa, #bcdcf2 55%, #b9e5d8) !important; }
+.dashboard-modern [data-widget-id="income"] { background: #b9e5d8 !important; }
+.dashboard-modern [data-widget-id="expense"] { background: #f2c5cb !important; }
+.dashboard-modern [data-widget-id="cashflow"] { background: #c7dcf5 !important; }
+.dashboard-modern [data-widget-id="composition"] { background: #f2d6a2 !important; }
+.dashboard-modern [data-widget-id="rhythm"] { background: #d5c9ee !important; }
+.dashboard-modern [data-widget-id="health"] { background: #b7dfd2 !important; }
+.dashboard-modern [data-widget-id="accounts"] { background: #bcdff0 !important; }
+.dashboard-modern [data-widget-id="recent"] { background: #d3d8f5 !important; }
+.dashboard-modern [data-widget-id="budgets"] { background: #f0d4a7 !important; }
+.dashboard-modern [data-widget-id="goals"] { background: #d7cdf3 !important; }
+.dashboard-modern [data-widget-id="payable"] { background: #efbec7 !important; }
+.dashboard-modern [data-widget-id="receivable"] { background: #afe0d1 !important; }
+.dashboard-modern [data-widget-id="insights"] { background: #c5e2dc !important; }
+.dashboard-modern [data-widget-id="calendar"] > .card,
+.dashboard-modern [data-widget-id="calendar"] .card { background: #ded4f2 !important; }
+
+.dashboard-puzzle.is-dragging {
+  background-color: rgba(101, 82, 245, 0.08);
+  background-image:
+    linear-gradient(rgba(101, 82, 245, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(101, 82, 245, 0.12) 1px, transparent 1px);
+  background-size: 44px 44px;
+  box-shadow: inset 0 0 0 2px rgba(101, 82, 245, 0.16), var(--shadow-clay-soft);
+}
+
+@media (hover: hover) {
+  .dashboard-widget:hover > div > [data-widget-id] {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-clay);
+  }
 }
 
 .card::before {

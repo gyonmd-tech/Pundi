@@ -24,7 +24,7 @@ export function AppSidebar() {
 
   return (
     <aside className={cn(
-      "fixed bottom-3 left-3 top-3 z-30 hidden flex-col rounded-[28px] border border-white/80 bg-[linear-gradient(155deg,rgba(255,255,255,.96),rgba(246,243,255,.91))] shadow-clay backdrop-blur-xl transition-[width] duration-300 md:flex",
+      "fixed bottom-3 left-3 top-3 z-30 hidden flex-col rounded-[28px] border border-[#B9AFD4] bg-[#D8D1EA]/95 shadow-clay backdrop-blur-xl transition-[width] duration-300 md:flex",
       isCollapsed ? "w-[68px]" : "w-[248px]"
     )}>
       <div className="flex h-[78px] shrink-0 items-center justify-center border-b border-rule/80 px-2">

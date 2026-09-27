@@ -85,14 +85,14 @@ export function HeaderSearch() {
           onFocus={() => setOpen(true)}
           onChange={(event) => { setQuery(event.target.value); setOpen(true); }}
           placeholder="Cari transaksi, rekening, atau halaman…"
-          className="h-11 w-full rounded-[16px] border border-pine/12 bg-paper/80 pl-11 pr-20 text-sm font-medium text-ink outline-none transition placeholder:font-normal placeholder:text-ink-muted/75 focus:border-pine/35 focus:bg-white focus:shadow-[0_0_0_4px_rgba(91,74,239,0.08)]"
+          className="h-11 w-full border-0 border-b-2 border-[#7565C7] bg-transparent pl-11 pr-20 text-sm font-bold text-ink outline-none transition placeholder:font-medium placeholder:text-[#665F78] focus:border-[#34277F] focus:shadow-none"
         />
         {query ? (
           <button type="button" onClick={() => setQuery("")} aria-label="Hapus pencarian" className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-[9px] text-ink-muted transition hover:bg-pine-10 hover:text-pine">
             <X className="h-3.5 w-3.5" />
           </button>
         ) : (
-          <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-[8px] border border-rule bg-white px-2 py-1 text-[10px] font-semibold text-ink-muted shadow-2xs">Ctrl K</kbd>
+          <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-[8px] bg-[#40366F] px-2 py-1 text-[10px] font-bold text-white">Ctrl K</kbd>
         )}
       </form>
 
