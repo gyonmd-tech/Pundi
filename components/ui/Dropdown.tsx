@@ -36,7 +36,7 @@ export function Dropdown({ trigger, children, align = "right", className, conten
       {open ? (
         <div
           role="menu"
-          className={cn("absolute top-full z-50 mt-2 min-w-56 rounded-[18px] border border-rule bg-white p-2 shadow-float animate-in fade-in slide-in-from-top-2", align === "left" ? "left-0" : "right-0", contentClassName)}
+          className={cn("absolute top-full z-50 mt-2 min-w-56 rounded-[20px] border border-brand-200 bg-white p-2 shadow-float animate-in fade-in slide-in-from-top-2", align === "left" ? "left-0" : "right-0", contentClassName)}
         >
           {typeof children === "function" ? children({ close: () => setOpen(false) }) : children}
         </div>
@@ -46,5 +46,5 @@ export function Dropdown({ trigger, children, align = "right", className, conten
 }
 
 export function DropdownItem({ className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button role="menuitem" type="button" className={cn("flex min-h-10 w-full items-center gap-2 rounded-[12px] px-3 text-left text-sm font-medium text-ink transition hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine/25", className)} {...props} />;
+  return <button role="menuitem" type="button" className={cn("flex min-h-10 w-full items-center gap-2 rounded-[12px] px-3 text-left text-sm font-medium text-ink transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand-500/20", className)} {...props} />;
 }

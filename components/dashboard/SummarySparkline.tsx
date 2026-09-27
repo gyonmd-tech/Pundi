@@ -15,8 +15,8 @@ export function SummarySparkline({ values, className }: { values: number[]; clas
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className={cn("h-16 w-full overflow-visible", className)} preserveAspectRatio="none" aria-hidden>
-      <path d={area} fill="currentColor" opacity="0.1" />
-      <polyline points={points.join(" ")} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <path d={area} fill="currentColor" opacity="0.12" />
+      <polyline points={points.join(" ")} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
       {points.length ? <circle cx={points.at(-1)?.split(",")[0]} cy={points.at(-1)?.split(",")[1]} r="4" fill="currentColor" /> : null}
     </svg>
   );

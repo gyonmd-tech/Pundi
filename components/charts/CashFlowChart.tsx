@@ -56,7 +56,7 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
     <div
       className="rounded-card px-3 py-2.5 shadow-float"
       style={{
-        backgroundColor: "var(--color-surface)",
+        backgroundColor: "var(--color-surface-high)",
         border: "var(--border-hairline)",
         fontFamily: "var(--font-ui)",
       }}
@@ -155,11 +155,11 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
 
           {/* Grid — sangat subtle */}
           <CartesianGrid
-            strokeDasharray="3 0"
+            strokeDasharray="4 7"
             horizontal={true}
             vertical={false}
             stroke="var(--color-rule)"
-            strokeOpacity={0.5}
+            strokeOpacity={0.8}
           />
 
           {/* LEDGER BASELINE — signature element, wajib ada */}
@@ -201,11 +201,11 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
             type="monotone"
             dataKey="income"
             isAnimationActive={false}
-            stroke="var(--color-pine)"
-            strokeWidth={2}
+            stroke="var(--color-mint)"
+            strokeWidth={2.5}
             fill="url(#incomeGradient)"
             dot={false}
-            activeDot={{ r: 4, fill: "var(--color-pine)", strokeWidth: 0 }}
+            activeDot={{ r: 5, fill: "var(--color-mint)", stroke: "white", strokeWidth: 2 }}
           />
 
           {/* Expense area */}
@@ -214,10 +214,10 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
             dataKey="expense"
             isAnimationActive={false}
             stroke="var(--color-ember)"
-            strokeWidth={2}
+            strokeWidth={2.5}
             fill="url(#expenseGradient)"
             dot={false}
-            activeDot={{ r: 4, fill: "var(--color-ember)", strokeWidth: 0 }}
+            activeDot={{ r: 5, fill: "var(--color-ember)", stroke: "white", strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -225,7 +225,7 @@ export function CashFlowChart({ data, className, loading = false }: CashFlowChar
       {/* Legend — inline, bukan terpisah */}
       <div className="flex items-center gap-4 mt-3 justify-end">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: "var(--color-pine)" }} />
+          <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: "var(--color-mint)" }} />
           <span className="text-small" style={{ fontFamily: "var(--font-ui)", color: "var(--color-ink-muted)" }}>Pemasukan</span>
         </div>
         <div className="flex items-center gap-1.5">

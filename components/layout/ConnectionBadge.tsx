@@ -6,5 +6,5 @@ import { cn } from "@/lib/utils/cn";
 export function ConnectionBadge() {
   const { connection } = useApp();
   const label = connection.status === "loading" ? "Memuat data" : connection.status === "error" ? "Cloud bermasalah" : connection.mode === "cloud" ? "Data cloud" : "Demo lokal";
-  return <div className="hidden shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-white/80 bg-white/85 px-3 py-2 text-[11px] font-bold text-ink-muted shadow-clay-soft 2xl:flex" title={connection.error}><span className={cn("h-2 w-2 rounded-full", connection.status === "loading" ? "animate-pulse bg-brass" : connection.status === "error" ? "bg-ember" : connection.mode === "cloud" ? "bg-mint" : "bg-pine")} />{label}</div>;
+  return <div className="hidden shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-brand-200 bg-white px-3 py-2 text-[11px] font-semibold text-ink-muted shadow-card 2xl:flex" title={connection.error}><span className={cn("h-2 w-2 rounded-full", connection.status === "loading" ? "animate-pulse bg-brass" : connection.status === "error" ? "bg-ember" : connection.mode === "cloud" ? "bg-mint" : "bg-brand-600")} />{label}</div>;
 }

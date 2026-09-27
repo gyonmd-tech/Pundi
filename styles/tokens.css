@@ -1,56 +1,75 @@
-/* PUNDI — Modern Material + light claymorphism design tokens */
+/* PUNDI Soft Clay — brand-aligned design tokens */
 
 :root {
   color-scheme: light;
 
   /* Surfaces */
-  --color-paper: #F5F4FB;
-  --color-surface: #FFFFFF;
-  --color-surface-soft: #F0EEFA;
-  --color-surface-high: #FAF9FF;
+  --color-paper: #F4F7FC;
+  --color-surface: #F9FBFF;
+  --color-surface-soft: #EEF4FF;
+  --color-surface-high: #FFFFFF;
 
   /* Text */
-  --color-ink: #211F32;
-  --color-ink-muted: #716E82;
-  --color-ink-soft: #9894A8;
+  --color-ink: #17213D;
+  --color-ink-muted: #5F6982;
+  --color-ink-soft: #7B849B;
 
-  /* Primary — mapped to legacy pine aliases for existing components */
-  --color-pine: #5B4AEF;
-  --color-pine-hover: #4B3BD1;
-  --color-pine-10: #EFECFF;
-  --color-pine-20: #DCD6FF;
-  --color-pine-40: #978CF7;
+  /* Pundi brand. Legacy pine aliases remain until page-by-page migration. */
+  --color-brand-950: #112772;
+  --color-brand-900: #142B87;
+  --color-brand-800: #17368F;
+  --color-brand-700: #1D48B5;
+  --color-brand-600: #2459DE;
+  --color-brand-500: #2860E6;
+  --color-brand-400: #5C8FF2;
+  --color-brand-300: #8FBCFF;
+  --color-brand-200: #CADCFF;
+  --color-brand-100: #E7EFFF;
+  --color-brand-50: #F3F7FF;
+  --color-pine: var(--color-brand-600);
+  --color-pine-hover: var(--color-brand-700);
+  --color-pine-10: var(--color-brand-100);
+  --color-pine-20: var(--color-brand-200);
+  --color-pine-40: var(--color-brand-400);
 
   /* Semantic */
   --color-ember: #E95766;
-  --color-ember-10: #FFF0F1;
-  --color-ember-20: #F9BCC2;
+  --color-ember-ink: #B83547;
+  --color-ember-10: #FFE9EC;
+  --color-ember-20: #F9BCC5;
   --color-brass: #D99418;
   --color-brass-10: #FFF6DC;
   --color-warning: #C98010;
   --color-warning-10: #FFF5DD;
   --color-mint: #159B78;
-  --color-mint-10: #E5F8F1;
-  --color-sky: #3E86ED;
-  --color-sky-10: #EAF3FF;
+  --color-mint-ink: #0B6B54;
+  --color-mint-10: #E5F7F1;
+  --color-sky: #2860E6;
+  --color-sky-10: #E7EFFF;
+  --color-lavender: #7B61D1;
+  --color-lavender-ink: #5E46B8;
+  --color-lavender-10: #F0EAFE;
+  --color-cyan: #168AA0;
+  --color-cyan-ink: #0F6B7B;
+  --color-cyan-10: #E4F7FA;
 
   /* Structure */
-  --color-rule: #E4E0F0;
-  --color-rule-strong: #D4CEE5;
-  --color-scrim: rgba(28, 24, 47, 0.56);
+  --color-rule: #DCE4F2;
+  --color-rule-strong: #C7D3E7;
+  --color-scrim: rgba(17, 39, 114, 0.48);
 
   /* Type */
-  --font-display: var(--font-manrope, "Manrope"), "Segoe UI", system-ui, sans-serif;
-  --font-ui: var(--font-manrope, "Manrope"), "Segoe UI", system-ui, sans-serif;
-  --font-mono: var(--font-manrope, "Manrope"), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-bricolage, "Bricolage Grotesque"), "Segoe UI", system-ui, sans-serif;
+  --font-ui: var(--font-jakarta, "Plus Jakarta Sans"), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-jakarta, "Plus Jakarta Sans"), "Segoe UI", system-ui, sans-serif;
 
-  --text-display-xl: clamp(2.15rem, 4vw, 3.25rem);
-  --text-display-l: clamp(1.65rem, 2.5vw, 2.1rem);
-  --text-heading: 1.125rem;
+  --text-display-xl: clamp(2.5rem, 4vw, 3.5rem);
+  --text-display-l: clamp(1.875rem, 2.5vw, 2.25rem);
+  --text-heading: 1.375rem;
   --text-body: 0.9375rem;
   --text-small: 0.8125rem;
-  --text-data-l: clamp(1.45rem, 2.5vw, 2rem);
-  --text-data-m: 0.9375rem;
+  --text-data-l: clamp(1.625rem, 2.5vw, 2rem);
+  --text-data-m: 1.0625rem;
 
   --leading-display-xl: 1.08;
   --leading-display-l: 1.15;
@@ -78,31 +97,21 @@
 
   /* Shape */
   --radius-card: 1.375rem;
-  --radius-sm: 0.875rem;
-  --radius-xs: 0.625rem;
+  --radius-panel: 1.75rem;
+  --radius-sm: 1rem;
+  --radius-xs: 0.75rem;
   --radius-full: 9999px;
 
   /* Material / clay elevation */
-  --shadow-card:
-    0 1px 2px rgba(49, 40, 91, 0.03),
-    0 10px 28px rgba(73, 61, 133, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --shadow-card-hover:
-    0 16px 36px rgba(73, 61, 133, 0.13),
-    inset 0 1px 0 rgba(255, 255, 255, 1);
-  --shadow-clay:
-    12px 14px 30px rgba(82, 68, 151, 0.14),
-    -9px -9px 22px rgba(255, 255, 255, 0.92),
-    inset 0 1px 1px rgba(255, 255, 255, 0.95),
-    inset 0 -3px 7px rgba(70, 56, 150, 0.055);
-  --shadow-clay-soft:
-    5px 7px 16px rgba(82, 68, 151, 0.1),
-    -4px -4px 12px rgba(255, 255, 255, 0.88),
-    inset 0 1px 1px rgba(255, 255, 255, 0.94);
-  --shadow-float: 0 22px 60px rgba(43, 35, 80, 0.2);
-  --shadow-focus: 0 0 0 4px rgba(91, 74, 239, 0.18);
+  --shadow-card: 0 2px 4px rgba(20, 43, 135, 0.04), 0 10px 24px rgba(20, 43, 135, 0.07);
+  --shadow-card-hover: 0 4px 8px rgba(17, 39, 114, 0.06), 0 18px 42px rgba(17, 39, 114, 0.12);
+  --shadow-clay: 0 6px 14px rgba(17, 39, 114, 0.08), 0 22px 52px rgba(17, 39, 114, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  --shadow-clay-soft: 0 2px 5px rgba(20, 43, 135, 0.05), 0 9px 22px rgba(20, 43, 135, 0.08);
+  --shadow-float: 0 12px 24px rgba(17, 39, 114, 0.1), 0 28px 70px rgba(17, 39, 114, 0.16);
+  --shadow-pressed: inset 0 2px 6px rgba(17, 39, 114, 0.12);
+  --shadow-focus: 0 0 0 4px rgba(40, 96, 230, 0.16);
 
-  --border-hairline: 1px solid rgba(120, 107, 175, 0.18);
+  --border-hairline: 1px solid rgba(36, 89, 222, 0.14);
   --border-active: 1.5px solid var(--color-pine);
 
   --duration-fast: 150ms;
@@ -114,11 +123,11 @@
   --chart-baseline-width: 1px;
   --chart-income-color: var(--color-mint);
   --chart-expense-color: var(--color-ember);
-  --chart-networth-color: var(--color-pine);
-  --chart-category-1: #5B4AEF;
-  --chart-category-2: #3E86ED;
+  --chart-networth-color: var(--color-brand-600);
+  --chart-category-1: #2860E6;
+  --chart-category-2: #168AA0;
   --chart-category-3: #159B78;
   --chart-category-4: #F0A33B;
   --chart-category-5: #E95766;
-  --chart-category-6: #9B72E8;
+  --chart-category-6: #7B61D1;
 }

@@ -1,8 +1,20 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap", preload: true });
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
+  display: "swap",
+  preload: true,
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  display: "swap",
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: {
@@ -30,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${manrope.variable} antialiased`}>
+      <body className={`${bricolage.variable} ${jakarta.variable} antialiased`}>
         {children}
       </body>
     </html>

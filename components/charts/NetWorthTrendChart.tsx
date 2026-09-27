@@ -42,7 +42,7 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
     <div
       className="rounded-card px-3 py-2.5 shadow-float"
       style={{
-        backgroundColor: "var(--color-surface)",
+        backgroundColor: "var(--color-surface-high)",
         border: "var(--border-hairline)",
       }}
     >
@@ -68,11 +68,11 @@ export function NetWorthTrendChart({ data, className, loading = false }: NetWort
       <ResponsiveContainer width="100%" height={160}>
         <LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <CartesianGrid
-          strokeDasharray="3 0"
+          strokeDasharray="4 7"
           horizontal={true}
           vertical={false}
           stroke="var(--color-rule)"
-          strokeOpacity={0.5}
+          strokeOpacity={0.75}
         />
 
         {/* LEDGER BASELINE — signature */}
@@ -106,9 +106,9 @@ export function NetWorthTrendChart({ data, className, loading = false }: NetWort
           dataKey="netWorth"
             isAnimationActive={false}
           stroke="var(--color-pine)"
-          strokeWidth={2}
+          strokeWidth={2.5}
           dot={false}
-          activeDot={{ r: 4, fill: "var(--color-pine)", strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: "var(--color-pine)", stroke: "white", strokeWidth: 2 }}
         />
       </LineChart>
     </ResponsiveContainer>
