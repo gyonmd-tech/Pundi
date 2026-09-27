@@ -55,7 +55,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
           aria-expanded={open}
           onClick={() => setOpen((state) => !state)}
           className={cn(
-            "flex h-11 w-full items-center justify-between gap-3 rounded-[14px] border border-pine/12 bg-[linear-gradient(145deg,#FFFFFF,#FAF9FF)] px-3.5 text-left text-sm font-semibold text-ink outline-none shadow-2xs transition hover:border-pine/30 focus-visible:border-pine focus-visible:ring-4 focus-visible:ring-pine/10 disabled:opacity-50",
+            "flex h-11 w-full items-center justify-between gap-3 rounded-[15px] border border-white/80 bg-[linear-gradient(145deg,#FFFFFF,#F5F2FF)] px-3.5 text-left text-sm font-semibold text-ink outline-none shadow-clay-soft transition hover:border-pine/25 focus-visible:border-pine/40 focus-visible:ring-4 focus-visible:ring-pine/10 disabled:opacity-50",
             className,
           )}
         >

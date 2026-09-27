@@ -1,7 +1,5 @@
 /* PUNDI — Modern Material + light claymorphism design tokens */
 
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
-
 :root {
   color-scheme: light;
 
@@ -42,9 +40,9 @@
   --color-scrim: rgba(28, 24, 47, 0.56);
 
   /* Type */
-  --font-display: "Manrope", "Segoe UI", system-ui, sans-serif;
-  --font-ui: "Manrope", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-manrope, "Manrope"), "Segoe UI", system-ui, sans-serif;
+  --font-ui: var(--font-manrope, "Manrope"), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-manrope, "Manrope"), "Segoe UI", system-ui, sans-serif;
 
   --text-display-xl: clamp(2.15rem, 4vw, 3.25rem);
   --text-display-l: clamp(1.65rem, 2.5vw, 2.1rem);
@@ -93,9 +91,14 @@
     0 16px 36px rgba(73, 61, 133, 0.13),
     inset 0 1px 0 rgba(255, 255, 255, 1);
   --shadow-clay:
-    10px 12px 28px rgba(82, 68, 151, 0.13),
-    -8px -8px 20px rgba(255, 255, 255, 0.85),
-    inset 0 -2px 5px rgba(70, 56, 150, 0.06);
+    12px 14px 30px rgba(82, 68, 151, 0.14),
+    -9px -9px 22px rgba(255, 255, 255, 0.92),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95),
+    inset 0 -3px 7px rgba(70, 56, 150, 0.055);
+  --shadow-clay-soft:
+    5px 7px 16px rgba(82, 68, 151, 0.1),
+    -4px -4px 12px rgba(255, 255, 255, 0.88),
+    inset 0 1px 1px rgba(255, 255, 255, 0.94);
   --shadow-float: 0 22px 60px rgba(43, 35, 80, 0.2);
   --shadow-focus: 0 0 0 4px rgba(91, 74, 239, 0.18);
 

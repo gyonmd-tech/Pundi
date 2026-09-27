@@ -5,13 +5,14 @@ import { MobileBottomNav } from "./MobileBottomNav";
 
 export interface SidebarNavProps {
   onQuickAdd?: () => void;
+  hideMobileNav?: boolean;
 }
 
-export function SidebarNav({ onQuickAdd }: SidebarNavProps) {
+export function SidebarNav({ onQuickAdd, hideMobileNav }: SidebarNavProps) {
   return (
     <>
       <AppSidebar />
-      <MobileBottomNav onQuickAdd={onQuickAdd} />
+      {!hideMobileNav ? <MobileBottomNav onQuickAdd={onQuickAdd} /> : null}
     </>
   );
 }

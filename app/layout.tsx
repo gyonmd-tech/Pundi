@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 import "./globals.css";
+
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap", preload: true });
 
 export const metadata: Metadata = {
   title: {
@@ -27,10 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <head>
-        {/* Fonts loaded via tokens.css @import */}
-      </head>
-      <body className="antialiased">
+      <body className={`${manrope.variable} antialiased`}>
         {children}
       </body>
     </html>

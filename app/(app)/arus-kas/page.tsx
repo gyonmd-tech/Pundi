@@ -7,13 +7,16 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { CashFlowChart }          from "@/components/charts/CashFlowChart";
-import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
+import dynamic from "next/dynamic";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { useCategories, useTransactions } from "@/lib/data/store";
 import { useToast } from "@/lib/context/ToastContext";
 import { TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+
+const chartLoading = () => <div className="h-64 animate-pulse rounded-[18px] bg-pine-10/70" aria-label="Memuat grafik" />;
+const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart").then((module) => module.CashFlowChart), { ssr: false, loading: chartLoading });
+const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), { ssr: false, loading: chartLoading });
 
 const MONTHS = Array.from({ length: 6 }, (_, monthsAgo) => {
   const date = new Date();

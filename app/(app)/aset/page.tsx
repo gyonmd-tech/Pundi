@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/Input";
  */
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { useApp, useAssets } from "@/lib/data/store";
-import { NetWorthTrendChart } from "@/components/charts/NetWorthTrendChart";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { getNetWorthData, getAssetPnL, type AssetType, type Asset } from "@/lib/data/mock";
 import { useToast } from "@/lib/context/ToastContext";
@@ -20,6 +20,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { createAssetAction, deleteAssetAction, updateAssetAction } from "@/actions/assets";
+
+const NetWorthTrendChart = dynamic(() => import("@/components/charts/NetWorthTrendChart").then((module) => module.NetWorthTrendChart), {
+  ssr: false,
+  loading: () => <div className="h-64 animate-pulse rounded-[18px] bg-pine-10/70" aria-label="Memuat grafik" />,
+});
 
 const assetTypeConfig: Record<AssetType, { label: string; icon: any; color: string }> = {
   stock:       { label: "Saham",       icon: TrendingUp,       color: "var(--color-pine)" },
