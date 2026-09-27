@@ -2,6 +2,7 @@
 
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -11,9 +12,6 @@ import {
   WalletCards,
   HandCoins,
 } from "lucide-react";
-import { CashFlowChart } from "@/components/charts/CashFlowChart";
-import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
-import { AccountBalanceChart } from "@/components/charts/AccountBalanceChart";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -32,6 +30,11 @@ import {
   useDebts,
 } from "@/lib/data/store";
 import type { Transaction } from "@/lib/data/mock";
+
+const chartLoading = () => <div className="h-64 animate-pulse rounded-[18px] bg-pine-10/70" aria-label="Memuat grafik" />;
+const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart").then((module) => module.CashFlowChart), { ssr: false, loading: chartLoading });
+const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), { ssr: false, loading: chartLoading });
+const AccountBalanceChart = dynamic(() => import("@/components/charts/AccountBalanceChart").then((module) => module.AccountBalanceChart), { ssr: false, loading: chartLoading });
 
 function isSameMonth(date: Date, target: Date) {
   return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth();
@@ -152,8 +155,7 @@ export default function DashboardPage() {
       </header>
 
       <DashboardLayout>
-      <section data-widget-id="summary" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
-        <article className="relative overflow-hidden rounded-[1.75rem] border border-pine/15 bg-[linear-gradient(135deg,#EFECFF_0%,#EAF3FF_48%,#E5F8F1_100%)] p-5 text-ink shadow-card sm:p-7 lg:col-span-6 lg:h-full">
+        <article data-widget-id="balance" className="relative h-full overflow-hidden rounded-[1.75rem] border border-pine/15 bg-[linear-gradient(135deg,#EFECFF_0%,#EAF3FF_48%,#E5F8F1_100%)] p-5 text-ink shadow-clay sm:p-7">
           <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-pine/25 blur-3xl" />
           <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-sky/25 blur-3xl" />
           <div className="relative">
@@ -181,7 +183,7 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="card flex h-full flex-col justify-between border-mint/15 bg-[linear-gradient(145deg,#F8FFFC,#E5F8F1)] lg:col-span-3">
+        <article data-widget-id="income" className="card flex h-full flex-col justify-between border-mint/15 bg-[linear-gradient(145deg,#F8FFFC,#E5F8F1)]">
           <div className="flex items-center justify-between">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-mint text-white shadow-card">
               <TrendingUp size={19} />
@@ -198,7 +200,7 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="card flex h-full flex-col justify-between border-ember/15 bg-[linear-gradient(145deg,#FFF9FA,#FFF0F1)] lg:col-span-3">
+        <article data-widget-id="expense" className="card flex h-full flex-col justify-between border-ember/15 bg-[linear-gradient(145deg,#FFF9FA,#FFF0F1)]">
           <div className="flex items-center justify-between">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-ember text-white shadow-card">
               <TrendingDown size={19} />
@@ -214,10 +216,7 @@ export default function DashboardPage() {
             <p className="mt-1 text-xs text-ink-muted">dibanding bulan lalu</p>
           </div>
         </article>
-      </section>
-
-      <section data-widget-id="cashflow" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
-        <article className="card min-w-0 border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F3F8FF)] lg:col-span-8">
+        <article data-widget-id="cashflow" className="card h-full min-w-0 border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F3F8FF)]">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="eyebrow">Analitik</p>
@@ -230,7 +229,7 @@ export default function DashboardPage() {
           <CashFlowChart data={cashFlow} />
         </article>
 
-        <article className="card min-w-0 border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)] lg:col-span-4">
+        <article data-widget-id="composition" className="card h-full min-w-0 border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)]">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="eyebrow">Komposisi</p>
@@ -240,13 +239,10 @@ export default function DashboardPage() {
           </div>
           <CategoryBreakdownChart data={breakdown} />
         </article>
-      </section>
-
-      <section data-widget-id="accounts" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
-        <div className="h-full lg:col-span-5">
+        <div data-widget-id="calendar" className="h-full">
           <DashboardCalendar transactions={transactions} />
         </div>
-        <article className="card h-full min-w-0 border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F0FBF7)] lg:col-span-7">
+        <article data-widget-id="accounts" className="card h-full min-w-0 border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F0FBF7)]">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="eyebrow">Distribusi dana</p>
@@ -257,10 +253,7 @@ export default function DashboardPage() {
           </div>
           <AccountBalanceChart data={accountBalanceData} />
         </article>
-      </section>
-
-      <section data-widget-id="activity" className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12">
-        <article className="card flex h-full flex-col border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F6F9FF)] lg:col-span-7">
+        <article data-widget-id="recent" className="card flex h-full flex-col border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F6F9FF)]">
           <div className="mb-2 flex items-center justify-between border-b border-rule pb-4">
             <div>
               <p className="eyebrow">Aktivitas terbaru</p>
@@ -299,8 +292,7 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <div className="grid h-full gap-4 lg:col-span-5 lg:grid-rows-[auto_1fr]">
-          <article className="card border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)]">
+          <article data-widget-id="budgets" className="card h-full border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)]">
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <p className="eyebrow">Kontrol</p>
@@ -322,7 +314,7 @@ export default function DashboardPage() {
             </div>
           </article>
 
-          <article className="card h-full border-pine/15 bg-[linear-gradient(145deg,#FFFFFF,#F7F4FF)]">
+          <article data-widget-id="goals" className="card h-full border-pine/15 bg-[linear-gradient(145deg,#FFFFFF,#F7F4FF)]">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="eyebrow">Target</p>
@@ -334,15 +326,10 @@ export default function DashboardPage() {
               <GoalCard key={goal.id} {...goal} monthlySavings={1_200_000} />
             ))}
           </article>
-        </div>
-      </section>
+        <article data-widget-id="payable" className="card h-full border-ember/15 bg-[linear-gradient(145deg,#FFF8F8,#FFECEF)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-10 text-ember shadow-clay-soft"><HandCoins /></div></div></article>
+        <article data-widget-id="receivable" className="card h-full border-mint/15 bg-[linear-gradient(145deg,#F7FFFC,#E6F8F2)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-10 text-mint shadow-clay-soft"><WalletCards /></div></div></article>
 
-      <section data-widget-id="debts" className="grid gap-4 sm:grid-cols-2">
-        <article className="card border-ember/15 bg-[linear-gradient(145deg,#FFF8F8,#FFECEF)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-10 text-ember"><HandCoins /></div></div></article>
-        <article className="card border-mint/15 bg-[linear-gradient(145deg,#F7FFFC,#E6F8F2)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-10 text-mint"><WalletCards /></div></div></article>
-      </section>
-
-      <section data-widget-id="insights" className="card border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F2FCF8)]">
+      <section data-widget-id="insights" className="card h-full border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F2FCF8)]">
         <div className="mb-4 flex items-center justify-between border-b border-rule pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-pine-10 text-pine">

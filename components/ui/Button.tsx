@@ -6,16 +6,16 @@ import { LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export const buttonVariants = cva(
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] border px-4 text-sm font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine/35 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-[15px] border px-4 text-sm font-bold tracking-[-0.01em] transition-[transform,box-shadow,background-color,border-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine/35 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
-        primary: "border-pine bg-pine text-white shadow-sm hover:-translate-y-0.5 hover:shadow-md",
+        primary: "border-pine/80 bg-[linear-gradient(145deg,#6957F6,#4F3DDD)] text-white shadow-[6px_8px_18px_rgba(91,74,239,.22),inset_0_1px_1px_rgba(255,255,255,.32)] hover:-translate-y-0.5 hover:shadow-[8px_11px_24px_rgba(91,74,239,.28)]",
         secondary: "border-mint/40 bg-mint/15 text-ink hover:bg-mint/25",
-        outline: "border-rule bg-white text-ink shadow-2xs hover:border-pine/45 hover:bg-pine-10",
+        outline: "border-white/80 bg-[linear-gradient(145deg,#FFFFFF,#F5F2FF)] text-ink shadow-clay-soft hover:border-pine/25 hover:bg-pine-10",
         ghost: "border-transparent bg-transparent text-ink-muted hover:bg-paper hover:text-ink",
         danger: "border-ember bg-ember text-white shadow-sm hover:brightness-105",
-        soft: "border-pine/15 bg-pine-10 text-pine hover:bg-pine/15",
+        soft: "border-white/80 bg-[linear-gradient(145deg,#F8F6FF,#EAE5FF)] text-pine shadow-clay-soft hover:border-pine/20 hover:bg-pine/15",
       },
       size: {
         sm: "min-h-8 rounded-[11px] px-3 text-xs",

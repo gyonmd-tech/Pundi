@@ -22,7 +22,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-modern relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip bg-paper text-ink">
       <BackgroundPattern />
-      <SidebarNav onQuickAdd={openQuickAdd} />
+      <SidebarNav onQuickAdd={openQuickAdd} hideMobileNav={quickAddOpen} />
 
       <div className={cn("relative z-10 flex min-w-0 flex-1 flex-col transition-all duration-300", isCollapsed ? "md:pl-[92px]" : "md:pl-[268px]")}>
         <Header

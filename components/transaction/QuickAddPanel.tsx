@@ -29,7 +29,7 @@ const transactionTypes = [
   { value: "expense" as const, label: "Keluar", icon: ArrowDownLeft, tone: "text-ember bg-ember-10 border-ember/25" },
   { value: "income" as const, label: "Masuk", icon: ArrowUpRight, tone: "text-mint bg-mint-10 border-mint/25" },
   { value: "transfer" as const, label: "Transfer", icon: ArrowLeftRight, tone: "text-brass bg-brass-10 border-brass/25" },
-  { value: "cash_withdrawal" as const, label: "Tarik tunai", icon: Banknote, tone: "text-sky-700 bg-sky-50 border-sky-200" },
+  { value: "cash_withdrawal" as const, label: "Tunai", icon: Banknote, tone: "text-sky-700 bg-sky-50 border-sky-200" },
   { value: "balance_adjustment" as const, label: "Kondisi", icon: ClipboardCheck, tone: "text-violet-700 bg-violet-50 border-violet-200" },
 ];
 
@@ -241,8 +241,8 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
   }
 
   return (
-    <form onSubmit={submit} className="flex h-full min-h-0 flex-col bg-white">
-      <header className="flex shrink-0 items-start justify-between gap-4 border-b border-rule px-5 py-5">
+    <form onSubmit={submit} className="flex h-full min-h-0 flex-col bg-[linear-gradient(155deg,#FFFFFF_0%,#FCFBFF_58%,#F5F1FF_100%)]">
+      <header className="flex shrink-0 items-start justify-between gap-4 border-b border-rule/70 px-4 py-4 sm:px-5 sm:py-5">
         <div>
           <p className="eyebrow">{transaction ? "Perbaiki catatan" : "Catatan baru"}</p>
           <h2 className="mt-1 text-xl font-black tracking-tight text-ink">{transaction ? "Edit transaksi" : "Tambah transaksi"}</h2>
@@ -255,8 +255,8 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
         </IconButton>
       </header>
 
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
-        <div className="grid grid-cols-2 gap-2 rounded-[18px] bg-paper p-1.5 sm:grid-cols-5">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:space-y-5 sm:px-5 sm:py-5">
+        <div className="grid grid-cols-5 gap-1 rounded-[20px] border border-white/80 bg-[linear-gradient(145deg,#F1EEFA,#FBFAFF)] p-1.5 shadow-[inset_2px_2px_7px_rgba(65,49,130,.08),inset_-2px_-2px_7px_rgba(255,255,255,.9)]">
           {transactionTypes.map((item) => {
             const Icon = item.icon;
             const active = mode === item.value;
@@ -266,8 +266,8 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
                 type="button"
                 onClick={() => chooseMode(item.value)}
                 className={cn(
-                  "flex min-h-12 flex-col items-center justify-center gap-1 rounded-[14px] border px-1 text-[10px] font-extrabold transition-all",
-                  active ? `${item.tone} shadow-sm` : "border-transparent text-ink-muted hover:bg-white hover:text-ink"
+                  "flex min-h-13 min-w-0 flex-col items-center justify-center gap-1 rounded-[14px] border px-0.5 text-[9px] font-extrabold leading-none transition-all sm:text-[10px]",
+                  active ? `${item.tone} shadow-clay-soft` : "border-transparent text-ink-muted hover:bg-white/80 hover:text-ink"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -284,8 +284,8 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
         ) : null}
 
         {isAdjustment ? (
-          <div className="rounded-[16px] border border-violet-200 bg-violet-50 px-4 py-3 text-xs leading-relaxed text-violet-800">
-            Masukkan saldo nyata rekening pada akhir tanggal yang dipilih. Pundi menghitung selisih otomatis tanpa memasukkannya ke grafik pemasukan atau pengeluaran.
+          <div className="rounded-[18px] border border-violet-200/70 bg-[linear-gradient(145deg,#FAF8FF,#F1EDFF)] px-4 py-3 text-xs leading-relaxed text-violet-800 shadow-clay-soft">
+            Isi saldo nyata pada tanggal yang dipilih. Selisih dihitung otomatis dan tidak masuk ke grafik arus kas.
           </div>
         ) : null}
 
@@ -298,7 +298,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
               value={amount}
               onChange={(event) => setAmount(event.target.value.replace(/\D/g, ""))}
               placeholder="0"
-              className="h-14 rounded-[18px] border-pine/20 bg-pine-10/60 pl-12 font-mono text-xl font-semibold tracking-tight"
+              className="h-14 rounded-[18px] border-white/80 bg-[linear-gradient(145deg,#F8F6FF,#EEE9FF)] pl-12 font-mono text-xl font-semibold tracking-tight"
             />
           </div>
         </Field>
@@ -351,7 +351,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
         <Field label="Catatan" hint={`${note.length}/80`}>
           <div className="relative">
             <ReceiptText className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-ink-muted" />
-            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder="Contoh: makan siang bersama tim" className="min-h-24 w-full resize-none rounded-[16px] border border-rule bg-white py-3 pl-10 pr-3 text-sm text-ink outline-none transition placeholder:text-ink-muted/70 focus:border-pine focus:ring-2 focus:ring-pine/15" />
+            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder={isAdjustment ? "Contoh: saldo setelah pengecekan rekening" : "Contoh: makan siang bersama tim"} className="min-h-24 w-full resize-none rounded-[16px] border border-white/80 bg-[linear-gradient(145deg,#FFFFFF,#F8F6FF)] py-3 pl-10 pr-3 text-sm text-ink outline-none shadow-clay-soft transition placeholder:text-ink-muted/70 focus:border-pine/40 focus:ring-4 focus:ring-pine/10" />
           </div>
         </Field>
 
@@ -362,7 +362,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
         ) : null}
       </div>
 
-      <footer className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-rule bg-white/95 p-4 backdrop-blur">
+      <footer className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-rule/70 bg-white/85 p-4 backdrop-blur-md">
         <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
         <Button type="submit" loading={submitting} disabled={connection.status === "loading" || !accounts.length || (isTransfer && !destinationOptions.length)}>
           <Check className="h-4 w-4" /> {isAdjustment ? "Terapkan kondisi saldo" : transaction ? "Simpan perubahan" : "Simpan transaksi"}

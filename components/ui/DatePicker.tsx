@@ -37,7 +37,7 @@ export function DatePicker({ value, onValueChange, className, min, max, ariaLabe
 
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
-      <button type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen((state) => !state)} className="flex h-11 w-full items-center gap-3 rounded-[14px] border border-pine/12 bg-[linear-gradient(145deg,#FFFFFF,#FAF9FF)] px-3.5 text-left text-sm font-semibold text-ink shadow-2xs transition hover:border-pine/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine/10">
+      <button type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen((state) => !state)} className="flex h-11 w-full items-center gap-3 rounded-[15px] border border-white/80 bg-[linear-gradient(145deg,#FFFFFF,#F5F2FF)] px-3.5 text-left text-sm font-semibold text-ink shadow-clay-soft transition hover:border-pine/25 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine/10">
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[9px] bg-sky-10 text-sky"><CalendarDays className="h-3.5 w-3.5" /></span>
         <span className={cn("flex-1", !selected && "text-ink-muted")}>{selected ? dateFormatter.format(selected) : "Pilih tanggal"}</span>
         <ChevronRight className={cn("h-4 w-4 text-ink-muted transition", open && "rotate-90 text-pine")} />

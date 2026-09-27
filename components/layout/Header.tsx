@@ -28,8 +28,8 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
 
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 sm:px-4 lg:px-5">
-      <div className="rounded-[24px] border border-pine/10 bg-white/88 p-2.5 shadow-card backdrop-blur-xl">
-        <div className="flex min-h-12 flex-wrap items-center gap-2 lg:grid lg:grid-cols-[minmax(260px,1fr)_minmax(340px,640px)_minmax(230px,1fr)] lg:gap-3">
+      <div className="rounded-[25px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,.94),rgba(246,243,255,.88))] p-2.5 shadow-clay backdrop-blur-xl">
+        <div className="flex min-h-12 flex-wrap items-center gap-2 lg:grid lg:grid-cols-[minmax(320px,1fr)_minmax(280px,560px)_minmax(205px,auto)] lg:gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2 lg:col-start-1 lg:row-start-1">
             <AccountDropdown selectedId={selectedAccountId} onSelect={(id) => onSelectAccount?.(id)} />
             <HeaderDateBadge />

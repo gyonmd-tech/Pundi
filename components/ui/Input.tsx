@@ -18,7 +18,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className
         aria-invalid={Boolean(error)}
         aria-describedby={error && id ? `${id}-error` : undefined}
         className={cn(
-          "h-11 w-full rounded-[14px] border border-rule bg-white px-3.5 text-sm text-ink outline-none transition placeholder:text-ink-muted/70 focus:border-pine focus:ring-2 focus:ring-pine/15",
+          "h-11 w-full rounded-[15px] border border-white/80 bg-[linear-gradient(145deg,#FFFFFF,#F8F6FF)] px-3.5 text-sm text-ink outline-none shadow-clay-soft transition-[border-color,box-shadow,background] placeholder:text-ink-muted/70 focus:border-pine/45 focus:bg-white focus:shadow-[inset_2px_2px_7px_rgba(91,74,239,.08),0_0_0_4px_rgba(91,74,239,.1)]",
           icon && "pl-10",
           error && "border-ember focus:border-ember focus:ring-ember/15",
           className,
