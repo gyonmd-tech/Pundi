@@ -138,6 +138,21 @@ export default function DashboardPage() {
     category: categories.find((category) => category.id === transaction.categoryId),
   }));
 
+  const dailySpending = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - index));
+    const amount = transactions
+      .filter((transaction) => transaction.type === "expense" && new Date(transaction.date).toDateString() === date.toDateString())
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+    return {
+      label: new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(date),
+      amount,
+    };
+  });
+  const maxDailySpending = Math.max(...dailySpending.map((item) => item.amount), 1);
+  const openPayable = debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0);
+  const openReceivable = debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0);
+  const cashHealth = Math.max(0, Math.min(100, thisMonth.income ? ((thisMonth.income - thisMonth.expense) / thisMonth.income) * 100 : 0));
+
   return (
     <div className="dashboard-modern space-y-5 font-ui sm:space-y-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -160,10 +175,10 @@ export default function DashboardPage() {
           <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-sky/25 blur-3xl" />
           <div className="relative">
             <div className="flex items-start justify-between">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/75 text-pine ring-1 ring-pine/15">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#5146A5] text-white shadow-clay-soft">
                 <WalletCards size={21} />
               </div>
-              <span className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-extrabold text-pine ring-1 ring-pine/15">
+              <span className="rounded-full bg-[#5146A5] px-3 py-1 text-[11px] font-extrabold text-white shadow-clay-soft">
                 {accounts.length} akun aktif
               </span>
             </div>
@@ -173,10 +188,10 @@ export default function DashboardPage() {
             </p>
             <SummarySparkline values={balanceTrend} className="mt-5 text-pine" />
             <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-pine/10 pt-4">
-              <span className="rounded-full bg-white/70 px-3 py-1.5 text-xs text-ink-muted ring-1 ring-pine/10">
+              <span className="rounded-full bg-[#DED8F3] px-3 py-1.5 text-xs text-[#514A67] shadow-clay-soft">
                 Arus kas <strong className="ml-1 text-pine">{net >= 0 ? "+" : ""}{formatRupiah(net)}</strong>
               </span>
-              <span className="rounded-full bg-white/70 px-3 py-1.5 text-xs text-ink-muted ring-1 ring-pine/10">
+              <span className="rounded-full bg-[#C3E3DA] px-3 py-1.5 text-xs text-[#315950] shadow-clay-soft">
                 Rasio tabungan <strong className="ml-1 text-pine">{savingsRate.toFixed(1)}%</strong>
               </span>
             </div>
@@ -238,6 +253,36 @@ export default function DashboardPage() {
             <Link href="/anggaran" className="text-xs font-bold text-pine hover:underline">Kelola</Link>
           </div>
           <CategoryBreakdownChart data={breakdown} />
+        </article>
+
+        <article data-widget-id="rhythm" className="card h-full min-w-0">
+          <div className="flex items-start justify-between gap-4">
+            <div><p className="eyebrow">7 hari terakhir</p><h2 className="mt-1 text-heading font-bold text-ink">Ritme pengeluaran</h2></div>
+            <span className="rounded-full bg-[#473D78] px-3 py-1 text-[10px] font-extrabold text-white">Harian</span>
+          </div>
+          <div className="mt-7 flex h-40 items-end gap-2 sm:gap-3" aria-label="Grafik pengeluaran tujuh hari terakhir">
+            {dailySpending.map((item) => <div key={item.label} className="flex h-full flex-1 flex-col justify-end gap-2">
+              <div className="relative flex flex-1 items-end overflow-hidden rounded-[14px] bg-[#B7A8D6]/45">
+                <div className="w-full rounded-[14px] bg-[#5E4CCF] transition-[height] duration-500" style={{ height: `${Math.max(item.amount ? 12 : 3, (item.amount / maxDailySpending) * 100)}%` }} title={`${item.label}: ${formatRupiah(item.amount)}`} />
+              </div>
+              <span className="text-center text-[10px] font-extrabold uppercase text-[#473D78]">{item.label}</span>
+            </div>)}
+          </div>
+          <p className="mt-4 text-xs font-bold text-[#473D78]">Total minggu ini <span className="text-ink">{formatRupiah(dailySpending.reduce((sum, item) => sum + item.amount, 0))}</span></p>
+        </article>
+
+        <article data-widget-id="health" className="card h-full min-w-0">
+          <p className="eyebrow">Kesehatan kas</p>
+          <h2 className="mt-1 text-heading font-bold text-ink">Ruang aman bulan ini</h2>
+          <div className="mx-auto mt-6 grid h-36 w-36 place-items-center rounded-full shadow-clay-soft" style={{ background: `conic-gradient(#156F62 ${cashHealth}%, #E6A447 ${cashHealth}% 100%)` }}>
+            <div className="grid h-24 w-24 place-items-center rounded-full bg-[#DDF3EA] text-center shadow-[inset_3px_3px_9px_rgba(63,82,77,.18)]">
+              <div><p className="text-2xl font-black text-[#124F48]">{cashHealth.toFixed(0)}%</p><p className="text-[9px] font-extrabold uppercase text-[#356D65]">tersisa</p></div>
+            </div>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold">
+            <div className="rounded-xl bg-[#F2C5CB] p-3 text-[#772F3C]">Utang<br/><span className="text-ink">{formatRupiah(openPayable)}</span></div>
+            <div className="rounded-xl bg-[#B9E5D8] p-3 text-[#155C50]">Piutang<br/><span className="text-ink">{formatRupiah(openReceivable)}</span></div>
+          </div>
         </article>
         <div data-widget-id="calendar" className="h-full">
           <DashboardCalendar transactions={transactions} />
@@ -326,8 +371,8 @@ export default function DashboardPage() {
               <GoalCard key={goal.id} {...goal} monthlySavings={1_200_000} />
             ))}
           </article>
-        <article data-widget-id="payable" className="card h-full border-ember/15 bg-[linear-gradient(145deg,#FFF8F8,#FFECEF)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-10 text-ember shadow-clay-soft"><HandCoins /></div></div></article>
-        <article data-widget-id="receivable" className="card h-full border-mint/15 bg-[linear-gradient(145deg,#F7FFFC,#E6F8F2)]"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0))}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-10 text-mint shadow-clay-soft"><WalletCards /></div></div></article>
+        <article data-widget-id="payable" className="card h-full border-ember/15"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openPayable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-10 text-ember shadow-clay-soft"><HandCoins /></div></div></article>
+        <article data-widget-id="receivable" className="card h-full border-mint/15"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openReceivable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-10 text-mint shadow-clay-soft"><WalletCards /></div></div></article>
 
       <section data-widget-id="insights" className="card h-full border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F2FCF8)]">
         <div className="mb-4 flex items-center justify-between border-b border-rule pb-4">

@@ -1,7 +1,6 @@
 "use client";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 /**
@@ -17,7 +16,7 @@ import { downloadExcel } from "@/lib/utils/excelExport";
 import { useToast } from "@/lib/context/ToastContext";
 import {
   Search, Filter, Plus, Trash2, ArrowDownLeft, ArrowUpRight,
-  ArrowLeftRight, ChevronDown, ChevronUp, X, FileSpreadsheet, Pencil, Banknote,
+  ArrowLeftRight, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, X, FileSpreadsheet, Pencil, Banknote, Eye,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -58,6 +57,9 @@ export default function TransaksiPage() {
   const [showFilter, setShowFilter]       = useState(false);
   const [deleteId, setDeleteId]           = useState<string | null>(null);
   const [editTransaction, setEditTransaction] = useState<Transaction | null>(null);
+  const [detailTransaction, setDetailTransaction] = useState<Transaction | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const filtered = useMemo(() => {
     return transactions.filter((tx) => {
@@ -86,6 +88,9 @@ export default function TransaksiPage() {
   }), [filtered]);
 
   const activeFilters = [filterType !== "all", filterAccount !== "all", filterCategory !== "all", !!filterFrom, !!filterTo].filter(Boolean).length;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(currentPage, pageCount);
+  const pagedTransactions = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   async function handleDelete(id: string) {
     const tx = transactions.find(t => t.id === id);
@@ -125,6 +130,7 @@ export default function TransaksiPage() {
     setFilterFrom("");
     setFilterTo("");
     setSearch("");
+    setCurrentPage(1);
     showToast({
       type: "info",
       title: "Filter Direset",
@@ -280,8 +286,8 @@ export default function TransaksiPage() {
         ].map((s) => (
           <div
             key={s.label}
-            className="card p-4 transition-all duration-200 hover:border-pine/30"
-            style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}
+            className={cn("card p-4 transition-all duration-200", s.type === "income" ? "!bg-[#B7E1D2]" : s.type === "expense" ? "!bg-[#F0BFC7]" : "!bg-[#C8C0EB]")}
+            style={{ background: s.type === "income" ? "#B7E1D2" : s.type === "expense" ? "#F0BFC7" : "#C8C0EB" }}
           >
             <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
               {s.label}
@@ -297,17 +303,14 @@ export default function TransaksiPage() {
       {/* Search & Filter Toolbar */}
       <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
         {/* Search Bar with clear */}
-        <div
-          className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 rounded-card border transition-all duration-200 focus-within:border-pine focus-within:ring-2 focus-within:ring-pine/15"
-          style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}
-        >
+        <div className="flex flex-1 items-center gap-2.5 border-b-2 border-[#7565C7] px-1 py-2 transition-all duration-200 focus-within:border-[#372B86]">
           <Search size={16} strokeWidth={1.8} className="text-ink-muted flex-shrink-0" />
-          <Input
+          <input
             type="text"
-            placeholder="Cari berdasarkan catatan, kategori, akun..."
+            placeholder="Cari catatan, kategori, atau akun..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-small text-ink"
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-small font-bold text-ink outline-none placeholder:font-medium placeholder:text-[#655E78]"
             style={{ fontFamily: "var(--font-ui)" }}
           />
           {search && (
@@ -328,7 +331,7 @@ export default function TransaksiPage() {
             "flex items-center gap-2 px-4 py-2.5 rounded-card border text-small font-medium relative transition-all duration-200",
             showFilter || activeFilters > 0
               ? "border-pine bg-pine-10 text-pine font-semibold"
-              : "border-rule bg-surface text-ink-muted hover:text-ink hover:border-pine/50"
+              : "border-[#AFA4CF] bg-[#D8D1EA] text-[#514A67] shadow-clay-soft hover:text-ink hover:border-pine/50"
           )}
         >
           <Filter size={16} strokeWidth={1.8} />
@@ -347,8 +350,7 @@ export default function TransaksiPage() {
       {/* Expandable Filter Panel */}
       {showFilter && (
         <div
-          className="card p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 animate-in fade-in slide-in-from-top-2"
-          style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}
+          className="card grid grid-cols-1 gap-3.5 bg-[#CFC7E8] p-4 sm:grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-top-2"
         >
           {/* Filter Tipe */}
           <div>
@@ -357,7 +359,7 @@ export default function TransaksiPage() {
             </label>
             <Select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
+              onChange={(e) => { setFilterType(e.target.value as TransactionType | "all"); setCurrentPage(1); }}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
               style={{ borderColor: "var(--color-rule)" }}
             >
@@ -375,7 +377,7 @@ export default function TransaksiPage() {
             </label>
             <Select
               value={filterAccount}
-              onChange={(e) => setFilterAccount(e.target.value)}
+              onChange={(e) => { setFilterAccount(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
               style={{ borderColor: "var(--color-rule)" }}
             >
@@ -393,7 +395,7 @@ export default function TransaksiPage() {
             </label>
             <Select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              onChange={(e) => { setFilterCategory(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
               style={{ borderColor: "var(--color-rule)" }}
             >
@@ -410,8 +412,8 @@ export default function TransaksiPage() {
               Rentang Tanggal
             </label>
             <div className="grid grid-cols-1 gap-2">
-              <DatePicker value={filterFrom} onValueChange={setFilterFrom} ariaLabel="Tanggal mulai" />
-              <DatePicker value={filterTo} onValueChange={setFilterTo} min={filterFrom || undefined} ariaLabel="Tanggal akhir" />
+              <DatePicker value={filterFrom} onValueChange={(value) => { setFilterFrom(value); setCurrentPage(1); }} ariaLabel="Tanggal mulai" />
+              <DatePicker value={filterTo} onValueChange={(value) => { setFilterTo(value); setCurrentPage(1); }} min={filterFrom || undefined} ariaLabel="Tanggal akhir" />
             </div>
           </div>
 
@@ -430,7 +432,7 @@ export default function TransaksiPage() {
       )}
 
       {/* Transaction Records Card / Table */}
-      <div className="card overflow-hidden p-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+      <div className="overflow-hidden rounded-[25px] bg-[#BBB1DF] p-2 shadow-clay">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
             <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
@@ -454,8 +456,8 @@ export default function TransaksiPage() {
         ) : (
           <>
             {/* ── Mobile Card List View (<768px) ── */}
-            <div className="divide-y divide-rule/60 md:hidden">
-              {filtered.map((tx) => {
+            <div className="space-y-2 md:hidden">
+              {pagedTransactions.map((tx, rowIndex) => {
                 const acc = accounts.find((a) => a.id === tx.accountId);
                 const cat = categories.find((c) => c.id === tx.categoryId);
                 const destination = accounts.find((a) => a.id === tx.destinationAccountId);
@@ -465,7 +467,8 @@ export default function TransaksiPage() {
                 return (
                   <div
                     key={tx.id}
-                    className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-paper/60 transition-colors"
+                    onClick={() => setDetailTransaction(tx)}
+                    className={cn("flex items-center justify-between gap-3 rounded-[18px] p-3.5 shadow-clay-soft transition sm:p-4", rowIndex % 2 ? "bg-[#B7DDE1]" : "bg-[#D6CDF1]", "hover:-translate-y-0.5 hover:bg-[#AFA2DA]")}
                   >
                     {/* Left: Category Icon + Description & Metadata */}
                     <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -512,7 +515,7 @@ export default function TransaksiPage() {
                           {typeCfg.label}
                         </span>
                         {tx.recordKind !== "balance_adjustment" ? <button
-                          onClick={() => setEditTransaction(tx)}
+                          onClick={(event) => { event.stopPropagation(); setEditTransaction(tx); }}
                           className="p-1 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
                           title="Edit transaksi"
                           aria-label="Edit transaksi"
@@ -520,7 +523,7 @@ export default function TransaksiPage() {
                           <Pencil size={13} strokeWidth={1.8} />
                         </button> : null}
                         <button
-                          onClick={() => setDeleteId(tx.id)}
+                          onClick={(event) => { event.stopPropagation(); setDeleteId(tx.id); }}
                           className="p-1 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
                           title="Hapus transaksi"
                           aria-label="Hapus transaksi"
@@ -535,20 +538,20 @@ export default function TransaksiPage() {
             </div>
 
             {/* ── Desktop Data Table (≥768px) ── */}
-            <div className="hidden md:block overflow-x-auto">
-              <Table className="w-full text-left border-collapse">
+            <div className="hidden overflow-x-auto rounded-[19px] md:block">
+              <Table className="w-full border-separate border-spacing-y-1 text-left">
                 <TableHeader>
-                  <TableRow className="border-b" style={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-rule)" }}>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tanggal transaksi / dicatat</TableHead>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Transaksi & Kategori</TableHead>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Sumber Akun</TableHead>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Tipe</TableHead>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted text-right">Nominal</TableHead>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-muted w-10"></TableHead>
+                  <TableRow className="bg-[#40366F] text-white">
+                    <TableHead className="rounded-l-[14px] px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Tanggal transaksi / dicatat</TableHead>
+                    <TableHead className="px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Transaksi & Kategori</TableHead>
+                    <TableHead className="px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Sumber Akun</TableHead>
+                    <TableHead className="px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Tipe</TableHead>
+                    <TableHead className="px-4 py-4 text-right text-xs font-extrabold uppercase tracking-wider text-white">Nominal</TableHead>
+                    <TableHead className="w-24 rounded-r-[14px] px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="divide-y divide-rule/60">
-                  {filtered.map((tx) => {
+                <TableBody>
+                  {pagedTransactions.map((tx, rowIndex) => {
                     const acc = accounts.find((a) => a.id === tx.accountId);
                     const cat = categories.find((c) => c.id === tx.categoryId);
                     const destination = accounts.find((a) => a.id === tx.destinationAccountId);
@@ -558,7 +561,8 @@ export default function TransaksiPage() {
                     return (
                       <TableRow
                         key={tx.id}
-                        className="group transition-colors duration-150 hover:bg-paper/80"
+                        onClick={() => setDetailTransaction(tx)}
+                        className={cn("group cursor-pointer shadow-clay-soft transition-all duration-150", rowIndex % 2 ? "bg-[#B8DCE4]" : "bg-[#D6CDF0]", "hover:relative hover:z-10 hover:-translate-y-0.5 hover:bg-[#A99DD5] hover:shadow-clay")}
                       >
                         {/* Tanggal */}
                         <TableCell className="px-4 py-3.5 whitespace-nowrap">
@@ -626,9 +630,10 @@ export default function TransaksiPage() {
 
                         {/* Delete Action with tooltip */}
                         <TableCell className="px-4 py-3.5 text-right">
-                          <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                            <div className="flex items-center justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                            <button onClick={(event) => { event.stopPropagation(); setDetailTransaction(tx); }} className="rounded-xl bg-[#40366F] p-2 text-white transition hover:bg-[#261F4A]" title="Lihat detail" aria-label="Lihat detail transaksi"><Eye size={15} /></button>
                             {tx.recordKind !== "balance_adjustment" ? <button
-                              onClick={() => setEditTransaction(tx)}
+                              onClick={(event) => { event.stopPropagation(); setEditTransaction(tx); }}
                               className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-all duration-150"
                               title="Edit transaksi"
                               aria-label="Edit transaksi"
@@ -636,7 +641,7 @@ export default function TransaksiPage() {
                               <Pencil size={15} strokeWidth={1.8} />
                             </button> : null}
                             <button
-                              onClick={() => setDeleteId(tx.id)}
+                              onClick={(event) => { event.stopPropagation(); setDeleteId(tx.id); }}
                               className="p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"
                               title="Hapus transaksi"
                               aria-label="Hapus transaksi"
@@ -651,9 +656,39 @@ export default function TransaksiPage() {
                 </TableBody>
               </Table>
             </div>
+            <div className="flex flex-col gap-3 px-2 pb-2 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs font-bold text-[#40366F]">Menampilkan {filtered.length ? (safePage - 1) * pageSize + 1 : 0}–{Math.min(safePage * pageSize, filtered.length)} dari {filtered.length} transaksi</p>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1} className="grid h-9 w-9 place-items-center rounded-xl bg-[#E2DCF4] text-[#40366F] shadow-clay-soft transition hover:bg-[#CFC4EC] disabled:opacity-40" aria-label="Halaman sebelumnya"><ChevronLeft size={16} /></button>
+                <span className="rounded-xl bg-[#40366F] px-3 py-2 text-xs font-extrabold text-white">{safePage} / {pageCount}</span>
+                <button type="button" onClick={() => setCurrentPage(Math.min(pageCount, safePage + 1))} disabled={safePage === pageCount} className="grid h-9 w-9 place-items-center rounded-xl bg-[#E2DCF4] text-[#40366F] shadow-clay-soft transition hover:bg-[#CFC4EC] disabled:opacity-40" aria-label="Halaman berikutnya"><ChevronRight size={16} /></button>
+              </div>
+            </div>
           </>
         )}
       </div>
+
+      {detailTransaction && (() => {
+        const account = accounts.find((item) => item.id === detailTransaction.accountId);
+        const destination = accounts.find((item) => item.id === detailTransaction.destinationAccountId);
+        const category = categories.find((item) => item.id === detailTransaction.categoryId);
+        const cfg = detailTransaction.transferKind === "cash_withdrawal" ? cashWithdrawalLabel : typeLabel[detailTransaction.type];
+        return <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(35,28,68,.56)] p-4 backdrop-blur-[3px]" role="dialog" aria-modal="true" aria-label="Detail transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setDetailTransaction(null); }}>
+          <article className="w-full max-w-lg rounded-[28px] bg-[#C9C1E8] p-5 shadow-float sm:p-7">
+            <div className="flex items-start justify-between gap-4"><div><p className="eyebrow">Detail transaksi</p><h2 className="mt-1 text-2xl font-black text-ink">{detailTransaction.note || category?.name || "Transaksi"}</h2></div><button onClick={() => setDetailTransaction(null)} className="grid h-10 w-10 place-items-center rounded-xl bg-[#40366F] text-white"><X size={17}/></button></div>
+            <div className="mt-6 rounded-[22px] bg-[#40366F] p-5 text-white shadow-clay-soft"><p className="text-xs font-bold text-white/70">Nominal</p><p className="mt-1 text-3xl font-black tabular-nums">{formatRupiah(detailTransaction.amount)}</p><span className="mt-3 inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold">{cfg.label}</span></div>
+            <dl className="mt-4 grid gap-2 sm:grid-cols-2">
+              {[
+                ["Tanggal transaksi", formatDate(detailTransaction.date, "short")],
+                ["Dicatat pada", formatRecordedDate(detailTransaction.createdAt || detailTransaction.date)],
+                ["Kategori", category?.name || "Tanpa kategori"],
+                ["Sumber dana", `${account?.name || "—"}${destination ? ` → ${destination.name}` : ""}`],
+              ].map(([label, value]) => <div key={label} className="rounded-[16px] bg-[#E1DCF1] p-4"><dt className="text-[10px] font-extrabold uppercase tracking-wider text-[#625A79]">{label}</dt><dd className="mt-1 text-sm font-extrabold text-ink">{value}</dd></div>)}
+            </dl>
+            <div className="mt-5 flex justify-end gap-2">{detailTransaction.recordKind !== "balance_adjustment" && <button onClick={() => { setDetailTransaction(null); setEditTransaction(detailTransaction); }} className="material-button secondary"><Pencil size={15}/> Edit</button>}<button onClick={() => setDetailTransaction(null)} className="material-button">Tutup</button></div>
+          </article>
+        </div>;
+      })()}
 
       {editTransaction && (
         <div className="fixed inset-0 z-50 bg-[rgba(28,24,47,0.42)] backdrop-blur-[3px]" role="dialog" aria-modal="true" aria-label="Edit transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditTransaction(null); }}>
