@@ -13,14 +13,14 @@ interface PreferenceToggleProps {
 }
 
 const iconTone = {
-  pine: "bg-pine-10 text-pine",
-  mint: "bg-mint-10 text-mint",
-  sky: "bg-sky-10 text-sky",
+  pine: "bg-brand-600 text-white",
+  mint: "bg-mint-ink text-white",
+  sky: "bg-brand-900 text-white",
 };
 
 export function PreferenceToggle({ label, description, icon: Icon, checked, onChange, tone = "pine" }: PreferenceToggleProps) {
   return (
-    <div className="flex items-center gap-3 rounded-[18px] border border-white/80 bg-white/70 p-3.5 shadow-2xs sm:p-4">
+    <div className="flex items-center gap-3 rounded-[18px] bg-brand-50 p-3.5 sm:p-4">
       <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-[12px]", iconTone[tone])}>
         <Icon className="h-4 w-4" aria-hidden />
       </span>

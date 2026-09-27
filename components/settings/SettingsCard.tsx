@@ -3,17 +3,17 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 const toneClasses = {
-  violet: "border-pine/15 bg-[linear-gradient(145deg,rgba(239,236,255,.96),rgba(255,255,255,.94))]",
-  blue: "border-sky/15 bg-[linear-gradient(145deg,rgba(234,243,255,.92),rgba(255,255,255,.96))]",
-  mint: "border-mint/15 bg-[linear-gradient(145deg,rgba(229,248,241,.88),rgba(255,255,255,.96))]",
-  amber: "border-brass/15 bg-[linear-gradient(145deg,rgba(255,246,220,.9),rgba(255,255,255,.96))]",
+  violet: "border-brand-600/10 bg-white",
+  blue: "border-brand-600/10 bg-white",
+  mint: "border-brand-600/10 bg-white",
+  amber: "border-brand-600/10 bg-white",
 } as const;
 
 const iconClasses = {
-  violet: "bg-pine-10 text-pine",
-  blue: "bg-sky-10 text-sky",
-  mint: "bg-mint-10 text-mint",
-  amber: "bg-brass-10 text-brass",
+  violet: "bg-brand-600 text-white shadow-card",
+  blue: "bg-brand-900 text-white shadow-card",
+  mint: "bg-mint-ink text-white shadow-card",
+  amber: "bg-[#855A00] text-white shadow-card",
 } as const;
 
 interface SettingsCardProps {

@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { formatRupiah, formatDelta } from "@/lib/utils/formatter";
 import type { LucideIcon } from "lucide-react";
+import { SummarySparkline } from "./SummarySparkline";
 
 interface SummaryCardProps {
   title:       string;
@@ -20,6 +21,8 @@ interface SummaryCardProps {
   variant?:    "neutral" | "positive" | "negative";
   className?:  string;
   loading?:    boolean;
+  trend?:      number[];
+  caption?:    string;
 }
 
 function useCountUp(target: number, duration: number = 400) {
@@ -66,6 +69,8 @@ export function SummaryCard({
   variant = "neutral",
   className,
   loading = false,
+  trend,
+  caption,
 }: SummaryCardProps) {
   const displayAmount = useCountUp(amount);
 
@@ -86,104 +91,66 @@ export function SummaryCard({
   }
 
   const deltaPositive = delta !== undefined && delta >= 0;
+  const tone = {
+    neutral: {
+      surface: "border-brand-600/10 bg-white",
+      icon: "bg-brand-600 text-white",
+      chart: "text-brand-600",
+      delta: "text-brand-800",
+    },
+    positive: {
+      surface: "border-brand-600/10 bg-white",
+      icon: "bg-mint-ink text-white",
+      chart: "text-mint",
+      delta: "text-mint-ink",
+    },
+    negative: {
+      surface: "border-brand-600/10 bg-white",
+      icon: "bg-ember-ink text-white",
+      chart: "text-ember",
+      delta: "text-ember-ink",
+    },
+  }[variant];
 
   return (
     <div
+      data-tone={variant}
       className={cn(
-        "card group relative overflow-hidden transition-all duration-300 ease-out",
-        "hover:-translate-y-1 hover:shadow-card hover:border-pine/40 cursor-default select-none",
+        "card group relative flex h-full flex-col overflow-hidden border transition-[border-color,box-shadow] duration-200",
+        "cursor-default select-none",
+        tone.surface,
         className
       )}
-      style={{
-        borderColor: "var(--color-rule)",
-        backgroundColor: "var(--color-surface)",
-      }}
     >
-      {/* Subtle top accent gradient */}
-      <div
-        className={cn(
-          "absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-          variant === "positive" ? "bg-pine" : variant === "negative" ? "bg-ember" : "bg-pine"
-        )}
-      />
-
-      {/* Header: title + icon */}
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <span
-          className="text-small font-medium tracking-tight text-ink-muted group-hover:text-ink transition-colors"
-          style={{ fontFamily: "var(--font-ui)" }}
-        >
-          {title}
-        </span>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <span className="text-small font-semibold tracking-[-0.01em] text-ink-muted">{title}</span>
+          {delta !== undefined && (
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className={cn("text-xs font-semibold tabular-nums", deltaPositive ? tone.delta : "text-ember-ink")}>{formatDelta(delta)}</span>
+              <span className="sr-only">{deltaLabel}</span>
+            </div>
+          )}
+        </div>
 
         {Icon && (
-          <div
-            className="w-8 h-8 rounded-sm flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
-            style={{
-              backgroundColor:
-                variant === "positive"
-                  ? "var(--color-pine-10)"
-                  : variant === "negative"
-                  ? "var(--color-ember-10)"
-                  : "var(--color-paper)",
-            }}
-          >
-            <Icon
-              size={16}
-              strokeWidth={1.8}
-              style={{
-                color:
-                  variant === "positive"
-                    ? "var(--color-pine)"
-                    : variant === "negative"
-                    ? "var(--color-ember)"
-                    : "var(--color-ink-muted)",
-              }}
-            />
+          <div className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[14px] shadow-card", tone.icon)}>
+            <Icon size={18} strokeWidth={1.9} />
           </div>
         )}
       </div>
 
-      {/* Amount — IBM Plex Mono, display-xl */}
-      <div className="mb-2.5">
+      {trend?.length ? <SummarySparkline values={trend} className={cn("mt-5 h-20", tone.chart)} /> : <div className="min-h-5 flex-1" />}
+
+      <div className="mt-auto pt-3">
         <span
-          className="tabular-nums font-mono leading-tight font-semibold tracking-tight"
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "var(--text-data-l)",
-            color:
-              variant === "positive"
-                ? "var(--color-pine)"
-                : variant === "negative"
-                ? "var(--color-ember)"
-                : "var(--color-ink)",
-            display: "block",
-            textAlign: "right",
-          }}
+          className="block font-ui text-data-l font-semibold leading-tight tracking-[-0.045em] text-ink tabular-nums"
         >
           {formatRupiah(displayAmount)}
         </span>
+        {caption ? <p className="mt-1 text-xs text-ink-muted">{caption}</p> : null}
       </div>
 
-      {/* Delta indicator pill */}
-      {delta !== undefined && (
-        <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-rule/40">
-          <span
-            className="text-xs font-mono font-semibold flex items-center gap-0.5"
-            style={{
-              color: deltaPositive ? "var(--color-pine)" : "var(--color-ember)",
-            }}
-          >
-            {formatDelta(delta)}
-          </span>
-          <span
-            className="text-xs text-ink-muted"
-            style={{ fontFamily: "var(--font-ui)" }}
-          >
-            {deltaLabel}
-          </span>
-        </div>
-      )}
     </div>
   );
 }

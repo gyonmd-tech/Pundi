@@ -5,7 +5,6 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
   ArrowRight,
-  ArrowUpRight,
   Sparkles,
   TrendingDown,
   TrendingUp,
@@ -14,11 +13,14 @@ import {
 } from "lucide-react";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
+import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { InsightFeed } from "@/components/dashboard/InsightFeed";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
 import {
   useAccounts,
@@ -35,6 +37,7 @@ const chartLoading = () => <div className="h-64 animate-pulse rounded-[18px] bg-
 const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart").then((module) => module.CashFlowChart), { ssr: false, loading: chartLoading });
 const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), { ssr: false, loading: chartLoading });
 const AccountBalanceChart = dynamic(() => import("@/components/charts/AccountBalanceChart").then((module) => module.AccountBalanceChart), { ssr: false, loading: chartLoading });
+const SpendingMomentumChart = dynamic(() => import("@/components/charts/SpendingMomentumChart").then((module) => module.SpendingMomentumChart), { ssr: false, loading: chartLoading });
 
 function isSameMonth(date: Date, target: Date) {
   return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth();
@@ -148,7 +151,6 @@ export default function DashboardPage() {
       amount,
     };
   });
-  const maxDailySpending = Math.max(...dailySpending.map((item) => item.amount), 1);
   const openPayable = debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const openReceivable = debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const cashHealth = Math.max(0, Math.min(100, thisMonth.income ? ((thisMonth.income - thisMonth.expense) / thisMonth.income) * 100 : 0));
@@ -170,68 +172,42 @@ export default function DashboardPage() {
       </header>
 
       <DashboardLayout>
-        <article data-widget-id="balance" className="relative h-full overflow-hidden rounded-[1.75rem] border border-pine/15 bg-[linear-gradient(135deg,#EFECFF_0%,#EAF3FF_48%,#E5F8F1_100%)] p-5 text-ink shadow-clay sm:p-7">
-          <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-pine/25 blur-3xl" />
-          <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-sky/25 blur-3xl" />
+        <Card variant="highlight" data-widget-id="balance" className="relative h-full overflow-hidden rounded-[1.75rem] p-5 sm:p-7">
+          <div className="absolute -right-14 -top-20 h-56 w-56 rounded-full border-[34px] border-white/8" />
+          <div className="absolute -bottom-20 right-1/4 h-40 w-40 rounded-full bg-brand-500/35" />
           <div className="relative">
             <div className="flex items-start justify-between">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#5146A5] text-white shadow-clay-soft">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white shadow-card">
                 <WalletCards size={21} />
               </div>
-              <span className="rounded-full bg-[#5146A5] px-3 py-1 text-[11px] font-extrabold text-white shadow-clay-soft">
+              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-brand-900 shadow-card">
                 {accounts.length} akun aktif
               </span>
             </div>
-            <p className="mt-8 text-small font-semibold text-ink-muted">Total saldo tersedia</p>
-            <p className="mt-1 font-ui tabular-nums tracking-[-0.035em] text-[clamp(1.9rem,4vw,3.25rem)] font-medium tracking-[-0.06em]">
+            <p className="mt-8 text-small font-semibold text-white/70">Total saldo tersedia</p>
+            <p className="mt-1 font-ui tabular-nums text-[clamp(1.9rem,4vw,3.25rem)] font-semibold tracking-[-0.06em]">
               {formatRupiah(totalBalance)}
             </p>
-            <SummarySparkline values={balanceTrend} className="mt-5 text-pine" />
-            <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-pine/10 pt-4">
-              <span className="rounded-full bg-[#DED8F3] px-3 py-1.5 text-xs text-[#514A67] shadow-clay-soft">
-                Arus kas <strong className="ml-1 text-pine">{net >= 0 ? "+" : ""}{formatRupiah(net)}</strong>
+            <SummarySparkline values={balanceTrend} className="mt-5 text-white" />
+            <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/15 pt-4">
+              <span className="rounded-full border border-white/15 bg-white px-3 py-1.5 text-xs text-ink-muted shadow-card">
+                Arus kas <strong className="ml-1 text-brand-800">{net >= 0 ? "+" : ""}{formatRupiah(net)}</strong>
               </span>
-              <span className="rounded-full bg-[#C3E3DA] px-3 py-1.5 text-xs text-[#315950] shadow-clay-soft">
-                Rasio tabungan <strong className="ml-1 text-pine">{savingsRate.toFixed(1)}%</strong>
+              <span className="rounded-full border border-white/15 bg-brand-900 px-3 py-1.5 text-xs text-white shadow-card">
+                Rasio tabungan <strong className="ml-1">{savingsRate.toFixed(1)}%</strong>
               </span>
             </div>
           </div>
-        </article>
+        </Card>
 
-        <article data-widget-id="income" className="card flex h-full flex-col justify-between border-mint/15 bg-[linear-gradient(145deg,#F8FFFC,#E5F8F1)]">
-          <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-mint text-white shadow-card">
-              <TrendingUp size={19} />
-            </div>
-            <span className="flex items-center gap-1 text-xs font-bold text-mint">
-              <ArrowUpRight size={14} /> {incomeDelta >= 0 ? "+" : ""}{incomeDelta.toFixed(1)}%
-            </span>
-          </div>
-          <SummarySparkline values={incomeTrend} className="mt-5 h-24 text-mint" />
-          <div className="mt-2">
-            <p className="text-small font-semibold text-ink-muted">Pemasukan bulan ini</p>
-            <p className="mt-2 font-ui tabular-nums tracking-[-0.035em] text-data-l font-medium text-ink">{formatRupiah(thisMonth.income)}</p>
-            <p className="mt-1 text-xs text-ink-muted">dibanding bulan lalu</p>
-          </div>
-        </article>
+        <div data-widget-id="income" className="h-full">
+          <SummaryCard title="Pemasukan bulan ini" amount={thisMonth.income} delta={incomeDelta} deltaLabel="dibanding bulan lalu" icon={TrendingUp} variant="positive" trend={incomeTrend} caption="dibanding bulan lalu" />
+        </div>
 
-        <article data-widget-id="expense" className="card flex h-full flex-col justify-between border-ember/15 bg-[linear-gradient(145deg,#FFF9FA,#FFF0F1)]">
-          <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-ember text-white shadow-card">
-              <TrendingDown size={19} />
-            </div>
-            <span className="flex items-center gap-1 text-xs font-bold text-ember">
-              {expenseDelta >= 0 ? "+" : ""}{expenseDelta.toFixed(1)}%
-            </span>
-          </div>
-          <SummarySparkline values={expenseTrend} className="mt-5 h-24 text-ember" />
-          <div className="mt-2">
-            <p className="text-small font-semibold text-ink-muted">Pengeluaran bulan ini</p>
-            <p className="mt-2 font-ui tabular-nums tracking-[-0.035em] text-data-l font-medium text-ink">{formatRupiah(thisMonth.expense)}</p>
-            <p className="mt-1 text-xs text-ink-muted">dibanding bulan lalu</p>
-          </div>
-        </article>
-        <article data-widget-id="cashflow" className="card h-full min-w-0 border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F3F8FF)]">
+        <div data-widget-id="expense" className="h-full">
+          <SummaryCard title="Pengeluaran bulan ini" amount={thisMonth.expense} delta={expenseDelta} deltaLabel="dibanding bulan lalu" icon={TrendingDown} variant="negative" trend={expenseTrend} caption="dibanding bulan lalu" />
+        </div>
+        <article data-widget-id="cashflow" className="card h-full min-w-0 border-brand-600/10 bg-white">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="eyebrow">Analitik</p>
@@ -244,7 +220,7 @@ export default function DashboardPage() {
           <CashFlowChart data={cashFlow} />
         </article>
 
-        <article data-widget-id="composition" className="card h-full min-w-0 border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)]">
+        <article data-widget-id="composition" className="card h-full min-w-0 border-brand-600/10 bg-white">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="eyebrow">Komposisi</p>
@@ -255,20 +231,13 @@ export default function DashboardPage() {
           <CategoryBreakdownChart data={breakdown} />
         </article>
 
-        <article data-widget-id="rhythm" className="card h-full min-w-0">
+        <article data-widget-id="rhythm" className="card h-full min-w-0 border-brand-600/10 bg-white">
           <div className="flex items-start justify-between gap-4">
-            <div><p className="eyebrow">7 hari terakhir</p><h2 className="mt-1 text-heading font-bold text-ink">Ritme pengeluaran</h2></div>
-            <span className="rounded-full bg-[#473D78] px-3 py-1 text-[10px] font-extrabold text-white">Harian</span>
+            <div><p className="eyebrow">7 hari terakhir</p><h2 className="mt-1 text-heading font-bold text-ink">Momentum pengeluaran</h2><p className="mt-1 text-xs text-ink-muted">Bar harian dengan garis akumulasi minggu berjalan.</p></div>
+            <Badge tone="neutral">Live</Badge>
           </div>
-          <div className="mt-7 flex h-40 items-end gap-2 sm:gap-3" aria-label="Grafik pengeluaran tujuh hari terakhir">
-            {dailySpending.map((item) => <div key={item.label} className="flex h-full flex-1 flex-col justify-end gap-2">
-              <div className="relative flex flex-1 items-end overflow-hidden rounded-[14px] bg-[#B7A8D6]/45">
-                <div className="w-full rounded-[14px] bg-[#5E4CCF] transition-[height] duration-500" style={{ height: `${Math.max(item.amount ? 12 : 3, (item.amount / maxDailySpending) * 100)}%` }} title={`${item.label}: ${formatRupiah(item.amount)}`} />
-              </div>
-              <span className="text-center text-[10px] font-extrabold uppercase text-[#473D78]">{item.label}</span>
-            </div>)}
-          </div>
-          <p className="mt-4 text-xs font-bold text-[#473D78]">Total minggu ini <span className="text-ink">{formatRupiah(dailySpending.reduce((sum, item) => sum + item.amount, 0))}</span></p>
+          <div className="mt-4"><SpendingMomentumChart data={dailySpending} /></div>
+          <div className="mt-2 flex items-center justify-between border-t border-rule pt-3 text-xs font-semibold text-ink-muted"><span>Total minggu ini</span><strong className="text-brand-900">{formatRupiah(dailySpending.reduce((sum, item) => sum + item.amount, 0))}</strong></div>
         </article>
 
         <article data-widget-id="health" className="card h-full min-w-0">
@@ -280,25 +249,25 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold">
-            <div className="rounded-xl bg-[#F2C5CB] p-3 text-[#772F3C]">Utang<br/><span className="text-ink">{formatRupiah(openPayable)}</span></div>
-            <div className="rounded-xl bg-[#B9E5D8] p-3 text-[#155C50]">Piutang<br/><span className="text-ink">{formatRupiah(openReceivable)}</span></div>
+            <div className="rounded-xl border border-rule bg-white p-3 text-ember-ink">Utang<br/><span className="text-ink">{formatRupiah(openPayable)}</span></div>
+            <div className="rounded-xl border border-rule bg-white p-3 text-mint-ink">Piutang<br/><span className="text-ink">{formatRupiah(openReceivable)}</span></div>
           </div>
         </article>
         <div data-widget-id="calendar" className="h-full">
           <DashboardCalendar transactions={transactions} />
         </div>
-        <article data-widget-id="accounts" className="card h-full min-w-0 border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F0FBF7)]">
+        <article data-widget-id="accounts" className="card h-full min-w-0 border-brand-600/10 bg-white">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="eyebrow">Distribusi dana</p>
               <h2 className="mt-1 text-lg font-extrabold tracking-[-0.02em] text-ink">Saldo per rekening</h2>
               <p className="mt-1 text-xs font-medium text-ink-muted">Perbandingan dana likuid dan investasi aktif.</p>
             </div>
-            <span className="rounded-full bg-sky-10 px-3 py-1.5 text-[11px] font-bold text-sky">{accounts.length} rekening</span>
+            <Badge tone="primary">{accounts.length} rekening</Badge>
           </div>
           <AccountBalanceChart data={accountBalanceData} />
         </article>
-        <article data-widget-id="recent" className="card flex h-full flex-col border-sky/15 bg-[linear-gradient(145deg,#FFFFFF,#F6F9FF)]">
+        <article data-widget-id="recent" className="card flex h-full flex-col border-brand-600/10 bg-white">
           <div className="mb-2 flex items-center justify-between border-b border-rule pb-4">
             <div>
               <p className="eyebrow">Aktivitas terbaru</p>
@@ -337,7 +306,7 @@ export default function DashboardPage() {
           </div>
         </article>
 
-          <article data-widget-id="budgets" className="card h-full border-brass/15 bg-[linear-gradient(145deg,#FFFFFF,#FFF8E8)]">
+          <article data-widget-id="budgets" className="card h-full border-brand-600/10 bg-white">
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <p className="eyebrow">Kontrol</p>
@@ -359,7 +328,7 @@ export default function DashboardPage() {
             </div>
           </article>
 
-          <article data-widget-id="goals" className="card h-full border-pine/15 bg-[linear-gradient(145deg,#FFFFFF,#F7F4FF)]">
+          <article data-widget-id="goals" className="card h-full border-brand-600/10 bg-white">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="eyebrow">Target</p>
@@ -371,13 +340,13 @@ export default function DashboardPage() {
               <GoalCard key={goal.id} {...goal} monthlySavings={1_200_000} />
             ))}
           </article>
-        <article data-widget-id="payable" className="card h-full border-ember/15"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openPayable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-10 text-ember shadow-clay-soft"><HandCoins /></div></div></article>
-        <article data-widget-id="receivable" className="card h-full border-mint/15"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openReceivable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-10 text-mint shadow-clay-soft"><WalletCards /></div></div></article>
+        <article data-widget-id="payable" className="card h-full border-brand-600/10 bg-white"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember-ink">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openPayable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember-ink hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-ink text-white shadow-card"><HandCoins /></div></div></article>
+        <article data-widget-id="receivable" className="card h-full border-brand-600/10 bg-white"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint-ink">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openReceivable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint-ink hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-ink text-white shadow-card"><WalletCards /></div></div></article>
 
-      <section data-widget-id="insights" className="card h-full border-mint/15 bg-[linear-gradient(145deg,#FFFFFF,#F2FCF8)]">
+      <section data-widget-id="insights" className="card h-full border-brand-600/10 bg-white">
         <div className="mb-4 flex items-center justify-between border-b border-rule pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-pine-10 text-pine">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-card">
               <Sparkles size={18} />
             </div>
             <div>

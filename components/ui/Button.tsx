@@ -6,19 +6,20 @@ import { LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export const buttonVariants = cva(
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-[15px] border px-4 text-sm font-bold tracking-[-0.01em] transition-[transform,box-shadow,background-color,border-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine/35 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-[16px] border px-4 text-sm font-semibold tracking-[-0.01em] transition-[transform,box-shadow,background-color,border-color,color] duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand-500/20 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:translate-y-px",
   {
     variants: {
       variant: {
-        primary: "border-pine/80 bg-[linear-gradient(145deg,#6957F6,#4F3DDD)] text-white shadow-[6px_8px_18px_rgba(91,74,239,.22),inset_0_1px_1px_rgba(255,255,255,.32)] hover:-translate-y-0.5 hover:shadow-[8px_11px_24px_rgba(91,74,239,.28)]",
-        secondary: "border-mint/40 bg-mint/15 text-ink hover:bg-mint/25",
-        outline: "border-white/80 bg-[linear-gradient(145deg,#FFFFFF,#F5F2FF)] text-ink shadow-clay-soft hover:border-pine/25 hover:bg-pine-10",
-        ghost: "border-transparent bg-transparent text-ink-muted hover:bg-paper hover:text-ink",
-        danger: "border-ember bg-ember text-white shadow-sm hover:brightness-105",
-        soft: "border-white/80 bg-[linear-gradient(145deg,#F8F6FF,#EAE5FF)] text-pine shadow-clay-soft hover:border-pine/20 hover:bg-pine/15",
+        primary: "border-brand-600 bg-brand-600 text-white shadow-[0_8px_18px_rgba(36,89,222,.20)] hover:border-brand-700 hover:bg-brand-700 hover:shadow-[0_10px_24px_rgba(36,89,222,.25)]",
+        secondary: "border-brand-900 bg-brand-900 text-white shadow-[0_8px_18px_rgba(19,43,94,.20)] hover:bg-brand-950",
+        outline: "border-brand-200 bg-white text-ink shadow-card hover:border-brand-300 hover:bg-brand-50",
+        ghost: "border-transparent bg-transparent text-ink-muted hover:bg-brand-50 hover:text-brand-800",
+        danger: "border-ember-ink bg-ember-ink text-white shadow-card hover:brightness-95",
+        soft: "border-[#49319B] bg-[#49319B] text-white shadow-[0_8px_18px_rgba(73,49,155,.20)] hover:brightness-95",
+        success: "border-mint-ink bg-mint-ink text-white shadow-[0_8px_18px_rgba(11,107,84,.20)] hover:brightness-95",
       },
       size: {
-        sm: "min-h-8 rounded-[11px] px-3 text-xs",
+        sm: "min-h-9 rounded-[12px] px-3 text-xs",
         md: "min-h-10 px-4",
         lg: "min-h-12 rounded-[16px] px-5 text-base",
         icon: "h-10 min-h-10 w-10 px-0",

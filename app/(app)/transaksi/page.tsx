@@ -25,6 +25,10 @@ import { useQuickAdd } from "@/lib/context/QuickAddContext";
 import { deleteTransactionAction } from "@/actions/transactions";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { QuickAddPanel } from "@/components/transaction/QuickAddPanel";
+import { Badge } from "@/components/ui/Badge";
+import { Button, IconButton } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { SearchField } from "@/components/ui/SearchField";
 
 const typeLabel: Record<TransactionType, { label: string; icon: LucideIcon; color: string; bg: string }> = {
   income:   { label: "Pemasukan",   icon: ArrowUpRight,   color: "var(--color-pine)",   bg: "var(--color-pine-10)" },
@@ -273,66 +277,54 @@ export default function TransaksiPage() {
       </div>
 
       {/* Summary 3-Strip Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
-          { label: "Total Pemasukan",   amount: totals.income,  color: "var(--color-pine)",  type: "income" },
-          { label: "Total Pengeluaran",  amount: totals.expense, color: "var(--color-ember)", type: "expense" },
+          { label: "Total Pemasukan", amount: totals.income, type: "income", icon: ArrowUpRight, caption: `${filtered.filter((item) => item.type === "income").length} catatan masuk` },
+          { label: "Total Pengeluaran", amount: totals.expense, type: "expense", icon: ArrowDownLeft, caption: `${filtered.filter((item) => item.type === "expense").length} catatan keluar` },
           {
             label: "Arus Kas Bersih",
             amount: totals.income - totals.expense,
-            color: totals.income >= totals.expense ? "var(--color-pine)" : "var(--color-ember)",
-            type: "net"
+            type: "net",
+            icon: ArrowLeftRight,
+            caption: totals.income >= totals.expense ? "Surplus pada hasil filter" : "Defisit pada hasil filter",
           },
         ].map((s) => (
-          <div
+          <Card
             key={s.label}
-            className={cn("card p-4 transition-all duration-200", s.type === "income" ? "!bg-[#B7E1D2]" : s.type === "expense" ? "!bg-[#F0BFC7]" : "!bg-[#C8C0EB]")}
-            style={{ background: s.type === "income" ? "#B7E1D2" : s.type === "expense" ? "#F0BFC7" : "#C8C0EB" }}
+            variant={s.type === "net" ? "highlight" : "default"}
+            className="flex min-h-[132px] items-start justify-between gap-4 p-5"
           >
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
-              {s.label}
-            </p>
-            <p className="tabular-nums font-mono font-bold text-heading" style={{ color: s.color }}>
-              {s.type === "net" && totals.income < totals.expense ? "−" : ""}
-              {formatRupiah(Math.abs(s.amount))}
-            </p>
-          </div>
+            <div className="min-w-0 self-stretch">
+              <p className={cn("text-[11px] font-bold uppercase tracking-[0.08em]", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.label}</p>
+              <p className={cn("mt-3 tabular-nums font-ui text-[clamp(1.35rem,2.2vw,1.8rem)] font-bold tracking-[-0.045em]", s.type === "income" ? "text-mint-ink" : s.type === "expense" ? "text-ember-ink" : "text-white")}>
+                {s.type === "net" && totals.income < totals.expense ? "−" : ""}{formatRupiah(Math.abs(s.amount))}
+              </p>
+              <p className={cn("mt-2 text-xs font-medium", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.caption}</p>
+            </div>
+            <div className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[15px] text-white shadow-card", s.type === "income" ? "bg-mint-ink" : s.type === "expense" ? "bg-ember-ink" : "bg-white/15")}>
+              <s.icon className="h-5 w-5" />
+            </div>
+          </Card>
         ))}
       </div>
 
       {/* Search & Filter Toolbar */}
       <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
         {/* Search Bar with clear */}
-        <div className="flex flex-1 items-center gap-2.5 border-b-2 border-[#7565C7] px-1 py-2 transition-all duration-200 focus-within:border-[#372B86]">
-          <Search size={16} strokeWidth={1.8} className="text-ink-muted flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="Cari catatan, kategori, atau akun..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-small font-bold text-ink outline-none placeholder:font-medium placeholder:text-[#655E78]"
-            style={{ fontFamily: "var(--font-ui)" }}
-          />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="text-ink-muted hover:text-ink p-1 rounded-sm transition-colors"
-              title="Hapus pencarian"
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
+        <SearchField
+          value={search}
+          onChange={(event) => { setSearch(event.target.value); setCurrentPage(1); }}
+          onClear={() => { setSearch(""); setCurrentPage(1); }}
+          placeholder="Cari catatan, kategori, atau akun..."
+          aria-label="Cari transaksi"
+          containerClassName="flex-1"
+        />
 
         {/* Filter Toggle Button */}
-        <button
+        <Button
           onClick={() => setShowFilter(!showFilter)}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-card border text-small font-medium relative transition-all duration-200",
-            showFilter || activeFilters > 0
-              ? "border-pine bg-pine-10 text-pine font-semibold"
-              : "border-[#AFA4CF] bg-[#D8D1EA] text-[#514A67] shadow-clay-soft hover:text-ink hover:border-pine/50"
-          )}
+          variant={showFilter || activeFilters > 0 ? "primary" : "outline"}
+          className="relative"
         >
           <Filter size={16} strokeWidth={1.8} />
           <span>Filter</span>
@@ -344,13 +336,13 @@ export default function TransaksiPage() {
             </span>
           )}
           {showFilter ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-        </button>
+        </Button>
       </div>
 
       {/* Expandable Filter Panel */}
       {showFilter && (
         <div
-          className="card grid grid-cols-1 gap-3.5 bg-[#CFC7E8] p-4 sm:grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-top-2"
+          className="card grid grid-cols-1 gap-3.5 border-brand-600/10 bg-white p-4 sm:grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-top-2"
         >
           {/* Filter Tipe */}
           <div>
@@ -432,7 +424,7 @@ export default function TransaksiPage() {
       )}
 
       {/* Transaction Records Card / Table */}
-      <div className="overflow-hidden rounded-[25px] bg-[#BBB1DF] p-2 shadow-clay">
+      <div className="overflow-hidden rounded-[24px] border border-brand-600/10 bg-white shadow-card">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
             <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
@@ -457,7 +449,7 @@ export default function TransaksiPage() {
           <>
             {/* ── Mobile Card List View (<768px) ── */}
             <div className="space-y-2 md:hidden">
-              {pagedTransactions.map((tx, rowIndex) => {
+              {pagedTransactions.map((tx) => {
                 const acc = accounts.find((a) => a.id === tx.accountId);
                 const cat = categories.find((c) => c.id === tx.categoryId);
                 const destination = accounts.find((a) => a.id === tx.destinationAccountId);
@@ -468,7 +460,7 @@ export default function TransaksiPage() {
                   <div
                     key={tx.id}
                     onClick={() => setDetailTransaction(tx)}
-                    className={cn("flex items-center justify-between gap-3 rounded-[18px] p-3.5 shadow-clay-soft transition sm:p-4", rowIndex % 2 ? "bg-[#B7DDE1]" : "bg-[#D6CDF1]", "hover:-translate-y-0.5 hover:bg-[#AFA2DA]")}
+                    className="flex items-center justify-between gap-3 border-b border-rule bg-white p-4 transition-colors last:border-b-0 hover:bg-brand-50"
                   >
                     {/* Left: Category Icon + Description & Metadata */}
                     <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -507,13 +499,10 @@ export default function TransaksiPage() {
                       </span>
 
                       <div className="flex items-center gap-1.5">
-                        <span
-                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold"
-                          style={{ backgroundColor: typeCfg.bg, color: typeCfg.color }}
-                        >
+                        <Badge tone={tx.transferKind === "cash_withdrawal" ? "primary" : tx.type === "income" ? "success" : tx.type === "expense" ? "danger" : "warning"} className="text-[10px]">
                           <TypeIcon size={10} strokeWidth={2.2} />
                           {typeCfg.label}
-                        </span>
+                        </Badge>
                         {tx.recordKind !== "balance_adjustment" ? <button
                           onClick={(event) => { event.stopPropagation(); setEditTransaction(tx); }}
                           className="p-1 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
@@ -538,20 +527,20 @@ export default function TransaksiPage() {
             </div>
 
             {/* ── Desktop Data Table (≥768px) ── */}
-            <div className="hidden overflow-x-auto rounded-[19px] md:block">
-              <Table className="w-full border-separate border-spacing-y-1 text-left">
+            <div className="hidden overflow-x-auto md:block">
+              <Table className="w-full text-left">
                 <TableHeader>
-                  <TableRow className="bg-[#40366F] text-white">
-                    <TableHead className="rounded-l-[14px] px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Tanggal transaksi / dicatat</TableHead>
-                    <TableHead className="px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Transaksi & Kategori</TableHead>
-                    <TableHead className="px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Sumber Akun</TableHead>
-                    <TableHead className="px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Tipe</TableHead>
-                    <TableHead className="px-4 py-4 text-right text-xs font-extrabold uppercase tracking-wider text-white">Nominal</TableHead>
-                    <TableHead className="w-24 rounded-r-[14px] px-4 py-4 text-xs font-extrabold uppercase tracking-wider text-white">Aksi</TableHead>
+                  <TableRow className="border-b-[3px] border-brand-500 bg-brand-950 text-white shadow-[inset_0_1px_rgba(255,255,255,.10)]">
+                    <TableHead className="w-[220px] whitespace-nowrap border-r border-white/10 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.08em] text-white">Tanggal transaksi / dicatat</TableHead>
+                    <TableHead className="min-w-[300px] border-r border-white/10 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.08em] text-white">Transaksi & kategori</TableHead>
+                    <TableHead className="w-[230px] border-r border-white/10 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.08em] text-white">Sumber akun</TableHead>
+                    <TableHead className="w-[150px] border-r border-white/10 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.08em] text-white">Tipe</TableHead>
+                    <TableHead className="w-[170px] border-r border-white/10 px-5 py-4 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-white">Nominal</TableHead>
+                    <TableHead className="w-[132px] px-5 py-4 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-white">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pagedTransactions.map((tx, rowIndex) => {
+                  {pagedTransactions.map((tx) => {
                     const acc = accounts.find((a) => a.id === tx.accountId);
                     const cat = categories.find((c) => c.id === tx.categoryId);
                     const destination = accounts.find((a) => a.id === tx.destinationAccountId);
@@ -562,25 +551,25 @@ export default function TransaksiPage() {
                       <TableRow
                         key={tx.id}
                         onClick={() => setDetailTransaction(tx)}
-                        className={cn("group cursor-pointer shadow-clay-soft transition-all duration-150", rowIndex % 2 ? "bg-[#B8DCE4]" : "bg-[#D6CDF0]", "hover:relative hover:z-10 hover:-translate-y-0.5 hover:bg-[#A99DD5] hover:shadow-clay")}
+                        className="group cursor-pointer border-b border-rule bg-white transition-colors duration-150 last:border-b-0 hover:bg-brand-50"
                       >
                         {/* Tanggal */}
-                        <TableCell className="px-4 py-3.5 whitespace-nowrap">
+                        <TableCell className="px-5 py-4 whitespace-nowrap">
                           <div className="space-y-1">
-                            <span suppressHydrationWarning className="block text-small font-mono text-ink">{formatDate(tx.date, "short")}</span>
+                            <span suppressHydrationWarning className="block text-small font-semibold text-ink">{formatDate(tx.date, "short")}</span>
                             <span suppressHydrationWarning className="block text-[10px] text-ink-muted">Dicatat {formatRecordedDate(tx.createdAt || tx.date)}</span>
                           </div>
                         </TableCell>
 
                         {/* Deskripsi & Kategori */}
-                        <TableCell className="px-4 py-3.5 max-w-xs">
+                        <TableCell className="max-w-xs px-5 py-4">
                           <div className="flex items-center gap-3">
                             <CategoryIcon icon={cat?.icon} color={cat?.color} size={15} containerSize="sm" />
                             <div className="min-w-0">
-                              <p className="text-body font-semibold text-ink truncate group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
+                              <p className="truncate text-body font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
                                 {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
                               </p>
-                              <p className="text-xs text-ink-muted truncate font-ui">
+                              <p className="truncate font-ui text-xs text-ink-muted">
                                 {tx.recordKind === "balance_adjustment" ? `Kondisi saldo${tx.observedBalance != null ? ` · ${formatRupiah(tx.observedBalance)}` : ""}` : cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer Antar Akun" : "Tanpa Kategori")}
                               </p>
                             </div>
@@ -588,40 +577,30 @@ export default function TransaksiPage() {
                         </TableCell>
 
                         {/* Akun */}
-                        <TableCell className="px-4 py-3.5">
+                        <TableCell className="px-5 py-4">
                           <div className="flex items-center gap-2">
                             <div
                               className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                               style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
                             />
-                            <span className="text-small font-medium text-ink truncate max-w-[190px]" style={{ fontFamily: "var(--font-ui)" }}>
+                            <span className="max-w-[190px] truncate text-small font-medium text-ink" style={{ fontFamily: "var(--font-ui)" }}>
                               {acc?.name ?? "—"}{destination ? ` → ${destination.name}` : ""}
                             </span>
                           </div>
                         </TableCell>
 
                         {/* Tipe Badge */}
-                        <TableCell className="px-4 py-3.5">
-                          <span
-                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                            style={{
-                              backgroundColor: typeCfg.bg,
-                              color: typeCfg.color,
-                              fontFamily: "var(--font-ui)",
-                            }}
-                          >
+                        <TableCell className="px-5 py-4">
+                          <Badge tone={tx.transferKind === "cash_withdrawal" ? "primary" : tx.type === "income" ? "success" : tx.type === "expense" ? "danger" : "warning"}>
                             <TypeIcon size={12} strokeWidth={2.2} />
                             {typeCfg.label}
-                          </span>
+                          </Badge>
                         </TableCell>
 
                         {/* Nominal */}
-                        <TableCell className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <TableCell className="px-5 py-4 text-right whitespace-nowrap">
                           <span
-                            className="tabular-nums font-mono font-bold text-body"
-                            style={{
-                              color: tx.type === "income" ? "var(--color-pine)" : tx.type === "transfer" ? "var(--color-ink-muted)" : "var(--color-ink)",
-                            }}
+                            className={cn("tabular-nums font-ui font-bold text-body", tx.type === "income" ? "text-mint-ink" : tx.type === "expense" ? "text-ember-ink" : "text-ink")}
                           >
                             {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}
                             {formatRupiah(tx.amount)}
@@ -629,25 +608,27 @@ export default function TransaksiPage() {
                         </TableCell>
 
                         {/* Delete Action with tooltip */}
-                        <TableCell className="px-4 py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-                            <button onClick={(event) => { event.stopPropagation(); setDetailTransaction(tx); }} className="rounded-xl bg-[#40366F] p-2 text-white transition hover:bg-[#261F4A]" title="Lihat detail" aria-label="Lihat detail transaksi"><Eye size={15} /></button>
-                            {tx.recordKind !== "balance_adjustment" ? <button
+                        <TableCell className="px-5 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <IconButton onClick={(event) => { event.stopPropagation(); setDetailTransaction(tx); }} variant="secondary" className="h-9 min-h-9 w-9" title="Lihat detail" aria-label="Lihat detail transaksi"><Eye size={15} /></IconButton>
+                            {tx.recordKind !== "balance_adjustment" ? <IconButton
                               onClick={(event) => { event.stopPropagation(); setEditTransaction(tx); }}
-                              className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-all duration-150"
+                              variant="outline"
+                              className="h-9 min-h-9 w-9"
                               title="Edit transaksi"
                               aria-label="Edit transaksi"
                             >
                               <Pencil size={15} strokeWidth={1.8} />
-                            </button> : null}
-                            <button
+                            </IconButton> : null}
+                            <IconButton
                               onClick={(event) => { event.stopPropagation(); setDeleteId(tx.id); }}
-                              className="p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-all duration-150"
+                              variant="danger"
+                              className="h-9 min-h-9 w-9"
                               title="Hapus transaksi"
                               aria-label="Hapus transaksi"
                             >
                               <Trash2 size={15} strokeWidth={1.8} />
-                            </button>
+                            </IconButton>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -657,11 +638,11 @@ export default function TransaksiPage() {
               </Table>
             </div>
             <div className="flex flex-col gap-3 px-2 pb-2 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs font-bold text-[#40366F]">Menampilkan {filtered.length ? (safePage - 1) * pageSize + 1 : 0}–{Math.min(safePage * pageSize, filtered.length)} dari {filtered.length} transaksi</p>
+              <p className="text-xs font-semibold text-ink-muted">Menampilkan <strong className="text-ink">{filtered.length ? (safePage - 1) * pageSize + 1 : 0}–{Math.min(safePage * pageSize, filtered.length)}</strong> dari {filtered.length} transaksi</p>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1} className="grid h-9 w-9 place-items-center rounded-xl bg-[#E2DCF4] text-[#40366F] shadow-clay-soft transition hover:bg-[#CFC4EC] disabled:opacity-40" aria-label="Halaman sebelumnya"><ChevronLeft size={16} /></button>
-                <span className="rounded-xl bg-[#40366F] px-3 py-2 text-xs font-extrabold text-white">{safePage} / {pageCount}</span>
-                <button type="button" onClick={() => setCurrentPage(Math.min(pageCount, safePage + 1))} disabled={safePage === pageCount} className="grid h-9 w-9 place-items-center rounded-xl bg-[#E2DCF4] text-[#40366F] shadow-clay-soft transition hover:bg-[#CFC4EC] disabled:opacity-40" aria-label="Halaman berikutnya"><ChevronRight size={16} /></button>
+                <IconButton type="button" variant="outline" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1} className="h-9 min-h-9 w-9" aria-label="Halaman sebelumnya"><ChevronLeft size={16} /></IconButton>
+                <span className="rounded-xl bg-brand-900 px-3 py-2 text-xs font-extrabold text-white shadow-card">{safePage} / {pageCount}</span>
+                <IconButton type="button" variant="outline" onClick={() => setCurrentPage(Math.min(pageCount, safePage + 1))} disabled={safePage === pageCount} className="h-9 min-h-9 w-9" aria-label="Halaman berikutnya"><ChevronRight size={16} /></IconButton>
               </div>
             </div>
           </>
@@ -673,19 +654,35 @@ export default function TransaksiPage() {
         const destination = accounts.find((item) => item.id === detailTransaction.destinationAccountId);
         const category = categories.find((item) => item.id === detailTransaction.categoryId);
         const cfg = detailTransaction.transferKind === "cash_withdrawal" ? cashWithdrawalLabel : typeLabel[detailTransaction.type];
-        return <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(35,28,68,.56)] p-4 backdrop-blur-[3px]" role="dialog" aria-modal="true" aria-label="Detail transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setDetailTransaction(null); }}>
-          <article className="w-full max-w-lg rounded-[28px] bg-[#C9C1E8] p-5 shadow-float sm:p-7">
-            <div className="flex items-start justify-between gap-4"><div><p className="eyebrow">Detail transaksi</p><h2 className="mt-1 text-2xl font-black text-ink">{detailTransaction.note || category?.name || "Transaksi"}</h2></div><button onClick={() => setDetailTransaction(null)} className="grid h-10 w-10 place-items-center rounded-xl bg-[#40366F] text-white"><X size={17}/></button></div>
-            <div className="mt-6 rounded-[22px] bg-[#40366F] p-5 text-white shadow-clay-soft"><p className="text-xs font-bold text-white/70">Nominal</p><p className="mt-1 text-3xl font-black tabular-nums">{formatRupiah(detailTransaction.amount)}</p><span className="mt-3 inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold">{cfg.label}</span></div>
-            <dl className="mt-4 grid gap-2 sm:grid-cols-2">
+        const DetailIcon = cfg.icon;
+        return <div className="fixed inset-0 z-50 flex items-end justify-center bg-brand-950/55 backdrop-blur-[3px] sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Detail transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setDetailTransaction(null); }}>
+          <article className="w-full overflow-hidden rounded-t-[28px] border border-brand-600/10 bg-white shadow-float sm:max-w-lg sm:rounded-[28px]">
+            <header className="flex items-start justify-between gap-4 border-b border-rule px-5 py-5 sm:px-6">
+              <div className="min-w-0"><p className="eyebrow">Detail transaksi</p><h2 className="mt-1 truncate text-2xl font-bold text-ink">{detailTransaction.note || category?.name || "Transaksi"}</h2></div>
+              <IconButton onClick={() => setDetailTransaction(null)} variant="outline" aria-label="Tutup detail transaksi"><X size={17}/></IconButton>
+            </header>
+            <div className="p-5 sm:p-6">
+              <div className="relative overflow-hidden rounded-[22px] bg-brand-600 p-5 text-white shadow-[0_14px_30px_rgba(36,89,222,.22)]">
+                <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] border-white/10" />
+                <div className="relative flex items-start justify-between gap-4">
+                  <div><p className="text-xs font-bold text-white/70">Nominal transaksi</p><p className="mt-2 font-ui text-3xl font-bold tracking-[-0.045em] tabular-nums">{detailTransaction.type === "income" ? "+" : detailTransaction.type === "expense" ? "−" : ""}{formatRupiah(detailTransaction.amount)}</p></div>
+                  <div className="grid h-11 w-11 place-items-center rounded-[15px] bg-white/15"><DetailIcon className="h-5 w-5" /></div>
+                </div>
+                <Badge tone={detailTransaction.transferKind === "cash_withdrawal" ? "primary" : detailTransaction.type === "income" ? "success" : detailTransaction.type === "expense" ? "danger" : "warning"} className="relative mt-4">{cfg.label}</Badge>
+              </div>
+              <dl className="mt-4 overflow-hidden rounded-[18px] border border-rule bg-white">
               {[
                 ["Tanggal transaksi", formatDate(detailTransaction.date, "short")],
                 ["Dicatat pada", formatRecordedDate(detailTransaction.createdAt || detailTransaction.date)],
                 ["Kategori", category?.name || "Tanpa kategori"],
                 ["Sumber dana", `${account?.name || "—"}${destination ? ` → ${destination.name}` : ""}`],
-              ].map(([label, value]) => <div key={label} className="rounded-[16px] bg-[#E1DCF1] p-4"><dt className="text-[10px] font-extrabold uppercase tracking-wider text-[#625A79]">{label}</dt><dd className="mt-1 text-sm font-extrabold text-ink">{value}</dd></div>)}
-            </dl>
-            <div className="mt-5 flex justify-end gap-2">{detailTransaction.recordKind !== "balance_adjustment" && <button onClick={() => { setDetailTransaction(null); setEditTransaction(detailTransaction); }} className="material-button secondary"><Pencil size={15}/> Edit</button>}<button onClick={() => setDetailTransaction(null)} className="material-button">Tutup</button></div>
+              ].map(([label, value]) => <div key={label} className="grid gap-1 border-b border-rule px-4 py-3.5 last:border-b-0 sm:grid-cols-[150px_1fr] sm:items-center"><dt className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-ink-muted">{label}</dt><dd className="text-sm font-bold text-ink sm:text-right">{value}</dd></div>)}
+              </dl>
+            </div>
+            <footer className="flex justify-end gap-2 border-t border-rule bg-brand-50 px-5 py-4 sm:px-6">
+              <Button onClick={() => setDetailTransaction(null)} variant="outline">Tutup</Button>
+              {detailTransaction.recordKind !== "balance_adjustment" && <Button onClick={() => { setDetailTransaction(null); setEditTransaction(detailTransaction); }}><Pencil size={15}/> Edit transaksi</Button>}
+            </footer>
           </article>
         </div>;
       })()}

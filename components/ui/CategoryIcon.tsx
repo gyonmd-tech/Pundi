@@ -2,7 +2,7 @@
 
 /**
  * components/ui/CategoryIcon.tsx
- * Komponen icon kategori SVG standar Lucide (aturan ui-ux-pro-max: NO emoji as structural icons).
+ * Badge ikon kategori Pundi dengan warna domain solid dan clay depth yang ringkas.
  */
 
 import React from "react";
@@ -59,24 +59,36 @@ export function CategoryIcon({
   const IconComponent = (icon && iconMap[icon]) || Tag;
 
   const sizeClasses = {
-    sm: "w-6 h-6 rounded-sm",
-    md: "w-8 h-8 rounded-sm",
-    lg: "w-10 h-10 rounded-card",
+    sm: "h-7 w-7 rounded-[9px]",
+    md: "h-9 w-9 rounded-[11px]",
+    lg: "h-11 w-11 rounded-[14px]",
   };
 
   return (
     <div
       className={cn(
-        "flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105",
+        "relative isolate grid flex-shrink-0 place-items-center",
         sizeClasses[containerSize],
         className
       )}
-      style={{
-        backgroundColor: color ? `${color}18` : "var(--color-paper)",
-        color: color || "var(--color-ink)",
-      }}
     >
-      <IconComponent size={size} strokeWidth={2} />
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 translate-x-[2px] translate-y-[3px] rounded-[inherit] opacity-25"
+        style={{ backgroundColor: color || "var(--color-brand-600)" }}
+      />
+      <span
+        className="relative grid h-full w-full place-items-center overflow-hidden rounded-[inherit] text-white"
+        style={{
+          backgroundColor: color || "var(--color-brand-600)",
+          backgroundImage: `linear-gradient(145deg, color-mix(in srgb, ${color || "var(--color-brand-600)"} 82%, white 18%), color-mix(in srgb, ${color || "var(--color-brand-600)"} 82%, black 18%))`,
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,.36), inset 0 -1px 0 rgba(17,39,114,.16)",
+        }}
+      >
+        <span aria-hidden="true" className="absolute -right-2 -top-2 h-5 w-5 rounded-full bg-white/20" />
+        <IconComponent className="relative drop-shadow-[0_1px_1px_rgba(17,39,114,.28)]" size={size} strokeWidth={2.25} />
+        <span aria-hidden="true" className="absolute bottom-1 right-1 h-1 w-1 rounded-full bg-white/80" />
+      </span>
     </div>
   );
 }

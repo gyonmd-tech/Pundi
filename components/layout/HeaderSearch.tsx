@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, Search, X } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAccounts, useCategories, useTransactions } from "@/lib/data/store";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
+import { SearchField } from "@/components/ui/SearchField";
 
 const pages = [
   { label: "Dashboard", description: "Ringkasan keuangan", href: "/dashboard" },
@@ -78,33 +79,27 @@ export function HeaderSearch() {
         }}
         className="relative"
       >
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-pine" />
-        <input
+        <SearchField
           ref={inputRef}
           value={query}
           onFocus={() => setOpen(true)}
           onChange={(event) => { setQuery(event.target.value); setOpen(true); }}
+          onClear={() => setQuery("")}
+          shortcut="Ctrl K"
           placeholder="Cari transaksi, rekening, atau halaman…"
-          className="h-11 w-full border-0 border-b-2 border-[#7565C7] bg-transparent pl-11 pr-20 text-sm font-bold text-ink outline-none transition placeholder:font-medium placeholder:text-[#665F78] focus:border-[#34277F] focus:shadow-none"
+          aria-label="Cari transaksi, rekening, atau halaman"
         />
-        {query ? (
-          <button type="button" onClick={() => setQuery("")} aria-label="Hapus pencarian" className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-[9px] text-ink-muted transition hover:bg-pine-10 hover:text-pine">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        ) : (
-          <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-[8px] bg-[#40366F] px-2 py-1 text-[10px] font-bold text-white">Ctrl K</kbd>
-        )}
       </form>
 
       {open && normalized ? (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[20px] border border-pine/10 bg-white p-2 shadow-float">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[20px] border border-brand-200 bg-white p-2 shadow-float">
           {transactionResults.length ? (
             <div>
-              <p className="px-3 pb-1.5 pt-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-ink-muted">Transaksi</p>
+              <p className="px-3 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-muted">Transaksi</p>
               {transactionResults.map((transaction) => {
                 const category = categories.find((item) => item.id === transaction.categoryId)?.name ?? "Transfer";
                 return (
-                  <button key={transaction.id} type="button" onClick={() => navigate(`/transaksi?focus=${transaction.id}`)} className="flex min-h-12 w-full items-center gap-3 rounded-[13px] px-3 text-left transition hover:bg-pine-10">
+                  <button key={transaction.id} type="button" onClick={() => navigate(`/transaksi?focus=${transaction.id}`)} className="flex min-h-12 w-full items-center gap-3 rounded-[13px] px-3 text-left transition hover:bg-brand-50">
                     <span className={`h-8 w-1 rounded-full ${transaction.type === "income" ? "bg-mint" : transaction.type === "expense" ? "bg-ember" : "bg-brass"}`} />
                     <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold text-ink">{transaction.note || category}</span><span className="mt-0.5 block text-[10px] text-ink-muted">{category} · {formatDate(transaction.date, "short")}</span></span>
                     <span className="shrink-0 text-xs font-semibold tabular-nums text-ink">{formatRupiah(transaction.amount)}</span>
@@ -116,11 +111,11 @@ export function HeaderSearch() {
 
           {pageResults.length ? (
             <div className={transactionResults.length ? "mt-2 border-t border-rule pt-2" : ""}>
-              <p className="px-3 pb-1.5 pt-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-ink-muted">Halaman</p>
+              <p className="px-3 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-muted">Halaman</p>
               {pageResults.map((page) => (
                 <button key={page.href} type="button" onClick={() => navigate(page.href)} className="flex min-h-11 w-full items-center justify-between rounded-[13px] px-3 text-left transition hover:bg-paper">
                   <span><span className="block text-xs font-bold text-ink">{page.label}</span><span className="text-[10px] text-ink-muted">{page.description}</span></span>
-                  <ArrowRight className="h-3.5 w-3.5 text-pine" />
+                  <ArrowRight className="h-3.5 w-3.5 text-brand-600" />
                 </button>
               ))}
             </div>

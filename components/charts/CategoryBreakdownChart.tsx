@@ -11,7 +11,7 @@
  */
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { formatRupiah } from "@/lib/utils/formatter";
+import { formatRupiah, formatRupiahShort } from "@/lib/utils/formatter";
 import { cn } from "@/lib/utils/cn";
 
 interface CategoryDataPoint {
@@ -53,7 +53,7 @@ function CustomTooltip({ active, payload }: TooltipProps) {
     <div
       className="rounded-card px-3 py-2 shadow-float"
       style={{
-        backgroundColor: "var(--color-surface)",
+        backgroundColor: "var(--color-surface-high)",
         border: "var(--border-hairline)",
         fontFamily: "var(--font-ui)",
       }}
@@ -99,9 +99,9 @@ export function CategoryBreakdownChart({ data, className, loading = false }: Cat
 
   return (
     <div className={cn("w-full min-w-0 overflow-hidden", className)}>
-      {/* Donut Chart */}
-      <ResponsiveContainer width="100%" height={140}>
-        <PieChart>
+      <div className="relative">
+        <ResponsiveContainer width="100%" height={156}>
+          <PieChart>
           <Pie
             data={sorted}
             dataKey="amount"
@@ -109,10 +109,12 @@ export function CategoryBreakdownChart({ data, className, loading = false }: Cat
             nameKey="name"
             cx="50%"
             cy="50%"
-            innerRadius={42}
-            outerRadius={62}
-            paddingAngle={2}
-            strokeWidth={0}
+            innerRadius={45}
+            outerRadius={66}
+            paddingAngle={3}
+            cornerRadius={6}
+            stroke="var(--color-surface-high)"
+            strokeWidth={2}
           >
             {sorted.map((entry, index) => (
               <Cell
@@ -122,8 +124,12 @@ export function CategoryBreakdownChart({ data, className, loading = false }: Cat
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
-        </PieChart>
-      </ResponsiveContainer>
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
+          <div><p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">Total</p><p className="mt-0.5 text-sm font-semibold text-ink tabular-nums">{formatRupiahShort(total)}</p></div>
+        </div>
+      </div>
 
       {/* Legend dengan angka nominal — bukan hanya persentase */}
       <ul className="space-y-2 mt-1">

@@ -36,8 +36,8 @@ export function DashboardCalendar({ transactions }: { transactions: Transaction[
   const selectedExpense = selectedTransactions.filter((item) => item.type === "expense").reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <article className="card h-full overflow-hidden border-pine/15 bg-[linear-gradient(160deg,#FFFFFF,#F8F6FF)] p-0">
-      <div className="flex items-center justify-between border-b border-rule bg-[linear-gradient(135deg,#F5F2FF,#EEF8FF)] px-5 py-4">
+    <article className="card h-full overflow-hidden border-brand-600/10 bg-white p-0">
+      <div className="flex items-center justify-between border-b border-rule bg-white px-5 py-4">
         <div><p className="eyebrow">Kalender finansial</p><h2 className="mt-1 text-lg font-extrabold tracking-[-0.02em] text-ink capitalize">{monthFormatter.format(month)}</h2></div>
         <div className="flex gap-1.5">
           <button type="button" aria-label="Bulan sebelumnya" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#5146A5] text-white shadow-clay-soft transition hover:bg-[#392F82]"><ChevronLeft className="h-4 w-4" /></button>
@@ -54,7 +54,7 @@ export function DashboardCalendar({ transactions }: { transactions: Transaction[
             const active = dateKey(day) === dateKey(selected);
             const isToday = dateKey(day) === dateKey(today);
             return (
-              <button key={dateKey(day)} type="button" onClick={() => setSelected(day)} className={`relative h-10 rounded-[12px] sm:h-11 text-xs font-bold transition ${active ? "bg-pine text-white shadow-[0_7px_16px_rgba(91,74,239,.25)]" : isToday ? "bg-mint-10 text-mint" : "text-ink hover:bg-paper"}`}>
+              <button key={dateKey(day)} type="button" onClick={() => setSelected(day)} className={`relative h-10 rounded-[12px] sm:h-11 text-xs font-semibold transition ${active ? "bg-brand-600 text-white shadow-[0_7px_16px_rgba(36,89,222,.22)]" : isToday ? "bg-mint-10 text-mint-ink" : "text-ink hover:bg-brand-50"}`}>
                 {day.getDate()}
                 {items.length ? <span className={`absolute bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full ${active ? "bg-white" : items.some((item) => item.type === "expense") ? "bg-ember" : "bg-mint"}`} /> : null}
               </button>

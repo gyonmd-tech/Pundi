@@ -1,5 +1,5 @@
 function SkeletonBlock({ className }: { className: string }) {
-  return <div className={`animate-pulse rounded-[18px] bg-pine-10/70 ${className}`} />;
+  return <div className={`animate-pulse rounded-[18px] bg-brand-100 ${className}`} />;
 }
 
 export function DashboardSkeleton() {
@@ -12,21 +12,21 @@ export function DashboardSkeleton() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="relative min-h-64 overflow-hidden rounded-[28px] border border-pine/10 bg-[linear-gradient(135deg,#EFECFF,#EAF3FF,#E5F8F1)] p-6 lg:col-span-6">
-          <div className="absolute -right-10 -top-14 h-40 w-40 animate-pulse rounded-full bg-sky/15 blur-2xl" />
-          <SkeletonBlock className="h-11 w-11 bg-white/80" />
-          <SkeletonBlock className="mt-12 h-4 w-36 bg-white/80" />
-          <SkeletonBlock className="mt-4 h-12 w-3/4 bg-white/80" />
-          <div className="mt-8 flex gap-3"><SkeletonBlock className="h-8 w-36 bg-white/80" /><SkeletonBlock className="h-8 w-32 bg-white/80" /></div>
+        <div className="relative min-h-64 overflow-hidden rounded-[28px] border border-brand-700 bg-brand-600 p-6 shadow-card lg:col-span-6">
+          <div className="absolute -right-10 -top-14 h-40 w-40 animate-pulse rounded-full border-[24px] border-white/10" />
+          <SkeletonBlock className="h-11 w-11 bg-white/20" />
+          <SkeletonBlock className="mt-12 h-4 w-36 bg-white/20" />
+          <SkeletonBlock className="mt-4 h-12 w-3/4 bg-white/25" />
+          <div className="mt-8 flex gap-3"><SkeletonBlock className="h-8 w-36 bg-white/90" /><SkeletonBlock className="h-8 w-32 bg-brand-900" /></div>
         </div>
-        <SkeletonBlock className="min-h-64 bg-mint-10 lg:col-span-3" />
-        <SkeletonBlock className="min-h-64 bg-ember-10 lg:col-span-3" />
+        <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-white shadow-card lg:col-span-3" />
+        <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-white shadow-card lg:col-span-3" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <div className="rounded-[22px] border border-rule bg-white p-5 lg:col-span-8">
           <SkeletonBlock className="h-6 w-52" />
-          <SkeletonBlock className="mt-8 h-64 w-full bg-sky-10/80" />
+          <SkeletonBlock className="mt-8 h-64 w-full bg-brand-50" />
         </div>
         <div className="rounded-[22px] border border-rule bg-white p-5 lg:col-span-4">
           <SkeletonBlock className="h-6 w-36" />
