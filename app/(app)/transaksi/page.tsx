@@ -36,7 +36,7 @@ const typeLabel: Record<TransactionType, { label: string; icon: LucideIcon; colo
   transfer: { label: "Transfer",    icon: ArrowLeftRight, color: "var(--color-brass)",  bg: "var(--color-brass-10)" },
 };
 
-const cashWithdrawalLabel = { label: "Tarik tunai", icon: Banknote, color: "#2563EB", bg: "#EFF6FF" };
+const cashWithdrawalLabel = { label: "Tarik tunai", icon: Banknote, color: "var(--color-pine)", bg: "var(--color-pine-10)" };
 
 function formatRecordedDate(value: Date) {
   return new Intl.DateTimeFormat("id-ID", {

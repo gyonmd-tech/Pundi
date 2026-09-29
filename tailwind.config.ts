@@ -22,7 +22,7 @@ const config: Config = {
         },
         ember: { DEFAULT: "#E95766", ink: "#B83547", 10: "#FFE9EC", 20: "#F9BCC5" },
         brass: { DEFAULT: "#D99418", 10: "#FFF6DC" },
-        warning: { DEFAULT: "#C98010", 10: "#FFF5DD" },
+        warning: { DEFAULT: "#C98010", ink: "#855A00", 10: "#FFF5DD" },
         mint: { DEFAULT: "#159B78", ink: "#0B6B54", 10: "#E5F7F1" },
         sky: { DEFAULT: "#2860E6", 10: "#E7EFFF" },
         lavender: { DEFAULT: "#7B61D1", ink: "#5E46B8", 10: "#F0EAFE" },
