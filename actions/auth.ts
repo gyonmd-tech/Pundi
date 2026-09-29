@@ -1,9 +1,17 @@
 "use server";
 
 import { createAdminServerClient, createSessionServerClient } from "@/lib/appwrite/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { ID } from "node-appwrite";
 import { seedDefaultCategoriesAction } from "./seed";
+import { checkRateLimit, getClientIpFromHeaders } from "@/lib/security/rateLimit";
+
+const LOGIN_LIMIT = 10; // percobaan
+const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 menit
+const SIGNUP_LIMIT = 5; // pendaftaran
+const SIGNUP_WINDOW_MS = 60 * 60 * 1000; // 1 jam
+
+const RATE_LIMIT_MESSAGE = "Terlalu banyak percobaan. Silakan coba lagi beberapa saat lagi.";
 
 const SESSION_COOKIE_NAME = "pundi-session";
 
@@ -69,6 +77,12 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
     return { success: false, error: "Email dan password wajib diisi." };
   }
 
+  const ip = getClientIpFromHeaders(await headers());
+  const loginCheck = checkRateLimit(`login:${ip}:${email}`, LOGIN_LIMIT, LOGIN_WINDOW_MS);
+  if (!loginCheck.allowed) {
+    return { success: false, error: RATE_LIMIT_MESSAGE };
+  }
+
   if (email === "demo@pundi.id" || email === "sarah@email.com") {
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, "demo-session-token", {
@@ -109,6 +123,16 @@ export async function signUpAction(formData: FormData): Promise<{ success: boole
   if (password.length < 8) {
     return { success: false, error: "Password minimal 8 karakter." };
   }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    return { success: false, error: "Format email tidak valid." };
+  }
+
+  const ip = getClientIpFromHeaders(await headers());
+  const signupCheck = checkRateLimit(`signup:${ip}`, SIGNUP_LIMIT, SIGNUP_WINDOW_MS);
+  if (!signupCheck.allowed) {
+    return { success: false, error: RATE_LIMIT_MESSAGE };
+  }
 
   try {
     const { account, users } = await createAdminServerClient();
@@ -124,7 +148,7 @@ export async function signUpAction(formData: FormData): Promise<{ success: boole
       maxAge: 60 * 60 * 24 * 7,
     });
 
-    const seeded = await seedDefaultCategoriesAction(userId);
+    const seeded = await seedDefaultCategoriesAction();
     if (!seeded.success) {
       return { success: false, error: "Akun dibuat, tetapi data awal gagal disiapkan. Silakan masuk kembali." };
     }

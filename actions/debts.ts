@@ -1,6 +1,6 @@
 "use server";
 
-import { ID, Query } from "node-appwrite";
+import { ID, Permission, Query, Role, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
@@ -16,16 +16,27 @@ type DebtInput = {
   note?: string;
 };
 
-function fromDocument(document: Record<string, any>): Debt {
+interface DebtFields {
+  direction: DebtDirection;
+  person: string;
+  amount: number;
+  remainingAmount: number;
+  dueDate?: string;
+  note?: string;
+  status: Debt["status"];
+}
+
+function fromDocument(document: Models.Document): Debt {
+  const fields = document as unknown as DebtFields;
   return {
     id: document.$id,
-    direction: document.direction,
-    person: document.person,
-    amount: Number(document.amount),
-    remainingAmount: Number(document.remainingAmount),
-    dueDate: document.dueDate ? new Date(document.dueDate) : undefined,
-    note: document.note || undefined,
-    status: document.status,
+    direction: fields.direction,
+    person: fields.person,
+    amount: Number(fields.amount),
+    remainingAmount: Number(fields.remainingAmount),
+    dueDate: fields.dueDate ? new Date(fields.dueDate) : undefined,
+    note: fields.note || undefined,
+    status: fields.status,
     createdAt: new Date(document.$createdAt),
     updatedAt: new Date(document.$updatedAt),
   };
@@ -74,7 +85,17 @@ export async function createDebtAction(payload: DebtInput) {
   if (!user || user.isDemo) return { success: true, id: `debt-${Date.now()}`, createdAt: new Date().toISOString() };
   try {
     const { databases } = await createAdminServerClient();
-    const document = await databases.createDocument(DATABASE_ID, COLLECTIONS.DEBTS, ID.unique(), documentPayload(user.id, payload));
+    const document = await databases.createDocument(
+      DATABASE_ID,
+      COLLECTIONS.DEBTS,
+      ID.unique(),
+      documentPayload(user.id, payload),
+      [
+        Permission.read(Role.user(user.id)),
+        Permission.update(Role.user(user.id)),
+        Permission.delete(Role.user(user.id)),
+      ]
+    );
     return { success: true, id: document.$id, createdAt: document.$createdAt, updatedAt: document.$updatedAt };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Utang gagal disimpan." };

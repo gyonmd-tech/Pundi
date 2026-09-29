@@ -1,6 +1,6 @@
 "use server";
 
-import { ID, Query } from "node-appwrite";
+import { ID, Permission, Query, Role } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
@@ -28,14 +28,24 @@ export async function createAccountAction(payload: AccountPayload) {
   try {
     const data = validateAccount(payload);
     const { databases } = await createAdminServerClient();
-    const document = await databases.createDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, ID.unique(), {
-      userId: user.id,
-      name: data.name,
-      type: data.type,
-      balance: data.balance,
-      colorTag: data.colorTag,
-      isActive: data.isActive,
-    });
+    const document = await databases.createDocument(
+      DATABASE_ID,
+      COLLECTIONS.ACCOUNTS,
+      ID.unique(),
+      {
+        userId: user.id,
+        name: data.name,
+        type: data.type,
+        balance: data.balance,
+        colorTag: data.colorTag,
+        isActive: data.isActive,
+      },
+      [
+        Permission.read(Role.user(user.id)),
+        Permission.update(Role.user(user.id)),
+        Permission.delete(Role.user(user.id)),
+      ]
+    );
     return { success: true, id: document.$id };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Rekening gagal dibuat." };

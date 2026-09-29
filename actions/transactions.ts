@@ -3,28 +3,43 @@
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
-import { ID, Query } from "node-appwrite";
+import { ID, Permission, Query, Role, type Models } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockTransactions, type Account, type Transaction } from "@/lib/data/mock";
 
 type TransactionInput = Omit<Transaction, "id" | "createdAt">;
 type BalanceChanges = Map<string, number>;
 
-function transactionFromDocument(document: Record<string, any>): Transaction {
+interface TransactionFields {
+  accountId: string;
+  destinationAccountId?: string;
+  transferKind?: Transaction["transferKind"];
+  recordKind?: Transaction["recordKind"];
+  observedBalance?: number;
+  categoryId?: string;
+  type: Transaction["type"];
+  amount: number;
+  date: string;
+  note?: string;
+  tags?: string[];
+}
+
+function transactionFromDocument(document: Models.Document): Transaction {
+  const fields = document as unknown as TransactionFields;
   return {
     id: document.$id,
-    accountId: document.accountId,
-    destinationAccountId: document.destinationAccountId || undefined,
-    transferKind: document.transferKind || undefined,
-    recordKind: document.recordKind || "standard",
-    observedBalance: document.observedBalance == null ? undefined : Number(document.observedBalance),
-    categoryId: document.categoryId || undefined,
-    type: document.type,
-    amount: Number(document.amount),
-    date: new Date(document.date),
+    accountId: fields.accountId,
+    destinationAccountId: fields.destinationAccountId || undefined,
+    transferKind: fields.transferKind || undefined,
+    recordKind: fields.recordKind || "standard",
+    observedBalance: fields.observedBalance == null ? undefined : Number(fields.observedBalance),
+    categoryId: fields.categoryId || undefined,
+    type: fields.type,
+    amount: Number(fields.amount),
+    date: new Date(fields.date),
     createdAt: new Date(document.$createdAt),
-    note: document.note || undefined,
-    tags: document.tags || [],
+    note: fields.note || undefined,
+    tags: fields.tags || [],
   };
 }
 
@@ -120,6 +135,14 @@ async function validateTransaction(
   }
 }
 
+function documentPermissions(userId: string) {
+  return [
+    Permission.read(Role.user(userId)),
+    Permission.update(Role.user(userId)),
+    Permission.delete(Role.user(userId)),
+  ];
+}
+
 function documentPayload(userId: string, payload: TransactionInput, clearOptional = false) {
   const data: Record<string, unknown> = {
     userId,
@@ -211,6 +234,7 @@ export async function createBalanceAdjustmentAction(payload: {
     try {
       const document = await databases.createDocument(
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, transaction),
+        documentPermissions(user.id),
       );
       return {
         success: true,
@@ -255,6 +279,7 @@ export async function createTransactionAction(payload: TransactionInput) {
     try {
       const document = await databases.createDocument(
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, payload),
+        documentPermissions(user.id),
       );
       return { success: true, id: document.$id, createdAt: document.$createdAt };
     } catch (error) {

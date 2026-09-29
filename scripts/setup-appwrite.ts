@@ -95,6 +95,13 @@ async function setup() {
       collectionExists = true;
     } catch (err: any) {
       if (err.code === 404) {
+        // Collection-level permissions sengaja dibiarkan kosong ([]): akses
+        // ditentukan per-dokumen (documentSecurity: true) lewat
+        // Permission.read/update/delete(Role.user(userId)) yang diset saat
+        // createDocument di actions/*.ts. Ini defense-in-depth — hari ini
+        // semua panggilan tetap lewat admin API key (bypass permission
+        // Appwrite), tapi dokumen sudah benar-benar terkunci per pengguna
+        // seandainya session client (non-admin) suatu saat dipakai langsung.
         await databases.createCollection(databaseId, col.$id, col.name, [], col.documentSecurity, col.enabled);
         console.log(`  ✓ Berhasil membuat Collection '${col.name}'.`);
         collectionExists = true;
