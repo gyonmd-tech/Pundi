@@ -56,6 +56,7 @@
             { "key": "transferKind", "type": "string", "size": 24, "required": false },
             { "key": "recordKind", "type": "string", "size": 32, "required": false },
             { "key": "recurringRuleId", "type": "string", "size": 36, "required": false },
+            { "key": "debtId", "type": "string", "size": 36, "required": false },
             { "key": "observedBalance", "type": "integer", "required": false },
             { "key": "categoryId", "type": "string", "size": 36, "required": false },
             { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
@@ -132,11 +133,13 @@
             { "key": "userId", "type": "string", "size": 36, "required": true },
             { "key": "type", "type": "enum", "elements": ["budget_warning", "goal_progress", "trend", "tip"], "required": true },
             { "key": "message", "type": "string", "size": 500, "required": true },
-            { "key": "isRead", "type": "boolean", "required": false, "default": false }
+            { "key": "isRead", "type": "boolean", "required": false, "default": false },
+            { "key": "key", "type": "string", "size": 128, "required": false }
           ],
           "indexes": [
             { "key": "idx_user", "type": "key", "attributes": ["userId"] },
-            { "key": "idx_user_read", "type": "key", "attributes": ["userId", "isRead"] }
+            { "key": "idx_user_read", "type": "key", "attributes": ["userId", "isRead"] },
+            { "key": "idx_user_key", "type": "key", "attributes": ["userId", "key"] }
           ]
         },
         {

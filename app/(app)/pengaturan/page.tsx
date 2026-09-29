@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import {
   BellRing,
   ChevronRight,
@@ -13,20 +13,24 @@ import {
   ShieldCheck,
   Sparkles,
   Tag,
+  Trash2,
   Wallet,
 } from "lucide-react";
 import { useAccounts, useApp, useCategories } from "@/lib/data/store";
-import type { Account } from "@/lib/data/mock";
+import type { Account, Category } from "@/lib/data/mock";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
-import { Button } from "@/components/ui/Button";
+import { Button, IconButton } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { PreferenceToggle } from "@/components/settings/PreferenceToggle";
 import { AccountManagerModal } from "@/components/settings/AccountManagerModal";
 import { ProfileNameModal } from "@/components/settings/ProfileNameModal";
+import { CategoryFormModal } from "@/components/settings/CategoryFormModal";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { deleteCategoryAction } from "@/actions/categories";
+import { useToast } from "@/lib/context/ToastContext";
 
 const accountTypeLabel: Record<string, string> = {
   bank: "Rekening bank",
@@ -41,8 +45,11 @@ type CategoryFilter = "all" | "expense" | "income";
 export default function PengaturanPage() {
   const accounts = useAccounts();
   const categories = useCategories();
-  const { connection } = useApp();
+  const { dispatch, connection } = useApp();
+  const { showToast } = useToast();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [notifications, setNotifications] = useState(true);
   const [autoInsights, setAutoInsights] = useState(true);
   const [compactNumbers, setCompactNumbers] = useState(false);
@@ -62,6 +69,28 @@ export default function PengaturanPage() {
   function openAccount(account: Account) {
     setEditingAccount(account);
     setAccountModalOpen(true);
+  }
+
+  function openNewCategory() {
+    setEditingCategory(null);
+    setCategoryModalOpen(true);
+  }
+
+  function openCategory(category: Category) {
+    setEditingCategory(category);
+    setCategoryModalOpen(true);
+  }
+
+  async function handleDeleteCategory(category: Category, event: MouseEvent) {
+    event.stopPropagation();
+    if (!window.confirm(`Hapus kategori "${category.name}"?`)) return;
+    const result = await deleteCategoryAction(category.id);
+    if (!result.success) {
+      showToast({ type: "error", title: "Kategori tidak bisa dihapus", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
+    dispatch({ type: "DELETE_CATEGORY", payload: category.id });
+    showToast({ type: "info", title: "Kategori Dihapus", message: `${category.name} telah dihapus.` });
   }
 
   return (
@@ -123,15 +152,48 @@ export default function PengaturanPage() {
           </div>
         </SettingsCard>
 
-        <SettingsCard title="Kategori transaksi" description="Warna dan ikon dipakai di seluruh grafik." icon={Tag} tone="amber" className="lg:col-span-12">
+        <SettingsCard
+          title="Kategori transaksi"
+          description="Warna dan ikon dipakai di seluruh grafik."
+          icon={Tag}
+          tone="amber"
+          className="lg:col-span-12"
+          action={<Button type="button" size="sm" onClick={openNewCategory}><Plus className="h-3.5 w-3.5" />Tambah</Button>}
+        >
           <div className="mb-4 flex max-w-full items-center gap-1 overflow-x-auto rounded-[14px] bg-brand-50 p-1">
             {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-8 flex-1 whitespace-nowrap rounded-[10px] px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-white hover:text-ink")}>{label}</button>)}
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredCategories.map((category) => <div key={category.id} className="flex min-w-0 items-center gap-2.5 rounded-[15px] border border-brand-600/10 bg-white p-2.5"><CategoryIcon icon={category.icon} color={category.color} size={15} containerSize="md" /><div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-ink">{category.name}</p><p className="text-[10px] font-bold uppercase tracking-wide text-ink-muted">{category.type === "income" ? "Pemasukan" : "Pengeluaran"}</p></div></div>)}
+            {filteredCategories.map((category) => (
+              <div
+                key={category.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openCategory(category)}
+                onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCategory(category); } }}
+                className="group flex min-w-0 cursor-pointer items-center gap-2.5 rounded-[15px] border border-brand-600/10 bg-white p-2.5 text-left transition-colors hover:bg-brand-50"
+              >
+                <CategoryIcon icon={category.icon} color={category.color} size={15} containerSize="md" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-extrabold text-ink">{category.name}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-ink-muted">{category.type === "income" ? "Pemasukan" : "Pengeluaran"}</p>
+                </div>
+                <IconButton
+                  variant="ghost"
+                  className="h-7 min-h-7 w-7 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-ember-10 hover:text-ember"
+                  aria-label={`Hapus kategori ${category.name}`}
+                  onClick={(event) => handleDeleteCategory(category, event)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </IconButton>
+              </div>
+            ))}
+            {!filteredCategories.length ? <p className="col-span-full py-6 text-center text-xs text-ink-muted">Belum ada kategori pada filter ini.</p> : null}
           </div>
         </SettingsCard>
       </div>
+
+      <CategoryFormModal key={`${editingCategory?.id ?? "new-category"}-${categoryModalOpen}`} open={categoryModalOpen} category={editingCategory} onClose={() => setCategoryModalOpen(false)} />
 
       <footer className="flex items-center gap-3 rounded-[22px] border border-brand-600/10 bg-white p-4 shadow-card sm:p-5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-brand-900 text-white shadow-card"><Info className="h-4 w-4" /></span><div><p className="text-sm font-extrabold text-ink">Pundi Personal Finance</p><p className="text-xs text-ink-muted">Next.js 16 · Appwrite · Versi 1.0.0</p></div></footer>
 

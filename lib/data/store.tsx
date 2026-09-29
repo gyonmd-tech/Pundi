@@ -57,6 +57,8 @@ type Action =
   | { type: "MARK_INSIGHT_READ"; payload: string }
   | { type: "MARK_ALL_READ" }
   | { type: "ADD_CATEGORY"; payload: Category }
+  | { type: "UPDATE_CATEGORY"; payload: Category }
+  | { type: "DELETE_CATEGORY"; payload: string }
   | { type: "ADD_DEBT"; payload: Debt }
   | { type: "UPDATE_DEBT"; payload: Debt }
   | { type: "DELETE_DEBT"; payload: string }
@@ -128,6 +130,13 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, insights: state.insights.map((insight) => ({ ...insight, isRead: true })) };
     case "ADD_CATEGORY":
       return { ...state, categories: [...state.categories, action.payload] };
+    case "UPDATE_CATEGORY":
+      return {
+        ...state,
+        categories: state.categories.map((category) => category.id === action.payload.id ? action.payload : category),
+      };
+    case "DELETE_CATEGORY":
+      return { ...state, categories: state.categories.filter((category) => category.id !== action.payload) };
     case "ADD_DEBT":
       return { ...state, debts: [action.payload, ...state.debts] };
     case "UPDATE_DEBT":

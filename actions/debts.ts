@@ -6,6 +6,13 @@ import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { getAuthUserAction } from "./auth";
 import type { Debt, DebtDirection } from "@/lib/data/mock";
+import {
+  applyBalanceChanges,
+  documentPayload as transactionDocumentPayload,
+  documentPermissions as transactionDocumentPermissions,
+  getBalanceChanges,
+  type TransactionInput,
+} from "@/lib/appwrite/transactionHelpers";
 
 type DebtInput = {
   direction: DebtDirection;
@@ -116,10 +123,18 @@ export async function updateDebtAction(id: string, payload: DebtInput) {
   }
 }
 
-export async function recordDebtPaymentAction(id: string, amount: number) {
+export async function recordDebtPaymentAction(id: string, amount: number, accountId?: string) {
   const user = await getAuthUserAction();
   if (!Number.isSafeInteger(amount) || amount <= 0) return { success: false, error: "Nominal pembayaran harus lebih besar dari nol." };
-  if (!user || user.isDemo) return { success: true, remainingAmount: 0, status: "paid" as const, updatedAt: new Date().toISOString() };
+  if (!user || user.isDemo) {
+    return {
+      success: true,
+      remainingAmount: 0,
+      status: "paid" as const,
+      updatedAt: new Date().toISOString(),
+      transactionId: accountId ? `tx-debt-demo-${Date.now()}` : undefined,
+    };
+  }
   try {
     const { databases } = await createAdminServerClient();
     const previous = await getOwnedDocument(databases, COLLECTIONS.DEBTS, id, user.id);
@@ -127,8 +142,47 @@ export async function recordDebtPaymentAction(id: string, amount: number) {
     if (amount > remaining) throw new Error("Pembayaran tidak boleh melebihi sisa utang.");
     const remainingAmount = remaining - amount;
     const status = remainingAmount === 0 ? "paid" : "open";
+    // Update dulu — ini yang wajib berhasil. Jejak transaksi di bawah bersifat
+    // best-effort: kalau gagal, pembayaran tetap tercatat (tidak di-rollback),
+    // hanya jejaknya di buku transaksi yang tidak lengkap.
     const document = await databases.updateDocument(DATABASE_ID, COLLECTIONS.DEBTS, id, { remainingAmount, status });
-    return { success: true, remainingAmount, status, updatedAt: document.$updatedAt };
+
+    let transactionId: string | undefined;
+    let warning: string | undefined;
+    if (accountId) {
+      try {
+        await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, accountId, user.id);
+        const direction = previous.direction as DebtDirection;
+        const txInput: TransactionInput = {
+          accountId,
+          type: direction === "payable" ? "expense" : "income",
+          amount,
+          date: new Date(),
+          note: `Pembayaran utang · ${previous.person}`,
+          tags: [],
+          recordKind: "debt_payment",
+          debtId: id,
+        };
+        const rollback = await applyBalanceChanges(databases, user.id, getBalanceChanges(txInput));
+        try {
+          const txDocument = await databases.createDocument(
+            DATABASE_ID,
+            COLLECTIONS.TRANSACTIONS,
+            ID.unique(),
+            transactionDocumentPayload(user.id, txInput),
+            transactionDocumentPermissions(user.id),
+          );
+          transactionId = txDocument.$id;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      } catch (error: unknown) {
+        warning = "Pembayaran tersimpan, tetapi gagal dicatat sebagai transaksi: " + (error instanceof Error ? error.message : "kesalahan tidak diketahui.");
+      }
+    }
+
+    return { success: true, remainingAmount, status, updatedAt: document.$updatedAt, transactionId, warning };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Pembayaran gagal dicatat." };
   }

@@ -13,6 +13,7 @@ import {
 } from "@/lib/appwrite/transactionHelpers";
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
 import { getNextOccurrence } from "@/lib/utils/recurrence";
+import { generateInsights } from "@/lib/appwrite/insightGenerator";
 import {
   mockAccounts,
   mockAssets,
@@ -154,6 +155,8 @@ interface TransactionFields {
   destinationAccountId?: string;
   transferKind?: Transaction["transferKind"];
   recordKind?: Transaction["recordKind"];
+  recurringRuleId?: string;
+  debtId?: string;
   observedBalance?: number;
   categoryId?: string;
   type: Transaction["type"];
@@ -258,109 +261,137 @@ export async function getAppBootstrapAction(): Promise<{
       ]),
     ]);
 
+    const mappedAccounts = accounts.documents.map((doc) => {
+      const f = fields<AccountFields>(doc);
+      return {
+        id: doc.$id,
+        name: f.name,
+        type: f.type,
+        balance: Number(f.balance),
+        colorTag: f.colorTag || "#5B4AEF",
+        isActive: Boolean(f.isActive),
+      };
+    });
+    const mappedCategories = categories.documents.map((doc) => {
+      const f = fields<CategoryFields>(doc);
+      return {
+        id: doc.$id,
+        name: f.name,
+        type: f.type,
+        icon: f.icon || "circle",
+        color: f.color || "#5B4AEF",
+        parentId: f.parentId || undefined,
+      };
+    });
+    const mappedTransactions = transactions.documents.map((doc) => {
+      const f = fields<TransactionFields>(doc);
+      return {
+        id: doc.$id,
+        accountId: f.accountId,
+        destinationAccountId: f.destinationAccountId || undefined,
+        transferKind: f.transferKind || undefined,
+        recordKind: f.recordKind || "standard",
+        recurringRuleId: f.recurringRuleId || undefined,
+        debtId: f.debtId || undefined,
+        observedBalance: f.observedBalance == null ? undefined : Number(f.observedBalance),
+        categoryId: f.categoryId || undefined,
+        type: f.type,
+        amount: Number(f.amount),
+        date: new Date(f.date),
+        createdAt: new Date(doc.$createdAt),
+        note: f.note || undefined,
+        tags: f.tags || [],
+      };
+    });
+    const mappedBudgets = budgets.documents.map((doc) => {
+      const f = fields<BudgetFields>(doc);
+      return {
+        id: doc.$id,
+        categoryId: f.categoryId,
+        period: f.period,
+        limitAmount: Number(f.limitAmount),
+      };
+    });
+    const mappedGoals = goals.documents.map((doc) => {
+      const f = fields<GoalFields>(doc);
+      return {
+        id: doc.$id,
+        name: f.name,
+        targetAmount: Number(f.targetAmount),
+        currentAmount: Number(f.currentAmount || 0),
+        targetDate: new Date(f.targetDate),
+        linkedAccountId: f.linkedAccountId || undefined,
+      };
+    });
+    const mappedAssets = assets.documents.map((doc) => {
+      const f = fields<AssetFields>(doc);
+      return {
+        id: doc.$id,
+        type: f.type,
+        name: f.name,
+        units: Number(f.units),
+        buyPrice: Number(f.buyPrice),
+        currentPrice: Number(f.currentPrice),
+        updatedAt: new Date(doc.$updatedAt),
+      };
+    });
+    const mappedExistingInsights = insights.documents.map((doc) => {
+      const f = fields<InsightFields>(doc);
+      return {
+        id: doc.$id,
+        type: f.type,
+        message: f.message,
+        isRead: Boolean(f.isRead),
+        createdAt: new Date(doc.$createdAt),
+      };
+    });
+    const mappedDebts = debts.documents.map((doc) => {
+      const f = fields<DebtFields>(doc);
+      return {
+        id: doc.$id,
+        direction: f.direction,
+        person: f.person,
+        amount: Number(f.amount),
+        remainingAmount: Number(f.remainingAmount),
+        dueDate: f.dueDate ? new Date(f.dueDate) : undefined,
+        note: f.note || undefined,
+        status: f.status,
+        createdAt: new Date(doc.$createdAt),
+        updatedAt: new Date(doc.$updatedAt),
+      };
+    });
+    const mappedRecurringRules = recurringRules.documents.map(recurringRuleFromDocument);
+
+    const newInsights = await generateInsights(
+      databases,
+      user.id,
+      {
+        categories: mappedCategories,
+        transactions: mappedTransactions,
+        budgets: mappedBudgets,
+        goals: mappedGoals,
+        recurringRules: mappedRecurringRules,
+      },
+      insights.documents,
+    );
+    const mergedInsights = [...newInsights, ...mappedExistingInsights].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
     return {
       mode: "cloud",
       userName: user.name,
       userEmail: user.email,
       data: {
-        accounts: accounts.documents.map((doc) => {
-          const f = fields<AccountFields>(doc);
-          return {
-            id: doc.$id,
-            name: f.name,
-            type: f.type,
-            balance: Number(f.balance),
-            colorTag: f.colorTag || "#5B4AEF",
-            isActive: Boolean(f.isActive),
-          };
-        }),
-        categories: categories.documents.map((doc) => {
-          const f = fields<CategoryFields>(doc);
-          return {
-            id: doc.$id,
-            name: f.name,
-            type: f.type,
-            icon: f.icon || "circle",
-            color: f.color || "#5B4AEF",
-            parentId: f.parentId || undefined,
-          };
-        }),
-        transactions: transactions.documents.map((doc) => {
-          const f = fields<TransactionFields>(doc);
-          return {
-            id: doc.$id,
-            accountId: f.accountId,
-            destinationAccountId: f.destinationAccountId || undefined,
-            transferKind: f.transferKind || undefined,
-            recordKind: f.recordKind || "standard",
-            observedBalance: f.observedBalance == null ? undefined : Number(f.observedBalance),
-            categoryId: f.categoryId || undefined,
-            type: f.type,
-            amount: Number(f.amount),
-            date: new Date(f.date),
-            createdAt: new Date(doc.$createdAt),
-            note: f.note || undefined,
-            tags: f.tags || [],
-          };
-        }),
-        budgets: budgets.documents.map((doc) => {
-          const f = fields<BudgetFields>(doc);
-          return {
-            id: doc.$id,
-            categoryId: f.categoryId,
-            period: f.period,
-            limitAmount: Number(f.limitAmount),
-          };
-        }),
-        goals: goals.documents.map((doc) => {
-          const f = fields<GoalFields>(doc);
-          return {
-            id: doc.$id,
-            name: f.name,
-            targetAmount: Number(f.targetAmount),
-            currentAmount: Number(f.currentAmount || 0),
-            targetDate: new Date(f.targetDate),
-            linkedAccountId: f.linkedAccountId || undefined,
-          };
-        }),
-        assets: assets.documents.map((doc) => {
-          const f = fields<AssetFields>(doc);
-          return {
-            id: doc.$id,
-            type: f.type,
-            name: f.name,
-            units: Number(f.units),
-            buyPrice: Number(f.buyPrice),
-            currentPrice: Number(f.currentPrice),
-            updatedAt: new Date(doc.$updatedAt),
-          };
-        }),
-        insights: insights.documents.map((doc) => {
-          const f = fields<InsightFields>(doc);
-          return {
-            id: doc.$id,
-            type: f.type,
-            message: f.message,
-            isRead: Boolean(f.isRead),
-            createdAt: new Date(doc.$createdAt),
-          };
-        }),
-        debts: debts.documents.map((doc) => {
-          const f = fields<DebtFields>(doc);
-          return {
-            id: doc.$id,
-            direction: f.direction,
-            person: f.person,
-            amount: Number(f.amount),
-            remainingAmount: Number(f.remainingAmount),
-            dueDate: f.dueDate ? new Date(f.dueDate) : undefined,
-            note: f.note || undefined,
-            status: f.status,
-            createdAt: new Date(doc.$createdAt),
-            updatedAt: new Date(doc.$updatedAt),
-          };
-        }),
-        recurringRules: recurringRules.documents.map(recurringRuleFromDocument),
+        accounts: mappedAccounts,
+        categories: mappedCategories,
+        transactions: mappedTransactions,
+        budgets: mappedBudgets,
+        goals: mappedGoals,
+        assets: mappedAssets,
+        insights: mergedInsights,
+        debts: mappedDebts,
+        recurringRules: mappedRecurringRules,
       },
     };
   } catch (error: unknown) {

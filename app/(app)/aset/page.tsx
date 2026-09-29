@@ -12,7 +12,7 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { useApp, useAssets } from "@/lib/data/store";
 import { formatRupiah } from "@/lib/utils/formatter";
-import { getNetWorthData, getAssetPnL, type AssetType, type Asset } from "@/lib/data/mock";
+import { getAssetPnL, type AssetType, type Asset } from "@/lib/data/mock";
 import { useToast } from "@/lib/context/ToastContext";
 import {
   TrendingUp, TrendingDown, Plus, X, Edit2, Trash2,
@@ -21,7 +21,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { createAssetAction, deleteAssetAction, updateAssetAction } from "@/actions/assets";
 
-const NetWorthTrendChart = dynamic(() => import("@/components/charts/NetWorthTrendChart").then((module) => module.NetWorthTrendChart), {
+const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), {
   ssr: false,
   loading: () => <div className="h-64 animate-pulse rounded-[18px] bg-pine-10/70" aria-label="Memuat grafik" />,
 });
@@ -39,11 +39,17 @@ export default function AsetPage() {
   const assets        = useAssets();
   const { showToast } = useToast();
 
-  const netWorthData = getNetWorthData();
   const totalValue   = assets.reduce((s, a) => s + a.units * a.currentPrice, 0);
   const totalBuyVal  = assets.reduce((s, a) => s + a.units * a.buyPrice, 0);
   const totalPnL     = totalValue - totalBuyVal;
   const totalPnLPct  = totalBuyVal > 0 ? (totalPnL / totalBuyVal) * 100 : 0;
+  const allocationData = (Object.keys(assetTypeConfig) as AssetType[])
+    .map((t) => ({
+      name: assetTypeConfig[t].label,
+      amount: assets.filter((a) => a.type === t).reduce((s, a) => s + a.units * a.currentPrice, 0),
+      color: assetTypeConfig[t].color,
+    }))
+    .filter((item) => item.amount > 0);
 
   const [showForm, setShowForm]     = useState(false);
   const [editAsset, setEditAsset]   = useState<Asset | null>(null);
@@ -228,17 +234,17 @@ export default function AsetPage() {
           </div>
         </div>
 
-        {/* Right: Net Worth Trend Chart */}
+        {/* Right: Real Asset Allocation Chart */}
         <div className="lg:col-span-3 card p-4 sm:p-5 w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-              Tren Net Worth (6 Bulan)
+              Distribusi Nilai per Kelas Aset
             </h2>
-            <span className="text-xs font-mono text-pine font-semibold px-2 py-0.5 rounded-full bg-pine-10">
-              ▲ +12.4% Semester Ini
+            <span className="text-xs font-mono text-ink-muted font-semibold px-2 py-0.5 rounded-full bg-paper">
+              Hari ini
             </span>
           </div>
-          <NetWorthTrendChart data={netWorthData} />
+          <CategoryBreakdownChart data={allocationData} />
         </div>
       </div>
 

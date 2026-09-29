@@ -24,6 +24,7 @@ interface TransactionFields {
   transferKind?: Transaction["transferKind"];
   recordKind?: Transaction["recordKind"];
   recurringRuleId?: string;
+  debtId?: string;
   observedBalance?: number;
   categoryId?: string;
   type: Transaction["type"];
@@ -42,6 +43,7 @@ function transactionFromDocument(document: Models.Document): Transaction {
     transferKind: fields.transferKind || undefined,
     recordKind: fields.recordKind || "standard",
     recurringRuleId: fields.recurringRuleId || undefined,
+    debtId: fields.debtId || undefined,
     observedBalance: fields.observedBalance == null ? undefined : Number(fields.observedBalance),
     categoryId: fields.categoryId || undefined,
     type: fields.type,

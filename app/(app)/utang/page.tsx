@@ -5,8 +5,9 @@ import { ArrowDownLeft, ArrowUpRight, Check, HandCoins, Pencil, Plus, Trash2, X 
 import { Button, IconButton } from "@/components/ui/Button";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Field, Input } from "@/components/ui/Input";
-import { useApp, useDebts } from "@/lib/data/store";
-import type { Debt, DebtDirection } from "@/lib/data/mock";
+import { Select } from "@/components/ui/Select";
+import { useApp, useAccounts, useDebts } from "@/lib/data/store";
+import type { Debt, DebtDirection, Transaction } from "@/lib/data/mock";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
 import { createDebtAction, deleteDebtAction, recordDebtPaymentAction, updateDebtAction } from "@/actions/debts";
@@ -25,11 +26,13 @@ const emptyForm: FormState = { direction: "payable", person: "", amount: "", rem
 
 export default function UtangPage() {
   const debts = useDebts();
+  const accounts = useAccounts();
   const { dispatch, connection } = useApp();
   const { showToast } = useToast();
   const [editing, setEditing] = React.useState<Debt | "new" | null>(null);
   const [paymentDebt, setPaymentDebt] = React.useState<Debt | null>(null);
   const [payment, setPayment] = React.useState("");
+  const [paymentAccountId, setPaymentAccountId] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [form, setForm] = React.useState<FormState>(emptyForm);
 
@@ -93,14 +96,41 @@ export default function UtangPage() {
     if (!paymentDebt) return;
     const amount = Number(payment);
     setSubmitting(true);
-    const result = await recordDebtPaymentAction(paymentDebt.id, amount);
+    const result = await recordDebtPaymentAction(paymentDebt.id, amount, paymentAccountId || undefined);
     setSubmitting(false);
     if (!result.success) return showToast({ type: "error", title: "Pembayaran gagal", message: result.error || "Coba lagi." });
-    const paymentResult = result as { remainingAmount: number; status: "open" | "paid"; updatedAt: string };
+    const paymentResult = result as { remainingAmount: number; status: "open" | "paid"; updatedAt: string; transactionId?: string; warning?: string };
     dispatch({ type: "UPDATE_DEBT", payload: { ...paymentDebt, remainingAmount: paymentResult.remainingAmount, status: paymentResult.status, updatedAt: new Date(paymentResult.updatedAt) } });
-    showToast({ type: "success", title: "Pembayaran tercatat", message: `Sisa ${formatRupiah(paymentResult.remainingAmount)}.` });
+
+    if (paymentAccountId && paymentResult.transactionId) {
+      const account = accounts.find((item) => item.id === paymentAccountId);
+      if (account) {
+        const delta = paymentDebt.direction === "payable" ? -amount : amount;
+        dispatch({ type: "UPDATE_ACCOUNT", payload: { ...account, balance: account.balance + delta } });
+      }
+      const transaction: Transaction = {
+        id: paymentResult.transactionId,
+        accountId: paymentAccountId,
+        type: paymentDebt.direction === "payable" ? "expense" : "income",
+        amount,
+        date: new Date(),
+        createdAt: new Date(),
+        note: `Pembayaran utang · ${paymentDebt.person}`,
+        tags: [],
+        recordKind: "debt_payment",
+        debtId: paymentDebt.id,
+      };
+      dispatch({ type: "ADD_TRANSACTION", payload: transaction });
+    }
+
+    showToast({
+      type: paymentResult.warning ? "info" : "success",
+      title: "Pembayaran tercatat",
+      message: paymentResult.warning || `Sisa ${formatRupiah(paymentResult.remainingAmount)}.`,
+    });
     setPaymentDebt(null);
     setPayment("");
+    setPaymentAccountId("");
   }
 
   return (
@@ -126,7 +156,7 @@ export default function UtangPage() {
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-rule"><div className={cn("h-full rounded-full", item.direction === "payable" ? "bg-ember" : "bg-mint")} style={{ width: `${Math.max(3, progress)}%` }} /></div>
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted"><span>Sisa <strong className="text-ink">{formatRupiah(item.remainingAmount)}</strong> dari {formatRupiah(item.amount)}</span>{item.dueDate ? <span>Jatuh tempo {formatDate(item.dueDate, "short")}</span> : null}{item.note ? <span>{item.note}</span> : null}</div>
               </div>
-              <div className="flex items-center gap-2">{!paid ? <Button variant="soft" size="sm" onClick={() => { setPaymentDebt(item); setPayment(""); }}>Bayar / terima</Button> : null}<IconButton variant="ghost" aria-label="Edit" onClick={() => openForm(item)}><Pencil className="h-4 w-4" /></IconButton><IconButton variant="ghost" aria-label="Hapus" onClick={() => remove(item)} className="hover:bg-ember-10 hover:text-ember"><Trash2 className="h-4 w-4" /></IconButton></div>
+              <div className="flex items-center gap-2">{!paid ? <Button variant="soft" size="sm" onClick={() => { setPaymentDebt(item); setPayment(""); setPaymentAccountId(""); }}>Bayar / terima</Button> : null}<IconButton variant="ghost" aria-label="Edit" onClick={() => openForm(item)}><Pencil className="h-4 w-4" /></IconButton><IconButton variant="ghost" aria-label="Hapus" onClick={() => remove(item)} className="hover:bg-ember-10 hover:text-ember"><Trash2 className="h-4 w-4" /></IconButton></div>
             </article>;
           }) : <div className="py-16 text-center"><HandCoins className="mx-auto h-8 w-8 text-pine/50" /><p className="mt-3 text-sm font-bold text-ink">Belum ada catatan utang</p><p className="mt-1 text-xs text-ink-muted">Tambahkan utang atau piutang pertama Anda.</p></div>}
         </div>
@@ -141,7 +171,7 @@ export default function UtangPage() {
           <Field label="Catatan" hint={`${form.note.length}/500`}><textarea className="min-h-28 w-full rounded-2xl border border-rule p-3 text-sm outline-none focus:border-pine focus:ring-2 focus:ring-pine/15" maxLength={500} value={form.note} onChange={(event) => setForm({ ...form, note: event.target.value })} placeholder="Keterangan kesepakatan atau cicilan" /></Field>
         </div><footer className="grid grid-cols-[auto_1fr] gap-2 border-t border-rule p-4"><Button type="button" variant="outline" onClick={() => setEditing(null)}>Batal</Button><Button type="submit" loading={submitting}><Check className="h-4 w-4" /> Simpan catatan</Button></footer></form></div> : null}
 
-      {paymentDebt ? <div className="fixed inset-0 z-[60] grid place-items-center bg-ink/40 p-4 backdrop-blur-sm"><form onSubmit={pay} className="w-full max-w-sm rounded-[24px] border border-pine/10 bg-white p-5 shadow-float"><div className="flex items-start justify-between"><div><p className="eyebrow">Kurangi sisa</p><h2 className="mt-1 text-xl font-black text-ink">Catat pembayaran</h2><p className="mt-1 text-xs text-ink-muted">Sisa saat ini {formatRupiah(paymentDebt.remainingAmount)}</p></div><IconButton type="button" variant="soft" aria-label="Tutup" onClick={() => setPaymentDebt(null)}><X className="h-4 w-4" /></IconButton></div><Field label="Nominal pembayaran" required className="mt-5"><Input autoFocus inputMode="numeric" value={payment} onChange={(event) => setPayment(event.target.value.replace(/\D/g, ""))} placeholder="0" /></Field><div className="mt-5 grid grid-cols-[auto_1fr] gap-2"><Button type="button" variant="outline" onClick={() => setPaymentDebt(null)}>Batal</Button><Button type="submit" loading={submitting}>Simpan pembayaran</Button></div></form></div> : null}
+      {paymentDebt ? <div className="fixed inset-0 z-[60] grid place-items-center bg-ink/40 p-4 backdrop-blur-sm"><form onSubmit={pay} className="w-full max-w-sm rounded-[24px] border border-pine/10 bg-white p-5 shadow-float"><div className="flex items-start justify-between"><div><p className="eyebrow">Kurangi sisa</p><h2 className="mt-1 text-xl font-black text-ink">Catat pembayaran</h2><p className="mt-1 text-xs text-ink-muted">Sisa saat ini {formatRupiah(paymentDebt.remainingAmount)}</p></div><IconButton type="button" variant="soft" aria-label="Tutup" onClick={() => setPaymentDebt(null)}><X className="h-4 w-4" /></IconButton></div><Field label="Nominal pembayaran" required className="mt-5"><Input autoFocus inputMode="numeric" value={payment} onChange={(event) => setPayment(event.target.value.replace(/\D/g, ""))} placeholder="0" /></Field><Field label="Potong dari akun" hint="Opsional — biar tercatat di buku transaksi" className="mt-4"><Select value={paymentAccountId} onChange={(event) => setPaymentAccountId(event.target.value)}><option value="">Jangan buat transaksi</option>{accounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}</Select></Field><div className="mt-5 grid grid-cols-[auto_1fr] gap-2"><Button type="button" variant="outline" onClick={() => setPaymentDebt(null)}>Batal</Button><Button type="submit" loading={submitting}>Simpan pembayaran</Button></div></form></div> : null}
     </div>
   );
 }

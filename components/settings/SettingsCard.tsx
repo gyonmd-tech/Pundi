@@ -13,7 +13,7 @@ const iconClasses = {
   violet: "bg-brand-600 text-white shadow-card",
   blue: "bg-brand-900 text-white shadow-card",
   mint: "bg-mint-ink text-white shadow-card",
-  amber: "bg-[#855A00] text-white shadow-card",
+  amber: "bg-warning-ink text-white shadow-card",
 } as const;
 
 interface SettingsCardProps {

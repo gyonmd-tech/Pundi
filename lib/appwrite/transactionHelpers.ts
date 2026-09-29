@@ -105,6 +105,8 @@ export function documentPayload(userId: string, payload: TransactionInput, clear
   else if (clearOptional) data.recordKind = null;
   if (payload.recurringRuleId) data.recurringRuleId = payload.recurringRuleId;
   else if (clearOptional) data.recurringRuleId = null;
+  if (payload.debtId) data.debtId = payload.debtId;
+  else if (clearOptional) data.debtId = null;
   if (payload.observedBalance != null) data.observedBalance = payload.observedBalance;
   else if (clearOptional) data.observedBalance = null;
   if (payload.note) data.note = payload.note;

@@ -44,8 +44,9 @@ export interface Transaction {
   accountId: string;
   destinationAccountId?: string;
   transferKind?: "account" | "cash_withdrawal";
-  recordKind?: "standard" | "balance_adjustment" | "recurring";
+  recordKind?: "standard" | "balance_adjustment" | "recurring" | "debt_payment";
   recurringRuleId?: string;
+  debtId?: string;
   observedBalance?: number;
   categoryId?: string;
   type: TransactionType;
@@ -117,6 +118,9 @@ export interface Insight {
   message: string;
   isRead: boolean;
   createdAt: Date;
+  /** Kunci idempoten internal (mis. "budget:{budgetId}:{period}") dipakai
+   * generator agar tidak menulis insight duplikat. Tidak ditampilkan di UI. */
+  key?: string;
 }
 
 export const CURRENT_PERIOD = new Date().toISOString().slice(0, 7);
@@ -453,18 +457,6 @@ export function getCategoryBreakdown(period: string = CURRENT_PERIOD) {
 }
 
 /** Net worth per bulan (6 bulan) */
-export function getNetWorthData() {
-  const assetTotal = mockAssets.reduce(
-    (sum, a) => sum + a.units * a.currentPrice, 0
-  );
-  const months = ["Mar", "Apr", "Mei", "Jun", "Jul", "Agu"];
-  // Simulasi tren naik 2-4% per bulan dari 3 bulan lalu
-  return months.map((month, i) => ({
-    month,
-    netWorth: Math.round(assetTotal * (0.88 + i * 0.024)),
-  }));
-}
-
 /** Cari account by id */
 export function getAccountById(id: string) {
   return mockAccounts.find((a) => a.id === id);
