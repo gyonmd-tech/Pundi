@@ -19,10 +19,12 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { InsightFeed } from "@/components/dashboard/InsightFeed";
+import { SafeToSpendCard } from "@/components/dashboard/SafeToSpendCard";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
+import { computeSafeToSpend } from "@/lib/utils/safeToSpend";
 import {
   useAccounts,
   useBudgets,
@@ -162,6 +164,7 @@ export default function DashboardPage() {
   const openPayable = debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const openReceivable = debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const cashHealth = Math.max(0, Math.min(100, thisMonth.income ? ((thisMonth.income - thisMonth.expense) / thisMonth.income) * 100 : 0));
+  const safeToSpend = computeSafeToSpend(accounts, budgets, transactions, recurringRules, now);
 
   return (
     <div className="dashboard-modern space-y-5 font-ui sm:space-y-6">
@@ -178,6 +181,8 @@ export default function DashboardPage() {
           Lihat rekomendasi
         </Link>
       </header>
+
+      <SafeToSpendCard result={safeToSpend} />
 
       <DashboardLayout>
         <Card variant="highlight" data-widget-id="balance" className="relative h-full overflow-hidden rounded-[1.75rem] p-5 sm:p-7">

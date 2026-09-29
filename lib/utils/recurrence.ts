@@ -5,7 +5,7 @@
 import type { RecurringFrequency } from "@/lib/data/mock";
 
 /** Jumlah hari pada bulan tertentu (0-indexed month, seperti Date). */
-function daysInMonth(year: number, month: number): number {
+export function daysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
 }
 
