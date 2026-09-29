@@ -12,6 +12,7 @@ export const createRecurringRuleSchema = z
     accountId: z.string().min(1, "Pilih akun"),
     destinationAccountId: z.string().min(1).optional(),
     categoryId: z.string().min(1).optional(),
+    goalId: z.string().min(1).optional(),
     type: RecurringTypeEnum,
     amount: z
       .number()
@@ -30,6 +31,10 @@ export const createRecurringRuleSchema = z
   .refine((data) => !data.endDate || data.endDate > data.startDate, {
     message: "Tanggal berakhir harus setelah tanggal mulai",
     path: ["endDate"],
+  })
+  .refine((data) => !data.goalId || data.type === "expense", {
+    message: "Kontribusi tujuan otomatis hanya berlaku untuk jenis pengeluaran",
+    path: ["goalId"],
   });
 
 export const updateRecurringRuleSchema = createRecurringRuleSchema.and(

@@ -60,6 +60,9 @@ export async function createRecurringRuleAction(payload: Omit<RecurringRule, "id
     if (parsed.data.categoryId) {
       await getOwnedDocument(databases, COLLECTIONS.CATEGORIES, parsed.data.categoryId, user.id);
     }
+    if (parsed.data.goalId) {
+      await getOwnedDocument(databases, COLLECTIONS.GOALS, parsed.data.goalId, user.id);
+    }
 
     // Kejadian pertama adalah startDate itu sendiri; loop generasi di
     // actions/bootstrap.ts akan membuat transaksinya begitu startDate <= now.
@@ -72,6 +75,7 @@ export async function createRecurringRuleAction(payload: Omit<RecurringRule, "id
         accountId: parsed.data.accountId,
         destinationAccountId: parsed.data.destinationAccountId,
         categoryId: parsed.data.categoryId,
+        goalId: parsed.data.goalId,
         type: parsed.data.type,
         amount: parsed.data.amount,
         note: parsed.data.note,
@@ -101,10 +105,14 @@ export async function updateRecurringRuleAction(payload: Omit<RecurringRule, "ne
   try {
     const { databases } = await createAdminServerClient();
     await getOwnedDocument(databases, COLLECTIONS.RECURRING_RULES, payload.id, user.id);
+    if (parsed.data.goalId) {
+      await getOwnedDocument(databases, COLLECTIONS.GOALS, parsed.data.goalId, user.id);
+    }
     await databases.updateDocument(DATABASE_ID, COLLECTIONS.RECURRING_RULES, payload.id, {
       accountId: parsed.data.accountId,
       destinationAccountId: parsed.data.destinationAccountId ?? null,
       categoryId: parsed.data.categoryId ?? null,
+      goalId: parsed.data.goalId ?? null,
       type: parsed.data.type,
       amount: parsed.data.amount,
       note: parsed.data.note ?? null,

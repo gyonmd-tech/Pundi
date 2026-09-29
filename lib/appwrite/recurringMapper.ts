@@ -11,6 +11,7 @@ interface RecurringRuleFields {
   accountId: string;
   destinationAccountId?: string;
   categoryId?: string;
+  goalId?: string;
   type: RecurringRule["type"];
   amount: number;
   note?: string;
@@ -29,6 +30,7 @@ export function recurringRuleFromDocument(document: Models.Document): RecurringR
     accountId: f.accountId,
     destinationAccountId: f.destinationAccountId || undefined,
     categoryId: f.categoryId || undefined,
+    goalId: f.goalId || undefined,
     type: f.type,
     amount: Number(f.amount),
     note: f.note || undefined,

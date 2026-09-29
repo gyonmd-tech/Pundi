@@ -10,7 +10,7 @@
 
 import React, { useState } from "react";
 import { Repeat, Plus, Pencil, Trash2, Pause, Play, ChevronDown, ChevronUp } from "lucide-react";
-import { useApp, useRecurringRules, useAccounts, useCategories } from "@/lib/data/store";
+import { useApp, useRecurringRules, useAccounts, useCategories, useGoals } from "@/lib/data/store";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
 import {
@@ -84,6 +84,7 @@ export function RecurringRulesCard() {
   const rules = useRecurringRules();
   const accounts = useAccounts();
   const categories = useCategories();
+  const goals = useGoals();
   const { showToast } = useToast();
 
   const [expanded, setExpanded] = useState(true);
@@ -207,6 +208,7 @@ export function RecurringRulesCard() {
             {rules.map((rule) => {
               const account = accounts.find((a) => a.id === rule.accountId);
               const category = categories.find((c) => c.id === rule.categoryId);
+              const goal = rule.goalId ? goals.find((g) => g.id === rule.goalId) : undefined;
               return (
                 <div key={rule.id} className={cn("flex items-center justify-between gap-3 rounded-[14px] border border-rule px-3.5 py-3", !rule.isActive && "opacity-55")}>
                   <div className="flex min-w-0 items-center gap-3">
@@ -215,6 +217,7 @@ export function RecurringRulesCard() {
                       <p className="truncate text-small font-semibold text-ink">{rule.note || category?.name || "Transaksi berulang"}</p>
                       <p className="truncate text-xs text-ink-muted">
                         {account?.name ?? "—"} · {frequencyLabel[rule.frequency]} · Berikutnya {formatDate(rule.nextOccurrence, "short")}
+                        {goal ? <> · <span className="font-semibold text-pine">Tujuan: {goal.name}</span></> : null}
                       </p>
                     </div>
                   </div>

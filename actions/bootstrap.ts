@@ -3,6 +3,7 @@
 import { ID, Query, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
+import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { getAuthUserAction } from "./auth";
 import {
   applyBalanceChanges,
@@ -128,6 +129,24 @@ async function generateDueRecurringTransactions(
         ...(lastGenerated ? { lastGeneratedDate: lastGenerated.toISOString() } : {}),
         isActive: active,
       });
+    }
+
+    // Kontribusi tujuan otomatis: naikkan currentAmount goal sekali per
+    // rule per pemanggilan (bukan per-occurrence) sebesar total yang
+    // berhasil digenerate barusan.
+    if (rule.goalId && generated > 0) {
+      try {
+        const goalDoc = await getOwnedDocument(databases, COLLECTIONS.GOALS, rule.goalId, userId);
+        const currentAmount = Number(goalDoc.currentAmount ?? 0);
+        await databases.updateDocument(DATABASE_ID, COLLECTIONS.GOALS, rule.goalId, {
+          currentAmount: currentAmount + generated * rule.amount,
+        });
+      } catch (error) {
+        console.error(
+          `Gagal memperbarui progres tujuan ${rule.goalId} dari aturan ${rule.id}:`,
+          error instanceof Error ? error.message : error,
+        );
+      }
     }
   }
 }

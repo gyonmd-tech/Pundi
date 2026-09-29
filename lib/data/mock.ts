@@ -62,6 +62,9 @@ export interface RecurringRule {
   accountId: string;
   destinationAccountId?: string;
   categoryId?: string;
+  /** Diisi jika rule ini adalah kontribusi otomatis ke tujuan tabungan
+   * (hanya valid untuk type "expense" — lihat lib/validations/recurring.ts). */
+  goalId?: string;
   type: TransactionType;
   amount: number;
   note?: string;
@@ -326,6 +329,18 @@ export const mockRecurringRules: RecurringRule[] = [
     frequency: "monthly",
     startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 8, 7),
     nextOccurrence: nextMonthlyDate(7),
+    isActive: true,
+  },
+  {
+    id: "rec-4",
+    accountId: "acc-1",
+    goalId: "goal-1",
+    type: "expense",
+    amount: 500_000,
+    note: "Sisihkan ke Dana Darurat",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 4, 5),
+    nextOccurrence: nextMonthlyDate(5),
     isActive: true,
   },
 ];
