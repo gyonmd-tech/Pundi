@@ -1,9 +1,18 @@
 "use server";
 
-import { Query, type Models } from "node-appwrite";
+import { ID, Query, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getAuthUserAction } from "./auth";
+import {
+  applyBalanceChanges,
+  documentPayload,
+  documentPermissions,
+  getBalanceChanges,
+  type TransactionInput,
+} from "@/lib/appwrite/transactionHelpers";
+import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
+import { getNextOccurrence } from "@/lib/utils/recurrence";
 import {
   mockAccounts,
   mockAssets,
@@ -13,6 +22,7 @@ import {
   mockInsights,
   mockTransactions,
   mockDebts,
+  mockRecurringRules,
   type Account,
   type Asset,
   type Budget,
@@ -21,6 +31,7 @@ import {
   type Insight,
   type Transaction,
   type Debt,
+  type RecurringRule,
 } from "@/lib/data/mock";
 
 export interface AppBootstrapData {
@@ -32,6 +43,92 @@ export interface AppBootstrapData {
   assets: Asset[];
   insights: Insight[];
   debts: Debt[];
+  recurringRules: RecurringRule[];
+}
+
+const MAX_CATCHUP_PER_RULE = 24;
+
+/**
+ * Buat transaksi yang jatuh tempo untuk aturan berulang aktif, lalu majukan
+ * nextOccurrence. Dipanggil dari getAppBootstrapAction setiap data pengguna
+ * dimuat — tidak ada cron/Appwrite Function, jadi transaksi baru terbentuk
+ * "saat aplikasi dibuka berikutnya", bukan persis tengah malam. Dibatasi
+ * MAX_CATCHUP_PER_RULE per aturan agar pengguna yang lama tidak membuka app
+ * tidak memicu ratusan transaksi sekaligus.
+ */
+async function generateDueRecurringTransactions(
+  databases: Awaited<ReturnType<typeof createAdminServerClient>>["databases"],
+  userId: string,
+  dueRuleDocs: Models.Document[],
+) {
+  const now = new Date();
+
+  for (const doc of dueRuleDocs) {
+    const rule = recurringRuleFromDocument(doc);
+    let occurrence = rule.nextOccurrence;
+    let lastGenerated: Date | undefined;
+    let generated = 0;
+    let active = rule.isActive;
+
+    while (occurrence <= now && generated < MAX_CATCHUP_PER_RULE) {
+      if (rule.endDate && occurrence > rule.endDate) {
+        active = false;
+        break;
+      }
+
+      const txInput: TransactionInput = {
+        accountId: rule.accountId,
+        destinationAccountId: rule.destinationAccountId,
+        transferKind: rule.type === "transfer" ? "account" : undefined,
+        recordKind: "recurring",
+        recurringRuleId: rule.id,
+        categoryId: rule.categoryId,
+        type: rule.type,
+        amount: rule.amount,
+        date: occurrence,
+        note: rule.note,
+        tags: [],
+      };
+
+      try {
+        const rollback = await applyBalanceChanges(databases, userId, getBalanceChanges(txInput));
+        try {
+          await databases.createDocument(
+            DATABASE_ID,
+            COLLECTIONS.TRANSACTIONS,
+            ID.unique(),
+            documentPayload(userId, txInput),
+            documentPermissions(userId),
+          );
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      } catch (error) {
+        console.error(
+          `Gagal membuat transaksi berulang untuk aturan ${rule.id}:`,
+          error instanceof Error ? error.message : error,
+        );
+        break;
+      }
+
+      lastGenerated = occurrence;
+      generated += 1;
+      occurrence = getNextOccurrence(occurrence, rule.frequency);
+      if (rule.endDate && occurrence > rule.endDate) {
+        active = false;
+        break;
+      }
+    }
+
+    if (generated > 0 || active !== rule.isActive) {
+      await databases.updateDocument(DATABASE_ID, COLLECTIONS.RECURRING_RULES, rule.id, {
+        nextOccurrence: occurrence.toISOString(),
+        ...(lastGenerated ? { lastGeneratedDate: lastGenerated.toISOString() } : {}),
+        isActive: active,
+      });
+    }
+  }
 }
 
 function fields<T>(doc: Models.Document): T {
@@ -108,6 +205,7 @@ const demoData: AppBootstrapData = {
   assets: mockAssets,
   insights: mockInsights,
   debts: mockDebts,
+  recurringRules: mockRecurringRules,
 };
 
 export async function getAppBootstrapAction(): Promise<{
@@ -125,7 +223,18 @@ export async function getAppBootstrapAction(): Promise<{
   try {
     const { databases } = await createAdminServerClient();
     const userQuery = [Query.equal("userId", user.id), Query.limit(500)];
-    const [accounts, categories, transactions, budgets, goals, assets, insights, debts] = await Promise.all([
+
+    const dueRules = await databases.listDocuments(DATABASE_ID, COLLECTIONS.RECURRING_RULES, [
+      Query.equal("userId", user.id),
+      Query.equal("isActive", true),
+      Query.lessThanEqual("nextOccurrence", new Date().toISOString()),
+      Query.limit(100),
+    ]);
+    if (dueRules.documents.length > 0) {
+      await generateDueRecurringTransactions(databases, user.id, dueRules.documents);
+    }
+
+    const [accounts, categories, transactions, budgets, goals, assets, insights, debts, recurringRules] = await Promise.all([
       databases.listDocuments(DATABASE_ID, COLLECTIONS.ACCOUNTS, userQuery),
       databases.listDocuments(DATABASE_ID, COLLECTIONS.CATEGORIES, userQuery),
       databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
@@ -143,6 +252,9 @@ export async function getAppBootstrapAction(): Promise<{
       ]),
       databases.listDocuments(DATABASE_ID, COLLECTIONS.DEBTS, [
         Query.equal("userId", user.id), Query.orderDesc("$createdAt"), Query.limit(500),
+      ]),
+      databases.listDocuments(DATABASE_ID, COLLECTIONS.RECURRING_RULES, [
+        Query.equal("userId", user.id), Query.orderAsc("nextOccurrence"), Query.limit(200),
       ]),
     ]);
 
@@ -248,10 +360,11 @@ export async function getAppBootstrapAction(): Promise<{
             updatedAt: new Date(doc.$updatedAt),
           };
         }),
+        recurringRules: recurringRules.documents.map(recurringRuleFromDocument),
       },
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Data cloud tidak dapat dimuat.";
-    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [] }, userName: user.name, userEmail: user.email, error: message };
+    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [], recurringRules: [] }, userName: user.name, userEmail: user.email, error: message };
   }
 }

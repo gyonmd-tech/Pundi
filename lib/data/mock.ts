@@ -19,6 +19,7 @@ export type InsightType = "budget_warning" | "goal_progress" | "trend" | "tip";
 export type BudgetStatus = "safe" | "warning" | "over";
 export type DebtDirection = "payable" | "receivable";
 export type DebtStatus = "open" | "paid";
+export type RecurringFrequency = "weekly" | "monthly" | "yearly";
 
 export interface Account {
   id: string;
@@ -43,7 +44,8 @@ export interface Transaction {
   accountId: string;
   destinationAccountId?: string;
   transferKind?: "account" | "cash_withdrawal";
-  recordKind?: "standard" | "balance_adjustment";
+  recordKind?: "standard" | "balance_adjustment" | "recurring";
+  recurringRuleId?: string;
   observedBalance?: number;
   categoryId?: string;
   type: TransactionType;
@@ -52,6 +54,22 @@ export interface Transaction {
   createdAt?: Date;
   note?: string;
   tags: string[];
+}
+
+export interface RecurringRule {
+  id: string;
+  accountId: string;
+  destinationAccountId?: string;
+  categoryId?: string;
+  type: TransactionType;
+  amount: number;
+  note?: string;
+  frequency: RecurringFrequency;
+  startDate: Date;
+  nextOccurrence: Date;
+  endDate?: Date;
+  isActive: boolean;
+  lastGeneratedDate?: Date;
 }
 
 export interface Debt {
@@ -259,6 +277,54 @@ export const mockGoals: Goal[] = [
 ];
 
 export const mockDebts: Debt[] = [];
+
+// ── Recurring rules ───────────────────────────────────────────────────
+
+function nextMonthlyDate(day: number): Date {
+  const now = new Date();
+  const candidate = new Date(now.getFullYear(), now.getMonth(), day);
+  if (candidate < now) candidate.setMonth(candidate.getMonth() + 1);
+  return candidate;
+}
+
+export const mockRecurringRules: RecurringRule[] = [
+  {
+    id: "rec-1",
+    accountId: "acc-1",
+    categoryId: "cat-i1",
+    type: "income",
+    amount: 7_500_000,
+    note: "Gaji bulanan",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 6, 1),
+    nextOccurrence: nextMonthlyDate(1),
+    isActive: true,
+  },
+  {
+    id: "rec-2",
+    accountId: "acc-2",
+    categoryId: "cat-e4",
+    type: "expense",
+    amount: 54_000,
+    note: "Langganan Spotify",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 10, 12),
+    nextOccurrence: nextMonthlyDate(12),
+    isActive: true,
+  },
+  {
+    id: "rec-3",
+    accountId: "acc-1",
+    categoryId: "cat-e6",
+    type: "expense",
+    amount: 185_000,
+    note: "Listrik & internet",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 8, 7),
+    nextOccurrence: nextMonthlyDate(7),
+    isActive: true,
+  },
+];
 
 // ── Assets ─────────────────────────────────────────────────────────────
 

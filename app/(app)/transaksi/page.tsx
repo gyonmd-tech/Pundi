@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button, IconButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SearchField } from "@/components/ui/SearchField";
+import { RecurringRulesCard } from "@/components/transaction/RecurringRulesCard";
 
 const typeLabel: Record<TransactionType, { label: string; icon: LucideIcon; color: string; bg: string }> = {
   income:   { label: "Pemasukan",   icon: ArrowUpRight,   color: "var(--color-pine)",   bg: "var(--color-pine-10)" },
@@ -308,6 +309,8 @@ export default function TransaksiPage() {
         ))}
       </div>
 
+      <RecurringRulesCard />
+
       {/* Search & Filter Toolbar */}
       <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
         {/* Search Bar with clear */}
@@ -499,6 +502,7 @@ export default function TransaksiPage() {
                       </span>
 
                       <div className="flex items-center gap-1.5">
+                        {tx.recordKind === "recurring" && <Badge tone="neutral" className="text-[10px]">Otomatis</Badge>}
                         <Badge tone={tx.transferKind === "cash_withdrawal" ? "primary" : tx.type === "income" ? "success" : tx.type === "expense" ? "danger" : "warning"} className="text-[10px]">
                           <TypeIcon size={10} strokeWidth={2.2} />
                           {typeCfg.label}
@@ -591,10 +595,13 @@ export default function TransaksiPage() {
 
                         {/* Tipe Badge */}
                         <TableCell className="px-5 py-4">
-                          <Badge tone={tx.transferKind === "cash_withdrawal" ? "primary" : tx.type === "income" ? "success" : tx.type === "expense" ? "danger" : "warning"}>
-                            <TypeIcon size={12} strokeWidth={2.2} />
-                            {typeCfg.label}
-                          </Badge>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {tx.recordKind === "recurring" && <Badge tone="neutral">Otomatis</Badge>}
+                            <Badge tone={tx.transferKind === "cash_withdrawal" ? "primary" : tx.type === "income" ? "success" : tx.type === "expense" ? "danger" : "warning"}>
+                              <TypeIcon size={12} strokeWidth={2.2} />
+                              {typeCfg.label}
+                            </Badge>
+                          </div>
                         </TableCell>
 
                         {/* Nominal */}

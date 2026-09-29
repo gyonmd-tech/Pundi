@@ -55,6 +55,7 @@
             { "key": "destinationAccountId", "type": "string", "size": 36, "required": false },
             { "key": "transferKind", "type": "string", "size": 24, "required": false },
             { "key": "recordKind", "type": "string", "size": 32, "required": false },
+            { "key": "recurringRuleId", "type": "string", "size": 36, "required": false },
             { "key": "observedBalance", "type": "integer", "required": false },
             { "key": "categoryId", "type": "string", "size": 36, "required": false },
             { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
@@ -157,6 +158,32 @@
           "indexes": [
             { "key": "idx_user", "type": "key", "attributes": ["userId"] },
             { "key": "idx_user_status", "type": "key", "attributes": ["userId", "status"] }
+          ]
+        },
+        {
+          "$id": "recurring_rules",
+          "name": "recurring_rules",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "accountId", "type": "string", "size": 36, "required": true },
+            { "key": "destinationAccountId", "type": "string", "size": 36, "required": false },
+            { "key": "categoryId", "type": "string", "size": 36, "required": false },
+            { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
+            { "key": "amount", "type": "integer", "required": true },
+            { "key": "note", "type": "string", "size": 500, "required": false },
+            { "key": "frequency", "type": "enum", "elements": ["weekly", "monthly", "yearly"], "required": true },
+            { "key": "startDate", "type": "datetime", "required": true },
+            { "key": "nextOccurrence", "type": "datetime", "required": true },
+            { "key": "endDate", "type": "datetime", "required": false },
+            { "key": "isActive", "type": "boolean", "required": false, "default": true },
+            { "key": "lastGeneratedDate", "type": "datetime", "required": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_user_active_next", "type": "key", "attributes": ["userId", "isActive", "nextOccurrence"] }
           ]
         }
       ]

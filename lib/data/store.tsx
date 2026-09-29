@@ -11,6 +11,7 @@ import {
   type Asset,
   type Insight,
   type Debt,
+  type RecurringRule,
 } from "./mock";
 
 interface AppState extends AppBootstrapData {
@@ -22,6 +23,7 @@ interface AppState extends AppBootstrapData {
   assets: Asset[];
   insights: Insight[];
   debts: Debt[];
+  recurringRules: RecurringRule[];
 }
 
 const initialState: AppState = {
@@ -33,6 +35,7 @@ const initialState: AppState = {
   assets: [],
   insights: [],
   debts: [],
+  recurringRules: [],
 };
 
 type Action =
@@ -56,7 +59,10 @@ type Action =
   | { type: "ADD_CATEGORY"; payload: Category }
   | { type: "ADD_DEBT"; payload: Debt }
   | { type: "UPDATE_DEBT"; payload: Debt }
-  | { type: "DELETE_DEBT"; payload: string };
+  | { type: "DELETE_DEBT"; payload: string }
+  | { type: "ADD_RECURRING_RULE"; payload: RecurringRule }
+  | { type: "UPDATE_RECURRING_RULE"; payload: RecurringRule }
+  | { type: "DELETE_RECURRING_RULE"; payload: string };
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -128,6 +134,15 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, debts: state.debts.map((debt) => debt.id === action.payload.id ? action.payload : debt) };
     case "DELETE_DEBT":
       return { ...state, debts: state.debts.filter((debt) => debt.id !== action.payload) };
+    case "ADD_RECURRING_RULE":
+      return { ...state, recurringRules: [...state.recurringRules, action.payload] };
+    case "UPDATE_RECURRING_RULE":
+      return {
+        ...state,
+        recurringRules: state.recurringRules.map((rule) => rule.id === action.payload.id ? action.payload : rule),
+      };
+    case "DELETE_RECURRING_RULE":
+      return { ...state, recurringRules: state.recurringRules.filter((rule) => rule.id !== action.payload) };
     default:
       return state;
   }
@@ -222,4 +237,8 @@ export function useCategories() {
 
 export function useDebts() {
   return useApp().state.debts;
+}
+
+export function useRecurringRules() {
+  return useApp().state.recurringRules;
 }

@@ -12,4 +12,5 @@ export const COLLECTIONS = {
   ASSETS: "assets",
   INSIGHTS: "insights",
   DEBTS: "debts",
+  RECURRING_RULES: "recurring_rules",
 } as const;
