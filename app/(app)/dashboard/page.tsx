@@ -23,7 +23,7 @@ import { SafeToSpendCard } from "@/components/dashboard/SafeToSpendCard";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { formatDate, formatRupiah } from "@/lib/utils/formatter";
+import { formatAmount, formatDate, formatRupiah } from "@/lib/utils/formatter";
 import { computeSafeToSpend } from "@/lib/utils/safeToSpend";
 import {
   useAccounts,
@@ -33,6 +33,7 @@ import {
   useInsights,
   useTransactions,
   useDebts,
+  usePreferences,
   useRecurringRules,
 } from "@/lib/data/store";
 import type { Transaction } from "@/lib/data/mock";
@@ -67,6 +68,7 @@ export default function DashboardPage() {
   const accounts = useAccounts();
   const categories = useCategories();
   const debts = useDebts();
+  const preferences = usePreferences();
   const recurringRules = useRecurringRules();
 
   const now = new Date();
@@ -199,7 +201,7 @@ export default function DashboardPage() {
             </div>
             <p className="mt-8 text-small font-semibold text-white/70">Total saldo tersedia</p>
             <p className="mt-1 font-ui tabular-nums text-[clamp(1.9rem,4vw,3.25rem)] font-semibold tracking-[-0.06em]">
-              {formatRupiah(totalBalance)}
+              {formatAmount(totalBalance, preferences.compactNumbers)}
             </p>
             <SummarySparkline values={balanceTrend} className="mt-5 text-white" />
             <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/15 pt-4">
@@ -214,11 +216,11 @@ export default function DashboardPage() {
         </Card>
 
         <div data-widget-id="income" className="h-full">
-          <SummaryCard title="Pemasukan bulan ini" amount={thisMonth.income} delta={incomeDelta} deltaLabel="dibanding bulan lalu" icon={TrendingUp} variant="positive" trend={incomeTrend} caption="dibanding bulan lalu" />
+          <SummaryCard title="Pemasukan bulan ini" amount={thisMonth.income} delta={incomeDelta} deltaLabel="dibanding bulan lalu" icon={TrendingUp} variant="positive" trend={incomeTrend} caption="dibanding bulan lalu" compact={preferences.compactNumbers} />
         </div>
 
         <div data-widget-id="expense" className="h-full">
-          <SummaryCard title="Pengeluaran bulan ini" amount={thisMonth.expense} delta={expenseDelta} deltaLabel="dibanding bulan lalu" icon={TrendingDown} variant="negative" trend={expenseTrend} caption="dibanding bulan lalu" />
+          <SummaryCard title="Pengeluaran bulan ini" amount={thisMonth.expense} delta={expenseDelta} deltaLabel="dibanding bulan lalu" icon={TrendingDown} variant="negative" trend={expenseTrend} caption="dibanding bulan lalu" compact={preferences.compactNumbers} />
         </div>
         <article data-widget-id="cashflow" className="card h-full min-w-0 border-brand-600/10 bg-white">
           <div className="mb-5 flex items-center justify-between gap-4">

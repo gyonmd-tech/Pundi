@@ -126,6 +126,29 @@ export interface Insight {
   key?: string;
 }
 
+// ── Preferensi pengguna ──────────────────────────────────────────────
+
+export type AccentColor = "brand" | "mint" | "ember" | "lavender" | "cyan";
+export type ThemeMode = "light" | "dark" | "system";
+
+export interface UserPreferences {
+  notifications: boolean;
+  autoInsights: boolean;
+  compactNumbers: boolean;
+  defaultAccountId?: string;
+  theme: ThemeMode;
+  accentColor: AccentColor;
+  avatarFileId?: string;
+}
+
+export const DEFAULT_PREFERENCES: UserPreferences = {
+  notifications: true,
+  autoInsights: true,
+  compactNumbers: false,
+  theme: "system",
+  accentColor: "brand",
+};
+
 export const CURRENT_PERIOD = new Date().toISOString().slice(0, 7);
 const CURRENT_MONTH_LABEL = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date());
 

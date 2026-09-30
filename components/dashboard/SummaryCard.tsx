@@ -8,7 +8,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
-import { formatRupiah, formatDelta } from "@/lib/utils/formatter";
+import { formatAmount, formatDelta } from "@/lib/utils/formatter";
 import type { LucideIcon } from "lucide-react";
 import { SummarySparkline } from "./SummarySparkline";
 
@@ -23,6 +23,8 @@ interface SummaryCardProps {
   loading?:    boolean;
   trend?:      number[];
   caption?:    string;
+  /** Pakai format Rupiah ringkas (mis. "Rp 8,6 jt") — preferences.compactNumbers. */
+  compact?:    boolean;
 }
 
 function useCountUp(target: number, duration: number = 400) {
@@ -71,6 +73,7 @@ export function SummaryCard({
   loading = false,
   trend,
   caption,
+  compact = false,
 }: SummaryCardProps) {
   const displayAmount = useCountUp(amount);
 
@@ -146,7 +149,7 @@ export function SummaryCard({
         <span
           className="block font-ui text-data-l font-semibold leading-tight tracking-[-0.045em] text-ink tabular-nums"
         >
-          {formatRupiah(displayAmount)}
+          {formatAmount(displayAmount, compact)}
         </span>
         {caption ? <p className="mt-1 text-xs text-ink-muted">{caption}</p> : null}
       </div>

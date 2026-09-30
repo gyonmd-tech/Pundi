@@ -16,11 +16,12 @@ import {
   Trash2,
   Wallet,
 } from "lucide-react";
-import { useAccounts, useApp, useCategories } from "@/lib/data/store";
-import type { Account, Category } from "@/lib/data/mock";
+import { useAccounts, useApp, useCategories, usePreferences, DEMO_PREFERENCES_STORAGE_KEY } from "@/lib/data/store";
+import type { Account, Category, UserPreferences } from "@/lib/data/mock";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Button, IconButton } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils/cn";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { PreferenceToggle } from "@/components/settings/PreferenceToggle";
@@ -30,6 +31,7 @@ import { CategoryFormModal } from "@/components/settings/CategoryFormModal";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { deleteCategoryAction } from "@/actions/categories";
+import { updatePreferencesAction } from "@/actions/preferences";
 import { useToast } from "@/lib/context/ToastContext";
 
 const accountTypeLabel: Record<string, string> = {
@@ -45,14 +47,12 @@ type CategoryFilter = "all" | "expense" | "income";
 export default function PengaturanPage() {
   const accounts = useAccounts();
   const categories = useCategories();
+  const preferences = usePreferences();
   const { dispatch, connection } = useApp();
   const { showToast } = useToast();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [notifications, setNotifications] = useState(true);
-  const [autoInsights, setAutoInsights] = useState(true);
-  const [compactNumbers, setCompactNumbers] = useState(false);
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -79,6 +79,24 @@ export default function PengaturanPage() {
   function openCategory(category: Category) {
     setEditingCategory(category);
     setCategoryModalOpen(true);
+  }
+
+  async function savePreference(partial: Partial<UserPreferences>) {
+    const merged = { ...preferences, ...partial };
+    dispatch({ type: "UPDATE_PREFERENCES", payload: merged });
+    if ((connection.mode === "demo" || connection.mode === "guest") && typeof window !== "undefined") {
+      try {
+        localStorage.setItem(DEMO_PREFERENCES_STORAGE_KEY, JSON.stringify(merged));
+      } catch {
+        // localStorage tidak tersedia — preferensi tetap berlaku untuk sesi ini saja.
+      }
+      return;
+    }
+    const result = await updatePreferencesAction(partial);
+    if (!result.success) {
+      dispatch({ type: "UPDATE_PREFERENCES", payload: preferences });
+      showToast({ type: "error", title: "Preferensi gagal disimpan", message: result.error || "Coba lagi beberapa saat." });
+    }
   }
 
   async function handleDeleteCategory(category: Category, event: MouseEvent) {
@@ -131,10 +149,17 @@ export default function PengaturanPage() {
 
         <SettingsCard title="Preferensi aplikasi" description="Atur pengalaman harian tanpa meninggalkan halaman." icon={Palette} tone="mint" className="lg:col-span-6">
           <div className="grid gap-3 sm:grid-cols-2">
-            <PreferenceToggle label="Notifikasi pengingat" description="Peringatan anggaran dan transaksi penting." icon={BellRing} checked={notifications} onChange={setNotifications} tone="pine" />
-            <PreferenceToggle label="Insight otomatis" description="Ringkasan pola keuangan yang relevan." icon={Sparkles} checked={autoInsights} onChange={setAutoInsights} tone="mint" />
-            <PreferenceToggle label="Angka ringkas" description="Tampilkan jutaan sebagai jt pada ringkasan." icon={Database} checked={compactNumbers} onChange={setCompactNumbers} tone="sky" />
+            <PreferenceToggle label="Notifikasi pengingat" description="Peringatan anggaran dan transaksi penting." icon={BellRing} checked={preferences.notifications} onChange={(checked) => savePreference({ notifications: checked })} tone="pine" />
+            <PreferenceToggle label="Insight otomatis" description="Ringkasan pola keuangan yang relevan." icon={Sparkles} checked={preferences.autoInsights} onChange={(checked) => savePreference({ autoInsights: checked })} tone="mint" />
+            <PreferenceToggle label="Angka ringkas" description="Tampilkan jutaan sebagai jt pada ringkasan utama." icon={Database} checked={preferences.compactNumbers} onChange={(checked) => savePreference({ compactNumbers: checked })} tone="sky" />
             <div className="flex items-center gap-3 rounded-[18px] bg-brand-50 p-3.5 text-left sm:p-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-brand-900 text-white"><Languages className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-extrabold text-ink">Bahasa &amp; wilayah</span><span className="mt-0.5 block text-xs text-ink-muted">Indonesia · Asia/Jakarta</span></span></div>
+          </div>
+          <div className="mt-3">
+            <label className="mb-1.5 block text-xs font-bold text-ink-muted">Akun default untuk transaksi baru</label>
+            <Select value={preferences.defaultAccountId || ""} onChange={(event) => savePreference({ defaultAccountId: event.target.value || undefined })}>
+              <option value="">Tidak ditentukan (pakai akun pertama)</option>
+              {accounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}
+            </Select>
           </div>
         </SettingsCard>
 

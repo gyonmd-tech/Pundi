@@ -15,6 +15,7 @@ import {
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
 import { getNextOccurrence } from "@/lib/utils/recurrence";
 import { generateInsights } from "@/lib/appwrite/insightGenerator";
+import { getPreferencesAction } from "./preferences";
 import {
   mockAccounts,
   mockAssets,
@@ -25,6 +26,7 @@ import {
   mockTransactions,
   mockDebts,
   mockRecurringRules,
+  DEFAULT_PREFERENCES,
   type Account,
   type Asset,
   type Budget,
@@ -34,6 +36,7 @@ import {
   type Transaction,
   type Debt,
   type RecurringRule,
+  type UserPreferences,
 } from "@/lib/data/mock";
 
 export interface AppBootstrapData {
@@ -46,6 +49,7 @@ export interface AppBootstrapData {
   insights: Insight[];
   debts: Debt[];
   recurringRules: RecurringRule[];
+  preferences: UserPreferences;
 }
 
 const MAX_CATCHUP_PER_RULE = 24;
@@ -228,6 +232,7 @@ const demoData: AppBootstrapData = {
   insights: mockInsights,
   debts: mockDebts,
   recurringRules: mockRecurringRules,
+  preferences: DEFAULT_PREFERENCES,
 };
 
 export async function getAppBootstrapAction(): Promise<{
@@ -256,7 +261,7 @@ export async function getAppBootstrapAction(): Promise<{
       await generateDueRecurringTransactions(databases, user.id, dueRules.documents);
     }
 
-    const [accounts, categories, transactions, budgets, goals, assets, insights, debts, recurringRules] = await Promise.all([
+    const [accounts, categories, transactions, budgets, goals, assets, insights, debts, recurringRules, preferences] = await Promise.all([
       databases.listDocuments(DATABASE_ID, COLLECTIONS.ACCOUNTS, userQuery),
       databases.listDocuments(DATABASE_ID, COLLECTIONS.CATEGORIES, userQuery),
       databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
@@ -278,6 +283,7 @@ export async function getAppBootstrapAction(): Promise<{
       databases.listDocuments(DATABASE_ID, COLLECTIONS.RECURRING_RULES, [
         Query.equal("userId", user.id), Query.orderAsc("nextOccurrence"), Query.limit(200),
       ]),
+      getPreferencesAction(),
     ]);
 
     const mappedAccounts = accounts.documents.map((doc) => {
@@ -411,10 +417,11 @@ export async function getAppBootstrapAction(): Promise<{
         insights: mergedInsights,
         debts: mappedDebts,
         recurringRules: mappedRecurringRules,
+        preferences,
       },
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Data cloud tidak dapat dimuat.";
-    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [], recurringRules: [] }, userName: user.name, userEmail: user.email, error: message };
+    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [], recurringRules: [], preferences: DEFAULT_PREFERENCES }, userName: user.name, userEmail: user.email, error: message };
   }
 }

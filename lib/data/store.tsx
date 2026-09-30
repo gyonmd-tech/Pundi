@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useReducer, useState, type ReactNode } from "react";
 import { getAppBootstrapAction, type AppBootstrapData } from "@/actions/bootstrap";
 import {
+  DEFAULT_PREFERENCES,
   type Account,
   type Category,
   type Transaction,
@@ -12,7 +13,10 @@ import {
   type Insight,
   type Debt,
   type RecurringRule,
+  type UserPreferences,
 } from "./mock";
+
+export const DEMO_PREFERENCES_STORAGE_KEY = "pundi-demo-preferences";
 
 interface AppState extends AppBootstrapData {
   accounts: Account[];
@@ -24,6 +28,7 @@ interface AppState extends AppBootstrapData {
   insights: Insight[];
   debts: Debt[];
   recurringRules: RecurringRule[];
+  preferences: UserPreferences;
 }
 
 const initialState: AppState = {
@@ -36,6 +41,7 @@ const initialState: AppState = {
   insights: [],
   debts: [],
   recurringRules: [],
+  preferences: DEFAULT_PREFERENCES,
 };
 
 type Action =
@@ -64,7 +70,8 @@ type Action =
   | { type: "DELETE_DEBT"; payload: string }
   | { type: "ADD_RECURRING_RULE"; payload: RecurringRule }
   | { type: "UPDATE_RECURRING_RULE"; payload: RecurringRule }
-  | { type: "DELETE_RECURRING_RULE"; payload: string };
+  | { type: "DELETE_RECURRING_RULE"; payload: string }
+  | { type: "UPDATE_PREFERENCES"; payload: UserPreferences };
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -152,6 +159,8 @@ function reducer(state: AppState, action: Action): AppState {
       };
     case "DELETE_RECURRING_RULE":
       return { ...state, recurringRules: state.recurringRules.filter((rule) => rule.id !== action.payload) };
+    case "UPDATE_PREFERENCES":
+      return { ...state, preferences: action.payload };
     default:
       return state;
   }
@@ -185,7 +194,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     getAppBootstrapAction().then((result) => {
       if (!active) return;
-      dispatch({ type: "HYDRATE", payload: result.data });
+      let data = result.data;
+      if ((result.mode === "demo" || result.mode === "guest") && typeof window !== "undefined") {
+        try {
+          const saved = JSON.parse(localStorage.getItem(DEMO_PREFERENCES_STORAGE_KEY) || "null") as Partial<UserPreferences> | null;
+          if (saved) data = { ...data, preferences: { ...data.preferences, ...saved } };
+        } catch {
+          // localStorage tidak tersedia atau datanya rusak — abaikan, pakai default.
+        }
+      }
+      dispatch({ type: "HYDRATE", payload: data });
       setConnection({
         mode: result.mode,
         status: result.error ? "error" : "ready",
@@ -250,4 +268,8 @@ export function useDebts() {
 
 export function useRecurringRules() {
   return useApp().state.recurringRules;
+}
+
+export function usePreferences() {
+  return useApp().state.preferences;
 }

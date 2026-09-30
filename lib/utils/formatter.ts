@@ -29,6 +29,16 @@ export function formatRupiah(amount: number | string): string {
 }
 
 /**
+ * Pilih antara formatRupiah (lengkap) dan formatRupiahShort (ringkas)
+ * berdasarkan preferensi "Angka ringkas" pengguna (lib/data/mock.ts
+ * UserPreferences.compactNumbers). Dipakai di angka ringkasan utama
+ * (dashboard) yang paling sering dilihat sekilas.
+ */
+export function formatAmount(amount: number | string, compact: boolean): string {
+  return compact ? formatRupiahShort(amount) : formatRupiah(amount);
+}
+
+/**
  * Format angka ke format Rupiah singkat (untuk chart labels, badges).
  *
  * @example formatRupiahShort(24850000) → "Rp 24,8 jt"
