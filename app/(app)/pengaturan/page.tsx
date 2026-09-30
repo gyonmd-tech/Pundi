@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   Database,
+  Download,
   Info,
   Languages,
   Monitor,
@@ -37,6 +38,7 @@ import { Card } from "@/components/ui/Card";
 import { deleteCategoryAction } from "@/actions/categories";
 import { updatePreferencesAction } from "@/actions/preferences";
 import { useToast } from "@/lib/context/ToastContext";
+import { buildBackupPayload, downloadBackupJson } from "@/lib/utils/backupExport";
 
 const accountTypeLabel: Record<string, string> = {
   bank: "Rekening bank",
@@ -66,7 +68,7 @@ export default function PengaturanPage() {
   const accounts = useAccounts();
   const categories = useCategories();
   const preferences = usePreferences();
-  const { dispatch, connection } = useApp();
+  const { state, dispatch, connection } = useApp();
   const { showToast } = useToast();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
@@ -115,6 +117,22 @@ export default function PengaturanPage() {
       dispatch({ type: "UPDATE_PREFERENCES", payload: preferences });
       showToast({ type: "error", title: "Preferensi gagal disimpan", message: result.error || "Coba lagi beberapa saat." });
     }
+  }
+
+  function handleDownloadBackup() {
+    const payload = buildBackupPayload({
+      accounts: state.accounts,
+      categories: state.categories,
+      transactions: state.transactions,
+      budgets: state.budgets,
+      goals: state.goals,
+      assets: state.assets,
+      insights: state.insights,
+      debts: state.debts,
+      recurringRules: state.recurringRules,
+    });
+    downloadBackupJson(payload);
+    showToast({ type: "success", title: "Cadangan Diunduh", message: "Seluruh datamu tersimpan dalam satu file JSON." });
   }
 
   async function handleDeleteCategory(category: Category, event: MouseEvent) {
@@ -273,6 +291,17 @@ export default function PengaturanPage() {
               </div>
             ))}
             {!filteredCategories.length ? <p className="col-span-full py-6 text-center text-xs text-ink-muted">Belum ada kategori pada filter ini.</p> : null}
+          </div>
+        </SettingsCard>
+
+        <SettingsCard title="Backup & Data" description="Unduh salinan seluruh datamu kapan saja." icon={Database} tone="blue" className="lg:col-span-12">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <p className="text-xs text-ink-muted max-w-lg">
+              Berisi semua akun, kategori, transaksi, anggaran, tujuan, aset, utang/piutang, aturan berulang, dan insight dalam satu file JSON — simpan sebagai cadangan pribadi. Fitur impor/pulihkan belum tersedia.
+            </p>
+            <Button type="button" variant="outline" onClick={handleDownloadBackup}>
+              <Download className="h-3.5 w-3.5" /> Unduh cadangan (.json)
+            </Button>
           </div>
         </SettingsCard>
       </div>
