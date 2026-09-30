@@ -3,21 +3,25 @@
 import { useState, type MouseEvent } from "react";
 import {
   BellRing,
+  Check,
   ChevronRight,
   Database,
   Info,
   Languages,
+  Monitor,
+  Moon,
   Palette,
   Pencil,
   Plus,
   ShieldCheck,
   Sparkles,
+  Sun,
   Tag,
   Trash2,
   Wallet,
 } from "lucide-react";
 import { useAccounts, useApp, useCategories, usePreferences, DEMO_PREFERENCES_STORAGE_KEY } from "@/lib/data/store";
-import type { Account, Category, UserPreferences } from "@/lib/data/mock";
+import type { Account, AccentColor, Category, ThemeMode, UserPreferences } from "@/lib/data/mock";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -43,6 +47,20 @@ const accountTypeLabel: Record<string, string> = {
 };
 
 type CategoryFilter = "all" | "expense" | "income";
+
+const themeOptions: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
+  { value: "light", label: "Terang", icon: Sun },
+  { value: "dark", label: "Gelap", icon: Moon },
+  { value: "system", label: "Ikuti sistem", icon: Monitor },
+];
+
+const accentOptions: { value: AccentColor; label: string; swatch: string }[] = [
+  { value: "brand", label: "Biru (default)", swatch: "#2459DE" },
+  { value: "mint", label: "Hijau", swatch: "#159B78" },
+  { value: "ember", label: "Merah", swatch: "#E95766" },
+  { value: "lavender", label: "Ungu", swatch: "#7B61D1" },
+  { value: "cyan", label: "Cyan", swatch: "#168AA0" },
+];
 
 export default function PengaturanPage() {
   const accounts = useAccounts();
@@ -160,6 +178,47 @@ export default function PengaturanPage() {
               <option value="">Tidak ditentukan (pakai akun pertama)</option>
               {accounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}
             </Select>
+          </div>
+        </SettingsCard>
+
+        <SettingsCard title="Tampilan" description="Tema dan warna aksen — tersimpan ke akunmu." icon={Palette} tone="violet" className="lg:col-span-6">
+          <div>
+            <p className="mb-1.5 text-xs font-bold text-ink-muted">Tema</p>
+            <div className="grid grid-cols-3 gap-2">
+              {themeOptions.map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => savePreference({ theme: value })}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 rounded-[14px] border px-2 py-3 text-xs font-bold transition",
+                    preferences.theme === value ? "border-brand-600 bg-brand-50 text-brand-700" : "border-rule text-ink-muted hover:bg-paper",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <p className="mb-1.5 text-xs font-bold text-ink-muted">Warna aksen</p>
+            <div className="flex flex-wrap gap-2">
+              {accentOptions.map(({ value, label, swatch }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => savePreference({ accentColor: value })}
+                  aria-label={label}
+                  title={label}
+                  className="grid h-9 w-9 place-items-center rounded-full transition"
+                  style={{ backgroundColor: swatch, boxShadow: preferences.accentColor === value ? `0 0 0 3px var(--color-surface-high), 0 0 0 5px ${swatch}` : "none" }}
+                >
+                  {preferences.accentColor === value ? <Check size={15} className="text-white" /> : null}
+                </button>
+              ))}
+            </div>
           </div>
         </SettingsCard>
 

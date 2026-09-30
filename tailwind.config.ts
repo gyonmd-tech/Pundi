@@ -9,25 +9,40 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: "#F4F7FC",
-        surface: "#F9FBFF",
-        brand: { 50: "#F3F7FF", 100: "#E7EFFF", 200: "#CADCFF", 300: "#8FBCFF", 400: "#5C8FF2", 500: "#2860E6", 600: "#2459DE", 700: "#1D48B5", 800: "#17368F", 900: "#142B87", 950: "#112772" },
-        ink: { DEFAULT: "#17213D", muted: "#5F6982", soft: "#7B849B" },
-        pine: {
-          DEFAULT: "#2459DE",
-          hover: "#1D48B5",
-          10: "#E7EFFF",
-          20: "#CADCFF",
-          40: "#5C8FF2",
+        // Semua warna merujuk custom property di styles/tokens.css (bukan
+        // hex statis) supaya utility class Tailwind (bg-paper, text-ink,
+        // dst.) ikut berubah saat tema gelap/warna aksen di-override lewat
+        // CSS variable oleh components/providers/ThemeEffect.tsx — nilai
+        // default di :root sama persis dengan hex lama, jadi tidak ada
+        // perubahan visual di mode terang.
+        paper: "var(--color-paper)",
+        surface: {
+          DEFAULT: "var(--color-surface)",
+          soft: "var(--color-surface-soft)",
+          high: "var(--color-surface-high)",
         },
-        ember: { DEFAULT: "#E95766", ink: "#B83547", 10: "#FFE9EC", 20: "#F9BCC5" },
-        brass: { DEFAULT: "#D99418", 10: "#FFF6DC" },
-        warning: { DEFAULT: "#C98010", ink: "#855A00", 10: "#FFF5DD" },
-        mint: { DEFAULT: "#159B78", ink: "#0B6B54", 10: "#E5F7F1" },
-        sky: { DEFAULT: "#2860E6", 10: "#E7EFFF" },
-        lavender: { DEFAULT: "#7B61D1", ink: "#5E46B8", 10: "#F0EAFE" },
-        cyan: { DEFAULT: "#168AA0", ink: "#0F6B7B", 10: "#E4F7FA" },
-        rule: { DEFAULT: "#DCE4F2", strong: "#C7D3E7" },
+        brand: {
+          50: "var(--color-brand-50)", 100: "var(--color-brand-100)", 200: "var(--color-brand-200)",
+          300: "var(--color-brand-300)", 400: "var(--color-brand-400)", 500: "var(--color-brand-500)",
+          600: "var(--color-brand-600)", 700: "var(--color-brand-700)", 800: "var(--color-brand-800)",
+          900: "var(--color-brand-900)", 950: "var(--color-brand-950)",
+        },
+        ink: { DEFAULT: "var(--color-ink)", muted: "var(--color-ink-muted)", soft: "var(--color-ink-soft)" },
+        pine: {
+          DEFAULT: "var(--color-pine)",
+          hover: "var(--color-pine-hover)",
+          10: "var(--color-pine-10)",
+          20: "var(--color-pine-20)",
+          40: "var(--color-pine-40)",
+        },
+        ember: { DEFAULT: "var(--color-ember)", ink: "var(--color-ember-ink)", 10: "var(--color-ember-10)", 20: "var(--color-ember-20)" },
+        brass: { DEFAULT: "var(--color-brass)", 10: "var(--color-brass-10)" },
+        warning: { DEFAULT: "var(--color-warning)", ink: "var(--color-warning-ink)", 10: "var(--color-warning-10)" },
+        mint: { DEFAULT: "var(--color-mint)", ink: "var(--color-mint-ink)", 10: "var(--color-mint-10)" },
+        sky: { DEFAULT: "var(--color-sky)", 10: "var(--color-sky-10)" },
+        lavender: { DEFAULT: "var(--color-lavender)", ink: "var(--color-lavender-ink)", 10: "var(--color-lavender-10)" },
+        cyan: { DEFAULT: "var(--color-cyan)", ink: "var(--color-cyan-ink)", 10: "var(--color-cyan-10)" },
+        rule: { DEFAULT: "var(--color-rule)", strong: "var(--color-rule-strong)" },
       },
       fontFamily: {
         display: ["var(--font-bricolage)", "Segoe UI", "system-ui", "sans-serif"],

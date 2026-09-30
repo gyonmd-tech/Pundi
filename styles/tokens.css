@@ -132,3 +132,42 @@
   --chart-category-5: #E95766;
   --chart-category-6: #7B61D1;
 }
+
+/*
+ * Tema gelap — aktif lewat atribut data-theme="dark" di <html>, diset oleh
+ * components/providers/ThemeEffect.tsx berdasarkan preferensi pengguna
+ * (lib/data/mock.ts UserPreferences.theme).
+ *
+ * Cakupan sengaja terbatas ke token permukaan/teks/struktur/shadow — ramp
+ * warna brand & semantik (biru/mint/ember/dst.) dipertahankan sama persis
+ * karena sudah cukup jenuh untuk tetap terbaca di kedua tema. Beberapa
+ * gradient/hex yang di-hardcode langsung di komponen (bukan lewat token,
+ * mis. sebagian kartu di halaman Utang) tidak otomatis ikut berubah —
+ * keterbatasan yang diketahui, bukan cakupan perbaikan bagian ini.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-paper: #0C1424;
+  --color-surface: #121D33;
+  --color-surface-soft: #182541;
+  --color-surface-high: #1D2C4A;
+
+  --color-ink: #E9EFFC;
+  --color-ink-muted: #98A7C4;
+  --color-ink-soft: #74839F;
+
+  --color-rule: #263554;
+  --color-rule-strong: #37476B;
+  --color-scrim: rgba(3, 8, 20, 0.65);
+
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.24), 0 10px 24px rgba(0, 0, 0, 0.32);
+  --shadow-card-hover: 0 4px 8px rgba(0, 0, 0, 0.28), 0 18px 42px rgba(0, 0, 0, 0.38);
+  --shadow-clay: 0 6px 14px rgba(0, 0, 0, 0.3), 0 22px 52px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-clay-soft: 0 2px 5px rgba(0, 0, 0, 0.22), 0 9px 22px rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 12px 24px rgba(0, 0, 0, 0.35), 0 28px 70px rgba(0, 0, 0, 0.45);
+  --shadow-pressed: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-focus: 0 0 0 4px rgba(92, 143, 242, 0.28);
+
+  --border-hairline: 1px solid rgba(140, 170, 255, 0.16);
+}

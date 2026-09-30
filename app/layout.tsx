@@ -41,7 +41,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
+      <head>
+        {/* Terapkan tema & warna aksen dari cache sebelum hidrasi, supaya
+            tidak ada kedipan (flash) warna terang saat halaman dimuat.
+            Nilai sebenarnya (dari preferensi tersimpan) menyusul lewat
+            ThemeEffect setelah data bootstrap dimuat. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("pundi-theme-cache");if(t)document.documentElement.dataset.theme=t;var a=localStorage.getItem("pundi-accent-cache");var p={mint:["#1CB78C","#159B78","#0B6B54"],ember:["#EE7683","#E95766","#B83547"],lavender:["#9483DD","#7B61D1","#5E46B8"],cyan:["#25A6BE","#168AA0","#0F6B7B"]}[a];if(p){var r=document.documentElement.style;r.setProperty("--color-brand-500",p[0]);r.setProperty("--color-brand-600",p[1]);r.setProperty("--color-brand-700",p[2]);}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${bricolage.variable} ${jakarta.variable} antialiased`}>
         {children}
       </body>
