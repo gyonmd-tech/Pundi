@@ -6,6 +6,7 @@ import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { getAuthUserAction } from "./auth";
 import type { Account, AccountType } from "@/lib/data/mock";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 const accountTypes: AccountType[] = ["bank", "ewallet", "cash", "credit_card", "investment"];
 
@@ -46,6 +47,10 @@ export async function createAccountAction(payload: AccountPayload) {
         Permission.delete(Role.user(user.id)),
       ]
     );
+    await recordAuditLog(databases, user.id, {
+      entityType: "account", entityId: document.$id, action: "create",
+      summary: `Membuat rekening "${data.name}"`, after: data,
+    });
     return { success: true, id: document.$id };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Rekening gagal dibuat." };
@@ -60,13 +65,17 @@ export async function updateAccountAction(payload: Account) {
   try {
     const data = validateAccount(payload);
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, payload.id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, payload.id, user.id);
     await databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, payload.id, {
       name: data.name,
       type: data.type,
       balance: data.balance,
       colorTag: data.colorTag,
       isActive: data.isActive,
+    });
+    await recordAuditLog(databases, user.id, {
+      entityType: "account", entityId: payload.id, action: "update",
+      summary: `Mengubah rekening "${data.name}"`, before: previous, after: data,
     });
     return { success: true };
   } catch (error: unknown) {
@@ -96,6 +105,10 @@ export async function deleteAccountAction(id: string) {
     if (transactions.documents.some((transaction) => transaction.accountId === id || transaction.destinationAccountId === id)) throw new Error("Rekening memiliki riwayat transaksi. Nonaktifkan rekening agar riwayat tetap utuh.");
 
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "account", entityId: id, action: "delete",
+      summary: `Menghapus rekening "${account.name}"`, before: account,
+    });
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Rekening gagal dihapus." };

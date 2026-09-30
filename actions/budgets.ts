@@ -12,6 +12,7 @@ import { Permission, Role, ID, Query, type Models } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockBudgets, type Budget } from "@/lib/data/mock";
 import { createBudgetSchema } from "@/lib/validations/budget";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 interface BudgetFields {
   categoryId: string;
@@ -66,13 +67,17 @@ export async function upsertBudgetAction(payload: Budget) {
   try {
     const { databases } = await createAdminServerClient();
     if (payload.id && !payload.id.startsWith("bud-")) {
-      await getOwnedDocument(databases, COLLECTIONS.BUDGETS, payload.id, user.id);
+      const previous = await getOwnedDocument(databases, COLLECTIONS.BUDGETS, payload.id, user.id);
       await databases.updateDocument(
         DATABASE_ID,
         COLLECTIONS.BUDGETS,
         payload.id,
         parsed.data
       );
+      await recordAuditLog(databases, user.id, {
+        entityType: "budget", entityId: payload.id, action: "update",
+        summary: `Mengubah anggaran periode ${parsed.data.period}`, before: previous, after: parsed.data,
+      });
       return { success: true, id: payload.id };
     }
 
@@ -90,6 +95,10 @@ export async function upsertBudgetAction(payload: Budget) {
         Permission.delete(Role.user(user.id)),
       ]
     );
+    await recordAuditLog(databases, user.id, {
+      entityType: "budget", entityId: document.$id, action: "create",
+      summary: `Membuat anggaran periode ${parsed.data.period}`, after: parsed.data,
+    });
     return { success: true, id: document.$id };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };
@@ -104,8 +113,12 @@ export async function deleteBudgetAction(id: string) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.BUDGETS, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.BUDGETS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.BUDGETS, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "budget", entityId: id, action: "delete",
+      summary: "Menghapus anggaran", before: previous,
+    });
     return { success: true };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };

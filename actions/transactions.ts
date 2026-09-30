@@ -16,6 +16,7 @@ import {
   type TransactionInput,
 } from "@/lib/appwrite/transactionHelpers";
 import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 export type { TransactionInput };
 
@@ -144,6 +145,11 @@ export async function createBalanceAdjustmentAction(payload: {
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, transaction),
         documentPermissions(user.id),
       );
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: document.$id, action: "create",
+        summary: `Catatan kondisi: penyesuaian saldo "${(account as unknown as { name?: string }).name ?? ""}"`,
+        after: { delta, newBalance: currentBalance + delta, observedBalance: payload.observedBalance },
+      });
       return {
         success: true,
         id: document.$id,
@@ -189,6 +195,10 @@ export async function createTransactionAction(payload: TransactionInput) {
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, payload),
         documentPermissions(user.id),
       );
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: document.$id, action: "create",
+        summary: `Mencatat transaksi ${payload.type}`, after: payload,
+      });
       return { success: true, id: document.$id, createdAt: document.$createdAt };
     } catch (error) {
       await rollback();
@@ -214,6 +224,10 @@ export async function updateTransactionAction(payload: Transaction) {
       await databases.updateDocument(
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, payload.id, documentPayload(user.id, payload, true),
       );
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: payload.id, action: "update",
+        summary: `Mengubah transaksi ${payload.type}`, before: previous, after: payload,
+      });
       return { success: true };
     } catch (error) {
       await rollback();
@@ -236,6 +250,10 @@ export async function deleteTransactionAction(id: string) {
     const rollback = await applyBalanceChanges(databases, user.id, negateChanges(getBalanceChanges(transaction)));
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTIONS.TRANSACTIONS, id);
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: id, action: "delete",
+        summary: `Menghapus transaksi ${transaction.type}`, before: transaction,
+      });
       return { success: true };
     } catch (error) {
       await rollback();

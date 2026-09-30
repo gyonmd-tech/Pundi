@@ -14,6 +14,7 @@ import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { getBudgetStatus } from "@/lib/utils/formatter";
 import type { Budget, Category, Goal, Insight, RecurringRule, Transaction } from "@/lib/data/mock";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 export interface InsightGeneratorContext {
   categories: Category[];
@@ -75,6 +76,10 @@ export async function generateInsights(
         ],
       );
       created.push({ id: document.$id, type, message, isRead: false, createdAt: new Date(document.$createdAt), key });
+      await recordAuditLog(databases, userId, {
+        entityType: "insight", entityId: document.$id, action: "generate", actor: "system",
+        summary: message,
+      });
     } catch (error) {
       console.error(`Gagal membuat insight (${key}):`, error instanceof Error ? error.message : error);
     }

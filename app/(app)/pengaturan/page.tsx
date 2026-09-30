@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, type MouseEvent } from "react";
+import Link from "next/link";
 import {
   BellRing,
   Check,
   ChevronRight,
   Database,
   Download,
+  History,
   Info,
   Languages,
   Monitor,
@@ -300,7 +302,7 @@ export default function PengaturanPage() {
           </div>
         </SettingsCard>
 
-        <SettingsCard title="Backup & Data" description="Unduh salinan seluruh datamu kapan saja." icon={Database} tone="blue" className="lg:col-span-12">
+        <SettingsCard title="Backup & Data" description="Unduh salinan seluruh datamu kapan saja." icon={Database} tone="blue" className="lg:col-span-6">
           <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <p className="text-xs text-ink-muted max-w-lg">
               Berisi semua akun, kategori, transaksi, anggaran, tujuan, aset, utang/piutang, aturan berulang, dan insight dalam satu file JSON — simpan sebagai cadangan pribadi. Fitur impor/pulihkan belum tersedia.
@@ -308,6 +310,17 @@ export default function PengaturanPage() {
             <Button type="button" variant="outline" onClick={handleDownloadBackup}>
               <Download className="h-3.5 w-3.5" /> Unduh cadangan (.json)
             </Button>
+          </div>
+        </SettingsCard>
+
+        <SettingsCard title="Aktivitas" description="Riwayat lengkap perubahan data, manual maupun otomatis." icon={History} tone="mint" className="lg:col-span-6">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <p className="text-xs text-ink-muted max-w-lg">
+              Setiap perubahan pada rekening, transaksi, anggaran, tujuan, aset, utang, kategori, dan aturan berulang tercatat lengkap dengan nilai sebelum &amp; sesudah.
+            </p>
+            <Link href="/pengaturan/log-aktivitas">
+              <Button type="button" variant="outline"><History className="h-3.5 w-3.5" /> Lihat semua aktivitas</Button>
+            </Link>
           </div>
         </SettingsCard>
       </div>

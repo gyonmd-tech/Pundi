@@ -16,6 +16,7 @@ import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
 import { getNextOccurrence } from "@/lib/utils/recurrence";
 import { generateInsights } from "@/lib/appwrite/insightGenerator";
 import { getPreferencesAction } from "./preferences";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 import {
   mockAccounts,
   mockAssets,
@@ -135,6 +136,14 @@ async function generateDueRecurringTransactions(
       });
     }
 
+    if (generated > 0) {
+      await recordAuditLog(databases, userId, {
+        entityType: "recurring_rule", entityId: rule.id, action: "generate", actor: "system",
+        summary: `Membuat ${generated} transaksi otomatis dari aturan "${rule.note || rule.type}"`,
+        after: { generated, lastGenerated: lastGenerated?.toISOString() },
+      });
+    }
+
     // Kontribusi tujuan otomatis: naikkan currentAmount goal sekali per
     // rule per pemanggilan (bukan per-occurrence) sebesar total yang
     // berhasil digenerate barusan.
@@ -142,8 +151,14 @@ async function generateDueRecurringTransactions(
       try {
         const goalDoc = await getOwnedDocument(databases, COLLECTIONS.GOALS, rule.goalId, userId);
         const currentAmount = Number(goalDoc.currentAmount ?? 0);
+        const contribution = generated * rule.amount;
         await databases.updateDocument(DATABASE_ID, COLLECTIONS.GOALS, rule.goalId, {
-          currentAmount: currentAmount + generated * rule.amount,
+          currentAmount: currentAmount + contribution,
+        });
+        await recordAuditLog(databases, userId, {
+          entityType: "goal", entityId: rule.goalId, action: "generate", actor: "system",
+          summary: `Kontribusi otomatis Rp ${contribution.toLocaleString("id-ID")} dari aturan berulang`,
+          before: { currentAmount }, after: { currentAmount: currentAmount + contribution },
         });
       } catch (error) {
         console.error(

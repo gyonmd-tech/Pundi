@@ -17,6 +17,7 @@ import { getAuthUserAction } from "./auth";
 import { mockRecurringRules, type RecurringRule } from "@/lib/data/mock";
 import { createRecurringRuleSchema } from "@/lib/validations/recurring";
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 function rulePermissions(userId: string) {
   return [
@@ -87,6 +88,10 @@ export async function createRecurringRuleAction(payload: Omit<RecurringRule, "id
       },
       rulePermissions(user.id),
     );
+    await recordAuditLog(databases, user.id, {
+      entityType: "recurring_rule", entityId: document.$id, action: "create",
+      summary: `Membuat aturan berulang "${parsed.data.note || parsed.data.type}"`, after: parsed.data,
+    });
     return { success: true, id: document.$id };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Aturan berulang gagal disimpan." };
@@ -104,11 +109,11 @@ export async function updateRecurringRuleAction(payload: Omit<RecurringRule, "ne
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.RECURRING_RULES, payload.id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.RECURRING_RULES, payload.id, user.id);
     if (parsed.data.goalId) {
       await getOwnedDocument(databases, COLLECTIONS.GOALS, parsed.data.goalId, user.id);
     }
-    await databases.updateDocument(DATABASE_ID, COLLECTIONS.RECURRING_RULES, payload.id, {
+    const updatePayload = {
       accountId: parsed.data.accountId,
       destinationAccountId: parsed.data.destinationAccountId ?? null,
       categoryId: parsed.data.categoryId ?? null,
@@ -121,6 +126,11 @@ export async function updateRecurringRuleAction(payload: Omit<RecurringRule, "ne
       nextOccurrence: parsed.data.startDate.toISOString(),
       endDate: parsed.data.endDate?.toISOString() ?? null,
       isActive: payload.isActive,
+    };
+    await databases.updateDocument(DATABASE_ID, COLLECTIONS.RECURRING_RULES, payload.id, updatePayload);
+    await recordAuditLog(databases, user.id, {
+      entityType: "recurring_rule", entityId: payload.id, action: "update",
+      summary: `Mengubah aturan berulang "${parsed.data.note || parsed.data.type}"`, before: previous, after: updatePayload,
     });
     return { success: true };
   } catch (error: unknown) {
@@ -134,8 +144,13 @@ export async function toggleRecurringRuleAction(id: string, isActive: boolean) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.RECURRING_RULES, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.RECURRING_RULES, id, user.id);
     await databases.updateDocument(DATABASE_ID, COLLECTIONS.RECURRING_RULES, id, { isActive });
+    await recordAuditLog(databases, user.id, {
+      entityType: "recurring_rule", entityId: id, action: "toggle",
+      summary: `${isActive ? "Mengaktifkan" : "Menonaktifkan"} aturan berulang "${(previous as unknown as { note?: string; type?: string }).note || (previous as unknown as { type?: string }).type || ""}"`,
+      before: { isActive: previous.isActive }, after: { isActive },
+    });
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Status aturan gagal diperbarui." };
@@ -148,8 +163,13 @@ export async function deleteRecurringRuleAction(id: string) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.RECURRING_RULES, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.RECURRING_RULES, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.RECURRING_RULES, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "recurring_rule", entityId: id, action: "delete",
+      summary: `Menghapus aturan berulang "${(previous as unknown as { note?: string; type?: string }).note || (previous as unknown as { type?: string }).type || ""}"`,
+      before: previous,
+    });
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Aturan berulang gagal dihapus." };

@@ -189,6 +189,28 @@
             { "key": "idx_user", "type": "key", "attributes": ["userId"] },
             { "key": "idx_user_active_next", "type": "key", "attributes": ["userId", "isActive", "nextOccurrence"] }
           ]
+        },
+        {
+          "$id": "audit_logs",
+          "name": "audit_logs",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "entityType", "type": "string", "size": 32, "required": true },
+            { "key": "entityId", "type": "string", "size": 36, "required": false },
+            { "key": "action", "type": "string", "size": 16, "required": true },
+            { "key": "actor", "type": "string", "size": 16, "required": true, "default": "user" },
+            { "key": "summary", "type": "string", "size": 500, "required": true },
+            { "key": "before", "type": "string", "size": 2000, "required": false },
+            { "key": "after", "type": "string", "size": 2000, "required": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_user_entity", "type": "key", "attributes": ["userId", "entityType"] },
+            { "key": "idx_user_created", "type": "key", "attributes": ["userId", "$createdAt"] }
+          ]
         }
       ]
     }

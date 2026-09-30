@@ -14,6 +14,7 @@ import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { Permission, Role, ID, Query } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { createCategorySchema } from "@/lib/validations/category";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 function categoryPermissions(userId: string) {
   return [
@@ -41,6 +42,10 @@ export async function createCategoryAction(payload: { name: string; type: "incom
       { userId: user.id, ...parsed.data },
       categoryPermissions(user.id),
     );
+    await recordAuditLog(databases, user.id, {
+      entityType: "category", entityId: document.$id, action: "create",
+      summary: `Membuat kategori "${parsed.data.name}"`, after: parsed.data,
+    });
     return { success: true, id: document.$id };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Kategori gagal disimpan." };
@@ -58,8 +63,12 @@ export async function updateCategoryAction(payload: { id: string; name: string; 
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.CATEGORIES, payload.id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.CATEGORIES, payload.id, user.id);
     await databases.updateDocument(DATABASE_ID, COLLECTIONS.CATEGORIES, payload.id, parsed.data);
+    await recordAuditLog(databases, user.id, {
+      entityType: "category", entityId: payload.id, action: "update",
+      summary: `Mengubah kategori "${parsed.data.name}"`, before: previous, after: parsed.data,
+    });
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Kategori gagal diperbarui." };
@@ -72,7 +81,7 @@ export async function deleteCategoryAction(id: string) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.CATEGORIES, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.CATEGORIES, id, user.id);
 
     const [transactionsInUse, budgetsInUse] = await Promise.all([
       databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
@@ -90,6 +99,10 @@ export async function deleteCategoryAction(id: string) {
     }
 
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.CATEGORIES, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "category", entityId: id, action: "delete",
+      summary: `Menghapus kategori "${(previous as unknown as { name?: string }).name ?? ""}"`, before: previous,
+    });
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Kategori gagal dihapus." };

@@ -12,6 +12,7 @@ import { Permission, Role, ID, Query, type Models } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockAssets, type Asset, type AssetType } from "@/lib/data/mock";
 import { createAssetSchema } from "@/lib/validations/asset";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 interface AssetFields {
   type: AssetType;
@@ -82,6 +83,10 @@ export async function createAssetAction(payload: Omit<Asset, "id">) {
       ]
     );
 
+    await recordAuditLog(databases, user.id, {
+      entityType: "asset", entityId: doc.$id, action: "create",
+      summary: `Menambah aset "${parsed.data.name}"`, after: parsed.data,
+    });
     return { success: true, id: doc.$id };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };
@@ -101,7 +106,7 @@ export async function updateAssetAction(payload: Asset) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.ASSETS, payload.id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.ASSETS, payload.id, user.id);
     await databases.updateDocument(
       DATABASE_ID,
       COLLECTIONS.ASSETS,
@@ -109,6 +114,10 @@ export async function updateAssetAction(payload: Asset) {
       parsed.data
     );
 
+    await recordAuditLog(databases, user.id, {
+      entityType: "asset", entityId: payload.id, action: "update",
+      summary: `Mengubah aset "${parsed.data.name}"`, before: previous, after: parsed.data,
+    });
     return { success: true };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };
@@ -123,8 +132,12 @@ export async function deleteAssetAction(id: string) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.ASSETS, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.ASSETS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.ASSETS, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "asset", entityId: id, action: "delete",
+      summary: `Menghapus aset "${(previous as unknown as { name?: string }).name ?? ""}"`, before: previous,
+    });
     return { success: true };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };

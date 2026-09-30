@@ -12,6 +12,7 @@ import { Permission, Role, ID, Query, type Models } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockGoals, type Goal } from "@/lib/data/mock";
 import { createGoalSchema } from "@/lib/validations/goal";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 interface GoalFields {
   name: string;
@@ -85,6 +86,10 @@ export async function createGoalAction(payload: Omit<Goal, "id">) {
       ]
     );
 
+    await recordAuditLog(databases, user.id, {
+      entityType: "goal", entityId: doc.$id, action: "create",
+      summary: `Membuat tujuan "${parsed.data.name}"`, after: parsed.data,
+    });
     return { success: true, id: doc.$id };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };
@@ -104,7 +109,7 @@ export async function updateGoalAction(payload: Goal) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.GOALS, payload.id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.GOALS, payload.id, user.id);
     await databases.updateDocument(
       DATABASE_ID,
       COLLECTIONS.GOALS,
@@ -118,6 +123,10 @@ export async function updateGoalAction(payload: Goal) {
       }
     );
 
+    await recordAuditLog(databases, user.id, {
+      entityType: "goal", entityId: payload.id, action: "update",
+      summary: `Mengubah tujuan "${parsed.data.name}"`, before: previous, after: parsed.data,
+    });
     return { success: true };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };
@@ -132,8 +141,12 @@ export async function deleteGoalAction(id: string) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.GOALS, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.GOALS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.GOALS, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "goal", entityId: id, action: "delete",
+      summary: `Menghapus tujuan "${(previous as unknown as { name?: string }).name ?? ""}"`, before: previous,
+    });
     return { success: true };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };
