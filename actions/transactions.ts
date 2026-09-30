@@ -15,6 +15,7 @@ import {
   negateChanges,
   type TransactionInput,
 } from "@/lib/appwrite/transactionHelpers";
+import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
 
 export type { TransactionInput };
 
@@ -120,22 +121,9 @@ export async function createBalanceAdjustmentAction(payload: {
       Query.limit(500),
     ]);
 
-    let activityAfterSnapshot = 0;
-    for (const document of response.documents) {
-      const transaction = transactionFromDocument(document);
-      if (transaction.accountId === payload.accountId) {
-        if (transaction.type === "income") activityAfterSnapshot += transaction.amount;
-        if (transaction.type === "expense") activityAfterSnapshot -= transaction.amount;
-        if (transaction.type === "transfer") activityAfterSnapshot -= transaction.amount;
-      }
-      if (transaction.type === "transfer" && transaction.destinationAccountId === payload.accountId) {
-        activityAfterSnapshot += transaction.amount;
-      }
-    }
-
+    const recentTransactions = response.documents.map((document) => transactionFromDocument(document));
     const currentBalance = Number(account.balance || 0);
-    const expectedAtSnapshot = currentBalance - activityAfterSnapshot;
-    const delta = payload.observedBalance - expectedAtSnapshot;
+    const delta = computeObservedDelta(recentTransactions, payload.accountId, currentBalance, payload.observedBalance, snapshotEnd);
     const type: Transaction["type"] = delta < 0 ? "expense" : "income";
     const transaction: TransactionInput = {
       accountId: payload.accountId,

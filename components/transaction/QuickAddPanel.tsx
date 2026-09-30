@@ -22,6 +22,7 @@ import { useToast } from "@/lib/context/ToastContext";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { cn } from "@/lib/utils/cn";
 import { createBalanceAdjustmentAction, createTransactionAction, updateTransactionAction } from "@/actions/transactions";
+import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
 
 type EntryMode = TransactionType | "cash_withdrawal" | "balance_adjustment";
 
@@ -136,17 +137,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
       setSubmitting(true);
       const selectedDate = new Date(`${date}T23:59:59.999`);
       const account = accounts.find((item) => item.id === resolvedAccountId);
-      const activityAfter = transactions.reduce((sum, item) => {
-        if (new Date(item.date) <= selectedDate) return sum;
-        let delta = 0;
-        if (item.accountId === resolvedAccountId) {
-          if (item.type === "income") delta += item.amount;
-          if (item.type === "expense" || item.type === "transfer") delta -= item.amount;
-        }
-        if (item.type === "transfer" && item.destinationAccountId === resolvedAccountId) delta += item.amount;
-        return sum + delta;
-      }, 0);
-      const localDelta = numericAmount - ((account?.balance || 0) - activityAfter);
+      const localDelta = computeObservedDelta(transactions, resolvedAccountId, account?.balance || 0, numericAmount, selectedDate);
       const result = await createBalanceAdjustmentAction({
         accountId: resolvedAccountId,
         observedBalance: numericAmount,
