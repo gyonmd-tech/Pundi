@@ -19,6 +19,7 @@ export type InsightType = "budget_warning" | "goal_progress" | "trend" | "tip";
 export type BudgetStatus = "safe" | "warning" | "over";
 export type DebtDirection = "payable" | "receivable";
 export type DebtStatus = "open" | "paid";
+export type RecurringFrequency = "weekly" | "monthly" | "yearly";
 
 export interface Account {
   id: string;
@@ -43,7 +44,9 @@ export interface Transaction {
   accountId: string;
   destinationAccountId?: string;
   transferKind?: "account" | "cash_withdrawal";
-  recordKind?: "standard" | "balance_adjustment";
+  recordKind?: "standard" | "balance_adjustment" | "recurring" | "debt_payment";
+  recurringRuleId?: string;
+  debtId?: string;
   observedBalance?: number;
   categoryId?: string;
   type: TransactionType;
@@ -52,6 +55,25 @@ export interface Transaction {
   createdAt?: Date;
   note?: string;
   tags: string[];
+}
+
+export interface RecurringRule {
+  id: string;
+  accountId: string;
+  destinationAccountId?: string;
+  categoryId?: string;
+  /** Diisi jika rule ini adalah kontribusi otomatis ke tujuan tabungan
+   * (hanya valid untuk type "expense" — lihat lib/validations/recurring.ts). */
+  goalId?: string;
+  type: TransactionType;
+  amount: number;
+  note?: string;
+  frequency: RecurringFrequency;
+  startDate: Date;
+  nextOccurrence: Date;
+  endDate?: Date;
+  isActive: boolean;
+  lastGeneratedDate?: Date;
 }
 
 export interface Debt {
@@ -99,7 +121,33 @@ export interface Insight {
   message: string;
   isRead: boolean;
   createdAt: Date;
+  /** Kunci idempoten internal (mis. "budget:{budgetId}:{period}") dipakai
+   * generator agar tidak menulis insight duplikat. Tidak ditampilkan di UI. */
+  key?: string;
 }
+
+// ── Preferensi pengguna ──────────────────────────────────────────────
+
+export type AccentColor = "brand" | "mint" | "ember" | "lavender" | "cyan";
+export type ThemeMode = "light" | "dark" | "system";
+
+export interface UserPreferences {
+  notifications: boolean;
+  autoInsights: boolean;
+  compactNumbers: boolean;
+  defaultAccountId?: string;
+  theme: ThemeMode;
+  accentColor: AccentColor;
+  avatarFileId?: string;
+}
+
+export const DEFAULT_PREFERENCES: UserPreferences = {
+  notifications: true,
+  autoInsights: true,
+  compactNumbers: false,
+  theme: "system",
+  accentColor: "brand",
+};
 
 export const CURRENT_PERIOD = new Date().toISOString().slice(0, 7);
 const CURRENT_MONTH_LABEL = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date());
@@ -260,6 +308,66 @@ export const mockGoals: Goal[] = [
 
 export const mockDebts: Debt[] = [];
 
+// ── Recurring rules ───────────────────────────────────────────────────
+
+function nextMonthlyDate(day: number): Date {
+  const now = new Date();
+  const candidate = new Date(now.getFullYear(), now.getMonth(), day);
+  if (candidate < now) candidate.setMonth(candidate.getMonth() + 1);
+  return candidate;
+}
+
+export const mockRecurringRules: RecurringRule[] = [
+  {
+    id: "rec-1",
+    accountId: "acc-1",
+    categoryId: "cat-i1",
+    type: "income",
+    amount: 7_500_000,
+    note: "Gaji bulanan",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 6, 1),
+    nextOccurrence: nextMonthlyDate(1),
+    isActive: true,
+  },
+  {
+    id: "rec-2",
+    accountId: "acc-2",
+    categoryId: "cat-e4",
+    type: "expense",
+    amount: 54_000,
+    note: "Langganan Spotify",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 10, 12),
+    nextOccurrence: nextMonthlyDate(12),
+    isActive: true,
+  },
+  {
+    id: "rec-3",
+    accountId: "acc-1",
+    categoryId: "cat-e6",
+    type: "expense",
+    amount: 185_000,
+    note: "Listrik & internet",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 8, 7),
+    nextOccurrence: nextMonthlyDate(7),
+    isActive: true,
+  },
+  {
+    id: "rec-4",
+    accountId: "acc-1",
+    goalId: "goal-1",
+    type: "expense",
+    amount: 500_000,
+    note: "Sisihkan ke Dana Darurat",
+    frequency: "monthly",
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 4, 5),
+    nextOccurrence: nextMonthlyDate(5),
+    isActive: true,
+  },
+];
+
 // ── Assets ─────────────────────────────────────────────────────────────
 
 export const mockAssets: Asset[] = [
@@ -387,18 +495,6 @@ export function getCategoryBreakdown(period: string = CURRENT_PERIOD) {
 }
 
 /** Net worth per bulan (6 bulan) */
-export function getNetWorthData() {
-  const assetTotal = mockAssets.reduce(
-    (sum, a) => sum + a.units * a.currentPrice, 0
-  );
-  const months = ["Mar", "Apr", "Mei", "Jun", "Jul", "Agu"];
-  // Simulasi tren naik 2-4% per bulan dari 3 bulan lalu
-  return months.map((month, i) => ({
-    month,
-    netWorth: Math.round(assetTotal * (0.88 + i * 0.024)),
-  }));
-}
-
 /** Cari account by id */
 export function getAccountById(id: string) {
   return mockAccounts.find((a) => a.id === id);

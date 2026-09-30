@@ -12,6 +12,7 @@ import { BackgroundPattern } from "@/components/ui/BackgroundPattern";
 import { cn } from "@/lib/utils/cn";
 import { DashboardSkeleton } from "@/components/ui/DashboardSkeleton";
 import { useApp } from "@/lib/data/store";
+import { ThemeEffect } from "@/components/providers/ThemeEffect";
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const [selectedAccountId, setSelectedAccountId] = useState("all");
@@ -21,6 +22,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-modern relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip bg-paper text-ink">
+      <ThemeEffect />
       <BackgroundPattern />
       <SidebarNav onQuickAdd={openQuickAdd} hideMobileNav={quickAddOpen} />
 

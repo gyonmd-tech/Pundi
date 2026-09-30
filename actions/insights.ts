@@ -8,7 +8,7 @@
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
-import { Query } from "node-appwrite";
+import { Query, type Models } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockInsights, type Insight } from "@/lib/data/mock";
 
@@ -26,17 +26,20 @@ export async function getInsightsAction(): Promise<{ data: Insight[]; error?: st
       [Query.equal("userId", user.id), Query.orderDesc("$createdAt")]
     );
 
-    const mapped: Insight[] = response.documents.map((doc: any) => ({
-      id: doc.$id,
-      type: doc.type,
-      message: doc.message,
-      isRead: doc.isRead,
-      createdAt: new Date(doc.$createdAt),
-    }));
+    const mapped: Insight[] = response.documents.map((doc: Models.Document) => {
+      const fields = doc as unknown as { type: Insight["type"]; message: string; isRead: boolean };
+      return {
+        id: doc.$id,
+        type: fields.type,
+        message: fields.message,
+        isRead: fields.isRead,
+        createdAt: new Date(doc.$createdAt),
+      };
+    });
 
     return { data: mapped };
-  } catch (err: any) {
-    return { data: mockInsights, error: err.message };
+  } catch (err: unknown) {
+    return { data: mockInsights, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -62,7 +65,7 @@ export async function markAllInsightsReadAction() {
     }
 
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

@@ -16,12 +16,13 @@ import { Button, IconButton } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { useAccounts, useApp, useCategories, useTransactions } from "@/lib/data/store";
+import { useAccounts, useApp, useCategories, usePreferences, useTransactions } from "@/lib/data/store";
 import type { Transaction, TransactionType } from "@/lib/data/mock";
 import { useToast } from "@/lib/context/ToastContext";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { cn } from "@/lib/utils/cn";
 import { createBalanceAdjustmentAction, createTransactionAction, updateTransactionAction } from "@/actions/transactions";
+import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
 
 type EntryMode = TransactionType | "cash_withdrawal" | "balance_adjustment";
 
@@ -63,6 +64,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
   const accounts = useAccounts().filter((account) => account.isActive);
   const categories = useCategories();
   const transactions = useTransactions();
+  const preferences = usePreferences();
   const { dispatch, connection } = useApp();
   const { showToast } = useToast();
   const amountRef = React.useRef<HTMLInputElement>(null);
@@ -71,9 +73,12 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
     : transaction?.transferKind === "cash_withdrawal"
     ? "cash_withdrawal"
     : transaction?.type || "expense";
+  const defaultAccountId = accounts.some((account) => account.id === preferences.defaultAccountId)
+    ? preferences.defaultAccountId
+    : accounts[0]?.id;
   const [mode, setMode] = React.useState<EntryMode>(initialMode);
   const [amount, setAmount] = React.useState(transaction ? String(transaction.amount) : "");
-  const [accountId, setAccountId] = React.useState(transaction?.accountId || accounts[0]?.id || "");
+  const [accountId, setAccountId] = React.useState(transaction?.accountId || defaultAccountId || "");
   const [destinationAccountId, setDestinationAccountId] = React.useState(transaction?.destinationAccountId || "");
   const [categoryId, setCategoryId] = React.useState(transaction?.categoryId || "");
   const [date, setDate] = React.useState(() =>
@@ -136,17 +141,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
       setSubmitting(true);
       const selectedDate = new Date(`${date}T23:59:59.999`);
       const account = accounts.find((item) => item.id === resolvedAccountId);
-      const activityAfter = transactions.reduce((sum, item) => {
-        if (new Date(item.date) <= selectedDate) return sum;
-        let delta = 0;
-        if (item.accountId === resolvedAccountId) {
-          if (item.type === "income") delta += item.amount;
-          if (item.type === "expense" || item.type === "transfer") delta -= item.amount;
-        }
-        if (item.type === "transfer" && item.destinationAccountId === resolvedAccountId) delta += item.amount;
-        return sum + delta;
-      }, 0);
-      const localDelta = numericAmount - ((account?.balance || 0) - activityAfter);
+      const localDelta = computeObservedDelta(transactions, resolvedAccountId, account?.balance || 0, numericAmount, selectedDate);
       const result = await createBalanceAdjustmentAction({
         accountId: resolvedAccountId,
         observedBalance: numericAmount,

@@ -8,9 +8,19 @@
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
-import { ID, Query } from "node-appwrite";
+import { Permission, Role, ID, Query, type Models } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockGoals, type Goal } from "@/lib/data/mock";
+import { createGoalSchema } from "@/lib/validations/goal";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
+
+interface GoalFields {
+  name: string;
+  targetAmount: number;
+  currentAmount?: number;
+  targetDate: string;
+  linkedAccountId?: string;
+}
 
 export async function getGoalsAction(): Promise<{ data: Goal[]; error?: string }> {
   const user = await getAuthUserAction();
@@ -26,18 +36,21 @@ export async function getGoalsAction(): Promise<{ data: Goal[]; error?: string }
       [Query.equal("userId", user.id)]
     );
 
-    const mapped: Goal[] = response.documents.map((doc: any) => ({
-      id: doc.$id,
-      name: doc.name,
-      targetAmount: doc.targetAmount,
-      currentAmount: doc.currentAmount || 0,
-      targetDate: new Date(doc.targetDate),
-      linkedAccountId: doc.linkedAccountId,
-    }));
+    const mapped: Goal[] = response.documents.map((doc: Models.Document) => {
+      const fields = doc as unknown as GoalFields;
+      return {
+        id: doc.$id,
+        name: fields.name,
+        targetAmount: fields.targetAmount,
+        currentAmount: fields.currentAmount || 0,
+        targetDate: new Date(fields.targetDate),
+        linkedAccountId: fields.linkedAccountId,
+      };
+    });
 
     return { data: mapped };
-  } catch (err: any) {
-    return { data: mockGoals, error: err.message };
+  } catch (err: unknown) {
+    return { data: mockGoals, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -45,6 +58,11 @@ export async function createGoalAction(payload: Omit<Goal, "id">) {
   const user = await getAuthUserAction();
   if (!user || user.isDemo) {
     return { success: true, id: `goal-${Date.now()}` };
+  }
+
+  const parsed = createGoalSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Data tujuan tidak valid." };
   }
 
   try {
@@ -55,17 +73,26 @@ export async function createGoalAction(payload: Omit<Goal, "id">) {
       ID.unique(),
       {
         userId: user.id,
-        name: payload.name,
-        targetAmount: payload.targetAmount,
-        currentAmount: payload.currentAmount || 0,
-        targetDate: payload.targetDate.toISOString(),
-        linkedAccountId: payload.linkedAccountId,
-      }
+        name: parsed.data.name,
+        targetAmount: parsed.data.targetAmount,
+        currentAmount: parsed.data.currentAmount,
+        targetDate: parsed.data.targetDate.toISOString(),
+        linkedAccountId: parsed.data.linkedAccountId,
+      },
+      [
+        Permission.read(Role.user(user.id)),
+        Permission.update(Role.user(user.id)),
+        Permission.delete(Role.user(user.id)),
+      ]
     );
 
+    await recordAuditLog(databases, user.id, {
+      entityType: "goal", entityId: doc.$id, action: "create",
+      summary: `Membuat tujuan "${parsed.data.name}"`, after: parsed.data,
+    });
     return { success: true, id: doc.$id };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -75,25 +102,34 @@ export async function updateGoalAction(payload: Goal) {
     return { success: true };
   }
 
+  const parsed = createGoalSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Data tujuan tidak valid." };
+  }
+
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.GOALS, payload.id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.GOALS, payload.id, user.id);
     await databases.updateDocument(
       DATABASE_ID,
       COLLECTIONS.GOALS,
       payload.id,
       {
-        name: payload.name,
-        targetAmount: payload.targetAmount,
-        currentAmount: payload.currentAmount,
-        targetDate: payload.targetDate.toISOString(),
-        linkedAccountId: payload.linkedAccountId,
+        name: parsed.data.name,
+        targetAmount: parsed.data.targetAmount,
+        currentAmount: parsed.data.currentAmount,
+        targetDate: parsed.data.targetDate.toISOString(),
+        linkedAccountId: parsed.data.linkedAccountId,
       }
     );
 
+    await recordAuditLog(databases, user.id, {
+      entityType: "goal", entityId: payload.id, action: "update",
+      summary: `Mengubah tujuan "${parsed.data.name}"`, before: previous, after: parsed.data,
+    });
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -105,10 +141,14 @@ export async function deleteGoalAction(id: string) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.GOALS, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.GOALS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.GOALS, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "goal", entityId: id, action: "delete",
+      summary: `Menghapus tujuan "${(previous as unknown as { name?: string }).name ?? ""}"`, before: previous,
+    });
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

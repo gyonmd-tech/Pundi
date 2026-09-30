@@ -106,7 +106,7 @@ textarea::placeholder {
   padding: var(--card-padding);
   border: var(--border-hairline);
   border-radius: var(--radius-card);
-  background: #FFFFFF;
+  background: var(--color-surface-high);
   box-shadow: var(--shadow-clay-soft);
   transition:
     box-shadow var(--duration-normal) var(--ease-standard),
@@ -316,7 +316,7 @@ input[data-search-input="true"]:focus-visible {
 /* Dashboard surfaces: white by default, solid brand blue for a deliberate highlight. */
 .dashboard-modern [data-widget-id="balance"] { background: var(--color-brand-600) !important; }
 .dashboard-modern [data-widget-id="calendar"] > .card,
-.dashboard-modern [data-widget-id="calendar"] .card { background: #FFFFFF !important; }
+.dashboard-modern [data-widget-id="calendar"] .card { background: var(--color-surface-high) !important; }
 
 .dashboard-puzzle.is-dragging {
   background-color: rgba(36, 89, 222, 0.08);
@@ -334,4 +334,4 @@ input[data-search-input="true"]:focus-visible {
   }
 }
 
-.card[data-tone] { background: #FFFFFF; }
+.card[data-tone] { background: var(--color-surface-high); }

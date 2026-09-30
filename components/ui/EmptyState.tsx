@@ -3,8 +3,8 @@
 /**
  * components/ui/EmptyState.tsx
  * Empty state terarah-aksi — bukan sekadar ilustrasi kosong.
- * (PRD.md § 7 Risiko: empty state harus mengarahkan aksi)
- * (DESIGN.md § 4.5: minimal shadow, hairline border)
+ * (design-system/pundi/MASTER.md: minimal shadow, hairline border,
+ * empty state harus mengarahkan aksi)
  */
 
 import { cn } from "@/lib/utils/cn";
@@ -93,7 +93,7 @@ export function EmptyState({
                 fontFamily: "var(--font-ui)",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#153d32";
+                e.currentTarget.style.backgroundColor = "var(--color-pine-hover)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "var(--color-pine)";

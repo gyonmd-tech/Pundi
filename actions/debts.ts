@@ -1,11 +1,19 @@
 "use server";
 
-import { ID, Query } from "node-appwrite";
+import { ID, Permission, Query, Role, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { getAuthUserAction } from "./auth";
 import type { Debt, DebtDirection } from "@/lib/data/mock";
+import {
+  applyBalanceChanges,
+  documentPayload as transactionDocumentPayload,
+  documentPermissions as transactionDocumentPermissions,
+  getBalanceChanges,
+  type TransactionInput,
+} from "@/lib/appwrite/transactionHelpers";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
 type DebtInput = {
   direction: DebtDirection;
@@ -16,16 +24,27 @@ type DebtInput = {
   note?: string;
 };
 
-function fromDocument(document: Record<string, any>): Debt {
+interface DebtFields {
+  direction: DebtDirection;
+  person: string;
+  amount: number;
+  remainingAmount: number;
+  dueDate?: string;
+  note?: string;
+  status: Debt["status"];
+}
+
+function fromDocument(document: Models.Document): Debt {
+  const fields = document as unknown as DebtFields;
   return {
     id: document.$id,
-    direction: document.direction,
-    person: document.person,
-    amount: Number(document.amount),
-    remainingAmount: Number(document.remainingAmount),
-    dueDate: document.dueDate ? new Date(document.dueDate) : undefined,
-    note: document.note || undefined,
-    status: document.status,
+    direction: fields.direction,
+    person: fields.person,
+    amount: Number(fields.amount),
+    remainingAmount: Number(fields.remainingAmount),
+    dueDate: fields.dueDate ? new Date(fields.dueDate) : undefined,
+    note: fields.note || undefined,
+    status: fields.status,
     createdAt: new Date(document.$createdAt),
     updatedAt: new Date(document.$updatedAt),
   };
@@ -74,7 +93,22 @@ export async function createDebtAction(payload: DebtInput) {
   if (!user || user.isDemo) return { success: true, id: `debt-${Date.now()}`, createdAt: new Date().toISOString() };
   try {
     const { databases } = await createAdminServerClient();
-    const document = await databases.createDocument(DATABASE_ID, COLLECTIONS.DEBTS, ID.unique(), documentPayload(user.id, payload));
+    const document = await databases.createDocument(
+      DATABASE_ID,
+      COLLECTIONS.DEBTS,
+      ID.unique(),
+      documentPayload(user.id, payload),
+      [
+        Permission.read(Role.user(user.id)),
+        Permission.update(Role.user(user.id)),
+        Permission.delete(Role.user(user.id)),
+      ]
+    );
+    await recordAuditLog(databases, user.id, {
+      entityType: "debt", entityId: document.$id, action: "create",
+      summary: `Mencatat utang ${payload.direction === "payable" ? "kepada" : "dari"} "${payload.person.trim()}"`,
+      after: documentPayload(user.id, payload),
+    });
     return { success: true, id: document.$id, createdAt: document.$createdAt, updatedAt: document.$updatedAt };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Utang gagal disimpan." };
@@ -87,18 +121,30 @@ export async function updateDebtAction(id: string, payload: DebtInput) {
   if (!user || user.isDemo) return { success: true, updatedAt: new Date().toISOString() };
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.DEBTS, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.DEBTS, id, user.id);
     const document = await databases.updateDocument(DATABASE_ID, COLLECTIONS.DEBTS, id, documentPayload(user.id, payload));
+    await recordAuditLog(databases, user.id, {
+      entityType: "debt", entityId: id, action: "update",
+      summary: `Mengubah utang "${payload.person.trim()}"`, before: previous, after: documentPayload(user.id, payload),
+    });
     return { success: true, updatedAt: document.$updatedAt };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Perubahan utang gagal disimpan." };
   }
 }
 
-export async function recordDebtPaymentAction(id: string, amount: number) {
+export async function recordDebtPaymentAction(id: string, amount: number, accountId?: string) {
   const user = await getAuthUserAction();
   if (!Number.isSafeInteger(amount) || amount <= 0) return { success: false, error: "Nominal pembayaran harus lebih besar dari nol." };
-  if (!user || user.isDemo) return { success: true, remainingAmount: 0, status: "paid" as const, updatedAt: new Date().toISOString() };
+  if (!user || user.isDemo) {
+    return {
+      success: true,
+      remainingAmount: 0,
+      status: "paid" as const,
+      updatedAt: new Date().toISOString(),
+      transactionId: accountId ? `tx-debt-demo-${Date.now()}` : undefined,
+    };
+  }
   try {
     const { databases } = await createAdminServerClient();
     const previous = await getOwnedDocument(databases, COLLECTIONS.DEBTS, id, user.id);
@@ -106,8 +152,52 @@ export async function recordDebtPaymentAction(id: string, amount: number) {
     if (amount > remaining) throw new Error("Pembayaran tidak boleh melebihi sisa utang.");
     const remainingAmount = remaining - amount;
     const status = remainingAmount === 0 ? "paid" : "open";
+    // Update dulu — ini yang wajib berhasil. Jejak transaksi di bawah bersifat
+    // best-effort: kalau gagal, pembayaran tetap tercatat (tidak di-rollback),
+    // hanya jejaknya di buku transaksi yang tidak lengkap.
     const document = await databases.updateDocument(DATABASE_ID, COLLECTIONS.DEBTS, id, { remainingAmount, status });
-    return { success: true, remainingAmount, status, updatedAt: document.$updatedAt };
+
+    let transactionId: string | undefined;
+    let warning: string | undefined;
+    if (accountId) {
+      try {
+        await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, accountId, user.id);
+        const direction = previous.direction as DebtDirection;
+        const txInput: TransactionInput = {
+          accountId,
+          type: direction === "payable" ? "expense" : "income",
+          amount,
+          date: new Date(),
+          note: `Pembayaran utang · ${previous.person}`,
+          tags: [],
+          recordKind: "debt_payment",
+          debtId: id,
+        };
+        const rollback = await applyBalanceChanges(databases, user.id, getBalanceChanges(txInput));
+        try {
+          const txDocument = await databases.createDocument(
+            DATABASE_ID,
+            COLLECTIONS.TRANSACTIONS,
+            ID.unique(),
+            transactionDocumentPayload(user.id, txInput),
+            transactionDocumentPermissions(user.id),
+          );
+          transactionId = txDocument.$id;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      } catch (error: unknown) {
+        warning = "Pembayaran tersimpan, tetapi gagal dicatat sebagai transaksi: " + (error instanceof Error ? error.message : "kesalahan tidak diketahui.");
+      }
+    }
+
+    await recordAuditLog(databases, user.id, {
+      entityType: "debt", entityId: id, action: "payment",
+      summary: `Mencatat pembayaran utang "${previous.person}"`,
+      before: { remainingAmount: remaining }, after: { remainingAmount, status, amount },
+    });
+    return { success: true, remainingAmount, status, updatedAt: document.$updatedAt, transactionId, warning };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Pembayaran gagal dicatat." };
   }
@@ -118,8 +208,12 @@ export async function deleteDebtAction(id: string) {
   if (!user || user.isDemo) return { success: true };
   try {
     const { databases } = await createAdminServerClient();
-    await getOwnedDocument(databases, COLLECTIONS.DEBTS, id, user.id);
+    const previous = await getOwnedDocument(databases, COLLECTIONS.DEBTS, id, user.id);
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.DEBTS, id);
+    await recordAuditLog(databases, user.id, {
+      entityType: "debt", entityId: id, action: "delete",
+      summary: `Menghapus utang "${(previous as unknown as { person?: string }).person ?? ""}"`, before: previous,
+    });
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Utang gagal dihapus." };

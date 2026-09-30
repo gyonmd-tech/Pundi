@@ -3,88 +3,57 @@
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
-import { ID, Query } from "node-appwrite";
+import { ID, Query, type Models } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockTransactions, type Account, type Transaction } from "@/lib/data/mock";
+import {
+  applyBalanceChanges,
+  documentPayload,
+  documentPermissions,
+  getBalanceChanges,
+  mergeChanges,
+  negateChanges,
+  type TransactionInput,
+} from "@/lib/appwrite/transactionHelpers";
+import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
+import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
-type TransactionInput = Omit<Transaction, "id" | "createdAt">;
-type BalanceChanges = Map<string, number>;
+export type { TransactionInput };
 
-function transactionFromDocument(document: Record<string, any>): Transaction {
+interface TransactionFields {
+  accountId: string;
+  destinationAccountId?: string;
+  transferKind?: Transaction["transferKind"];
+  recordKind?: Transaction["recordKind"];
+  recurringRuleId?: string;
+  debtId?: string;
+  observedBalance?: number;
+  categoryId?: string;
+  type: Transaction["type"];
+  amount: number;
+  date: string;
+  note?: string;
+  tags?: string[];
+}
+
+function transactionFromDocument(document: Models.Document): Transaction {
+  const fields = document as unknown as TransactionFields;
   return {
     id: document.$id,
-    accountId: document.accountId,
-    destinationAccountId: document.destinationAccountId || undefined,
-    transferKind: document.transferKind || undefined,
-    recordKind: document.recordKind || "standard",
-    observedBalance: document.observedBalance == null ? undefined : Number(document.observedBalance),
-    categoryId: document.categoryId || undefined,
-    type: document.type,
-    amount: Number(document.amount),
-    date: new Date(document.date),
+    accountId: fields.accountId,
+    destinationAccountId: fields.destinationAccountId || undefined,
+    transferKind: fields.transferKind || undefined,
+    recordKind: fields.recordKind || "standard",
+    recurringRuleId: fields.recurringRuleId || undefined,
+    debtId: fields.debtId || undefined,
+    observedBalance: fields.observedBalance == null ? undefined : Number(fields.observedBalance),
+    categoryId: fields.categoryId || undefined,
+    type: fields.type,
+    amount: Number(fields.amount),
+    date: new Date(fields.date),
     createdAt: new Date(document.$createdAt),
-    note: document.note || undefined,
-    tags: document.tags || [],
-  };
-}
-
-function getBalanceChanges(transaction: TransactionInput): BalanceChanges {
-  const changes = new Map<string, number>();
-  if (transaction.type === "income") changes.set(transaction.accountId, transaction.amount);
-  if (transaction.type === "expense") changes.set(transaction.accountId, -transaction.amount);
-  if (transaction.type === "transfer" && transaction.destinationAccountId) {
-    changes.set(transaction.accountId, -transaction.amount);
-    changes.set(transaction.destinationAccountId, transaction.amount);
-  }
-  return changes;
-}
-
-function mergeChanges(...groups: BalanceChanges[]) {
-  const result = new Map<string, number>();
-  for (const group of groups) {
-    for (const [accountId, delta] of group) {
-      result.set(accountId, (result.get(accountId) || 0) + delta);
-    }
-  }
-  return new Map([...result].filter(([, delta]) => delta !== 0));
-}
-
-function negateChanges(changes: BalanceChanges) {
-  return new Map([...changes].map(([accountId, delta]) => [accountId, -delta]));
-}
-
-async function applyBalanceChanges(
-  databases: Awaited<ReturnType<typeof createAdminServerClient>>["databases"],
-  userId: string,
-  changes: BalanceChanges,
-) {
-  const snapshots = new Map<string, number>();
-  for (const accountId of changes.keys()) {
-    const account = await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, accountId, userId);
-    snapshots.set(accountId, Number(account.balance ?? 0));
-  }
-
-  const applied: string[] = [];
-  try {
-    for (const [accountId, delta] of changes) {
-      await databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, accountId, {
-        balance: (snapshots.get(accountId) || 0) + delta,
-      });
-      applied.push(accountId);
-    }
-  } catch (error) {
-    await Promise.allSettled(applied.map((accountId) =>
-      databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, accountId, {
-        balance: snapshots.get(accountId) || 0,
-      })
-    ));
-    throw error;
-  }
-
-  return async () => {
-    await Promise.allSettled([...snapshots].map(([accountId, balance]) =>
-      databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, accountId, { balance })
-    ));
+    note: fields.note || undefined,
+    tags: fields.tags || [],
   };
 }
 
@@ -120,30 +89,6 @@ async function validateTransaction(
   }
 }
 
-function documentPayload(userId: string, payload: TransactionInput, clearOptional = false) {
-  const data: Record<string, unknown> = {
-    userId,
-    accountId: payload.accountId,
-    type: payload.type,
-    amount: payload.amount,
-    date: payload.date.toISOString(),
-    tags: payload.tags || [],
-  };
-  if (payload.categoryId) data.categoryId = payload.categoryId;
-  else if (clearOptional) data.categoryId = null;
-  if (payload.destinationAccountId) data.destinationAccountId = payload.destinationAccountId;
-  else if (clearOptional) data.destinationAccountId = null;
-  if (payload.type === "transfer") data.transferKind = payload.transferKind || "account";
-  else if (clearOptional) data.transferKind = null;
-  if (payload.recordKind) data.recordKind = payload.recordKind;
-  else if (clearOptional) data.recordKind = null;
-  if (payload.observedBalance != null) data.observedBalance = payload.observedBalance;
-  else if (clearOptional) data.observedBalance = null;
-  if (payload.note) data.note = payload.note;
-  else if (clearOptional) data.note = null;
-  return data;
-}
-
 export async function createBalanceAdjustmentAction(payload: {
   accountId: string;
   observedBalance: number;
@@ -177,22 +122,9 @@ export async function createBalanceAdjustmentAction(payload: {
       Query.limit(500),
     ]);
 
-    let activityAfterSnapshot = 0;
-    for (const document of response.documents) {
-      const transaction = transactionFromDocument(document);
-      if (transaction.accountId === payload.accountId) {
-        if (transaction.type === "income") activityAfterSnapshot += transaction.amount;
-        if (transaction.type === "expense") activityAfterSnapshot -= transaction.amount;
-        if (transaction.type === "transfer") activityAfterSnapshot -= transaction.amount;
-      }
-      if (transaction.type === "transfer" && transaction.destinationAccountId === payload.accountId) {
-        activityAfterSnapshot += transaction.amount;
-      }
-    }
-
+    const recentTransactions = response.documents.map((document) => transactionFromDocument(document));
     const currentBalance = Number(account.balance || 0);
-    const expectedAtSnapshot = currentBalance - activityAfterSnapshot;
-    const delta = payload.observedBalance - expectedAtSnapshot;
+    const delta = computeObservedDelta(recentTransactions, payload.accountId, currentBalance, payload.observedBalance, snapshotEnd);
     const type: Transaction["type"] = delta < 0 ? "expense" : "income";
     const transaction: TransactionInput = {
       accountId: payload.accountId,
@@ -211,7 +143,13 @@ export async function createBalanceAdjustmentAction(payload: {
     try {
       const document = await databases.createDocument(
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, transaction),
+        documentPermissions(user.id),
       );
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: document.$id, action: "create",
+        summary: `Catatan kondisi: penyesuaian saldo "${(account as unknown as { name?: string }).name ?? ""}"`,
+        after: { delta, newBalance: currentBalance + delta, observedBalance: payload.observedBalance },
+      });
       return {
         success: true,
         id: document.$id,
@@ -255,7 +193,12 @@ export async function createTransactionAction(payload: TransactionInput) {
     try {
       const document = await databases.createDocument(
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, payload),
+        documentPermissions(user.id),
       );
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: document.$id, action: "create",
+        summary: `Mencatat transaksi ${payload.type}`, after: payload,
+      });
       return { success: true, id: document.$id, createdAt: document.$createdAt };
     } catch (error) {
       await rollback();
@@ -281,6 +224,10 @@ export async function updateTransactionAction(payload: Transaction) {
       await databases.updateDocument(
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, payload.id, documentPayload(user.id, payload, true),
       );
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: payload.id, action: "update",
+        summary: `Mengubah transaksi ${payload.type}`, before: previous, after: payload,
+      });
       return { success: true };
     } catch (error) {
       await rollback();
@@ -303,6 +250,10 @@ export async function deleteTransactionAction(id: string) {
     const rollback = await applyBalanceChanges(databases, user.id, negateChanges(getBalanceChanges(transaction)));
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTIONS.TRANSACTIONS, id);
+      await recordAuditLog(databases, user.id, {
+        entityType: "transaction", entityId: id, action: "delete",
+        summary: `Menghapus transaksi ${transaction.type}`, before: transaction,
+      });
       return { success: true };
     } catch (error) {
       await rollback();

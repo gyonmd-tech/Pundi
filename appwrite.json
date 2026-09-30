@@ -55,6 +55,8 @@
             { "key": "destinationAccountId", "type": "string", "size": 36, "required": false },
             { "key": "transferKind", "type": "string", "size": 24, "required": false },
             { "key": "recordKind", "type": "string", "size": 32, "required": false },
+            { "key": "recurringRuleId", "type": "string", "size": 36, "required": false },
+            { "key": "debtId", "type": "string", "size": 36, "required": false },
             { "key": "observedBalance", "type": "integer", "required": false },
             { "key": "categoryId", "type": "string", "size": 36, "required": false },
             { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
@@ -131,11 +133,13 @@
             { "key": "userId", "type": "string", "size": 36, "required": true },
             { "key": "type", "type": "enum", "elements": ["budget_warning", "goal_progress", "trend", "tip"], "required": true },
             { "key": "message", "type": "string", "size": 500, "required": true },
-            { "key": "isRead", "type": "boolean", "required": false, "default": false }
+            { "key": "isRead", "type": "boolean", "required": false, "default": false },
+            { "key": "key", "type": "string", "size": 128, "required": false }
           ],
           "indexes": [
             { "key": "idx_user", "type": "key", "attributes": ["userId"] },
-            { "key": "idx_user_read", "type": "key", "attributes": ["userId", "isRead"] }
+            { "key": "idx_user_read", "type": "key", "attributes": ["userId", "isRead"] },
+            { "key": "idx_user_key", "type": "key", "attributes": ["userId", "key"] }
           ]
         },
         {
@@ -158,8 +162,71 @@
             { "key": "idx_user", "type": "key", "attributes": ["userId"] },
             { "key": "idx_user_status", "type": "key", "attributes": ["userId", "status"] }
           ]
+        },
+        {
+          "$id": "recurring_rules",
+          "name": "recurring_rules",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "accountId", "type": "string", "size": 36, "required": true },
+            { "key": "destinationAccountId", "type": "string", "size": 36, "required": false },
+            { "key": "categoryId", "type": "string", "size": 36, "required": false },
+            { "key": "goalId", "type": "string", "size": 36, "required": false },
+            { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
+            { "key": "amount", "type": "integer", "required": true },
+            { "key": "note", "type": "string", "size": 500, "required": false },
+            { "key": "frequency", "type": "enum", "elements": ["weekly", "monthly", "yearly"], "required": true },
+            { "key": "startDate", "type": "datetime", "required": true },
+            { "key": "nextOccurrence", "type": "datetime", "required": true },
+            { "key": "endDate", "type": "datetime", "required": false },
+            { "key": "isActive", "type": "boolean", "required": false, "default": true },
+            { "key": "lastGeneratedDate", "type": "datetime", "required": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_user_active_next", "type": "key", "attributes": ["userId", "isActive", "nextOccurrence"] }
+          ]
+        },
+        {
+          "$id": "audit_logs",
+          "name": "audit_logs",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "entityType", "type": "string", "size": 32, "required": true },
+            { "key": "entityId", "type": "string", "size": 36, "required": false },
+            { "key": "action", "type": "string", "size": 16, "required": true },
+            { "key": "actor", "type": "string", "size": 16, "required": true, "default": "user" },
+            { "key": "summary", "type": "string", "size": 500, "required": true },
+            { "key": "before", "type": "string", "size": 2000, "required": false },
+            { "key": "after", "type": "string", "size": 2000, "required": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_user_entity", "type": "key", "attributes": ["userId", "entityType"] },
+            { "key": "idx_user_created", "type": "key", "attributes": ["userId", "$createdAt"] }
+          ]
         }
       ]
+    }
+  ],
+  "buckets": [
+    {
+      "$id": "avatars",
+      "name": "avatars",
+      "$permissions": [],
+      "fileSecurity": true,
+      "enabled": true,
+      "maximumFileSize": 2097152,
+      "allowedFileExtensions": ["jpg", "jpeg", "png", "webp"],
+      "compression": "gzip",
+      "encryption": true,
+      "antivirus": true
     }
   ]
 }

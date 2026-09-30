@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 /**
  * app/(app)/anggaran/page.tsx
  * Manajemen anggaran bulanan per kategori dengan CategoryIcon,
@@ -136,17 +137,14 @@ export default function AnggaranPage() {
           </p>
         </div>
 
-        <button
+        <Button
+          variant="primary"
           onClick={() => { setEditId(null); setShowForm(true); }}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-card text-small font-semibold shadow-sm",
-            "transition-all duration-200 hover:brightness-105 active:scale-95 group"
-          )}
-          style={{ backgroundColor: "var(--color-pine)", color: "white", fontFamily: "var(--font-ui)" }}
+          className="group"
         >
           <Plus size={16} strokeWidth={2.5} className="transition-transform group-hover:rotate-90" />
           <span className="hidden sm:inline">Tambah Anggaran</span>
-        </button>
+        </Button>
       </div>
 
       {/* Summary Cards */}

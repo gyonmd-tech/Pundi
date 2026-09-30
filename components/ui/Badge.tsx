@@ -8,7 +8,7 @@ const badgeVariants = cva("inline-flex items-center gap-1.5 rounded-full border 
       neutral: "border-brand-900 bg-brand-900 text-white",
       primary: "border-brand-600 bg-brand-600 text-white",
       success: "border-mint-ink bg-mint-ink text-white",
-      warning: "border-[#855A00] bg-[#855A00] text-white",
+      warning: "border-warning-ink bg-warning-ink text-white",
       danger: "border-ember-ink bg-ember-ink text-white",
     },
   },

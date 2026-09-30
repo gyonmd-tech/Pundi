@@ -10,6 +10,7 @@ import {
   TrendingUp,
   WalletCards,
   HandCoins,
+  Repeat,
 } from "lucide-react";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
@@ -18,10 +19,12 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { InsightFeed } from "@/components/dashboard/InsightFeed";
+import { SafeToSpendCard } from "@/components/dashboard/SafeToSpendCard";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { formatDate, formatRupiah } from "@/lib/utils/formatter";
+import { formatAmount, formatDate, formatRupiah } from "@/lib/utils/formatter";
+import { computeSafeToSpend } from "@/lib/utils/safeToSpend";
 import {
   useAccounts,
   useBudgets,
@@ -30,6 +33,8 @@ import {
   useInsights,
   useTransactions,
   useDebts,
+  usePreferences,
+  useRecurringRules,
 } from "@/lib/data/store";
 import type { Transaction } from "@/lib/data/mock";
 
@@ -63,6 +68,8 @@ export default function DashboardPage() {
   const accounts = useAccounts();
   const categories = useCategories();
   const debts = useDebts();
+  const preferences = usePreferences();
+  const recurringRules = useRecurringRules();
 
   const now = new Date();
   const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -151,9 +158,15 @@ export default function DashboardPage() {
       amount,
     };
   });
+  const upcomingWindow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const upcomingRules = recurringRules
+    .filter((rule) => rule.isActive && new Date(rule.nextOccurrence) <= upcomingWindow)
+    .sort((a, b) => new Date(a.nextOccurrence).getTime() - new Date(b.nextOccurrence).getTime())
+    .slice(0, 3);
   const openPayable = debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const openReceivable = debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const cashHealth = Math.max(0, Math.min(100, thisMonth.income ? ((thisMonth.income - thisMonth.expense) / thisMonth.income) * 100 : 0));
+  const safeToSpend = computeSafeToSpend(accounts, budgets, transactions, recurringRules, now);
 
   return (
     <div className="dashboard-modern space-y-5 font-ui sm:space-y-6">
@@ -171,6 +184,8 @@ export default function DashboardPage() {
         </Link>
       </header>
 
+      <SafeToSpendCard result={safeToSpend} />
+
       <DashboardLayout>
         <Card variant="highlight" data-widget-id="balance" className="relative h-full overflow-hidden rounded-[1.75rem] p-5 sm:p-7">
           <div className="absolute -right-14 -top-20 h-56 w-56 rounded-full border-[34px] border-white/8" />
@@ -186,7 +201,7 @@ export default function DashboardPage() {
             </div>
             <p className="mt-8 text-small font-semibold text-white/70">Total saldo tersedia</p>
             <p className="mt-1 font-ui tabular-nums text-[clamp(1.9rem,4vw,3.25rem)] font-semibold tracking-[-0.06em]">
-              {formatRupiah(totalBalance)}
+              {formatAmount(totalBalance, preferences.compactNumbers)}
             </p>
             <SummarySparkline values={balanceTrend} className="mt-5 text-white" />
             <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/15 pt-4">
@@ -201,11 +216,11 @@ export default function DashboardPage() {
         </Card>
 
         <div data-widget-id="income" className="h-full">
-          <SummaryCard title="Pemasukan bulan ini" amount={thisMonth.income} delta={incomeDelta} deltaLabel="dibanding bulan lalu" icon={TrendingUp} variant="positive" trend={incomeTrend} caption="dibanding bulan lalu" />
+          <SummaryCard title="Pemasukan bulan ini" amount={thisMonth.income} delta={incomeDelta} deltaLabel="dibanding bulan lalu" icon={TrendingUp} variant="positive" trend={incomeTrend} caption="dibanding bulan lalu" compact={preferences.compactNumbers} />
         </div>
 
         <div data-widget-id="expense" className="h-full">
-          <SummaryCard title="Pengeluaran bulan ini" amount={thisMonth.expense} delta={expenseDelta} deltaLabel="dibanding bulan lalu" icon={TrendingDown} variant="negative" trend={expenseTrend} caption="dibanding bulan lalu" />
+          <SummaryCard title="Pengeluaran bulan ini" amount={thisMonth.expense} delta={expenseDelta} deltaLabel="dibanding bulan lalu" icon={TrendingDown} variant="negative" trend={expenseTrend} caption="dibanding bulan lalu" compact={preferences.compactNumbers} />
         </div>
         <article data-widget-id="cashflow" className="card h-full min-w-0 border-brand-600/10 bg-white">
           <div className="mb-5 flex items-center justify-between gap-4">
@@ -304,6 +319,41 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+        </article>
+
+        <article data-widget-id="upcoming" className="card flex h-full flex-col border-brand-600/10 bg-white">
+          <div className="mb-2 flex items-center justify-between border-b border-rule pb-4">
+            <div>
+              <p className="eyebrow">7 hari ke depan</p>
+              <h2 className="mt-1 flex items-center gap-2 text-heading font-bold text-ink"><Repeat size={15} className="text-ink-muted" /> Akan datang</h2>
+            </div>
+            <Link href="/transaksi" className="flex items-center gap-1 text-xs font-bold text-pine hover:underline">
+              Kelola <ArrowRight size={14} />
+            </Link>
+          </div>
+          {upcomingRules.length === 0 ? (
+            <p className="flex flex-1 items-center text-xs text-ink-muted">Tidak ada transaksi berulang yang jatuh tempo minggu ini.</p>
+          ) : (
+            <div className="flex flex-1 flex-col divide-y divide-rule/80">
+              {upcomingRules.map((rule) => {
+                const category = categories.find((item) => item.id === rule.categoryId);
+                return (
+                  <div key={rule.id} className="flex flex-1 items-center justify-between gap-3 py-3.5">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <CategoryIcon icon={category?.icon} color={category?.color} size={15} containerSize="sm" />
+                      <div className="min-w-0">
+                        <p className="truncate text-body font-bold text-ink">{rule.note || category?.name || "Transaksi berulang"}</p>
+                        <p className="truncate text-xs text-ink-muted">{formatDate(rule.nextOccurrence, "short")}</p>
+                      </div>
+                    </div>
+                    <span className={`shrink-0 font-ui tabular-nums tracking-[-0.035em] text-small font-medium ${rule.type === "income" ? "text-mint" : "text-ink"}`}>
+                      {rule.type === "income" ? "+" : rule.type === "expense" ? "−" : ""}{formatRupiah(rule.amount)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </article>
 
           <article data-widget-id="budgets" className="card h-full border-brand-600/10 bg-white">

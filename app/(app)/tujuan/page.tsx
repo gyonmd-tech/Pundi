@@ -10,14 +10,16 @@ import { DatePicker } from "@/components/ui/DatePicker";
  */
 
 import React, { useState } from "react";
-import { useApp, useGoals, useAccounts } from "@/lib/data/store";
+import { useApp, useGoals, useAccounts, useRecurringRules } from "@/lib/data/store";
 import { GoalCard } from "@/components/dashboard/GoalCard";
-import { formatRupiah, calcProgress } from "@/lib/utils/formatter";
+import { GoalContributionModal } from "@/components/tujuan/GoalContributionModal";
+import { formatRupiah, formatDate, calcProgress } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
-import { Plus, X, Target, Trash2, Sparkles } from "lucide-react";
-import type { Goal } from "@/lib/data/mock";
+import { Plus, X, Target, Trash2, Sparkles, Repeat, Pause, Play, Pencil } from "lucide-react";
+import type { Goal, RecurringRule } from "@/lib/data/mock";
 import { cn } from "@/lib/utils/cn";
 import { createGoalAction, deleteGoalAction, updateGoalAction } from "@/actions/goals";
+import { toggleRecurringRuleAction, deleteRecurringRuleAction } from "@/actions/recurring";
 
 const MONTHLY_SAVINGS = 1_200_000;
 
@@ -25,11 +27,13 @@ export default function TujuanPage() {
   const { dispatch }  = useApp();
   const goals         = useGoals();
   const accounts      = useAccounts();
+  const recurringRules = useRecurringRules();
   const { showToast } = useToast();
 
   const [showForm, setShowForm]   = useState(false);
   const [editGoal, setEditGoal]   = useState<Goal | null>(null);
   const [deleteId, setDeleteId]   = useState<string | null>(null);
+  const [contributionGoal, setContributionGoal] = useState<Goal | null>(null);
 
   const [form, setForm] = useState({
     name:            "",
@@ -134,6 +138,28 @@ export default function TujuanPage() {
     });
   }
 
+  async function toggleContribution(rule: RecurringRule) {
+    const nextActive = !rule.isActive;
+    const result = await toggleRecurringRuleAction(rule.id, nextActive);
+    if (!result.success) {
+      showToast({ type: "error", title: "Gagal mengubah status", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
+    dispatch({ type: "UPDATE_RECURRING_RULE", payload: { ...rule, isActive: nextActive } });
+  }
+
+  async function removeContribution(rule: RecurringRule) {
+    const result = await deleteRecurringRuleAction(rule.id);
+    if (!result.success) {
+      showToast({ type: "error", title: "Gagal menghapus", message: result.error || "Coba lagi beberapa saat." });
+      return;
+    }
+    dispatch({ type: "DELETE_RECURRING_RULE", payload: rule.id });
+    showToast({ type: "info", title: "Kontribusi Otomatis Dihapus" });
+  }
+
+  const frequencyLabel: Record<RecurringRule["frequency"], string> = { weekly: "minggu", monthly: "bulan", yearly: "tahun" };
+
   const totalTarget    = goals.reduce((s, g) => s + g.targetAmount, 0);
   const totalSaved     = goals.reduce((s, g) => s + g.currentAmount, 0);
   const completedCount = goals.filter(g => g.currentAmount >= g.targetAmount).length;
@@ -205,15 +231,48 @@ export default function TujuanPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full min-w-0">
-          {goals.map((g) => (
-            <GoalCard
-              key={g.id}
-              {...g}
-              monthlySavings={MONTHLY_SAVINGS}
-              onEdit={() => openEdit(g)}
-              onDelete={() => setDeleteId(g.id)}
-            />
-          ))}
+          {goals.map((g) => {
+            const contributionRule = recurringRules.find((rule) => rule.goalId === g.id);
+            return (
+              <div key={g.id} className="space-y-2">
+                <GoalCard
+                  {...g}
+                  monthlySavings={MONTHLY_SAVINGS}
+                  onEdit={() => openEdit(g)}
+                  onDelete={() => setDeleteId(g.id)}
+                />
+                {contributionRule ? (
+                  <div className={cn("flex items-center justify-between gap-2 rounded-[16px] border border-rule bg-white px-3.5 py-2.5", !contributionRule.isActive && "opacity-55")}>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Repeat size={14} className="shrink-0 text-pine" />
+                      <p className="truncate text-xs font-semibold text-ink">
+                        {formatRupiah(contributionRule.amount)}/{frequencyLabel[contributionRule.frequency]} · berikutnya {formatDate(contributionRule.nextOccurrence, "short")}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button type="button" onClick={() => toggleContribution(contributionRule)} className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title={contributionRule.isActive ? "Jeda" : "Lanjutkan"} aria-label={contributionRule.isActive ? "Jeda kontribusi" : "Lanjutkan kontribusi"}>
+                        {contributionRule.isActive ? <Pause size={13} /> : <Play size={13} />}
+                      </button>
+                      <button type="button" onClick={() => setContributionGoal(g)} className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title="Edit kontribusi" aria-label="Edit kontribusi otomatis">
+                        <Pencil size={13} />
+                      </button>
+                      <button type="button" onClick={() => removeContribution(contributionRule)} className="p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors" title="Hapus kontribusi" aria-label="Hapus kontribusi otomatis">
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setContributionGoal(g)}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-[16px] border border-dashed border-pine/30 bg-pine-10/40 px-3.5 py-2.5 text-xs font-semibold text-pine transition-colors hover:bg-pine-10"
+                  >
+                    <Repeat size={13} /> Sisihkan otomatis
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -405,6 +464,16 @@ export default function TujuanPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {contributionGoal && (
+        <GoalContributionModal
+          key={contributionGoal.id}
+          open={Boolean(contributionGoal)}
+          goal={contributionGoal}
+          rule={recurringRules.find((rule) => rule.goalId === contributionGoal.id) || null}
+          onClose={() => setContributionGoal(null)}
+        />
       )}
     </div>
   );

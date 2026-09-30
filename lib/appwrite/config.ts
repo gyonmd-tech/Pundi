@@ -19,6 +19,22 @@ export function normalizeEnvironmentValue(value: string | undefined, fallback = 
   return normalized || fallback;
 }
 
+function warnMissingEnv(varName: string) {
+  // Hanya untuk visibilitas developer; mode demo/guest tetap berjalan tanpa
+  // Appwrite (lihat actions/auth.ts, actions/bootstrap.ts), jadi ini tidak
+  // menghentikan aplikasi — tapi setiap panggilan Appwrite nyata akan gagal
+  // dengan jelas alih-alih diam-diam menyasar proyek yang salah.
+  if (process.env.NODE_ENV !== "production") return;
+  console.warn(
+    `[appwrite/config] ${varName} tidak diset. Fitur berbasis akun cloud tidak akan berfungsi ` +
+      `sampai environment variable ini dikonfigurasi di deployment.`,
+  );
+}
+
+if (!process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) warnMissingEnv("NEXT_PUBLIC_APPWRITE_ENDPOINT");
+if (!process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) warnMissingEnv("NEXT_PUBLIC_APPWRITE_PROJECT_ID");
+if (!process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID) warnMissingEnv("NEXT_PUBLIC_APPWRITE_DATABASE_ID");
+
 export const APPWRITE_ENDPOINT = normalizeEnvironmentValue(
   process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
   "https://sgp.cloud.appwrite.io/v1",
