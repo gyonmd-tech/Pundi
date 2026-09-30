@@ -39,6 +39,7 @@ import { deleteCategoryAction } from "@/actions/categories";
 import { updatePreferencesAction } from "@/actions/preferences";
 import { useToast } from "@/lib/context/ToastContext";
 import { buildBackupPayload, downloadBackupJson } from "@/lib/utils/backupExport";
+import { getAvatarUrl } from "@/lib/appwrite/storage";
 
 const accountTypeLabel: Record<string, string> = {
   bank: "Rekening bank",
@@ -161,8 +162,13 @@ export default function PengaturanPage() {
         <div className="absolute -right-12 -top-20 h-44 w-44 rounded-full border-[26px] border-white/10" />
         <div className="absolute -bottom-28 -left-12 h-44 w-44 rounded-full bg-brand-500/35" />
         <div className="relative flex flex-col items-center justify-center text-center sm:flex-row sm:text-left">
-          <div className="grid h-24 w-24 shrink-0 place-items-center rounded-[28px] bg-white text-2xl font-black text-brand-900 shadow-[0_14px_30px_rgba(17,39,114,.24)]">
-            {displayName.split(" ").slice(0, 2).map((name) => name[0]).join("")}
+          <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-[28px] bg-white text-2xl font-black text-brand-900 shadow-[0_14px_30px_rgba(17,39,114,.24)]">
+            {preferences.avatarFileId ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={getAvatarUrl(preferences.avatarFileId)} alt="" className="h-full w-full object-cover" />
+            ) : (
+              displayName.split(" ").slice(0, 2).map((name) => name[0]).join("")
+            )}
           </div>
           <div className="mt-4 min-w-0 sm:ml-5 sm:mt-0">
             <Badge tone="success"><ShieldCheck className="h-3.5 w-3.5" />Terverifikasi</Badge>
@@ -311,7 +317,17 @@ export default function PengaturanPage() {
       <footer className="flex items-center gap-3 rounded-[22px] border border-brand-600/10 bg-white p-4 shadow-card sm:p-5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-brand-900 text-white shadow-card"><Info className="h-4 w-4" /></span><div><p className="text-sm font-extrabold text-ink">Pundi Personal Finance</p><p className="text-xs text-ink-muted">Next.js 16 · Appwrite · Versi 1.0.0</p></div></footer>
 
       <AccountManagerModal key={editingAccount?.id ?? "new-account"} open={accountModalOpen} account={editingAccount} onClose={() => setAccountModalOpen(false)} />
-      <ProfileNameModal key={`profile-${displayName}`} open={profileOpen} currentName={displayName} email={displayEmail} onClose={() => setProfileOpen(false)} onSaved={setProfileName} />
+      <ProfileNameModal
+        key={`profile-${displayName}`}
+        open={profileOpen}
+        currentName={displayName}
+        email={displayEmail}
+        avatarFileId={preferences.avatarFileId}
+        isDemo={connection.mode !== "cloud"}
+        onClose={() => setProfileOpen(false)}
+        onSaved={setProfileName}
+        onAvatarUploaded={(fileId) => dispatch({ type: "UPDATE_PREFERENCES", payload: { ...preferences, avatarFileId: fileId } })}
+      />
     </div>
   );
 }

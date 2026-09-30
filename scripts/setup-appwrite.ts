@@ -4,7 +4,7 @@
  * Jalankan: npm run db:setup
  */
 
-import { Client, Databases } from "node-appwrite";
+import { Client, Databases, Storage } from "node-appwrite";
 import fs from "fs";
 import path from "path";
 import schema from "../appwrite.json";
@@ -64,6 +64,7 @@ const client = new Client()
   .setKey(apiKey);
 
 const databases = new Databases(client);
+const storage = new Storage(client);
 
 async function setup() {
   console.log(`\n🚀 Memulai inisialisasi database Appwrite pada project: ${projectId}...`);
@@ -153,6 +154,34 @@ async function setup() {
   }
 
   console.log(`\n🎉 Seluruh ${collections.length} Collections dan Attributes Appwrite berhasil diinisialisasi!\n`);
+
+  // 5. Buat Storage Buckets (mis. avatar profil) dari schema appwrite.json
+  const buckets = (schema as { buckets?: any[] }).buckets || [];
+  for (const bucket of buckets) {
+    console.log(`\n🪣 Memproses bucket: ${bucket.name} (${bucket.$id})...`);
+    try {
+      await storage.getBucket(bucket.$id);
+      console.log(`  ✓ Bucket '${bucket.name}' sudah ada.`);
+    } catch (err: any) {
+      if (err.code === 404) {
+        await storage.createBucket({
+          bucketId: bucket.$id,
+          name: bucket.name,
+          permissions: bucket.$permissions || [],
+          fileSecurity: bucket.fileSecurity,
+          enabled: bucket.enabled,
+          maximumFileSize: bucket.maximumFileSize,
+          allowedFileExtensions: bucket.allowedFileExtensions,
+          compression: bucket.compression,
+          encryption: bucket.encryption,
+          antivirus: bucket.antivirus,
+        });
+        console.log(`  ✓ Berhasil membuat bucket '${bucket.name}'.`);
+      } else {
+        console.warn(`  ✕ Gagal membuat bucket: ${err.message}`);
+      }
+    }
+  }
 }
 
 setup().catch((e) => {

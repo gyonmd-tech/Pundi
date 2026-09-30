@@ -5,10 +5,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
-import { useApp, useInsights } from "@/lib/data/store";
+import { useApp, useInsights, usePreferences } from "@/lib/data/store";
 import { useSidebar } from "@/lib/context/SidebarContext";
 import { cn } from "@/lib/utils/cn";
 import { IconButton } from "@/components/ui/Button";
+import { getAvatarUrl } from "@/lib/appwrite/storage";
 import { getNavigation, isRouteActive } from "./navigation";
 import { SidebarItem } from "./SidebarItem";
 
@@ -17,6 +18,7 @@ export function AppSidebar() {
   const router = useRouter();
   const insights = useInsights();
   const { connection } = useApp();
+  const preferences = usePreferences();
   const { isCollapsed, toggleSidebar } = useSidebar();
   const navigation = getNavigation(insights.filter((item) => !item.isRead).length);
   const displayName = connection.userName ?? (connection.mode === "cloud" ? "Pengguna Pundi" : "Sarah Dewi");
@@ -79,7 +81,12 @@ export function AppSidebar() {
 
       <div className="border-t border-white/10 p-2.5">
         <div className={cn("flex items-center rounded-[18px] border border-white/15 bg-white/10 p-2 shadow-card", isCollapsed ? "justify-center" : "gap-2.5")}>
-          <Link href="/pengaturan" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-xs font-bold text-brand-900 shadow-card">{initials}</Link>
+          <Link href="/pengaturan" className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-xs font-bold text-brand-900 shadow-card">
+            {preferences.avatarFileId ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={getAvatarUrl(preferences.avatarFileId)} alt="" className="h-full w-full object-cover" />
+            ) : initials}
+          </Link>
           {!isCollapsed ? (
             <>
               <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-white">{displayName}</p><p className="text-[10px] font-medium text-white/60">{connection.mode === "cloud" ? "Akun cloud" : "Mode demo"}</p></div>

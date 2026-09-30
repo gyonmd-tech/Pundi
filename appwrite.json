@@ -192,5 +192,19 @@
         }
       ]
     }
+  ],
+  "buckets": [
+    {
+      "$id": "avatars",
+      "name": "avatars",
+      "$permissions": [],
+      "fileSecurity": true,
+      "enabled": true,
+      "maximumFileSize": 2097152,
+      "allowedFileExtensions": ["jpg", "jpeg", "png", "webp"],
+      "compression": "gzip",
+      "encryption": true,
+      "antivirus": true
+    }
   ]
 }

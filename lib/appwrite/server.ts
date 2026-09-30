@@ -1,7 +1,7 @@
 /**
  * Server-side Appwrite clients for Server Components and Server Actions.
  */
-import { Account, Client, Databases, Users } from "node-appwrite";
+import { Account, Client, Databases, Storage, Users } from "node-appwrite";
 import { cookies } from "next/headers";
 import {
   APPWRITE_ENDPOINT,
@@ -45,6 +45,9 @@ export async function createAdminServerClient() {
     },
     get users() {
       return new Users(client);
+    },
+    get storage() {
+      return new Storage(client);
     },
   };
 }
