@@ -28,7 +28,7 @@ interface SettingsCardProps {
 
 export function SettingsCard({ title, description, icon: Icon, tone = "violet", action, children, className }: SettingsCardProps) {
   return (
-    <section className={cn("flex h-full flex-col rounded-[26px] border p-4 shadow-card sm:p-5", toneClasses[tone], className)}>
+    <section className={cn("flex h-full min-w-0 flex-col rounded-[22px] border p-4 shadow-card sm:rounded-[26px] sm:p-5", toneClasses[tone], className)}>
       <div className="mb-4 flex items-start justify-between gap-3 border-b border-rule/70 pb-4">
         <div className="flex min-w-0 items-start gap-3">
           <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[13px]", iconClasses[tone])}>

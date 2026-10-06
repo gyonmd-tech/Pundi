@@ -148,7 +148,7 @@ export default function AnggaranPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full min-w-0">
         <div className="card p-4 hover:border-pine/30 transition-all w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
             Total Batas Anggaran
@@ -170,7 +170,7 @@ export default function AnggaranPage() {
           </p>
         </div>
 
-        <div className="card p-4 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="card col-span-2 p-4 hover:border-pine/30 transition-all sm:col-span-1" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
             Sisa Alokasi
           </p>
@@ -210,11 +210,11 @@ export default function AnggaranPage() {
 
       {/* Budget List Card */}
       <div className="card p-4 sm:p-6" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between pb-3 mb-2 border-b border-rule">
+        <div className="flex items-center justify-between gap-3 pb-3 mb-2 border-b border-rule">
           <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
             Daftar Alokasi per Kategori
           </h2>
-          <span className="text-xs font-mono text-ink-muted">
+          <span className="shrink-0 whitespace-nowrap text-xs font-mono text-ink-muted">
             {thisPeriodBudgets.length} kategori aktif
           </span>
         </div>

@@ -191,7 +191,7 @@ export default function TujuanPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full min-w-0">
         <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Total Target</p>
           <p className="tabular-nums font-mono font-bold text-heading text-ink">{formatRupiah(totalTarget)}</p>
@@ -202,7 +202,7 @@ export default function TujuanPage() {
           <p className="tabular-nums font-mono font-bold text-heading text-pine">{formatRupiah(totalSaved)}</p>
         </div>
 
-        <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="card col-span-2 p-4 transition-all hover:border-pine/30 w-full min-w-0 sm:col-span-1" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Kemajuan Kolektif</p>
           <p className="tabular-nums font-mono font-bold text-heading text-brass">
             {totalTarget > 0 ? calcProgress(totalSaved, totalTarget) : 0}% ({completedCount}/{goals.length} tercapai)
@@ -250,13 +250,13 @@ export default function TujuanPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <button type="button" onClick={() => toggleContribution(contributionRule)} className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title={contributionRule.isActive ? "Jeda" : "Lanjutkan"} aria-label={contributionRule.isActive ? "Jeda kontribusi" : "Lanjutkan kontribusi"}>
+                      <button type="button" onClick={() => toggleContribution(contributionRule)} className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title={contributionRule.isActive ? "Jeda" : "Lanjutkan"} aria-label={contributionRule.isActive ? "Jeda kontribusi" : "Lanjutkan kontribusi"}>
                         {contributionRule.isActive ? <Pause size={13} /> : <Play size={13} />}
                       </button>
-                      <button type="button" onClick={() => setContributionGoal(g)} className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title="Edit kontribusi" aria-label="Edit kontribusi otomatis">
+                      <button type="button" onClick={() => setContributionGoal(g)} className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title="Edit kontribusi" aria-label="Edit kontribusi otomatis">
                         <Pencil size={13} />
                       </button>
-                      <button type="button" onClick={() => removeContribution(contributionRule)} className="p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors" title="Hapus kontribusi" aria-label="Hapus kontribusi otomatis">
+                      <button type="button" onClick={() => removeContribution(contributionRule)} className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors" title="Hapus kontribusi" aria-label="Hapus kontribusi otomatis">
                         <Trash2 size={13} />
                       </button>
                     </div>

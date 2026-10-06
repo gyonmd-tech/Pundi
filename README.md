@@ -55,7 +55,7 @@ Pundi tersedia dalam dua bentuk aplikasi mobile, keduanya memakai kode web yang 
 
 ### 1. PWA (pasang dari browser)
 
-Setelah web di-deploy lewat HTTPS, Pundi bisa langsung di-install:
+Buka **https://pundi-theta.vercel.app** di ponsel, lalu install:
 
 - **Android / Chrome / Edge**: buka menu **Lainnya → Pasang aplikasi Pundi** di navigasi bawah, atau pilih *Install app* dari menu browser.
 - **iPhone / iPad (Safari)**: ketuk **Bagikan → Tambah ke Layar Utama**.
@@ -64,17 +64,14 @@ Yang disertakan: manifest (`app/manifest.ts`) dengan ikon maskable dan shortcut 
 
 ### 2. Aplikasi native Android & iOS (Capacitor)
 
-Folder `android/` dan `ios/` berisi proyek native yang membungkus Pundi dalam WebView layar penuh. Karena Pundi memakai Server Actions, aplikasi native memuat URL web yang sudah di-deploy.
+Folder `android/` dan `ios/` berisi proyek native yang membungkus Pundi dalam WebView layar penuh. Karena Pundi memakai Server Actions, aplikasi native memuat versi produksi di **https://pundi-theta.vercel.app** — setiap deploy ke Vercel langsung terlihat di aplikasi tanpa rilis ulang.
 
 ```bash
-# Android (butuh Android Studio)
-PUNDI_APP_URL=https://pundi-kamu.vercel.app npm run mobile:android
-
-# iOS (butuh macOS + Xcode)
-PUNDI_APP_URL=https://pundi-kamu.vercel.app npm run mobile:ios
+npm run mobile:android   # Android (butuh Android Studio)
+npm run mobile:ios       # iOS (butuh macOS + Xcode)
 ```
 
-Perintah di atas menyinkronkan konfigurasi (`capacitor.config.ts`) lalu membuka proyek di Android Studio / Xcode untuk dijalankan di emulator, perangkat, atau dibuat file rilis (`.aab` untuk Play Store, archive untuk App Store). Di Windows (cmd), set variabel dulu: `set PUNDI_APP_URL=https://...` lalu `npm run mobile:android`. Ikon dan splash screen sudah memakai logo Pundi.
+Perintah di atas menyinkronkan konfigurasi (`capacitor.config.ts`) lalu membuka proyek di Android Studio / Xcode untuk dijalankan di emulator, perangkat, atau dibuat file rilis (`.aab` untuk Play Store, archive untuk App Store). Untuk menguji deploy lain (mis. preview Vercel), timpa alamatnya: `PUNDI_APP_URL=https://alamat-preview.vercel.app npm run mobile:android`. Ikon dan splash screen sudah memakai logo Pundi.
 
 ## Perintah proyek
 

@@ -84,6 +84,16 @@ export function BudgetProgress({
   const StatusIcon = cfg.Icon;
   const remaining  = Math.max(limit - spent, 0);
 
+  const statusBadge = (
+    <span
+      className="inline-flex items-center gap-1 whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-semibold shadow-2xs"
+      style={{ backgroundColor: cfg.bgColor, color: cfg.textColor, fontFamily: "var(--font-ui)" }}
+    >
+      <StatusIcon size={12} strokeWidth={2.2} />
+      {cfg.label} ({progress}%)
+    </span>
+  );
+
   return (
     <div
       className={cn(
@@ -109,30 +119,21 @@ export function BudgetProgress({
                 {period}
               </span>
             )}
+            {/* Di ponsel badge pindah ke bawah nama supaya nama kategori tidak terpotong. */}
+            <span className="mt-1 flex sm:hidden">{statusBadge}</span>
           </div>
         </div>
 
         {/* Right side: Badge + Action Buttons side-by-side */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <div
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold shadow-2xs"
-            style={{
-              backgroundColor: cfg.bgColor,
-              color: cfg.textColor,
-            }}
-          >
-            <StatusIcon size={12} strokeWidth={2.2} />
-            <span style={{ fontFamily: "var(--font-ui)" }}>
-              {cfg.label} ({progress}%)
-            </span>
-          </div>
+          <span className="hidden sm:flex">{statusBadge}</span>
 
           {(onEdit || onDelete) && (
             <div className="flex items-center gap-0.5 ml-1 border-l border-rule/50 pl-1">
               {onEdit && (
                 <button
                   onClick={onEdit}
-                  className="p-1 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
+                  className="grid h-9 w-9 place-items-center rounded-lg text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors sm:h-auto sm:w-auto sm:p-1"
                   title="Edit batas anggaran"
                   aria-label="Edit batas anggaran"
                 >
@@ -142,7 +143,7 @@ export function BudgetProgress({
               {onDelete && (
                 <button
                   onClick={onDelete}
-                  className="p-1 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
+                  className="grid h-9 w-9 place-items-center rounded-lg text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors sm:h-auto sm:w-auto sm:p-1"
                   title="Hapus anggaran"
                   aria-label="Hapus anggaran"
                 >

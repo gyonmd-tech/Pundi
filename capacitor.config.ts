@@ -8,28 +8,24 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * di dalam WebView layar penuh — setiap deploy web otomatis memperbarui app
  * tanpa rilis ulang ke Play Store / App Store.
  *
- * Set URL produksi sebelum `npx cap sync`:
- *   PUNDI_APP_URL=https://pundi-kamu.vercel.app npm run mobile:sync
+ * Default memuat produksi di https://pundi-theta.vercel.app. Untuk menguji
+ * deploy lain (mis. preview Vercel), timpa lewat env:
+ *   PUNDI_APP_URL=https://alamat-lain.vercel.app npm run mobile:sync
  */
-const appUrl = process.env.PUNDI_APP_URL?.replace(/\/$/, "");
-
-if (!appUrl) {
-  console.warn("[capacitor] PUNDI_APP_URL belum diset — app hanya akan menampilkan layar mobile/www/index.html.");
-}
+const PRODUCTION_URL = "https://pundi-theta.vercel.app";
+const appUrl = (process.env.PUNDI_APP_URL || PRODUCTION_URL).replace(/\/$/, "");
 
 const config: CapacitorConfig = {
   appId: "id.pundi.app",
   appName: "Pundi",
   webDir: "mobile/www",
   backgroundColor: "#F4F7FC",
-  server: appUrl
-    ? {
-        url: `${appUrl}/dashboard`,
-        cleartext: appUrl.startsWith("http://"),
-        allowNavigation: [new URL(appUrl).host, "*.appwrite.io", "*.cloud.appwrite.io"],
-        errorPath: "index.html",
-      }
-    : undefined,
+  server: {
+    url: `${appUrl}/dashboard`,
+    cleartext: appUrl.startsWith("http://"),
+    allowNavigation: [new URL(appUrl).host, "*.appwrite.io", "*.cloud.appwrite.io"],
+    errorPath: "index.html",
+  },
   android: {
     allowMixedContent: false,
   },

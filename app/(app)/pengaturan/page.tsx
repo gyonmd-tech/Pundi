@@ -160,11 +160,11 @@ export default function PengaturanPage() {
         </div>
       </header>
 
-      <Card variant="highlight" className="relative overflow-hidden p-6 sm:p-8">
+      <Card variant="highlight" className="relative overflow-hidden p-5 sm:p-8">
         <div className="absolute -right-12 -top-20 h-44 w-44 rounded-full border-[26px] border-white/10" />
         <div className="absolute -bottom-28 -left-12 h-44 w-44 rounded-full bg-brand-500/35" />
         <div className="relative flex flex-col items-center justify-center text-center sm:flex-row sm:text-left">
-          <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-[28px] bg-surface-high text-2xl font-black text-brand-900 shadow-[0_14px_30px_rgba(17,39,114,.24)]">
+          <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[24px] bg-surface-high sm:h-24 sm:w-24 sm:rounded-[28px] text-2xl font-black text-brand-900 shadow-[0_14px_30px_rgba(17,39,114,.24)]">
             {preferences.avatarFileId ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={getAvatarUrl(preferences.avatarFileId)} alt="" className="h-full w-full object-cover" />
@@ -174,22 +174,22 @@ export default function PengaturanPage() {
           </div>
           <div className="mt-4 min-w-0 sm:ml-5 sm:mt-0">
             <Badge tone="success"><ShieldCheck className="h-3.5 w-3.5" />Terverifikasi</Badge>
-            <h2 className="mt-2 truncate text-3xl font-bold tracking-[-0.035em] text-white">{displayName}</h2>
+            <h2 className="mt-2 truncate text-2xl font-bold sm:text-3xl tracking-[-0.035em] text-white">{displayName}</h2>
             <p className="mt-0.5 truncate text-sm font-medium text-white/70">{displayEmail}</p>
             <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => setProfileOpen(true)}><Pencil className="h-3.5 w-3.5" />Ubah profil</Button>
           </div>
         </div>
-        <div className="relative mt-7 grid overflow-hidden rounded-[20px] border border-white/15 bg-brand-900/55 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="relative mt-6 grid grid-cols-2 overflow-hidden rounded-[20px] border border-white/15 bg-brand-900/55 sm:mt-7 xl:grid-cols-4">
           {[["Nama lengkap", displayName], ["Mata uang", "Rupiah Indonesia (IDR)"], ["Format angka", "1.234.567"], ["Bahasa", "Bahasa Indonesia"]].map(([label, value], index) => (
-            <button key={label} type="button" disabled={index !== 0} onClick={index === 0 ? () => setProfileOpen(true) : undefined} className="min-w-0 border-b border-white/10 px-4 py-3.5 text-center last:border-b-0 disabled:cursor-default sm:border-r sm:[&:nth-child(2)]:border-r-0 sm:[&:nth-child(3)]:border-b-0 xl:border-b-0 xl:[&:nth-child(2)]:border-r xl:[&:nth-child(3)]:border-r xl:last:border-r-0">
+            <button key={label} type="button" disabled={index !== 0} onClick={index === 0 ? () => setProfileOpen(true) : undefined} className="min-w-0 border-b border-r border-white/10 px-3 py-3 text-center disabled:cursor-default sm:px-4 sm:py-3.5 [&:nth-child(2)]:border-r-0 [&:nth-child(3)]:border-b-0 [&:nth-child(4)]:border-b-0 [&:nth-child(4)]:border-r-0 xl:border-b-0 xl:[&:nth-child(2)]:border-r xl:[&:nth-child(3)]:border-r xl:last:border-r-0">
               <span className="block text-[10px] font-bold uppercase tracking-[0.08em] text-white/55">{label}</span>
-              <span className="mt-1.5 block truncate text-sm font-bold text-white">{value}</span>
+              <span className="mt-1.5 block break-words text-[13px] font-bold leading-snug text-white sm:truncate sm:text-sm">{value}</span>
             </button>
           ))}
         </div>
       </Card>
 
-      <div className="grid items-start gap-5 lg:grid-cols-12">
+      <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12">
 
         <SettingsCard title="Preferensi aplikasi" description="Atur pengalaman harian tanpa meninggalkan halaman." icon={Palette} tone="mint" className="lg:col-span-6">
           <div className="grid gap-3 sm:grid-cols-2">
