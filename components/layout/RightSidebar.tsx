@@ -18,7 +18,7 @@ export function RightSidebar({ quickAddOpen, onQuickAddClose }: RightSidebarProp
       aria-label="Tambah transaksi"
       onMouseDown={(event) => { if (event.target === event.currentTarget) onQuickAddClose(); }}
     >
-      <aside className="absolute bottom-2 right-2 top-2 w-[calc(100%-1rem)] max-w-[440px] overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-clay animate-in slide-in-from-right duration-300 sm:bottom-3 sm:right-3 sm:top-3">
+      <aside className="absolute inset-x-0 bottom-0 top-[max(2.5rem,env(safe-area-inset-top))] overflow-hidden rounded-t-[28px] border border-rule bg-surface-high pb-[env(safe-area-inset-bottom)] shadow-clay animate-in slide-in-from-bottom duration-300 sm:inset-x-auto sm:bottom-3 sm:right-3 sm:top-3 sm:w-[calc(100%-1.5rem)] sm:max-w-[440px] sm:rounded-[28px] sm:pb-0 sm:slide-in-from-right">
         <QuickAddPanel onClose={onQuickAddClose} />
       </aside>
     </div>

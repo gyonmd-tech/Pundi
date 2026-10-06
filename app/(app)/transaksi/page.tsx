@@ -278,7 +278,7 @@ export default function TransaksiPage() {
       </div>
 
       {/* Summary 3-Strip Cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {[
           { label: "Total Pemasukan", amount: totals.income, type: "income", icon: ArrowUpRight, caption: `${filtered.filter((item) => item.type === "income").length} catatan masuk` },
           { label: "Total Pengeluaran", amount: totals.expense, type: "expense", icon: ArrowDownLeft, caption: `${filtered.filter((item) => item.type === "expense").length} catatan keluar` },
@@ -293,16 +293,16 @@ export default function TransaksiPage() {
           <Card
             key={s.label}
             variant={s.type === "net" ? "highlight" : "default"}
-            className="flex min-h-[132px] items-start justify-between gap-4 p-5"
+            className={cn("flex min-h-[104px] items-start justify-between gap-3 p-4 sm:min-h-[132px] sm:gap-4 sm:p-5", s.type === "net" && "col-span-2 sm:col-span-1")}
           >
             <div className="min-w-0 self-stretch">
-              <p className={cn("text-[11px] font-bold uppercase tracking-[0.08em]", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.label}</p>
-              <p className={cn("mt-3 tabular-nums font-ui text-[clamp(1.35rem,2.2vw,1.8rem)] font-bold tracking-[-0.045em]", s.type === "income" ? "text-mint-ink" : s.type === "expense" ? "text-ember-ink" : "text-white")}>
+              <p className={cn("text-[10px] font-bold uppercase tracking-[0.08em] sm:text-[11px]", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.label}</p>
+              <p className={cn("mt-2 whitespace-nowrap tabular-nums font-ui text-[clamp(1rem,4.6vw,1.35rem)] font-bold sm:mt-3 sm:text-[clamp(1.35rem,2.2vw,1.8rem)] tracking-[-0.045em]", s.type === "income" ? "text-mint-ink" : s.type === "expense" ? "text-ember-ink" : "text-white")}>
                 {s.type === "net" && totals.income < totals.expense ? "−" : ""}{formatRupiah(Math.abs(s.amount))}
               </p>
-              <p className={cn("mt-2 text-xs font-medium", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.caption}</p>
+              <p className={cn("mt-1.5 text-[11px] font-medium sm:mt-2 sm:text-xs", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.caption}</p>
             </div>
-            <div className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-[15px] text-white shadow-card", s.type === "income" ? "bg-mint-ink" : s.type === "expense" ? "bg-ember-ink" : "bg-white/15")}>
+            <div className={cn("h-11 w-11 shrink-0 place-items-center rounded-[15px] text-white shadow-card", s.type === "net" ? "grid" : "hidden sm:grid", s.type === "income" ? "bg-mint-ink" : s.type === "expense" ? "bg-ember-ink" : "bg-white/15")}>
               <s.icon className="h-5 w-5" />
             </div>
           </Card>
@@ -451,84 +451,50 @@ export default function TransaksiPage() {
         ) : (
           <>
             {/* ── Mobile Card List View (<768px) ── */}
-            <div className="space-y-2 md:hidden">
+            <ul className="divide-y divide-rule md:hidden">
               {pagedTransactions.map((tx) => {
                 const acc = accounts.find((a) => a.id === tx.accountId);
                 const cat = categories.find((c) => c.id === tx.categoryId);
                 const destination = accounts.find((a) => a.id === tx.destinationAccountId);
-                const typeCfg = tx.transferKind === "cash_withdrawal" ? cashWithdrawalLabel : typeLabel[tx.type];
-                const TypeIcon = typeCfg.icon;
+                const categoryLabel = tx.recordKind === "balance_adjustment" ? "Catatan kondisi saldo" : cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer" : "Lainnya");
 
                 return (
-                  <div
-                    key={tx.id}
-                    onClick={() => setDetailTransaction(tx)}
-                    className="flex items-center justify-between gap-3 border-b border-rule bg-white p-4 transition-colors last:border-b-0 hover:bg-brand-50"
-                  >
-                    {/* Left: Category Icon + Description & Metadata */}
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <li key={tx.id}>
+                    <button
+                      type="button"
+                      onClick={() => setDetailTransaction(tx)}
+                      className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-brand-50"
+                    >
                       <CategoryIcon icon={cat?.icon} color={cat?.color} size={16} containerSize="md" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-small sm:text-body font-semibold text-ink leading-snug break-words" style={{ fontFamily: "var(--font-ui)" }}>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-ink">
                           {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
-                        </p>
-                        <div className="flex items-center gap-1.5 text-xs text-ink-muted mt-1 flex-wrap font-ui">
-                          <span className="font-medium text-ink/80">{tx.recordKind === "balance_adjustment" ? "Catatan kondisi saldo" : cat?.name ?? (tx.transferKind === "cash_withdrawal" ? "Tarik tunai" : tx.type === "transfer" ? "Transfer" : "Lainnya")}</span>
-                          <span className="text-rule">·</span>
-                          <span suppressHydrationWarning className="font-mono text-[11px]">Transaksi {formatDate(tx.date, "short")}</span>
-                          <span className="text-rule">·</span>
-                          <span suppressHydrationWarning className="text-[10px]">Dicatat {formatRecordedDate(tx.createdAt || tx.date)}</span>
-                          <span className="text-rule">·</span>
-                          <div className="inline-flex items-center gap-1">
-                            <div
-                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
-                            />
-                            <span className="text-[11px] truncate max-w-[150px]">{acc?.name ?? "—"}{destination ? ` → ${destination.name}` : ""}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right: Nominal Amount + Type Badge + Action */}
-                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                      <span
-                        className="tabular-nums font-mono font-bold text-small sm:text-body"
-                        style={{
-                          color: tx.type === "income" ? "var(--color-pine)" : tx.type === "transfer" ? "var(--color-ink-muted)" : "var(--color-ink)",
-                        }}
-                      >
-                        {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}{formatRupiah(tx.amount)}
+                        </span>
+                        <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-ink-muted">
+                          <span className="truncate">{categoryLabel}</span>
+                          <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }} />
+                          <span className="truncate">{acc?.name ?? "—"}{destination ? ` → ${destination.name}` : ""}</span>
+                        </span>
                       </span>
-
-                      <div className="flex items-center gap-1.5">
-                        {tx.recordKind === "recurring" && <Badge tone="neutral" className="text-[10px]">Otomatis</Badge>}
-                        <Badge tone={tx.transferKind === "cash_withdrawal" ? "primary" : tx.type === "income" ? "success" : tx.type === "expense" ? "danger" : "warning"} className="text-[10px]">
-                          <TypeIcon size={10} strokeWidth={2.2} />
-                          {typeCfg.label}
-                        </Badge>
-                        {tx.recordKind !== "balance_adjustment" ? <button
-                          onClick={(event) => { event.stopPropagation(); setEditTransaction(tx); }}
-                          className="p-1 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
-                          title="Edit transaksi"
-                          aria-label="Edit transaksi"
+                      <span className="flex shrink-0 flex-col items-end gap-0.5">
+                        <span
+                          className={cn(
+                            "font-mono text-sm font-bold tabular-nums",
+                            tx.type === "income" ? "text-mint" : tx.type === "expense" ? "text-ember" : "text-ink-muted",
+                          )}
                         >
-                          <Pencil size={13} strokeWidth={1.8} />
-                        </button> : null}
-                        <button
-                          onClick={(event) => { event.stopPropagation(); setDeleteId(tx.id); }}
-                          className="p-1 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
-                          title="Hapus transaksi"
-                          aria-label="Hapus transaksi"
-                        >
-                          <Trash2 size={13} strokeWidth={1.8} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                          {tx.type === "income" ? "+" : tx.type === "expense" ? "−" : ""}{formatRupiah(tx.amount)}
+                        </span>
+                        <span suppressHydrationWarning className="flex items-center gap-1 text-[10px] font-medium text-ink-soft">
+                          {tx.recordKind === "recurring" ? <span className="rounded-full bg-brand-50 px-1.5 py-px font-bold text-brand-700">Otomatis</span> : null}
+                          {formatDate(tx.date, "short")}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
 
             {/* ── Desktop Data Table (≥768px) ── */}
             <div className="hidden overflow-x-auto md:block">
@@ -686,8 +652,9 @@ export default function TransaksiPage() {
               ].map(([label, value]) => <div key={label} className="grid gap-1 border-b border-rule px-4 py-3.5 last:border-b-0 sm:grid-cols-[150px_1fr] sm:items-center"><dt className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-ink-muted">{label}</dt><dd className="text-sm font-bold text-ink sm:text-right">{value}</dd></div>)}
               </dl>
             </div>
-            <footer className="flex justify-end gap-2 border-t border-rule bg-brand-50 px-5 py-4 sm:px-6">
-              <Button onClick={() => setDetailTransaction(null)} variant="outline">Tutup</Button>
+            <footer className="flex justify-end gap-2 border-t border-rule bg-brand-50 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-4">
+              <Button onClick={() => { setDetailTransaction(null); setDeleteId(detailTransaction.id); }} variant="outline" className="mr-auto text-ember"><Trash2 size={15}/> Hapus</Button>
+              <Button onClick={() => setDetailTransaction(null)} variant="outline" className="hidden sm:inline-flex">Tutup</Button>
               {detailTransaction.recordKind !== "balance_adjustment" && <Button onClick={() => { setDetailTransaction(null); setEditTransaction(detailTransaction); }}><Pencil size={15}/> Edit transaksi</Button>}
             </footer>
           </article>

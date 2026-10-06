@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { Header } from "@/components/layout/Header";
 import { RightSidebar } from "@/components/layout/RightSidebar";
@@ -19,6 +19,15 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { isCollapsed } = useSidebar();
   const { isOpen: quickAddOpen, openQuickAdd, closeQuickAdd } = useQuickAdd();
   const { connection } = useApp();
+
+  // Shortcut aplikasi terpasang (manifest) membuka /transaksi?tambah=1 → langsung buka panel tambah.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("tambah") !== "1") return;
+    url.searchParams.delete("tambah");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    openQuickAdd();
+  }, [openQuickAdd]);
 
   return (
     <div className="app-modern relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip bg-paper text-ink">
