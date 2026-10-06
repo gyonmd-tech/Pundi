@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Pundi</title>
+    <style>
+      :root { --paper: #F4F7FC; --surface: #FFFFFF; --ink: #17213D; --muted: #5F6982; --brand: #2459DE; --rule: #DCE4F2; }
+      @media (prefers-color-scheme: dark) {
+        :root { --paper: #0C1424; --surface: #1D2C4A; --ink: #E9EFFC; --muted: #98A7C4; --rule: #263554; }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        display: grid; place-items: center;
+        padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+        background: var(--paper); color: var(--ink);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main {
+        width: 100%; max-width: 380px; padding: 32px 24px; text-align: center;
+        background: var(--surface); border: 1px solid var(--rule); border-radius: 28px;
+      }
+      .logo { width: 64px; height: 64px; margin: 0 auto; border-radius: 18px; background: linear-gradient(135deg, #2860E6, #112772); }
+      h1 { margin: 20px 0 8px; font-size: 22px; }
+      p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+      button {
+        margin-top: 24px; width: 100%; min-height: 48px; border: 0; border-radius: 16px;
+        background: var(--brand); color: #fff; font: inherit; font-weight: 700; font-size: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="logo" aria-hidden="true"></div>
+      <h1>Tidak dapat terhubung</h1>
+      <p>Pundi butuh koneksi internet untuk memuat data keuanganmu. Periksa jaringan, lalu coba lagi.</p>
+      <button type="button" onclick="history.length > 1 ? history.back() : location.reload()">Coba lagi</button>
+    </main>
+  </body>
+</html>

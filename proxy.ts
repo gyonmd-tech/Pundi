@@ -46,5 +46,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|PUNDI-brand-assets|.*\\.(?:svg|png|jpg|jpeg|ico|mp4)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|PUNDI-brand-assets|sw.js|manifest.webmanifest|offline.html|.*\\.(?:svg|png|jpg|jpeg|ico|mp4)$).*)"],
 };

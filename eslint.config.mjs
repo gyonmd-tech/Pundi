@@ -16,6 +16,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Proyek native Capacitor (hasil generate).
+    "android/**",
+    "ios/**",
   ]),
 ]);
 
