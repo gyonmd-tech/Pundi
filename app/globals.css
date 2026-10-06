@@ -349,3 +349,33 @@ input[data-search-input="true"]:focus-visible {
 }
 
 .card[data-tone] { background: var(--color-surface-high); }
+
+/* ── Tema gelap: kontras teks ──────────────────────────────────────────
+   Shade brand gelap (700–950) & warna "-ink" semantik dirancang untuk teks di
+   atas latar terang. Di tema gelap teks tersebut dicerahkan agar tetap
+   terbaca; pemakaiannya sebagai latar (bg-*) tidak terpengaruh. */
+:root[data-theme="dark"] :is(.text-pine, .text-sky, .text-brand-500, .text-brand-600) { color: var(--color-text-brand); }
+:root[data-theme="dark"] :is(.text-brand-700, .text-brand-800, .text-brand-900, .text-brand-950) { color: var(--color-text-brand-strong); }
+:root[data-theme="dark"] .text-ember-ink { color: var(--color-text-ember); }
+:root[data-theme="dark"] .text-mint-ink { color: var(--color-text-mint); }
+:root[data-theme="dark"] .text-warning-ink { color: var(--color-text-warning); }
+:root[data-theme="dark"] .text-lavender-ink { color: var(--color-text-lavender); }
+:root[data-theme="dark"] .text-cyan-ink { color: var(--color-text-cyan); }
+:root[data-theme="dark"] .eyebrow:not([class*="text-"]) { color: var(--color-text-brand); }
+
+/* Garis tepi kontrol form memakai warna permukaan (tak terlihat di terang);
+   di gelap butuh garis nyata agar kolom input tetap terbaca batasnya. */
+:root[data-theme="dark"] .border-surface-high\/80 { border-color: var(--color-rule-strong); }
+
+:root[data-theme="dark"] .glass-panel { background: rgba(18, 29, 51, 0.92); }
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 10% -10%, rgba(92, 143, 242, 0.12), transparent 32rem),
+    radial-gradient(circle at 100% 14%, rgba(36, 89, 222, 0.10), transparent 28rem),
+    var(--color-paper);
+}
+:root[data-theme="dark"] .card:hover { border-color: rgba(140, 170, 255, 0.28); }
+
+/* Aset yang punya versi terang & gelap (mis. logo). */
+:root:not([data-theme="dark"]) .theme-dark-only,
+:root[data-theme="dark"] .theme-light-only { display: none; }

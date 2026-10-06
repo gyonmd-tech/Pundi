@@ -36,7 +36,7 @@ export function Dropdown({ trigger, children, align = "right", className, conten
       {open ? (
         <div
           role="menu"
-          className={cn("absolute top-full z-50 mt-2 min-w-56 rounded-[20px] border border-brand-200 bg-white p-2 shadow-float animate-in fade-in slide-in-from-top-2", align === "left" ? "left-0" : "right-0", contentClassName)}
+          className={cn("absolute top-full z-50 mt-2 min-w-56 rounded-[20px] border border-brand-200 bg-surface-high p-2 shadow-float animate-in fade-in slide-in-from-top-2", align === "left" ? "left-0" : "right-0", contentClassName)}
         >
           {typeof children === "function" ? children({ close: () => setOpen(false) }) : children}
         </div>

@@ -176,7 +176,7 @@ export default function HomePage() {
 
         <div className="relative lg:col-span-6">
           <div className="clay relative mx-auto max-w-2xl p-3 sm:p-5">
-            <div className="rounded-[1.25rem] border border-rule bg-white p-4 shadow-clay-soft sm:p-6">
+            <div className="rounded-[1.25rem] border border-rule bg-surface-high p-4 shadow-clay-soft sm:p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="eyebrow">Contoh tampilan · {monthLabel}</p>
@@ -197,7 +197,7 @@ export default function HomePage() {
                 <div className="rounded-2xl border border-rule bg-mint-10 p-4 shadow-clay-soft">
                   <p className="text-xs font-semibold text-ink-muted">Rasio tabungan</p>
                   <p className="mt-2 font-mono text-2xl font-medium text-mint">32,4%</p>
-                  <div className="mt-5 h-2 overflow-hidden rounded-full bg-white">
+                  <div className="mt-5 h-2 overflow-hidden rounded-full bg-surface-high">
                     <div className="h-full w-[64%] rounded-full bg-mint" />
                   </div>
                 </div>
@@ -220,7 +220,7 @@ export default function HomePage() {
                 </div>
                 <div className="rounded-2xl border border-rule bg-brass-10 p-4 shadow-clay-soft md:col-span-2">
                   <p className="text-xs font-bold text-ink">Anggaran makan</p>
-                  <div className="mx-auto mt-4 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-clay-soft ring-[10px] ring-brass/35">
+                  <div className="mx-auto mt-4 flex h-24 w-24 items-center justify-center rounded-full bg-surface-high shadow-clay-soft ring-[10px] ring-brass/35">
                     <div className="text-center">
                       <p className="font-mono text-xl font-medium">68%</p>
                       <p className="text-[9px] font-bold text-ink-muted">terpakai</p>
@@ -297,7 +297,7 @@ export default function HomePage() {
       </section>
 
       <section id="keamanan" className="relative mx-auto max-w-[90rem] px-4 pb-20 sm:px-6 sm:pb-28 lg:px-8">
-        <div className="overflow-hidden rounded-[2rem] bg-ink p-6 text-white sm:p-10 lg:p-14">
+        <div className="overflow-hidden rounded-[2rem] bg-brand-950 p-6 text-white sm:p-10 lg:p-14">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">

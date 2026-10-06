@@ -4,7 +4,7 @@
   height: 100svh;
   min-height: 100svh;
   overflow: hidden;
-  background: #ffffff;
+  background: var(--color-surface-high);
 }
 
 .formsGrid {
@@ -26,7 +26,7 @@
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   -webkit-overflow-scrolling: touch;
-  background: #ffffff;
+  background: var(--color-surface-high);
   padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
 }
 

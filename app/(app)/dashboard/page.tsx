@@ -195,7 +195,7 @@ export default function DashboardPage() {
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white shadow-card">
                 <WalletCards size={21} />
               </div>
-              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-brand-900 shadow-card">
+              <span className="rounded-full bg-surface-high px-3 py-1 text-[11px] font-bold text-brand-900 shadow-card">
                 {accounts.length} akun aktif
               </span>
             </div>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
             </p>
             <SummarySparkline values={balanceTrend} className="mt-5 text-white" />
             <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/15 pt-4">
-              <span className="rounded-full border border-white/15 bg-white px-3 py-1.5 text-xs text-ink-muted shadow-card">
+              <span className="rounded-full border border-white/15 bg-surface-high px-3 py-1.5 text-xs text-ink-muted shadow-card">
                 Arus kas <strong className="ml-1 text-brand-800">{net >= 0 ? "+" : ""}{formatRupiah(net)}</strong>
               </span>
               <span className="rounded-full border border-white/15 bg-brand-900 px-3 py-1.5 text-xs text-white shadow-card">
@@ -222,7 +222,7 @@ export default function DashboardPage() {
         <div data-widget-id="expense" className="h-full">
           <SummaryCard title="Pengeluaran bulan ini" amount={thisMonth.expense} delta={expenseDelta} deltaLabel="dibanding bulan lalu" icon={TrendingDown} variant="negative" trend={expenseTrend} caption="dibanding bulan lalu" compact={preferences.compactNumbers} />
         </div>
-        <article data-widget-id="cashflow" className="card h-full min-w-0 border-brand-600/10 bg-white">
+        <article data-widget-id="cashflow" className="card h-full min-w-0 border-brand-600/10 bg-surface-high">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="eyebrow">Analitik</p>
@@ -235,7 +235,7 @@ export default function DashboardPage() {
           <CashFlowChart data={cashFlow} />
         </article>
 
-        <article data-widget-id="composition" className="card h-full min-w-0 border-brand-600/10 bg-white">
+        <article data-widget-id="composition" className="card h-full min-w-0 border-brand-600/10 bg-surface-high">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="eyebrow">Komposisi</p>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
           <CategoryBreakdownChart data={breakdown} />
         </article>
 
-        <article data-widget-id="rhythm" className="card h-full min-w-0 border-brand-600/10 bg-white">
+        <article data-widget-id="rhythm" className="card h-full min-w-0 border-brand-600/10 bg-surface-high">
           <div className="flex items-start justify-between gap-4">
             <div><p className="eyebrow">7 hari terakhir</p><h2 className="mt-1 text-heading font-bold text-ink">Momentum pengeluaran</h2><p className="mt-1 text-xs text-ink-muted">Bar harian dengan garis akumulasi minggu berjalan.</p></div>
             <Badge tone="neutral">Live</Badge>
@@ -259,19 +259,19 @@ export default function DashboardPage() {
           <p className="eyebrow">Kesehatan kas</p>
           <h2 className="mt-1 text-heading font-bold text-ink">Ruang aman bulan ini</h2>
           <div className="mx-auto mt-6 grid h-36 w-36 place-items-center rounded-full shadow-clay-soft" style={{ background: `conic-gradient(#156F62 ${cashHealth}%, #E6A447 ${cashHealth}% 100%)` }}>
-            <div className="grid h-24 w-24 place-items-center rounded-full bg-[#DDF3EA] text-center shadow-[inset_3px_3px_9px_rgba(63,82,77,.18)]">
-              <div><p className="text-2xl font-black text-[#124F48]">{cashHealth.toFixed(0)}%</p><p className="text-[9px] font-extrabold uppercase text-[#356D65]">tersisa</p></div>
+            <div className="grid h-24 w-24 place-items-center rounded-full bg-mint-10 text-center shadow-[inset_3px_3px_9px_rgba(63,82,77,.18)]">
+              <div><p className="text-2xl font-black text-mint-ink">{cashHealth.toFixed(0)}%</p><p className="text-[9px] font-extrabold uppercase text-mint-ink opacity-80">tersisa</p></div>
             </div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold">
-            <div className="rounded-xl border border-rule bg-white p-3 text-ember-ink">Utang<br/><span className="text-ink">{formatRupiah(openPayable)}</span></div>
-            <div className="rounded-xl border border-rule bg-white p-3 text-mint-ink">Piutang<br/><span className="text-ink">{formatRupiah(openReceivable)}</span></div>
+            <div className="rounded-xl border border-rule bg-surface-high p-3 text-ember-ink">Utang<br/><span className="text-ink">{formatRupiah(openPayable)}</span></div>
+            <div className="rounded-xl border border-rule bg-surface-high p-3 text-mint-ink">Piutang<br/><span className="text-ink">{formatRupiah(openReceivable)}</span></div>
           </div>
         </article>
         <div data-widget-id="calendar" className="h-full">
           <DashboardCalendar transactions={transactions} />
         </div>
-        <article data-widget-id="accounts" className="card h-full min-w-0 border-brand-600/10 bg-white">
+        <article data-widget-id="accounts" className="card h-full min-w-0 border-brand-600/10 bg-surface-high">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="eyebrow">Distribusi dana</p>
@@ -282,7 +282,7 @@ export default function DashboardPage() {
           </div>
           <AccountBalanceChart data={accountBalanceData} />
         </article>
-        <article data-widget-id="recent" className="card flex h-full flex-col border-brand-600/10 bg-white">
+        <article data-widget-id="recent" className="card flex h-full flex-col border-brand-600/10 bg-surface-high">
           <div className="mb-2 flex items-center justify-between border-b border-rule pb-4">
             <div>
               <p className="eyebrow">Aktivitas terbaru</p>
@@ -321,7 +321,7 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article data-widget-id="upcoming" className="card flex h-full flex-col border-brand-600/10 bg-white">
+        <article data-widget-id="upcoming" className="card flex h-full flex-col border-brand-600/10 bg-surface-high">
           <div className="mb-2 flex items-center justify-between border-b border-rule pb-4">
             <div>
               <p className="eyebrow">7 hari ke depan</p>
@@ -356,7 +356,7 @@ export default function DashboardPage() {
           )}
         </article>
 
-          <article data-widget-id="budgets" className="card h-full border-brand-600/10 bg-white">
+          <article data-widget-id="budgets" className="card h-full border-brand-600/10 bg-surface-high">
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <p className="eyebrow">Kontrol</p>
@@ -378,7 +378,7 @@ export default function DashboardPage() {
             </div>
           </article>
 
-          <article data-widget-id="goals" className="card h-full border-brand-600/10 bg-white">
+          <article data-widget-id="goals" className="card h-full border-brand-600/10 bg-surface-high">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="eyebrow">Target</p>
@@ -390,10 +390,10 @@ export default function DashboardPage() {
               <GoalCard key={goal.id} {...goal} monthlySavings={1_200_000} />
             ))}
           </article>
-        <article data-widget-id="payable" className="card h-full border-brand-600/10 bg-white"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember-ink">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openPayable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember-ink hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-ink text-white shadow-card"><HandCoins /></div></div></article>
-        <article data-widget-id="receivable" className="card h-full border-brand-600/10 bg-white"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint-ink">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openReceivable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint-ink hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-ink text-white shadow-card"><WalletCards /></div></div></article>
+        <article data-widget-id="payable" className="card h-full border-brand-600/10 bg-surface-high"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember-ink">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openPayable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember-ink hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-ink text-white shadow-card"><HandCoins /></div></div></article>
+        <article data-widget-id="receivable" className="card h-full border-brand-600/10 bg-surface-high"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint-ink">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openReceivable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint-ink hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-ink text-white shadow-card"><WalletCards /></div></div></article>
 
-      <section data-widget-id="insights" className="card h-full border-brand-600/10 bg-white">
+      <section data-widget-id="insights" className="card h-full border-brand-600/10 bg-surface-high">
         <div className="mb-4 flex items-center justify-between border-b border-rule pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-card">

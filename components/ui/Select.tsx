@@ -55,7 +55,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
           aria-expanded={open}
           onClick={() => setOpen((state) => !state)}
           className={cn(
-            "flex h-11 w-full items-center justify-between gap-3 rounded-[15px] border border-white/80 bg-[linear-gradient(145deg,#FFFFFF,var(--color-brand-50))] px-3.5 text-left text-sm font-semibold text-ink outline-none shadow-clay-soft transition hover:border-pine/25 focus-visible:border-pine/40 focus-visible:ring-4 focus-visible:ring-pine/10 disabled:opacity-50",
+            "flex h-11 w-full items-center justify-between gap-3 rounded-[15px] border border-surface-high/80 bg-[linear-gradient(145deg,var(--color-surface-high),var(--color-brand-50))] px-3.5 text-left text-sm font-semibold text-ink outline-none shadow-clay-soft transition hover:border-pine/25 focus-visible:border-pine/40 focus-visible:ring-4 focus-visible:ring-pine/10 disabled:opacity-50",
             className,
           )}
         >
@@ -63,7 +63,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
           <ChevronDown className={cn("h-4 w-4 shrink-0 text-pine transition-transform", open && "rotate-180")} />
         </button>
         {open ? (
-          <div role="listbox" className="absolute left-0 right-0 top-full z-[70] mt-2 max-h-64 overflow-y-auto rounded-[16px] border border-pine/12 bg-white p-1.5 shadow-float animate-in fade-in slide-in-from-top-1">
+          <div role="listbox" className="absolute left-0 right-0 top-full z-[70] mt-2 max-h-64 overflow-y-auto rounded-[16px] border border-pine/12 bg-surface-high p-1.5 shadow-float animate-in fade-in slide-in-from-top-1">
             {options.map((option) => (
               <button
                 key={option.value}

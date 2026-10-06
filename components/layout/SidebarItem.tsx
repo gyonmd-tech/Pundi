@@ -13,7 +13,7 @@ export function SidebarItem({ item, active, collapsed }: { item: NavigationItem;
         "group relative flex min-h-11 items-center gap-3 rounded-[16px] border transition-[background-color,border-color,color,box-shadow] duration-200",
         collapsed ? "justify-center px-0" : "px-3",
         active
-          ? "border-white bg-white font-semibold text-brand-900 shadow-[0_10px_22px_rgba(7,28,70,0.24)]"
+          ? "border-white bg-white font-semibold text-[var(--color-brand-900)] shadow-[0_10px_22px_rgba(7,28,70,0.24)]"
           : "border-transparent font-medium text-white/70 hover:border-white/10 hover:bg-white/10 hover:font-semibold hover:text-white"
       )}
     >

@@ -131,6 +131,7 @@
   --chart-category-4: #F0A33B;
   --chart-category-5: #E95766;
   --chart-category-6: #7B61D1;
+  --chart-line-strong: #142B87;
 }
 
 /*
@@ -138,12 +139,11 @@
  * components/providers/ThemeEffect.tsx berdasarkan preferensi pengguna
  * (lib/data/mock.ts UserPreferences.theme).
  *
- * Cakupan sengaja terbatas ke token permukaan/teks/struktur/shadow — ramp
- * warna brand & semantik (biru/mint/ember/dst.) dipertahankan sama persis
- * karena sudah cukup jenuh untuk tetap terbaca di kedua tema. Beberapa
- * gradient/hex yang di-hardcode langsung di komponen (bukan lewat token,
- * mis. sebagian kartu di halaman Utang) tidak otomatis ikut berubah —
- * keterbatasan yang diketahui, bukan cakupan perbaikan bagian ini.
+ * Token permukaan/teks/struktur/shadow dan tint terang (brand 50–300,
+ * semantik -10/-20) punya versi gelap. Shade solid (brand 400–950, warna
+ * semantik utama) tetap sama. Komponen wajib memakai token (bg-surface-high,
+ * bg-brand-50, var(--color-…)) — jangan hardcode putih/hex terang, karena
+ * tidak akan ikut berubah di tema gelap.
  */
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -170,4 +170,32 @@
   --shadow-focus: 0 0 0 4px rgba(92, 143, 242, 0.28);
 
   --border-hairline: 1px solid rgba(140, 170, 255, 0.16);
+
+  /* Tint terang (latar chip/badge/hover) → versi gelap bernuansa sama.
+     Shade 400–950 dipertahankan: dipakai sebagai warna solid. */
+  --color-brand-50: #16233F;
+  --color-brand-100: #1C2D52;
+  --color-brand-200: #2A3F6E;
+  --color-brand-300: #3D5694;
+
+  --color-ember-10: #3B1D29;
+  --color-ember-20: #5C2837;
+  --color-brass-10: #3A2E12;
+  --color-warning-10: #3A2D10;
+  --color-mint-10: #0F3A31;
+  --color-sky-10: #1C2D52;
+  --color-lavender-10: #2A2352;
+  --color-cyan-10: #0E3640;
+
+  /* Teks di atas permukaan gelap — dipakai lewat override kelas di globals.css. */
+  --color-text-brand: color-mix(in srgb, var(--color-brand-500) 62%, white);
+  --color-text-brand-strong: color-mix(in srgb, var(--color-brand-500) 40%, white);
+  --color-text-ember: #FF8D99;
+  --color-text-mint: #4FD6AC;
+  --color-text-warning: #F5BF55;
+  --color-text-lavender: #B9A9F5;
+  --color-text-cyan: #62D3E6;
+
+  --chart-baseline-color: var(--color-rule-strong);
+  --chart-line-strong: #A9C6FF;
 }

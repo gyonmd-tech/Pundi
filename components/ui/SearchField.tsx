@@ -17,7 +17,7 @@ export const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
     return (
       <div
         className={cn(
-          "relative flex h-12 w-full items-center rounded-[18px] bg-white px-3.5 shadow-[0_10px_28px_rgba(18,44,111,.10)] transition-[background-color,box-shadow] duration-200 focus-within:bg-white focus-within:shadow-[0_14px_34px_rgba(18,44,111,.16)]",
+          "relative flex h-12 w-full items-center rounded-[18px] bg-surface-high px-3.5 shadow-[0_10px_28px_rgba(18,44,111,.10)] transition-[background-color,box-shadow] duration-200 focus-within:bg-surface-high focus-within:shadow-[0_14px_34px_rgba(18,44,111,.16)]",
           containerClassName,
         )}
       >

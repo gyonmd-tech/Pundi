@@ -184,7 +184,7 @@ export function RecurringRulesCard() {
   }
 
   return (
-    <div className="card border-brand-600/10 bg-white !p-0">
+    <div className="card border-brand-600/10 bg-surface-high !p-0">
       <button
         type="button"
         onClick={() => setExpanded((value) => !value)}

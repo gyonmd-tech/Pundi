@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
 export function TableContainer({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("w-full overflow-x-auto rounded-[18px] border border-rule bg-white", className)} {...props} />;
+  return <div className={cn("w-full overflow-x-auto rounded-[18px] border border-rule bg-surface-high", className)} {...props} />;
 }
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return <table className={cn("w-full min-w-[640px] border-collapse text-left", className)} {...props} />;
