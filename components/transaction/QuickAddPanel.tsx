@@ -262,7 +262,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
                 onClick={() => chooseMode(item.value)}
                 className={cn(
                   "flex min-h-13 min-w-0 flex-col items-center justify-center gap-1 rounded-[14px] border px-0.5 text-[9px] font-extrabold leading-none transition-all sm:text-[10px]",
-                  active ? `${item.tone} shadow-clay-soft` : "border-transparent text-ink-muted hover:bg-white/80 hover:text-ink"
+                  active ? `${item.tone} shadow-clay-soft` : "border-transparent text-ink-muted hover:bg-surface-high/80 hover:text-ink"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -300,7 +300,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
 
         {!isAdjustment ? <div className="flex flex-wrap gap-2">
           {quickAmounts.map((value) => (
-            <button key={value} type="button" onClick={() => setAmount(String(numericAmount + value))} className="rounded-full border border-rule bg-white px-3 py-1.5 text-[11px] font-bold text-ink-muted transition hover:border-pine/35 hover:bg-pine-10 hover:text-pine">
+            <button key={value} type="button" onClick={() => setAmount(String(numericAmount + value))} className="rounded-full border border-rule bg-surface-high px-3 py-1.5 text-[11px] font-bold text-ink-muted transition hover:border-pine/35 hover:bg-pine-10 hover:text-pine">
               +{value >= 1_000_000 ? `${value / 1_000_000} jt` : `${value / 1_000} rb`}
             </button>
           ))}
@@ -346,7 +346,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
         <Field label="Catatan" hint={`${note.length}/80`}>
           <div className="relative">
             <ReceiptText className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-ink-muted" />
-            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder={isAdjustment ? "Contoh: saldo setelah pengecekan rekening" : "Contoh: makan siang bersama tim"} className="min-h-24 w-full resize-none rounded-[16px] border border-white/80 bg-[linear-gradient(145deg,#FFFFFF,#F8F6FF)] py-3 pl-10 pr-3 text-sm text-ink outline-none shadow-clay-soft transition placeholder:text-ink-muted/70 focus:border-pine/40 focus:ring-4 focus:ring-pine/10" />
+            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder={isAdjustment ? "Contoh: saldo setelah pengecekan rekening" : "Contoh: makan siang bersama tim"} className="min-h-24 w-full resize-none rounded-[16px] border border-rule bg-surface-high py-3 pl-10 pr-3 text-sm text-ink outline-none shadow-clay-soft transition placeholder:text-ink-muted/70 focus:border-pine/40 focus:ring-4 focus:ring-pine/10" />
           </div>
         </Field>
 
@@ -357,7 +357,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
         ) : null}
       </div>
 
-      <footer className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-rule/70 bg-white/85 p-4 backdrop-blur-md">
+      <footer className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-rule/70 bg-surface-high/85 p-4 backdrop-blur-md">
         <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
         <Button type="submit" loading={submitting} disabled={connection.status === "loading" || !accounts.length || (isTransfer && !destinationOptions.length)}>
           <Check className="h-4 w-4" /> {isAdjustment ? "Terapkan kondisi saldo" : transaction ? "Simpan perubahan" : "Simpan transaksi"}

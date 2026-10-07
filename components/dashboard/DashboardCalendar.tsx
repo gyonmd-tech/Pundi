@@ -36,8 +36,8 @@ export function DashboardCalendar({ transactions }: { transactions: Transaction[
   const selectedExpense = selectedTransactions.filter((item) => item.type === "expense").reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <article className="card h-full overflow-hidden border-brand-600/10 bg-white p-0">
-      <div className="flex items-center justify-between border-b border-rule bg-white px-5 py-4">
+    <article className="card h-full overflow-hidden border-brand-600/10 bg-surface-high p-0">
+      <div className="flex items-center justify-between border-b border-rule bg-surface-high px-5 py-4">
         <div><p className="eyebrow">Kalender finansial</p><h2 className="mt-1 text-lg font-extrabold tracking-[-0.02em] text-ink capitalize">{monthFormatter.format(month)}</h2></div>
         <div className="flex gap-1.5">
           <button type="button" aria-label="Bulan sebelumnya" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#5146A5] text-white shadow-clay-soft transition hover:bg-[#392F82]"><ChevronLeft className="h-4 w-4" /></button>

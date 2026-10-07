@@ -92,7 +92,7 @@ export function HeaderSearch() {
       </form>
 
       {open && normalized ? (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[20px] border border-brand-200 bg-white p-2 shadow-float">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[20px] border border-brand-200 bg-surface-high p-2 shadow-float">
           {transactionResults.length ? (
             <div>
               <p className="px-3 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-muted">Transaksi</p>

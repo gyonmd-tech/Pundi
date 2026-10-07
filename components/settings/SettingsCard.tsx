@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 const toneClasses = {
-  violet: "border-brand-600/10 bg-white",
-  blue: "border-brand-600/10 bg-white",
-  mint: "border-brand-600/10 bg-white",
-  amber: "border-brand-600/10 bg-white",
+  violet: "border-brand-600/10 bg-surface-high",
+  blue: "border-brand-600/10 bg-surface-high",
+  mint: "border-brand-600/10 bg-surface-high",
+  amber: "border-brand-600/10 bg-surface-high",
 } as const;
 
 const iconClasses = {

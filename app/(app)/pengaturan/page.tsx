@@ -258,7 +258,7 @@ export default function PengaturanPage() {
                 <ChevronRight className="h-4 w-4 shrink-0 text-ink-muted transition group-hover:translate-x-0.5 group-hover:text-pine" />
               </button>
             ))}
-            {!accounts.length && connection.status !== "loading" ? <button type="button" onClick={openNewAccount} className="rounded-[18px] border border-dashed border-sky/30 bg-white/60 p-6 text-sm font-bold text-sky">Tambah rekening pertama</button> : null}
+            {!accounts.length && connection.status !== "loading" ? <button type="button" onClick={openNewAccount} className="rounded-[18px] border border-dashed border-sky/30 bg-surface-high/60 p-6 text-sm font-bold text-sky">Tambah rekening pertama</button> : null}
           </div>
         </SettingsCard>
 
@@ -271,7 +271,7 @@ export default function PengaturanPage() {
           action={<Button type="button" size="sm" onClick={openNewCategory}><Plus className="h-3.5 w-3.5" />Tambah</Button>}
         >
           <div className="mb-4 flex max-w-full items-center gap-1 overflow-x-auto rounded-[14px] bg-brand-50 p-1">
-            {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-8 flex-1 whitespace-nowrap rounded-[10px] px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-white hover:text-ink")}>{label}</button>)}
+            {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-8 flex-1 whitespace-nowrap rounded-[10px] px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-surface-high hover:text-ink")}>{label}</button>)}
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredCategories.map((category) => (
@@ -281,7 +281,7 @@ export default function PengaturanPage() {
                 tabIndex={0}
                 onClick={() => openCategory(category)}
                 onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCategory(category); } }}
-                className="group flex min-w-0 cursor-pointer items-center gap-2.5 rounded-[15px] border border-brand-600/10 bg-white p-2.5 text-left transition-colors hover:bg-brand-50"
+                className="group flex min-w-0 cursor-pointer items-center gap-2.5 rounded-[15px] border border-brand-600/10 bg-surface-high p-2.5 text-left transition-colors hover:bg-brand-50"
               >
                 <CategoryIcon icon={category.icon} color={category.color} size={15} containerSize="md" />
                 <div className="min-w-0 flex-1">
@@ -327,7 +327,7 @@ export default function PengaturanPage() {
 
       <CategoryFormModal key={`${editingCategory?.id ?? "new-category"}-${categoryModalOpen}`} open={categoryModalOpen} category={editingCategory} onClose={() => setCategoryModalOpen(false)} />
 
-      <footer className="flex items-center gap-3 rounded-[22px] border border-brand-600/10 bg-white p-4 shadow-card sm:p-5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-brand-900 text-white shadow-card"><Info className="h-4 w-4" /></span><div><p className="text-sm font-extrabold text-ink">Pundi Personal Finance</p><p className="text-xs text-ink-muted">Next.js 16 · Appwrite · Versi 1.0.0</p></div></footer>
+      <footer className="flex items-center gap-3 rounded-[22px] border border-brand-600/10 bg-surface-high p-4 shadow-card sm:p-5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-brand-900 text-white shadow-card"><Info className="h-4 w-4" /></span><div><p className="text-sm font-extrabold text-ink">Pundi Personal Finance</p><p className="text-xs text-ink-muted">Next.js 16 · Appwrite · Versi 1.0.0</p></div></footer>
 
       <AccountManagerModal key={editingAccount?.id ?? "new-account"} open={accountModalOpen} account={editingAccount} onClose={() => setAccountModalOpen(false)} />
       <ProfileNameModal

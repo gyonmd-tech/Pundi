@@ -96,19 +96,19 @@ export function SummaryCard({
   const deltaPositive = delta !== undefined && delta >= 0;
   const tone = {
     neutral: {
-      surface: "border-brand-600/10 bg-white",
+      surface: "border-brand-600/10 bg-surface-high",
       icon: "bg-brand-600 text-white",
       chart: "text-brand-600",
       delta: "text-brand-800",
     },
     positive: {
-      surface: "border-brand-600/10 bg-white",
+      surface: "border-brand-600/10 bg-surface-high",
       icon: "bg-mint-ink text-white",
       chart: "text-mint",
       delta: "text-mint-ink",
     },
     negative: {
-      surface: "border-brand-600/10 bg-white",
+      surface: "border-brand-600/10 bg-surface-high",
       icon: "bg-ember-ink text-white",
       chart: "text-ember",
       delta: "text-ember-ink",

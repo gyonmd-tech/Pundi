@@ -37,14 +37,14 @@ export function DatePicker({ value, onValueChange, className, min, max, ariaLabe
 
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
-      <button type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen((state) => !state)} className="flex h-11 w-full items-center gap-3 rounded-[15px] border border-white/80 bg-[linear-gradient(145deg,#FFFFFF,var(--color-brand-50))] px-3.5 text-left text-sm font-semibold text-ink shadow-clay-soft transition hover:border-pine/25 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine/10">
+      <button type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen((state) => !state)} className="flex h-11 w-full items-center gap-3 rounded-[15px] border border-rule bg-surface-high px-3.5 text-left text-sm font-semibold text-ink shadow-clay-soft transition hover:border-pine/25 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine/10">
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[9px] bg-sky-10 text-sky"><CalendarDays className="h-3.5 w-3.5" /></span>
         <span className={cn("flex-1", !selected && "text-ink-muted")}>{selected ? dateFormatter.format(selected) : "Pilih tanggal"}</span>
         <ChevronRight className={cn("h-4 w-4 text-ink-muted transition", open && "rotate-90 text-pine")} />
       </button>
 
       {open ? (
-        <div className="absolute left-0 top-full z-[75] mt-2 w-[min(310px,calc(100vw-2rem))] rounded-[18px] border border-pine/12 bg-white p-3 shadow-float animate-in fade-in slide-in-from-top-1">
+        <div className="absolute left-0 top-full z-[75] mt-2 w-[min(310px,calc(100vw-2rem))] rounded-[18px] border border-pine/12 bg-surface-high p-3 shadow-float animate-in fade-in slide-in-from-top-1">
           <div className="mb-3 flex items-center justify-between">
             <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="grid h-8 w-8 place-items-center rounded-[10px] text-ink-muted hover:bg-pine-10 hover:text-pine"><ChevronLeft className="h-4 w-4" /></button>
             <p className="text-sm font-extrabold capitalize text-ink">{monthFormatter.format(month)}</p>

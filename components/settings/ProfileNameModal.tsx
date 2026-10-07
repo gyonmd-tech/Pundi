@@ -77,7 +77,7 @@ export function ProfileNameModal({ open, currentName, email, avatarFileId, isDem
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingAvatar}
-            className="group relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[14px] bg-white text-pine shadow-2xs"
+            className="group relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[14px] bg-surface-high text-pine shadow-2xs"
             aria-label="Ubah foto profil"
             title="Ubah foto profil"
           >

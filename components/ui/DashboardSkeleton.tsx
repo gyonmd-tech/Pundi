@@ -19,16 +19,16 @@ export function DashboardSkeleton() {
           <SkeletonBlock className="mt-4 h-12 w-3/4 bg-white/25" />
           <div className="mt-8 flex gap-3"><SkeletonBlock className="h-8 w-36 bg-white/90" /><SkeletonBlock className="h-8 w-32 bg-brand-900" /></div>
         </div>
-        <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-white shadow-card lg:col-span-3" />
-        <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-white shadow-card lg:col-span-3" />
+        <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-surface-high shadow-card lg:col-span-3" />
+        <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-surface-high shadow-card lg:col-span-3" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="rounded-[22px] border border-rule bg-white p-5 lg:col-span-8">
+        <div className="rounded-[22px] border border-rule bg-surface-high p-5 lg:col-span-8">
           <SkeletonBlock className="h-6 w-52" />
           <SkeletonBlock className="mt-8 h-64 w-full bg-brand-50" />
         </div>
-        <div className="rounded-[22px] border border-rule bg-white p-5 lg:col-span-4">
+        <div className="rounded-[22px] border border-rule bg-surface-high p-5 lg:col-span-4">
           <SkeletonBlock className="h-6 w-36" />
           <div className="mx-auto mt-8 h-44 w-44 animate-pulse rounded-full border-[28px] border-pine-10" />
         </div>
