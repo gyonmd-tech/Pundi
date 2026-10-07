@@ -87,7 +87,7 @@ export function ProfileNameModal({ open, currentName, email, avatarFileId, isDem
             ) : (
               <UserRound className="h-5 w-5" />
             )}
-            <span className="absolute inset-0 flex items-center justify-center bg-ink/50 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100">
               <Camera className="h-4 w-4" />
             </span>
           </button>
