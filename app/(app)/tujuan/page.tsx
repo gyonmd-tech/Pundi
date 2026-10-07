@@ -242,7 +242,7 @@ export default function TujuanPage() {
                   onDelete={() => setDeleteId(g.id)}
                 />
                 {contributionRule ? (
-                  <div className={cn("flex items-center justify-between gap-2 rounded-[16px] border border-rule bg-white px-3.5 py-2.5", !contributionRule.isActive && "opacity-55")}>
+                  <div className={cn("flex items-center justify-between gap-2 rounded-[16px] border border-rule bg-surface-high px-3.5 py-2.5", !contributionRule.isActive && "opacity-55")}>
                     <div className="flex min-w-0 items-center gap-2">
                       <Repeat size={14} className="shrink-0 text-pine" />
                       <p className="truncate text-xs font-semibold text-ink">

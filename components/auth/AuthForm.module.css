@@ -1,52 +1,44 @@
 .shell {
-  --visual-size: clamp(14rem, 34svh, 20rem);
+  --visual-size: clamp(12rem, 30vh, 18rem);
   position: relative;
-  height: 100svh;
-  min-height: 100svh;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
   background: #ffffff;
 }
 
 .formsGrid {
   position: relative;
-  height: 100%;
-  min-height: 100%;
 }
 
 .formPanel {
-  position: absolute;
+  position: relative;
   left: 0;
   display: flex;
   width: 100%;
-  height: calc(100svh - var(--visual-size));
+  min-height: calc(100vh - var(--visual-size));
+  min-height: calc(100dvh - var(--visual-size));
   align-items: center;
   justify-content: center;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
-  -webkit-overflow-scrolling: touch;
   background: #ffffff;
-  padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+  padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
 }
 
 .signupForm {
-  top: var(--visual-size);
+  top: auto;
 }
 
 .loginForm {
-  top: var(--visual-size);
+  top: auto;
 }
 
 .inactiveForm {
-  visibility: hidden;
-  pointer-events: none;
+  display: none;
 }
 
 .visualPanel {
-  position: absolute;
+  position: relative;
   z-index: 30;
-  top: 0;
+  top: auto;
   left: 0;
   display: flex;
   width: 100%;
@@ -134,26 +126,37 @@
 }
 
 @media (min-width: 1024px) {
+  .shell {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
   .illustrationFloat {
     animation: illustration-float 6s ease-in-out infinite;
   }
   .formsGrid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    height: 100%;
   }
 
   .formPanel {
     position: relative;
     inset: auto;
-    height: 100svh;
+    height: 100%;
+    min-height: 0;
     padding: 3rem 5rem;
   }
 
   .inactiveForm {
+    display: flex;
     visibility: visible;
   }
 
   .visualPanel {
+    position: absolute;
+    top: 0;
     width: 50%;
     height: 100%;
     padding: 2.5rem;
@@ -193,7 +196,7 @@
 
 @media (max-width: 1023px) and (max-height: 600px) {
   .shell {
-    --visual-size: clamp(12rem, 34svh, 15rem);
+    --visual-size: clamp(10rem, 28vh, 13rem);
   }
 }
 

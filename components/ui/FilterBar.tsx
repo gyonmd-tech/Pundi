@@ -6,7 +6,7 @@ import { Button } from "./Button";
 
 export function FilterBar({ children, activeCount = 0, onReset, className }: { children: React.ReactNode; activeCount?: number; onReset?: () => void; className?: string }) {
   return (
-    <div className={cn("flex flex-col gap-3 rounded-[18px] border border-rule bg-white p-3 shadow-2xs sm:flex-row sm:items-center", className)}>
+    <div className={cn("flex flex-col gap-3 rounded-[18px] border border-rule bg-surface-high p-3 shadow-2xs sm:flex-row sm:items-center", className)}>
       <div className="flex items-center gap-2 text-xs font-extrabold text-ink">
         <SlidersHorizontal className="h-4 w-4 text-pine" />
         Filter

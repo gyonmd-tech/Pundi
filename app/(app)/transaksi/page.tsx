@@ -345,7 +345,7 @@ export default function TransaksiPage() {
       {/* Expandable Filter Panel */}
       {showFilter && (
         <div
-          className="card grid grid-cols-1 gap-3.5 border-brand-600/10 bg-white p-4 sm:grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-top-2"
+          className="card grid grid-cols-1 gap-3.5 border-brand-600/10 bg-surface-high p-4 sm:grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-top-2"
         >
           {/* Filter Tipe */}
           <div>
@@ -427,7 +427,7 @@ export default function TransaksiPage() {
       )}
 
       {/* Transaction Records Card / Table */}
-      <div className="overflow-hidden rounded-[24px] border border-brand-600/10 bg-white shadow-card">
+      <div className="overflow-hidden rounded-[24px] border border-brand-600/10 bg-surface-high shadow-card">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
             <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
@@ -521,7 +521,7 @@ export default function TransaksiPage() {
                       <TableRow
                         key={tx.id}
                         onClick={() => setDetailTransaction(tx)}
-                        className="group cursor-pointer border-b border-rule bg-white transition-colors duration-150 last:border-b-0 hover:bg-brand-50"
+                        className="group cursor-pointer border-b border-rule bg-surface-high transition-colors duration-150 last:border-b-0 hover:bg-brand-50"
                       >
                         {/* Tanggal */}
                         <TableCell className="px-5 py-4 whitespace-nowrap">
@@ -629,7 +629,7 @@ export default function TransaksiPage() {
         const cfg = detailTransaction.transferKind === "cash_withdrawal" ? cashWithdrawalLabel : typeLabel[detailTransaction.type];
         const DetailIcon = cfg.icon;
         return <div className="fixed inset-0 z-50 flex items-end justify-center bg-brand-950/55 backdrop-blur-[3px] sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Detail transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setDetailTransaction(null); }}>
-          <article className="w-full overflow-hidden rounded-t-[28px] border border-brand-600/10 bg-white shadow-float sm:max-w-lg sm:rounded-[28px]">
+          <article className="w-full overflow-hidden rounded-t-[28px] border border-brand-600/10 bg-surface-high shadow-float sm:max-w-lg sm:rounded-[28px]">
             <header className="flex items-start justify-between gap-4 border-b border-rule px-5 py-5 sm:px-6">
               <div className="min-w-0"><p className="eyebrow">Detail transaksi</p><h2 className="mt-1 truncate text-2xl font-bold text-ink">{detailTransaction.note || category?.name || "Transaksi"}</h2></div>
               <IconButton onClick={() => setDetailTransaction(null)} variant="outline" aria-label="Tutup detail transaksi"><X size={17}/></IconButton>
@@ -643,7 +643,7 @@ export default function TransaksiPage() {
                 </div>
                 <Badge tone={detailTransaction.transferKind === "cash_withdrawal" ? "primary" : detailTransaction.type === "income" ? "success" : detailTransaction.type === "expense" ? "danger" : "warning"} className="relative mt-4">{cfg.label}</Badge>
               </div>
-              <dl className="mt-4 overflow-hidden rounded-[18px] border border-rule bg-white">
+              <dl className="mt-4 overflow-hidden rounded-[18px] border border-rule bg-surface-high">
               {[
                 ["Tanggal transaksi", formatDate(detailTransaction.date, "short")],
                 ["Dicatat pada", formatRecordedDate(detailTransaction.createdAt || detailTransaction.date)],
@@ -663,7 +663,7 @@ export default function TransaksiPage() {
 
       {editTransaction && (
         <div className="fixed inset-0 z-50 bg-[rgba(28,24,47,0.42)] backdrop-blur-[3px]" role="dialog" aria-modal="true" aria-label="Edit transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditTransaction(null); }}>
-          <aside className="absolute inset-y-0 right-0 w-full overflow-hidden bg-white shadow-float sm:bottom-3 sm:right-3 sm:top-3 sm:max-w-[440px] sm:rounded-[26px] sm:border sm:border-pine/10">
+          <aside className="absolute inset-y-0 right-0 w-full overflow-hidden bg-surface-high shadow-float sm:bottom-3 sm:right-3 sm:top-3 sm:max-w-[440px] sm:rounded-[26px] sm:border sm:border-pine/10">
             <QuickAddPanel key={editTransaction.id} transaction={editTransaction} onClose={() => setEditTransaction(null)} />
           </aside>
         </div>
