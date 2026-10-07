@@ -203,15 +203,15 @@ export function RecurringRulesCard() {
       </button>
 
       {expanded && (
-        <div className="border-t border-rule px-5 py-4">
+        <div className="border-t border-rule px-4 py-4 sm:px-5">
           <div className="space-y-2">
             {rules.map((rule) => {
               const account = accounts.find((a) => a.id === rule.accountId);
               const category = categories.find((c) => c.id === rule.categoryId);
               const goal = rule.goalId ? goals.find((g) => g.id === rule.goalId) : undefined;
               return (
-                <div key={rule.id} className={cn("flex items-center justify-between gap-3 rounded-[14px] border border-rule px-3.5 py-3", !rule.isActive && "opacity-55")}>
-                  <div className="flex min-w-0 items-center gap-3">
+                <div key={rule.id} className={cn("flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-[14px] border border-rule px-3.5 py-3 sm:flex-nowrap", !rule.isActive && "opacity-55")}>
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     <CategoryIcon icon={category?.icon} color={category?.color} size={15} containerSize="sm" />
                     <div className="min-w-0">
                       <p className="truncate text-small font-semibold text-ink">{rule.note || category?.name || "Transaksi berulang"}</p>
@@ -221,10 +221,10 @@ export function RecurringRulesCard() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className={cn("tabular-nums font-mono text-small font-bold", rule.type === "income" ? "text-mint-ink" : "text-ink")}>
-                      {rule.type === "income" ? "+" : rule.type === "expense" ? "−" : ""}{formatRupiah(rule.amount)}
-                    </span>
+                  <span className={cn("shrink-0 tabular-nums font-mono text-small font-bold", rule.type === "income" ? "text-mint-ink" : "text-ink")}>
+                    {rule.type === "income" ? "+" : rule.type === "expense" ? "−" : ""}{formatRupiah(rule.amount)}
+                  </span>
+                  <div className="flex w-full shrink-0 items-center justify-end gap-2 border-t border-rule pt-2.5 sm:w-auto sm:border-0 sm:pt-0">
                     {!rule.isActive && <Badge tone="neutral" className="text-[10px]">Dijeda</Badge>}
                     <IconButton variant="outline" className="h-8 min-h-8 w-8" onClick={() => toggleActive(rule)} aria-label={rule.isActive ? "Jeda aturan" : "Lanjutkan aturan"} title={rule.isActive ? "Jeda" : "Lanjutkan"}>
                       {rule.isActive ? <Pause size={14} /> : <Play size={14} />}

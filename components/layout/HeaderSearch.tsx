@@ -16,7 +16,7 @@ const pages = [
   { label: "Tujuan", description: "Target keuangan", href: "/tujuan" },
 ];
 
-export function HeaderSearch() {
+export function HeaderSearch({ autoFocus = false }: { autoFocus?: boolean }) {
   const router = useRouter();
   const transactions = useTransactions();
   const accounts = useAccounts();
@@ -26,6 +26,10 @@ export function HeaderSearch() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const normalized = query.trim().toLowerCase();
+
+  React.useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
 
   React.useEffect(() => {
     function handleShortcut(event: KeyboardEvent) {

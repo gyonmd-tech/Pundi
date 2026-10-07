@@ -49,6 +49,33 @@ npm run db:setup
 API key hanya dipakai oleh skrip setup/server. Jangan memasukkan `.env` atau `.env.local` ke Git; keduanya sudah diabaikan melalui `.gitignore`.
 Di Vercel, masukkan nilai environment sebagai teks polos tanpa tanda kutip pembuka/penutup. Pastikan proyek Appwrite berstatus aktif dan API key memiliki izin `users.write`, `databases.read`, serta `databases.write`.
 
+## Aplikasi mobile
+
+Pundi tersedia dalam dua bentuk aplikasi mobile, keduanya memakai kode web yang sama sehingga setiap deploy langsung memperbarui semua platform.
+
+### 1. PWA (pasang dari browser)
+
+Setelah web di-deploy lewat HTTPS, Pundi bisa langsung di-install:
+
+- **Android / Chrome / Edge**: buka menu **Lainnya → Pasang aplikasi Pundi** di navigasi bawah, atau pilih *Install app* dari menu browser.
+- **iPhone / iPad (Safari)**: ketuk **Bagikan → Tambah ke Layar Utama**.
+
+Yang disertakan: manifest (`app/manifest.ts`) dengan ikon maskable dan shortcut "Tambah transaksi", service worker (`public/sw.js`) yang meng-cache aset statis, dan halaman `public/offline.html` saat koneksi terputus. Data keuangan tidak pernah di-cache — halaman selalu diambil dari jaringan. Service worker hanya aktif di build produksi (`npm run build && npm run start`).
+
+### 2. Aplikasi native Android & iOS (Capacitor)
+
+Folder `android/` dan `ios/` berisi proyek native yang membungkus Pundi dalam WebView layar penuh. Karena Pundi memakai Server Actions, aplikasi native memuat URL web yang sudah di-deploy.
+
+```bash
+# Android (butuh Android Studio)
+PUNDI_APP_URL=https://pundi-kamu.vercel.app npm run mobile:android
+
+# iOS (butuh macOS + Xcode)
+PUNDI_APP_URL=https://pundi-kamu.vercel.app npm run mobile:ios
+```
+
+Perintah di atas menyinkronkan konfigurasi (`capacitor.config.ts`) lalu membuka proyek di Android Studio / Xcode untuk dijalankan di emulator, perangkat, atau dibuat file rilis (`.aab` untuk Play Store, archive untuk App Store). Di Windows (cmd), set variabel dulu: `set PUNDI_APP_URL=https://...` lalu `npm run mobile:android`. Ikon dan splash screen sudah memakai logo Pundi.
+
 ## Perintah proyek
 
 ```bash
@@ -57,6 +84,9 @@ npm run lint      # pemeriksaan ESLint
 npm run build     # build produksi
 npm run start     # menjalankan build produksi
 npm run db:setup  # menyiapkan resource Appwrite
+npm run mobile:sync     # sinkronkan konfigurasi ke proyek Android & iOS
+npm run mobile:android  # buka proyek Android di Android Studio
+npm run mobile:ios      # buka proyek iOS di Xcode
 ```
 
 ## Struktur utama
@@ -72,6 +102,8 @@ components/settings/ komponen halaman pengaturan
 lib/                 store data, Appwrite, context, dan utilitas
 public/              logo, favicon, ilustrasi, dan aset brand
 styles/              design tokens
+android/, ios/       proyek native Capacitor
+mobile/www/          halaman cadangan app native saat server tidak terjangkau
 ```
 
 ## Pemeriksaan sebelum rilis

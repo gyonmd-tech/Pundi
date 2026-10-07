@@ -143,11 +143,11 @@ export function SummaryCard({
         )}
       </div>
 
-      {trend?.length ? <SummarySparkline values={trend} className={cn("mt-5 h-20", tone.chart)} /> : <div className="min-h-5 flex-1" />}
+      {trend?.length ? <SummarySparkline values={trend} className={cn("mt-4 h-14 sm:mt-5 sm:h-20", tone.chart)} /> : <div className="min-h-5 flex-1" />}
 
       <div className="mt-auto pt-3">
         <span
-          className="block font-ui text-data-l font-semibold leading-tight tracking-[-0.045em] text-ink tabular-nums"
+          className="block whitespace-nowrap font-ui text-[clamp(1.05rem,5vw,1.25rem)] font-semibold leading-tight tracking-[-0.045em] text-ink tabular-nums sm:text-data-l"
         >
           {formatAmount(displayAmount, compact)}
         </span>

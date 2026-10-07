@@ -35,7 +35,7 @@ export function NotificationDropdown() {
             aria-label={`${unread.length} notifikasi belum dibaca`}
             aria-expanded={open}
             onClick={toggle}
-            className={`grid h-11 w-11 place-items-center rounded-[16px] border transition-all ${open ? "border-brand-600 bg-brand-600 text-white shadow-[0_8px_20px_rgba(36,89,222,.22)]" : "border-brand-200 bg-surface-high text-brand-700 shadow-card hover:border-brand-300 hover:bg-brand-50"}`}
+            className={`grid h-10 w-10 place-items-center rounded-[14px] border transition-all sm:h-11 sm:w-11 sm:rounded-[16px] ${open ? "border-brand-600 bg-brand-600 text-white shadow-[0_8px_20px_rgba(36,89,222,.22)]" : "border-brand-200 bg-surface-high text-brand-700 shadow-card hover:border-brand-300 hover:bg-brand-50"}`}
           >
             <Bell className="h-[18px] w-[18px]" strokeWidth={1.9} />
           </button>

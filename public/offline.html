@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2459DE" />
+    <title>Sedang offline | Pundi</title>
+    <link rel="icon" href="/PUNDI-brand-assets/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root { --paper: #F4F7FC; --surface: #FFFFFF; --ink: #17213D; --muted: #5F6982; --brand: #2459DE; --rule: #DCE4F2; }
+      @media (prefers-color-scheme: dark) {
+        :root { --paper: #0C1424; --surface: #1D2C4A; --ink: #E9EFFC; --muted: #98A7C4; --rule: #263554; }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        display: grid; place-items: center;
+        padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+        background: var(--paper); color: var(--ink);
+        font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+      main {
+        width: 100%; max-width: 380px; padding: 32px 24px; text-align: center;
+        background: var(--surface); border: 1px solid var(--rule); border-radius: 28px;
+        box-shadow: 0 12px 24px rgba(17, 39, 114, .1), 0 28px 70px rgba(17, 39, 114, .14);
+      }
+      img { width: 64px; height: 64px; border-radius: 18px; }
+      h1 { margin: 20px 0 8px; font-size: 22px; letter-spacing: -0.02em; }
+      p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+      button {
+        margin-top: 24px; width: 100%; min-height: 48px; border: 0; border-radius: 16px;
+        background: var(--brand); color: #fff; font: inherit; font-weight: 700; font-size: 15px;
+        box-shadow: 0 8px 18px rgba(36, 89, 222, .25); cursor: pointer;
+      }
+      button:active { transform: scale(.98); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/PUNDI-brand-assets/app-icon-192.png" alt="Pundi" />
+      <h1>Kamu sedang offline</h1>
+      <p>Pundi butuh koneksi internet untuk memuat data keuanganmu dengan aman. Periksa jaringan, lalu coba lagi.</p>
+      <button type="button" onclick="location.reload()">Coba lagi</button>
+    </main>
+    <script>
+      window.addEventListener("online", function () { location.reload(); });
+    </script>
+  </body>
+</html>

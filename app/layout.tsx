@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { PwaRegister } from "@/components/providers/PwaRegister";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -31,8 +32,29 @@ export const metadata: Metadata = {
       { url: "/PUNDI-brand-assets/favicon.svg", type: "image/svg+xml" },
       { url: "/PUNDI-brand-assets/favicon-32.png", sizes: "32x32", type: "image/png" },
     ],
-    apple: "/PUNDI-brand-assets/app-icon-192.png",
+    apple: { url: "/PUNDI-brand-assets/apple-touch-icon.png", sizes: "180x180" },
   },
+  appleWebApp: {
+    capable: true,
+    title: "Pundi",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F4F7FC" },
+    { media: "(prefers-color-scheme: dark)", color: "#0C1424" },
+  ],
 };
 
 export default function RootLayout({
@@ -54,6 +76,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${bricolage.variable} ${jakarta.variable} antialiased`}>
+        <PwaRegister />
         {children}
       </body>
     </html>
