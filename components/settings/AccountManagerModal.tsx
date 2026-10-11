@@ -78,7 +78,7 @@ export function AccountManagerModal({ open, account, onClose }: { open: boolean;
   return (
     <Modal open={open} onClose={onClose} title={isEditing ? "Kelola rekening" : "Tambah rekening"} description="Perubahan langsung tersinkron dengan data keuangan Anda.">
       <form onSubmit={submit} className="space-y-5 p-5">
-        <div className="rounded-[20px] border border-sky/15 bg-[linear-gradient(145deg,var(--color-brand-50),var(--color-surface-high))] p-4">
+        <div className="rounded-[20px] border border-sky/15 bg-sky-10 p-4">
           <div className="flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-[14px] bg-surface-high text-sky shadow-2xs"><WalletCards className="h-5 w-5" /></span>
             <div className="min-w-0"><p className="truncate text-sm font-extrabold text-ink">{name || "Rekening baru"}</p><p className="mt-0.5 text-xs text-ink-muted">{accountTypes.find((item) => item.value === type)?.label}</p></div>

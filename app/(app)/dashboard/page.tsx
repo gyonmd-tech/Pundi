@@ -259,9 +259,9 @@ export default function DashboardPage() {
         <article data-widget-id="health" className="card h-full min-w-0">
           <p className="eyebrow">Kesehatan kas</p>
           <h2 className="mt-1 text-heading font-bold text-ink">Ruang aman bulan ini</h2>
-          <div className="mx-auto mt-6 grid h-36 w-36 place-items-center rounded-full shadow-clay-soft" style={{ background: `conic-gradient(#156F62 ${cashHealth}%, #E6A447 ${cashHealth}% 100%)` }}>
+          <div className="mx-auto mt-6 grid h-36 w-36 place-items-center rounded-full shadow-clay-soft" style={{ background: `conic-gradient(var(--color-mint-ink) ${cashHealth}%, var(--color-brass) ${cashHealth}% 100%)` }}>
             <div className="grid h-24 w-24 place-items-center rounded-full bg-mint-10 text-center shadow-[inset_3px_3px_9px_rgba(63,82,77,.18)]">
-              <div><p className="text-2xl font-black text-mint-ink">{cashHealth.toFixed(0)}%</p><p className="text-[9px] font-extrabold uppercase text-mint-ink opacity-80">tersisa</p></div>
+              <div><p className="text-2xl font-black text-mint-ink">{cashHealth.toFixed(0)}%</p><p className="text-[9px] font-extrabold uppercase text-mint-ink/80">tersisa</p></div>
             </div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold">

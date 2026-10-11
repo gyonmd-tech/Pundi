@@ -348,7 +348,7 @@ export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddP
         <Field label="Catatan" hint={`${note.length}/80`}>
           <div className="relative">
             <ReceiptText className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-ink-muted" />
-            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder={isAdjustment ? "Contoh: saldo setelah pengecekan rekening" : "Contoh: makan siang bersama tim"} className="min-h-24 w-full resize-none rounded-[16px] border border-surface-high/80 bg-[linear-gradient(145deg,var(--color-surface-high),var(--color-surface))] py-3 pl-10 pr-3 text-sm text-ink outline-none shadow-clay-soft transition placeholder:text-ink-muted/70 focus:border-pine/40 focus:ring-4 focus:ring-pine/10" />
+            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder={isAdjustment ? "Contoh: saldo setelah pengecekan rekening" : "Contoh: makan siang bersama tim"} className="min-h-24 w-full resize-none rounded-[16px] border border-rule bg-surface-high py-3 pl-10 pr-3 text-sm text-ink outline-none shadow-clay-soft transition placeholder:text-ink-muted/70 focus:border-pine/40 focus:ring-4 focus:ring-pine/10" />
           </div>
         </Field>
 
