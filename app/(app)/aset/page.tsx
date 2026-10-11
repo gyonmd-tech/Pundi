@@ -190,7 +190,7 @@ export default function AsetPage() {
                 {totalPnL >= 0
                   ? <TrendingUp size={16} style={{ color: "var(--color-pine)" }} />
                   : <TrendingDown size={16} style={{ color: "var(--color-ember)" }} />}
-                <p className="tabular-nums font-mono font-bold text-body truncate" style={{ color: totalPnL >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
+                <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnL >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
                   {totalPnL >= 0 ? "+" : "−"}{formatRupiah(Math.abs(totalPnL))}
                 </p>
               </div>
@@ -198,7 +198,7 @@ export default function AsetPage() {
 
             <div className="card p-3.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Return Portofolio</p>
-              <p className="tabular-nums font-mono font-bold text-body truncate" style={{ color: totalPnLPct >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
+              <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnLPct >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
                 {totalPnLPct >= 0 ? "+" : ""}{totalPnLPct.toFixed(2)}%
               </p>
             </div>
@@ -250,11 +250,11 @@ export default function AsetPage() {
 
       {/* Asset Table / Mobile Card View */}
       <div className="card overflow-hidden p-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-paper)" }}>
+        <div className="px-4 py-3 border-b flex items-center justify-between gap-3" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-paper)" }}>
           <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
             Daftar Aset & Valuasi Terkini
           </h2>
-          <span className="text-xs font-mono text-ink-muted">
+          <span className="shrink-0 whitespace-nowrap text-xs font-mono text-ink-muted">
             {assets.length} aset tercatat
           </span>
         </div>
@@ -289,7 +289,7 @@ export default function AsetPage() {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={() => openEdit(asset)}
-                      className="p-1.5 rounded-card text-ink-muted hover:text-pine active:bg-pine-10 transition-colors"
+                      className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-pine active:bg-pine-10 transition-colors"
                       title="Edit aset"
                       aria-label="Edit aset"
                     >
@@ -297,7 +297,7 @@ export default function AsetPage() {
                     </button>
                     <button
                       onClick={() => setDeleteId(asset.id)}
-                      className="p-1.5 rounded-card text-ink-muted hover:text-ember active:bg-ember-10 transition-colors"
+                      className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-ember active:bg-ember-10 transition-colors"
                       title="Hapus aset"
                       aria-label="Hapus aset"
                     >

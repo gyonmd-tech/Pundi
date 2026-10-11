@@ -39,13 +39,13 @@ export function NotificationDropdown() {
           >
             <Bell className="h-[18px] w-[18px]" strokeWidth={1.9} />
           </button>
-          {unread.length ? <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full border-2 border-white bg-ember-ink px-1 text-[9px] font-bold text-white shadow-sm">{unread.length}</span> : null}
+          {unread.length ? <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full border-2 border-surface-high bg-ember-ink px-1 text-[9px] font-bold text-white shadow-sm">{unread.length}</span> : null}
         </div>
       )}
     >
       {({ close }) => (
         <>
-          <div className="bg-[linear-gradient(135deg,#E7EFFF,#E4F7FA)] px-5 py-4">
+          <div className="bg-[linear-gradient(135deg,var(--color-brand-100),var(--color-cyan-10))] px-5 py-4">
             <div className="flex items-start justify-between gap-4">
               <div><p className="font-display text-base font-semibold tracking-[-0.01em] text-ink">Notifikasi</p><p className="mt-1 text-[11px] text-ink-muted">Ringkasan penting dari aktivitas keuanganmu.</p></div>
               {unread.length ? <Badge tone="primary">{unread.length} baru</Badge> : <Badge tone="success">Semua dibaca</Badge>}

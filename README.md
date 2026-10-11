@@ -7,6 +7,8 @@ Pundi adalah aplikasi pencatatan keuangan personal untuk mengelola transaksi, an
 - Dashboard ringkasan dengan grafik arus kas, kategori, saldo rekening, dan kalender finansial.
 - Pencatatan pemasukan, pengeluaran, dan transfer melalui panel samping.
 - Pengelolaan transaksi, anggaran, aset, tujuan, insight, dan preferensi.
+- Anggaran fleksibel per hari, per minggu, atau per bulan (mis. makan Rp65.000/hari, bensin Rp225.000/minggu, self reward Rp100.000/minggu), lengkap dengan sisa jatah yang bisa terbawa dan ritme hemat/boros terhadap jadwal.
+- Kalkulator uang: kalkulator Rupiah (persen ala kalkulator HP, terbilang, riwayat), hitung uang tunai per pecahan, bagi tagihan, diskon bertingkat, simulasi cicilan, dan jatah harian sampai gajian — hasilnya bisa langsung dicatat sebagai transaksi.
 - Pencarian global melalui header dan pintasan `Ctrl + K`.
 - Mode demo lokal yang langsung dapat digunakan tanpa akun cloud.
 - Integrasi Appwrite untuk autentikasi dan penyimpanan cloud.
@@ -46,6 +48,8 @@ Setelah kredensial terisi dan proyek Appwrite aktif, buat database serta koleksi
 npm run db:setup
 ```
 
+Perintah ini aman dijalankan ulang: koleksi/atribut yang sudah ada dilewati, yang baru ditambahkan. **Jalankan ulang setiap kali ada pembaruan skema** — misalnya koleksi `audit_logs` (Log Aktivitas) dan atribut anggaran `cadence`, `cadenceAmount`, `rollover` (jatah harian/mingguan). Tanpa itu, Log Aktivitas menampilkan pesan "belum aktif" dan anggaran harian/mingguan tersimpan sebagai bulanan.
+
 API key hanya dipakai oleh skrip setup/server. Jangan memasukkan `.env` atau `.env.local` ke Git; keduanya sudah diabaikan melalui `.gitignore`.
 Di Vercel, masukkan nilai environment sebagai teks polos tanpa tanda kutip pembuka/penutup. Pastikan proyek Appwrite berstatus aktif dan API key memiliki izin `users.write`, `databases.read`, serta `databases.write`.
 
@@ -55,7 +59,7 @@ Pundi tersedia dalam dua bentuk aplikasi mobile, keduanya memakai kode web yang 
 
 ### 1. PWA (pasang dari browser)
 
-Setelah web di-deploy lewat HTTPS, Pundi bisa langsung di-install:
+Buka **https://pundi-theta.vercel.app** di ponsel, lalu install:
 
 - **Android / Chrome / Edge**: buka menu **Lainnya → Pasang aplikasi Pundi** di navigasi bawah, atau pilih *Install app* dari menu browser.
 - **iPhone / iPad (Safari)**: ketuk **Bagikan → Tambah ke Layar Utama**.
@@ -64,17 +68,14 @@ Yang disertakan: manifest (`app/manifest.ts`) dengan ikon maskable dan shortcut 
 
 ### 2. Aplikasi native Android & iOS (Capacitor)
 
-Folder `android/` dan `ios/` berisi proyek native yang membungkus Pundi dalam WebView layar penuh. Karena Pundi memakai Server Actions, aplikasi native memuat URL web yang sudah di-deploy.
+Folder `android/` dan `ios/` berisi proyek native yang membungkus Pundi dalam WebView layar penuh. Karena Pundi memakai Server Actions, aplikasi native memuat versi produksi di **https://pundi-theta.vercel.app** — setiap deploy ke Vercel langsung terlihat di aplikasi tanpa rilis ulang.
 
 ```bash
-# Android (butuh Android Studio)
-PUNDI_APP_URL=https://pundi-kamu.vercel.app npm run mobile:android
-
-# iOS (butuh macOS + Xcode)
-PUNDI_APP_URL=https://pundi-kamu.vercel.app npm run mobile:ios
+npm run mobile:android   # Android (butuh Android Studio)
+npm run mobile:ios       # iOS (butuh macOS + Xcode)
 ```
 
-Perintah di atas menyinkronkan konfigurasi (`capacitor.config.ts`) lalu membuka proyek di Android Studio / Xcode untuk dijalankan di emulator, perangkat, atau dibuat file rilis (`.aab` untuk Play Store, archive untuk App Store). Di Windows (cmd), set variabel dulu: `set PUNDI_APP_URL=https://...` lalu `npm run mobile:android`. Ikon dan splash screen sudah memakai logo Pundi.
+Perintah di atas menyinkronkan konfigurasi (`capacitor.config.ts`) lalu membuka proyek di Android Studio / Xcode untuk dijalankan di emulator, perangkat, atau dibuat file rilis (`.aab` untuk Play Store, archive untuk App Store). Untuk menguji deploy lain (mis. preview Vercel), timpa alamatnya: `PUNDI_APP_URL=https://alamat-preview.vercel.app npm run mobile:android`. Ikon dan splash screen sudah memakai logo Pundi.
 
 ## Perintah proyek
 

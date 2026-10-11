@@ -89,7 +89,7 @@ export function GoalCard({
 
           <div className="min-w-0 flex-1">
             <span
-              className="text-body font-semibold truncate block text-ink group-hover:text-pine transition-colors leading-snug"
+              className="line-clamp-2 block break-words text-body font-semibold text-ink group-hover:text-pine transition-colors leading-snug"
               style={{ fontFamily: "var(--font-ui)" }}
             >
               {name}
@@ -117,7 +117,7 @@ export function GoalCard({
               {onEdit && (
                 <button
                   onClick={onEdit}
-                  className="p-1 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
+                  className="grid h-9 w-9 place-items-center rounded-lg sm:h-auto sm:w-auto sm:p-1 text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
                   title="Edit tujuan"
                   aria-label="Edit tujuan"
                 >
@@ -127,7 +127,7 @@ export function GoalCard({
               {onDelete && (
                 <button
                   onClick={onDelete}
-                  className="p-1 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
+                  className="grid h-9 w-9 place-items-center rounded-lg sm:h-auto sm:w-auto sm:p-1 text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
                   title="Hapus tujuan"
                   aria-label="Hapus tujuan"
                 >

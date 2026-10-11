@@ -17,7 +17,7 @@ export function DashboardSkeleton() {
           <SkeletonBlock className="h-11 w-11 bg-white/20" />
           <SkeletonBlock className="mt-12 h-4 w-36 bg-white/20" />
           <SkeletonBlock className="mt-4 h-12 w-3/4 bg-white/25" />
-          <div className="mt-8 flex gap-3"><SkeletonBlock className="h-8 w-36 bg-white/90" /><SkeletonBlock className="h-8 w-32 bg-brand-900" /></div>
+          <div className="mt-8 flex gap-3"><SkeletonBlock className="h-8 w-36 bg-surface-high/90" /><SkeletonBlock className="h-8 w-32 bg-brand-900" /></div>
         </div>
         <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-surface-high shadow-card lg:col-span-3" />
         <SkeletonBlock className="min-h-64 border border-brand-600/10 bg-surface-high shadow-card lg:col-span-3" />

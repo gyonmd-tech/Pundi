@@ -73,7 +73,7 @@ export function SpendingMomentumChart({ data }: { data: SpendingPoint[] }) {
             contentStyle={{
               borderRadius: 16,
               border: "1px solid var(--color-brand-200)",
-              background: "#FFFFFF",
+              background: "var(--color-surface-high)",
               boxShadow: "var(--shadow-card)",
               fontFamily: "var(--font-ui)",
               fontSize: 12,
@@ -91,10 +91,10 @@ export function SpendingMomentumChart({ data }: { data: SpendingPoint[] }) {
             yAxisId="cumulative"
             type="monotone"
             dataKey="cumulative"
-            stroke="#142B87"
+            stroke="var(--chart-line-strong)"
             strokeWidth={2.5}
-            dot={{ r: 3.5, fill: "#FFFFFF", stroke: "#142B87", strokeWidth: 2 }}
-            activeDot={{ r: 5, fill: "#142B87", stroke: "#FFFFFF", strokeWidth: 2 }}
+            dot={{ r: 3.5, fill: "var(--color-surface-high)", stroke: "var(--chart-line-strong)", strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: "var(--chart-line-strong)", stroke: "var(--color-surface-high)", strokeWidth: 2 }}
             isAnimationActive={false}
           />
         </ComposedChart>

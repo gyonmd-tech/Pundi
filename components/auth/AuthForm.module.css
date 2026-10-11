@@ -3,7 +3,7 @@
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
-  background: #ffffff;
+  background: var(--color-surface-high);
 }
 
 .formsGrid {
@@ -19,7 +19,7 @@
   min-height: calc(100dvh - var(--visual-size));
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: var(--color-surface-high);
   padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
 }
 

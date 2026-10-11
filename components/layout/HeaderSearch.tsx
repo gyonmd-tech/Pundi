@@ -14,6 +14,9 @@ const pages = [
   { label: "Arus Kas", description: "Analisis pergerakan uang", href: "/arus-kas" },
   { label: "Aset", description: "Portofolio dan kekayaan", href: "/aset" },
   { label: "Tujuan", description: "Target keuangan", href: "/tujuan" },
+  { label: "Kalkulator", description: "Hitung uang, patungan, diskon, cicilan", href: "/kalkulator" },
+  { label: "Utang & Piutang", description: "Kewajiban dan tagihan", href: "/utang" },
+  { label: "Pengaturan", description: "Profil, rekening, kategori, tema", href: "/pengaturan" },
 ];
 
 export function HeaderSearch({ autoFocus = false }: { autoFocus?: boolean }) {

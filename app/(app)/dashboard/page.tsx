@@ -16,6 +16,7 @@ import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { cadenceAmountOf, CADENCE_LABEL } from "@/lib/utils/budgetPace";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { InsightFeed } from "@/components/dashboard/InsightFeed";
@@ -195,7 +196,7 @@ export default function DashboardPage() {
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white shadow-card">
                 <WalletCards size={21} />
               </div>
-              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-brand-900 shadow-card">
+              <span className="rounded-full bg-surface-high px-3 py-1 text-[11px] font-bold text-brand-900 shadow-card">
                 {accounts.length} akun aktif
               </span>
             </div>
@@ -205,7 +206,7 @@ export default function DashboardPage() {
             </p>
             <SummarySparkline values={balanceTrend} className="mt-5 text-white" />
             <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/15 pt-4">
-              <span className="rounded-full border border-white/15 bg-white px-3 py-1.5 text-xs text-ink-muted shadow-card">
+              <span className="rounded-full border border-white/15 bg-surface-high px-3 py-1.5 text-xs text-ink-muted shadow-card">
                 Arus kas <strong className="ml-1 text-brand-800">{net >= 0 ? "+" : ""}{formatRupiah(net)}</strong>
               </span>
               <span className="rounded-full border border-white/15 bg-brand-900 px-3 py-1.5 text-xs text-white shadow-card">
@@ -373,6 +374,7 @@ export default function DashboardPage() {
                   categoryColor={budget.category?.color}
                   spent={budget.spent}
                   limit={budget.limitAmount}
+                  period={budget.cadence && budget.cadence !== "monthly" ? `Jatah ${formatRupiah(cadenceAmountOf(budget))}${CADENCE_LABEL[budget.cadence].per}` : undefined}
                 />
               ))}
             </div>

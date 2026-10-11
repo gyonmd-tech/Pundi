@@ -12,6 +12,14 @@ export const createBudgetSchema = z.object({
     .int("Batas anggaran harus berupa bilangan bulat")
     .positive("Batas anggaran harus lebih dari 0")
     .max(999_999_999_999, "Nominal terlalu besar"),
+  cadence: z.enum(["daily", "weekly", "monthly"]).default("monthly"),
+  cadenceAmount: z
+    .number()
+    .int("Jatah harus berupa bilangan bulat")
+    .positive("Jatah harus lebih dari 0")
+    .max(999_999_999_999, "Nominal terlalu besar")
+    .optional(),
+  rollover: z.boolean().default(true),
 });
 
 export const updateBudgetSchema = createBudgetSchema.extend({

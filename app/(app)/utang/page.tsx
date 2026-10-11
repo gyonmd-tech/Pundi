@@ -146,7 +146,7 @@ export default function UtangPage() {
       </section>
 
       <section className="card border-pine/10 bg-surface-high/85">
-        <div className="flex items-center justify-between border-b border-rule pb-4"><div><p className="eyebrow">Daftar catatan</p><h2 className="mt-1 text-lg font-extrabold text-ink">Semua utang dan piutang</h2></div><span className="rounded-full bg-pine-10 px-3 py-1 text-xs font-bold text-pine">{debts.length} catatan</span></div>
+        <div className="flex items-center justify-between gap-3 border-b border-rule pb-4"><div><p className="eyebrow">Daftar catatan</p><h2 className="mt-1 text-lg font-extrabold text-ink">Semua utang dan piutang</h2></div><span className="shrink-0 whitespace-nowrap rounded-full bg-pine-10 px-3 py-1 text-xs font-bold text-pine">{debts.length} catatan</span></div>
         <div className="mt-2 divide-y divide-rule/80">
           {debts.length ? debts.map((item) => {
             const paid = item.status === "paid" || item.remainingAmount === 0;

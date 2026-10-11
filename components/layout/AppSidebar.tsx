@@ -81,7 +81,7 @@ export function AppSidebar() {
 
       <div className="border-t border-white/10 p-2.5">
         <div className={cn("flex items-center rounded-[18px] border border-white/15 bg-white/10 p-2 shadow-card", isCollapsed ? "justify-center" : "gap-2.5")}>
-          <Link href="/pengaturan" className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-xs font-bold text-brand-900 shadow-card">
+          <Link href="/pengaturan" className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-xs font-bold text-[var(--color-brand-900)] shadow-card">
             {preferences.avatarFileId ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={getAvatarUrl(preferences.avatarFileId)} alt="" className="h-full w-full object-cover" />

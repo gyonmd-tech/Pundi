@@ -38,6 +38,10 @@ export function applyTheme(theme: ThemeMode) {
   if (typeof document === "undefined") return;
   const resolved = resolveTheme(theme);
   document.documentElement.dataset.theme = resolved;
+  // Warna status bar ponsel / jendela aplikasi terpasang ikut tema aplikasi, bukan hanya tema OS.
+  document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
+    meta.content = resolved === "dark" ? "#0C1424" : "#F4F7FC";
+  });
   try {
     localStorage.setItem(THEME_CACHE_KEY, resolved);
   } catch {

@@ -81,7 +81,10 @@
             { "key": "userId", "type": "string", "size": 36, "required": true },
             { "key": "categoryId", "type": "string", "size": 36, "required": true },
             { "key": "period", "type": "string", "size": 7, "required": true },
-            { "key": "limitAmount", "type": "integer", "required": true }
+            { "key": "limitAmount", "type": "integer", "required": true },
+            { "key": "cadence", "type": "enum", "elements": ["daily", "weekly", "monthly"], "required": false, "default": "monthly" },
+            { "key": "cadenceAmount", "type": "integer", "required": false },
+            { "key": "rollover", "type": "boolean", "required": false, "default": true }
           ],
           "indexes": [
             { "key": "idx_user_period", "type": "key", "attributes": ["userId", "period"] }
