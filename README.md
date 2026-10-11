@@ -7,6 +7,8 @@ Pundi adalah aplikasi pencatatan keuangan personal untuk mengelola transaksi, an
 - Dashboard ringkasan dengan grafik arus kas, kategori, saldo rekening, dan kalender finansial.
 - Pencatatan pemasukan, pengeluaran, dan transfer melalui panel samping.
 - Pengelolaan transaksi, anggaran, aset, tujuan, insight, dan preferensi.
+- Anggaran fleksibel per hari, per minggu, atau per bulan (mis. makan Rp65.000/hari, bensin Rp225.000/minggu, self reward Rp100.000/minggu), lengkap dengan sisa jatah yang bisa terbawa dan ritme hemat/boros terhadap jadwal.
+- Kalkulator uang: kalkulator Rupiah (persen ala kalkulator HP, terbilang, riwayat), hitung uang tunai per pecahan, bagi tagihan, diskon bertingkat, simulasi cicilan, dan jatah harian sampai gajian — hasilnya bisa langsung dicatat sebagai transaksi.
 - Pencarian global melalui header dan pintasan `Ctrl + K`.
 - Mode demo lokal yang langsung dapat digunakan tanpa akun cloud.
 - Integrasi Appwrite untuk autentikasi dan penyimpanan cloud.
@@ -45,6 +47,8 @@ Setelah kredensial terisi dan proyek Appwrite aktif, buat database serta koleksi
 ```bash
 npm run db:setup
 ```
+
+Perintah ini aman dijalankan ulang: koleksi/atribut yang sudah ada dilewati, yang baru ditambahkan. **Jalankan ulang setiap kali ada pembaruan skema** — misalnya koleksi `audit_logs` (Log Aktivitas) dan atribut anggaran `cadence`, `cadenceAmount`, `rollover` (jatah harian/mingguan). Tanpa itu, Log Aktivitas menampilkan pesan "belum aktif" dan anggaran harian/mingguan tersimpan sebagai bulanan.
 
 API key hanya dipakai oleh skrip setup/server. Jangan memasukkan `.env` atau `.env.local` ke Git; keduanya sudah diabaikan melalui `.gitignore`.
 Di Vercel, masukkan nilai environment sebagai teks polos tanpa tanda kutip pembuka/penutup. Pastikan proyek Appwrite berstatus aktif dan API key memiliki izin `users.write`, `databases.read`, serta `databases.write`.

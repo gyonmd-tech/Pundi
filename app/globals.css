@@ -379,3 +379,8 @@ input[data-search-input="true"]:focus-visible {
 /* Aset yang punya versi terang & gelap (mis. logo). */
 :root:not([data-theme="dark"]) .theme-dark-only,
 :root[data-theme="dark"] .theme-light-only { display: none; }
+
+/* Dialog halaman berada di dalam lapisan konten (z-10), jadi navigasi bawah
+   ponsel (z-40) bisa menutupi tombol aksinya. Sembunyikan nav selama ada
+   dialog modal terbuka. */
+body:has([aria-modal="true"]) nav[aria-label="Navigasi mobile"] { display: none; }

@@ -207,6 +207,9 @@ interface BudgetFields {
   categoryId: string;
   period: string;
   limitAmount: number;
+  cadence?: "daily" | "weekly" | "monthly" | null;
+  cadenceAmount?: number | null;
+  rollover?: boolean | null;
 }
 interface GoalFields {
   name: string;
@@ -350,6 +353,9 @@ export async function getAppBootstrapAction(): Promise<{
         categoryId: f.categoryId,
         period: f.period,
         limitAmount: Number(f.limitAmount),
+        cadence: f.cadence ?? "monthly",
+        cadenceAmount: f.cadenceAmount ? Number(f.cadenceAmount) : undefined,
+        rollover: f.rollover ?? true,
       };
     });
     const mappedGoals = goals.documents.map((doc) => {

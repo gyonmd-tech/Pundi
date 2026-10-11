@@ -1,99 +1,160 @@
 "use client";
 
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
 /**
  * app/(app)/anggaran/page.tsx
- * Manajemen anggaran bulanan per kategori dengan CategoryIcon,
- * toast notifications, live spending preview, dan modal tambah/edit.
+ * Anggaran per kategori yang bisa diatur per hari, per minggu, atau per bulan.
+ * Contoh: makan Rp65.000/hari, bensin Rp225.000/minggu, self reward
+ * Rp100.000/minggu. Sisa jatah bisa terbawa ke hari/minggu berikutnya.
  */
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { AlertTriangle, CalendarDays, CalendarRange, Gift, Lightbulb, PieChart, Plus, Repeat, Sparkles, Sun, Trash2, Wallet, X } from "lucide-react";
 import { useApp, useBudgets, useCategories, useTransactions } from "@/lib/data/store";
-import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
-import { formatRupiah, formatDate, getBudgetStatus } from "@/lib/utils/formatter";
 import { upsertBudgetAction, deleteBudgetAction } from "@/actions/budgets";
+import { createCategoryAction } from "@/actions/categories";
 import { useToast } from "@/lib/context/ToastContext";
-import { Plus, X, AlertTriangle, Trash2, PieChart, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
+import { BudgetPaceCard, paceStatus } from "@/components/budget/BudgetPaceCard";
+import { formatDate, formatRupiah } from "@/lib/utils/formatter";
+import { averageSpendFor, cadenceAmountOf, CADENCE_LABEL, computeBudgetPace, monthlyLimitFor, periodBounds, toPeriod } from "@/lib/utils/budgetPace";
+import type { Budget, BudgetCadence } from "@/lib/data/mock";
 import { cn } from "@/lib/utils/cn";
 
-const CURRENT_PERIOD = new Date().toISOString().slice(0, 7);
+const CADENCE_OPTIONS: Array<{ value: BudgetCadence; label: string; hint: string; icon: typeof Sun }> = [
+  { value: "daily", label: "Per hari", hint: "Makan, kopi, jajan", icon: Sun },
+  { value: "weekly", label: "Per minggu", hint: "Bensin, self reward", icon: CalendarRange },
+  { value: "monthly", label: "Per bulan", hint: "Tagihan, belanja", icon: CalendarDays },
+];
+
+const STATUS_ORDER = { over: 0, warning: 1, safe: 2 } as const;
 
 export default function AnggaranPage() {
-  const { dispatch }  = useApp();
-  const budgets       = useBudgets();
-  const categories    = useCategories();
-  const transactions  = useTransactions();
+  const { dispatch } = useApp();
+  const budgets = useBudgets();
+  const categories = useCategories();
+  const transactions = useTransactions();
   const { showToast } = useToast();
 
-  const [showForm, setShowForm]         = useState(false);
-  const [editId, setEditId]             = useState<string | null>(null);
-  const [categoryId, setCategoryId]     = useState("");
-  const [limitAmount, setLimitAmount]   = useState("");
-  const [deleteId, setDeleteId]         = useState<string | null>(null);
-  const period = CURRENT_PERIOD;
-  const spentByCategory = (id: string, selectedPeriod: string) => transactions
-    .filter((transaction) => transaction.type === "expense" && transaction.categoryId === id && new Date(transaction.date).toISOString().slice(0, 7) === selectedPeriod)
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
+  const period = toPeriod(new Date());
+  const { days: daysInMonth } = periodBounds(period);
 
-  const thisPeriodBudgets = budgets
-    .filter((b) => b.period === period)
-    .map((b) => {
-      const cat   = categories.find((c) => c.id === b.categoryId);
-      const spent = spentByCategory(b.categoryId, period);
-      return { ...b, category: cat, spent };
-    })
-    .sort((a, b) => {
-      const statusOrder = { over: 0, warning: 1, safe: 2 };
-      return statusOrder[getBudgetStatus(a.spent, a.limitAmount)] - statusOrder[getBudgetStatus(b.spent, b.limitAmount)];
-    });
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState("");
+  const [cadence, setCadence] = useState<BudgetCadence>("daily");
+  const [amount, setAmount] = useState("");
+  const [rollover, setRollover] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const totalBudget = thisPeriodBudgets.reduce((s, b) => s + b.limitAmount, 0);
-  const totalSpent  = thisPeriodBudgets.reduce((s, b) => s + b.spent, 0);
-  const overBudgets = thisPeriodBudgets.filter((b) => getBudgetStatus(b.spent, b.limitAmount) === "over");
+  const rows = useMemo(() => budgets
+    .filter((budget) => budget.period === period)
+    .map((budget) => ({
+      budget,
+      category: categories.find((category) => category.id === budget.categoryId),
+      pace: computeBudgetPace(budget, transactions),
+    }))
+    .sort((a, b) => STATUS_ORDER[paceStatus(a.pace)] - STATUS_ORDER[paceStatus(b.pace)]), [budgets, categories, transactions, period]);
 
-  const usedCategoryIds = budgets.filter((b) => b.period === period).map((b) => b.categoryId);
-  const availableCategories = categories.filter((c) => c.type === "expense" && !usedCategoryIds.includes(c.id));
+  const totalLimit = rows.reduce((sum, row) => sum + row.pace.monthLimit, 0);
+  const totalSpent = rows.reduce((sum, row) => sum + row.pace.monthSpent, 0);
+  const todayAvailable = rows.reduce((sum, row) => sum + row.pace.todayAvailable, 0);
+  const overRows = rows.filter((row) => paceStatus(row.pace) === "over");
 
-  async function handleSave() {
-    const amt = parseInt(limitAmount.replace(/\D/g, ""), 10);
-    if (!categoryId || !amt || amt <= 0) {
-      showToast({
-        type: "error",
-        title: "Data Belum Lengkap",
-        message: "Pilih kategori dan masukkan batas anggaran yang valid.",
-      });
+  const usedCategoryIds = rows.map((row) => row.budget.categoryId);
+  const expenseCategories = categories.filter((category) => category.type === "expense");
+  const pickableCategories = editId ? expenseCategories : expenseCategories.filter((category) => !usedCategoryIds.includes(category.id));
+  const hasSelfReward = expenseCategories.some((category) => /self\s*reward/i.test(category.name));
+
+  const numericAmount = Number(amount || 0);
+  const previewMonthly = numericAmount ? monthlyLimitFor(cadence, numericAmount, period) : 0;
+  const suggestion = categoryId ? averageSpendFor(categoryId, cadence, transactions, period) : 0;
+
+  function openCreate() {
+    setEditId(null);
+    setCategoryId("");
+    setCadence("daily");
+    setAmount("");
+    setRollover(true);
+    setShowForm(true);
+  }
+
+  function openEdit(budget: Budget) {
+    setEditId(budget.id);
+    setCategoryId(budget.categoryId);
+    setCadence(budget.cadence ?? "monthly");
+    setAmount(String(cadenceAmountOf(budget)));
+    setRollover(budget.rollover !== false);
+    setShowForm(true);
+  }
+
+  function closeForm() {
+    if (saving) return;
+    setShowForm(false);
+  }
+
+  React.useEffect(() => {
+    if (!showForm && !deleteId) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setDeleteId(null);
+      if (!saving) setShowForm(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showForm, deleteId, saving]);
+
+  async function createSelfRewardCategory() {
+    const draft = { name: "Self Reward", type: "expense" as const, icon: "gift", color: "#7B61D1" };
+    const result = await createCategoryAction(draft);
+    if (!result.success || !result.id) {
+      showToast({ type: "error", title: "Kategori gagal dibuat", message: result.error || "Coba lagi beberapa saat." });
       return;
     }
+    dispatch({ type: "ADD_CATEGORY", payload: { id: result.id, ...draft } });
+    setCategoryId(result.id);
+    setCadence("weekly");
+  }
 
-    const selectedCat = categories.find((c) => c.id === categoryId);
-    const existing = budgets.find((b) => b.categoryId === categoryId && b.period === period);
-
-    const draft = {
+  async function handleSave() {
+    if (!categoryId || !numericAmount) {
+      showToast({ type: "error", title: "Data belum lengkap", message: "Pilih kategori dan isi nominal jatah." });
+      return;
+    }
+    const existing = budgets.find((budget) => budget.categoryId === categoryId && budget.period === period);
+    const draft: Budget = {
       id: editId ?? existing?.id ?? `bud-${categoryId}-${period}`,
       categoryId,
       period,
-      limitAmount: amt,
+      limitAmount: monthlyLimitFor(cadence, numericAmount, period),
+      cadence,
+      cadenceAmount: cadence === "monthly" ? undefined : numericAmount,
+      rollover: cadence === "monthly" ? true : rollover,
     };
+
+    setSaving(true);
     const result = await upsertBudgetAction(draft);
+    setSaving(false);
     if (!result.success) {
       showToast({ type: "error", title: "Anggaran gagal disimpan", message: result.error || "Coba lagi beberapa saat." });
       return;
     }
     dispatch({ type: "UPSERT_BUDGET", payload: { ...draft, id: result.id || draft.id } });
-
+    const name = categories.find((category) => category.id === categoryId)?.name ?? "kategori";
     showToast({
       type: "success",
-      title: editId ? "Anggaran Diperbarui" : "Anggaran Dibuat",
-      message: `Batas untuk ${selectedCat?.name ?? "kategori"} diset ke ${formatRupiah(amt)}.`,
+      title: editId ? "Anggaran diperbarui" : "Anggaran dibuat",
+      message: `${name}: ${formatRupiah(numericAmount)}${CADENCE_LABEL[cadence].per} (≈ ${formatRupiah(draft.limitAmount)} sebulan).`,
     });
-
-    resetForm();
+    if ("warning" in result && result.warning) {
+      showToast({ type: "info", title: "Perlu pembaruan database", message: result.warning });
+    }
+    setShowForm(false);
   }
 
   async function handleDelete(id: string) {
-    const bud = thisPeriodBudgets.find((b) => b.id === id);
+    const row = rows.find((item) => item.budget.id === id);
     const result = await deleteBudgetAction(id);
     if (!result.success) {
       showToast({ type: "error", title: "Anggaran gagal dihapus", message: result.error || "Coba lagi beberapa saat." });
@@ -101,309 +162,218 @@ export default function AnggaranPage() {
     }
     dispatch({ type: "DELETE_BUDGET", payload: id });
     setDeleteId(null);
-    showToast({
-      type: "info",
-      title: "Anggaran Dihapus",
-      message: `Anggaran kategori ${bud?.category?.name ?? ""} telah dihapus.`,
-    });
+    showToast({ type: "info", title: "Anggaran dihapus", message: `Anggaran ${row?.category?.name ?? ""} telah dihapus.` });
   }
-
-  function resetForm() {
-    setShowForm(false);
-    setEditId(null);
-    setCategoryId("");
-    setLimitAmount("");
-  }
-
-  function handleEdit(bud: typeof thisPeriodBudgets[0]) {
-    setEditId(bud.id);
-    setCategoryId(bud.categoryId);
-    setLimitAmount(bud.limitAmount.toString());
-    setShowForm(true);
-  }
-
-  const selectedCategoryCurrentSpent = categoryId ? spentByCategory(categoryId, period) : 0;
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="page-title">
-            Perencanaan Anggaran
-          </h1>
-          <p suppressHydrationWarning className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-            Periode: <strong className="text-ink font-semibold">{formatDate(new Date(), "month")}</strong>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="page-title">Perencanaan Anggaran</h1>
+          <p suppressHydrationWarning className="mt-0.5 text-xs text-ink-muted sm:text-small">
+            Periode <strong className="font-semibold text-ink">{formatDate(new Date(), "month")}</strong> · atur jatah per hari, minggu, atau bulan
           </p>
         </div>
-
-        <Button
-          variant="primary"
-          onClick={() => { setEditId(null); setShowForm(true); }}
-          className="group"
-        >
-          <Plus size={16} strokeWidth={2.5} className="transition-transform group-hover:rotate-90" />
+        <Button variant="primary" onClick={openCreate} className="shrink-0" aria-label="Tambah anggaran">
+          <Plus size={16} strokeWidth={2.5} />
           <span className="hidden sm:inline">Tambah Anggaran</span>
         </Button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full min-w-0">
-        <div className="card p-4 hover:border-pine/30 transition-all w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
-            Total Batas Anggaran
-          </p>
-          <p className="tabular-nums font-mono font-bold text-heading text-ink">
-            {formatRupiah(totalBudget)}
-          </p>
+      {/* Ringkasan */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="relative col-span-2 overflow-hidden rounded-[22px] bg-brand-600 p-4 text-white shadow-card sm:p-5 lg:col-span-1">
+          <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] border-white/10" />
+          <p className="relative flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white/75"><Wallet className="h-3.5 w-3.5" />Bisa dipakai hari ini</p>
+          <p className="relative mt-2 font-mono text-[1.75rem] font-bold leading-none tabular-nums tracking-[-0.04em]">{formatRupiah(todayAvailable)}</p>
+          <p className="relative mt-2 text-xs text-white/75">Gabungan sisa jatah semua anggaran untuk hari ini</p>
         </div>
-
-        <div className="card p-4 hover:border-pine/30 transition-all" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
-            Total Terpakai
-          </p>
-          <p
-            className="tabular-nums font-mono font-bold text-heading"
-            style={{ color: totalSpent > totalBudget ? "var(--color-ember)" : "var(--color-ink)" }}
-          >
-            {formatRupiah(totalSpent)}
-          </p>
-        </div>
-
-        <div className="card col-span-2 p-4 hover:border-pine/30 transition-all sm:col-span-1" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1" style={{ fontFamily: "var(--font-ui)" }}>
-            Sisa Alokasi
-          </p>
-          <p
-            className="tabular-nums font-mono font-bold text-heading"
-            style={{ color: totalBudget - totalSpent >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}
-          >
-            {totalBudget - totalSpent >= 0 ? "" : "−"}
-            {formatRupiah(Math.abs(totalBudget - totalSpent))}
-          </p>
-        </div>
+        <SummaryTile label="Jatah bulan ini" value={formatRupiah(totalLimit)} />
+        <SummaryTile label="Terpakai" value={formatRupiah(totalSpent)} tone={totalSpent > totalLimit ? "danger" : "default"} />
+        <SummaryTile
+          label="Sisa bulan ini"
+          value={`${totalLimit - totalSpent < 0 ? "−" : ""}${formatRupiah(Math.abs(totalLimit - totalSpent))}`}
+          tone={totalLimit - totalSpent < 0 ? "danger" : "brand"}
+          className="col-span-2 lg:col-span-1"
+        />
       </div>
 
-      {/* Alert Over-Budget Indicator */}
-      {overBudgets.length > 0 && (
-        <div
-          className="flex items-center gap-3.5 p-4 rounded-card border shadow-xs animate-in fade-in"
-          style={{
-            backgroundColor: "var(--color-ember-10)",
-            borderColor: "var(--color-ember)",
-            borderLeftWidth: "4px",
-          }}
-        >
-          <div className="w-8 h-8 rounded-full bg-ember/15 flex items-center justify-center flex-shrink-0 text-ember">
-            <AlertTriangle size={18} strokeWidth={2.2} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-small font-semibold text-ember leading-tight" style={{ fontFamily: "var(--font-ui)" }}>
-              Perhatian: {overBudgets.length} Kategori Melewati Batas
-            </p>
-            <p className="text-xs text-ember/80 mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-              Kategori <strong>{overBudgets.map(b => b.category?.name).filter(Boolean).join(", ")}</strong> telah melebihi target anggaran yang ditetapkan.
+      {overRows.length > 0 ? (
+        <div className="flex items-start gap-3 rounded-[18px] border border-ember/40 border-l-4 bg-ember-10 p-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-ember" />
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-ember-ink">{overRows.length} anggaran lewat jatah</p>
+            <p className="mt-0.5 text-xs text-ember-ink/80">
+              <strong>{overRows.map((row) => row.category?.name).filter(Boolean).join(", ")}</strong> sudah melewati jatah periode berjalan. Kurangi pengeluaran di kategori ini agar sisa bulan tetap aman.
             </p>
           </div>
+        </div>
+      ) : null}
+
+      {rows.length === 0 ? (
+        <div className="rounded-[22px] border border-rule bg-surface-high px-6 py-14 text-center shadow-card">
+          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-surface-soft text-ink-muted"><PieChart size={24} strokeWidth={1.5} /></div>
+          <p className="text-body font-semibold text-ink">Belum ada anggaran</p>
+          <p className="mx-auto mt-1 max-w-sm text-small text-ink-muted">Mulai dari jatah harian makan, jatah mingguan bensin, atau self reward mingguan supaya pengeluaran lebih terkendali.</p>
+          <Button className="mt-4" onClick={openCreate}><Plus size={16} />Buat anggaran pertama</Button>
+        </div>
+      ) : (
+        <div className="grid gap-3 lg:grid-cols-2">
+          {rows.map((row) => (
+            <BudgetPaceCard
+              key={row.budget.id}
+              name={row.category?.name ?? "Kategori"}
+              icon={row.category?.icon}
+              color={row.category?.color}
+              pace={row.pace}
+              onEdit={() => openEdit(row.budget)}
+              onDelete={() => setDeleteId(row.budget.id)}
+            />
+          ))}
         </div>
       )}
 
-      {/* Budget List Card */}
-      <div className="card p-4 sm:p-6" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between gap-3 pb-3 mb-2 border-b border-rule">
-          <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-            Daftar Alokasi per Kategori
-          </h2>
-          <span className="shrink-0 whitespace-nowrap text-xs font-mono text-ink-muted">
-            {thisPeriodBudgets.length} kategori aktif
-          </span>
-        </div>
-
-        {thisPeriodBudgets.length === 0 ? (
-          <div className="py-14 text-center">
-            <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mx-auto mb-3 text-ink-muted">
-              <PieChart size={24} strokeWidth={1.5} />
-            </div>
-            <p className="text-body font-semibold text-ink mb-1" style={{ fontFamily: "var(--font-ui)" }}>
-              Belum ada anggaran yang diset
-            </p>
-            <p className="text-small text-ink-muted mb-4 max-w-xs mx-auto" style={{ fontFamily: "var(--font-ui)" }}>
-              Buat batasan pengeluaran bulananmu agar arus kas tetap sehat dan terkontrol.
-            </p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="px-4 py-2 rounded-card text-small font-semibold text-white bg-pine shadow-sm hover:brightness-105 active:scale-95 transition-all"
-            >
-              Buat Anggaran Pertama
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-1">
-            {thisPeriodBudgets.map((b) => (
-              <BudgetProgress
-                key={b.id}
-                categoryName={b.category?.name ?? "Kategori"}
-                categoryIcon={b.category?.icon}
-                categoryColor={b.category?.color}
-                spent={b.spent}
-                limit={b.limitAmount}
-                onEdit={() => handleEdit(b)}
-                onDelete={() => setDeleteId(b.id)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Add / Edit Budget Modal */}
-      {showForm && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
-          onClick={resetForm}
-        >
-          <div
-            className="w-full sm:max-w-md rounded-t-2xl sm:rounded-card shadow-float overflow-hidden border animate-in slide-in-from-bottom-4 duration-200"
-            style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-rule)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--color-rule)" }}>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
-                  <Sparkles size={15} />
-                </div>
-                <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-                  {editId ? "Edit Batas Anggaran" : "Tambah Anggaran Baru"}
-                </h2>
+      {/* Form tambah / edit */}
+      {showForm ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-scrim)] backdrop-blur-[3px] animate-in fade-in duration-200 sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) closeForm(); }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="budget-form-title" className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[26px] border border-rule bg-surface-high shadow-float animate-in slide-in-from-bottom-4 duration-200 sm:max-w-lg sm:rounded-[26px]">
+            <header className="flex items-center justify-between gap-3 border-b border-rule px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-pine-10 text-pine"><Sparkles size={16} /></span>
+                <h2 id="budget-form-title" className="text-lg font-bold text-ink">{editId ? "Ubah anggaran" : "Anggaran baru"}</h2>
               </div>
-              <button onClick={resetForm} className="text-ink-muted hover:text-ink p-1">
-                <X size={18} />
-              </button>
-            </div>
+              <button type="button" onClick={closeForm} aria-label="Tutup" className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-surface-soft"><X size={18} /></button>
+            </header>
 
-            <div className="p-6 space-y-4">
-              {/* Category Picker */}
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-2" style={{ fontFamily: "var(--font-ui)" }}>
-                  Pilih Kategori Pengeluaran
-                </label>
-                <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
-                  {(editId ? categories.filter(c => c.type === "expense") : availableCategories).map((c) => {
-                    const isSelected = categoryId === c.id;
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">Kategori pengeluaran</p>
+                <div className="grid max-h-48 grid-cols-2 gap-2 overflow-y-auto pr-1">
+                  {pickableCategories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => setCategoryId(category.id)}
+                      className={cn("flex min-h-11 items-center gap-2 rounded-[14px] border p-2 text-left transition", categoryId === category.id ? "border-pine bg-pine-10 font-semibold text-ink" : "border-rule bg-surface hover:bg-surface-soft")}
+                    >
+                      <CategoryIcon icon={category.icon} color={category.color} size={14} containerSize="sm" />
+                      <span className="min-w-0 flex-1 truncate text-xs font-medium text-ink">{category.name}</span>
+                    </button>
+                  ))}
+                  {!editId && !hasSelfReward ? (
+                    <button type="button" onClick={createSelfRewardCategory} className="flex min-h-11 items-center gap-2 rounded-[14px] border border-dashed border-lavender/50 p-2 text-left text-lavender-ink transition hover:bg-lavender-10">
+                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-lavender-10"><Gift className="h-3.5 w-3.5" /></span>
+                      <span className="min-w-0 flex-1 text-xs font-bold">+ Self Reward</span>
+                    </button>
+                  ) : null}
+                </div>
+                {!pickableCategories.length ? <p className="mt-2 text-xs text-ink-muted">Semua kategori pengeluaran sudah punya anggaran bulan ini.</p> : null}
+              </div>
+
+              <div>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">Jatah dihitung</p>
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Periode jatah">
+                  {CADENCE_OPTIONS.map((option) => {
+                    const Icon = option.icon;
+                    const active = cadence === option.value;
                     return (
                       <button
-                        key={c.id}
+                        key={option.value}
                         type="button"
-                        onClick={() => setCategoryId(c.id)}
-                        className={cn(
-                          "flex items-center gap-2 p-2 rounded-card border text-left transition-all",
-                          isSelected
-                            ? "border-pine bg-pine-10 text-pine font-semibold shadow-xs"
-                            : "border-rule bg-paper/60 hover:bg-paper text-ink"
-                        )}
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setCadence(option.value)}
+                        className={cn("flex flex-col items-center gap-1 rounded-[16px] border px-2 py-3 text-center transition", active ? "border-brand-600 bg-brand-600 text-white shadow-[0_8px_18px_rgba(36,89,222,.25)]" : "border-rule bg-surface text-ink hover:bg-surface-soft")}
                       >
-                        <CategoryIcon icon={c.icon} color={c.color} size={14} containerSize="sm" />
-                        <span className="text-xs truncate flex-1 font-medium">{c.name}</span>
+                        <Icon className="h-4 w-4" />
+                        <span className="text-xs font-bold">{option.label}</span>
+                        <span className={cn("text-[10px] leading-tight", active ? "text-white/75" : "text-ink-muted")}>{option.hint}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Current Spending Info Preview */}
-              {categoryId && (
-                <div className="p-3 rounded-card border bg-paper/80 flex items-center justify-between" style={{ borderColor: "var(--color-rule)" }}>
-                  <span className="text-xs text-ink-muted">Pengeluaran Bulan Ini:</span>
-                  <span className="text-xs font-mono font-bold text-ink">
-                    {formatRupiah(selectedCategoryCurrentSpent)}
-                  </span>
-                </div>
-              )}
-
-              {/* Limit Amount Input */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
-                  Batas Maksimal Anggaran
+                <label htmlFor="budget-amount" className="mb-2 block text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">
+                  Jatah {CADENCE_LABEL[cadence].per.replace("/", "per ")}
                 </label>
-                <div
-                  className="flex items-center gap-2 px-4 py-3 rounded-card border bg-paper focus-within:border-pine"
-                  style={{ borderColor: "var(--color-rule)" }}
-                >
-                  <span className="text-small font-mono font-bold text-pine">Rp</span>
-                  <Input
-                    type="text"
+                <div className="flex items-center gap-2 rounded-[16px] border border-rule bg-surface px-4 focus-within:border-pine focus-within:shadow-[var(--shadow-focus)]">
+                  <span className="text-sm font-bold text-pine">Rp</span>
+                  <input
+                    id="budget-amount"
                     inputMode="numeric"
+                    autoComplete="off"
                     placeholder="0"
-                    value={limitAmount ? parseInt(limitAmount, 10).toLocaleString("id-ID") : ""}
-                    onChange={(e) => setLimitAmount(e.target.value.replace(/\D/g, ""))}
-                    className="flex-1 bg-transparent outline-none tabular-nums text-right font-mono font-bold text-lg text-ink"
-                    autoFocus
+                    value={amount ? Number(amount).toLocaleString("id-ID") : ""}
+                    onChange={(event) => setAmount(event.target.value.replace(/\D/g, "").slice(0, 12))}
+                    className="h-14 min-w-0 flex-1 border-0 bg-transparent text-right font-mono text-xl font-bold tabular-nums text-ink shadow-none outline-none focus:shadow-none"
+                    data-search-input="true"
                   />
+                  <span className="shrink-0 text-xs font-semibold text-ink-muted">{CADENCE_LABEL[cadence].per}</span>
                 </div>
+                {suggestion ? (
+                  <button type="button" onClick={() => setAmount(String(suggestion))} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface-soft px-3 py-1.5 text-[11px] font-semibold text-ink-muted transition hover:text-pine">
+                    <Lightbulb className="h-3.5 w-3.5 text-brass" />
+                    Rata-rata 3 bulan terakhir: {formatRupiah(suggestion)}{CADENCE_LABEL[cadence].per} · pakai
+                  </button>
+                ) : null}
               </div>
+
+              {cadence !== "monthly" ? (
+                <label className="flex cursor-pointer items-start gap-3 rounded-[16px] border border-rule bg-surface p-3.5">
+                  <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700"><Repeat className="h-4 w-4" /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold text-ink">Jatah fleksibel</span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-ink-muted">
+                      Sisa jatah {CADENCE_LABEL[cadence].unit} sebelumnya ikut terbawa, dan kelebihannya mengurangi jatah berikutnya.
+                    </span>
+                  </span>
+                  <input type="checkbox" checked={rollover} onChange={(event) => setRollover(event.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-brand-600)]" />
+                </label>
+              ) : null}
+
+              {numericAmount ? (
+                <div className="rounded-[16px] bg-brand-50 p-3.5 text-xs leading-relaxed text-ink">
+                  {cadence === "monthly" ? (
+                    <>Setara sekitar <b>{formatRupiah(Math.round(numericAmount / daysInMonth))}/hari</b> selama {daysInMonth} hari.</>
+                  ) : (
+                    <>Total sebulan ≈ <b>{formatRupiah(previewMonthly)}</b> ({cadence === "daily" ? `${daysInMonth} hari` : `${(daysInMonth / 7).toLocaleString("id-ID", { maximumFractionDigits: 1 })} minggu`}). Angka ini yang dipakai di dashboard & insight.</>
+                  )}
+                </div>
+              ) : null}
             </div>
 
-            <div className="flex gap-3 px-6 pb-6 pt-2 border-t border-rule bg-paper">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="flex-1 py-2.5 rounded-card text-small font-medium border text-ink-muted hover:bg-surface transition-colors"
-                style={{ borderColor: "var(--color-rule)" }}
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!categoryId || !limitAmount}
-                className="flex-1 py-2.5 rounded-card text-small font-semibold text-white bg-pine hover:brightness-105 active:scale-95 transition-all disabled:opacity-40"
-              >
-                {editId ? "Simpan Perubahan" : "Tetapkan Anggaran"}
-              </button>
-            </div>
-          </div>
+            <footer className="flex gap-3 border-t border-rule bg-surface px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={closeForm}>Batal</Button>
+              <Button type="button" className="flex-1" onClick={handleSave} loading={saving} disabled={!categoryId || !numericAmount}>{editId ? "Simpan perubahan" : "Tetapkan anggaran"}</Button>
+            </footer>
+          </section>
         </div>
-      )}
+      ) : null}
 
-      {/* Delete Confirmation Modal */}
-      {deleteId && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in"
-          style={{ backgroundColor: "var(--color-scrim)", backdropFilter: "blur(4px)" }}
-          onClick={() => setDeleteId(null)}
-        >
-          <div
-            className="w-full max-w-sm rounded-card p-6 shadow-float border bg-surface"
-            style={{ borderColor: "var(--color-rule)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-10 rounded-full bg-ember-10 flex items-center justify-center text-ember mb-3">
-              <Trash2 size={20} />
-            </div>
-            <h3 className="text-heading font-semibold text-ink mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
-              Hapus Anggaran?
-            </h3>
-            <p className="text-small text-ink-muted mb-5 leading-relaxed" style={{ fontFamily: "var(--font-ui)" }}>
-              Batas anggaran ini akan dihapus dari pemantauan bulanan.
-            </p>
+      {deleteId ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-scrim)] p-4 backdrop-blur-[3px] animate-in fade-in" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}>
+          <div role="alertdialog" aria-modal="true" className="w-full max-w-sm rounded-[24px] border border-rule bg-surface-high p-6 shadow-float">
+            <div className="mb-3 grid h-10 w-10 place-items-center rounded-full bg-ember-10 text-ember"><Trash2 size={20} /></div>
+            <h3 className="text-heading font-semibold text-ink">Hapus anggaran?</h3>
+            <p className="mb-5 mt-1.5 text-small leading-relaxed text-ink-muted">Jatah untuk kategori ini tidak akan dipantau lagi bulan ini. Transaksinya tetap tersimpan.</p>
             <div className="flex gap-2.5">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="flex-1 py-2.5 rounded-card text-small font-medium border text-ink-muted hover:bg-paper"
-                style={{ borderColor: "var(--color-rule)" }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                className="flex-1 py-2.5 rounded-card text-small font-semibold text-white bg-ember hover:brightness-110 active:scale-95 transition-all"
-              >
-                Ya, Hapus
-              </button>
+              <Button variant="outline" className="flex-1" onClick={() => setDeleteId(null)}>Batal</Button>
+              <Button className="flex-1 bg-ember hover:bg-ember-ink" onClick={() => handleDelete(deleteId)}>Ya, hapus</Button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
+    </div>
+  );
+}
+
+function SummaryTile({ label, value, tone = "default", className }: { label: string; value: string; tone?: "default" | "brand" | "danger"; className?: string }) {
+  return (
+    <div className={cn("rounded-[22px] border border-rule bg-surface-high p-4 shadow-card sm:p-5", className)}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">{label}</p>
+      <p className={cn("mt-2 whitespace-nowrap font-mono text-[clamp(1rem,4.6vw,1.25rem)] font-bold tabular-nums tracking-[-0.03em]", tone === "danger" ? "text-ember-ink" : tone === "brand" ? "text-pine" : "text-ink")}>{value}</p>
     </div>
   );
 }

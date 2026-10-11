@@ -58,9 +58,11 @@ function mergeClientChanges(...groups: Map<string, number>[]) {
 interface QuickAddPanelProps {
   onClose: () => void;
   transaction?: Transaction;
+  /** Nominal awal untuk transaksi baru (mis. dari kalkulator uang). */
+  initialAmount?: number;
 }
 
-export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
+export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddPanelProps) {
   const accounts = useAccounts().filter((account) => account.isActive);
   const categories = useCategories();
   const transactions = useTransactions();
@@ -77,7 +79,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
     ? preferences.defaultAccountId
     : accounts[0]?.id;
   const [mode, setMode] = React.useState<EntryMode>(initialMode);
-  const [amount, setAmount] = React.useState(transaction ? String(transaction.amount) : "");
+  const [amount, setAmount] = React.useState(transaction ? String(transaction.amount) : initialAmount ? String(initialAmount) : "");
   const [accountId, setAccountId] = React.useState(transaction?.accountId || defaultAccountId || "");
   const [destinationAccountId, setDestinationAccountId] = React.useState(transaction?.destinationAccountId || "");
   const [categoryId, setCategoryId] = React.useState(transaction?.categoryId || "");

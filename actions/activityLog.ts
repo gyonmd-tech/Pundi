@@ -98,6 +98,14 @@ export async function getAuditLogsAction(params: GetAuditLogsParams = {}): Promi
 
     return { data, nextCursor };
   } catch (error: unknown) {
-    return { data: [], error: error instanceof Error ? error.message : "Log aktivitas tidak dapat dimuat." };
+    const message = error instanceof Error ? error.message : "";
+    // Koleksi audit_logs belum dibuat di database (setup Appwrite versi lama).
+    if (/collection.*could not be found/i.test(message)) {
+      return {
+        data: [],
+        error: "Fitur log aktivitas belum aktif di database. Jalankan `npm run db:setup` sekali (dengan kredensial Appwrite produksi) untuk membuat koleksi yang dibutuhkan.",
+      };
+    }
+    return { data: [], error: message || "Log aktivitas tidak dapat dimuat." };
   }
 }

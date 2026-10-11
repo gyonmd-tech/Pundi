@@ -16,6 +16,7 @@ import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { cadenceAmountOf, CADENCE_LABEL } from "@/lib/utils/budgetPace";
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { InsightFeed } from "@/components/dashboard/InsightFeed";
@@ -373,6 +374,7 @@ export default function DashboardPage() {
                   categoryColor={budget.category?.color}
                   spent={budget.spent}
                   limit={budget.limitAmount}
+                  period={budget.cadence && budget.cadence !== "monthly" ? `Jatah ${formatRupiah(cadenceAmountOf(budget))}${CADENCE_LABEL[budget.cadence].per}` : undefined}
                 />
               ))}
             </div>
