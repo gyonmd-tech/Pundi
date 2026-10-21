@@ -39,6 +39,14 @@ export interface AgentTokenInfo {
 
 export type PenjagaMood = "idle" | "thinking" | "talking" | "happy" | "alert" | "sleeping";
 
+export interface ChatThread {
+  id: string;
+  title: string;
+  preview?: string;
+  /** ISO string. */
+  lastMessageAt: string;
+}
+
 export interface PenjagaChatMessage {
   id: string;
   role: "user" | "assistant";

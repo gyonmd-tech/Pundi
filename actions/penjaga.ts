@@ -15,7 +15,8 @@ import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { generateAgentToken } from "@/lib/penjaga/tokens";
 import { getPenjagaEngine, type HermesChatAccess, type PenjagaEngine } from "@/lib/penjaga/config";
 import { confirmDrafts, listDrafts, rejectDrafts } from "@/lib/penjaga/service";
-import type { AgentDraft, AgentTokenInfo, DraftEdit } from "@/lib/penjaga/types";
+import type { AgentDraft, AgentTokenInfo, ChatThread, DraftEdit, PenjagaChatMessage } from "@/lib/penjaga/types";
+import { deleteThread, getThreadMessages, listThreads } from "@/lib/penjaga/history";
 import type { Transaction } from "@/lib/data/mock";
 
 const MAX_ACTIVE_TOKENS = 5;
@@ -151,5 +152,40 @@ export async function revokeAgentTokenAction(id: string) {
     return { success: true };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : "Token gagal dicabut." };
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Riwayat chat (ADR-002)                                              */
+/* ------------------------------------------------------------------ */
+
+export async function listChatThreadsAction(): Promise<{ data: ChatThread[]; error?: string }> {
+  const user = await getAuthUserAction();
+  if (!user || user.isDemo) return { data: [] };
+  try {
+    return { data: await listThreads(user.id) };
+  } catch (error) {
+    return { data: [], error: error instanceof Error ? error.message : "Riwayat chat tidak dapat dimuat." };
+  }
+}
+
+export async function getChatThreadAction(threadId: string): Promise<{ data: PenjagaChatMessage[]; error?: string }> {
+  const user = await getAuthUserAction();
+  if (!user || user.isDemo) return { data: [] };
+  try {
+    return { data: await getThreadMessages(user.id, threadId) };
+  } catch (error) {
+    return { data: [], error: error instanceof Error ? error.message : "Percakapan tidak dapat dibuka." };
+  }
+}
+
+export async function deleteChatThreadAction(threadId: string) {
+  const user = await getAuthUserAction();
+  if (!user || user.isDemo) return { success: false, error: "Sesi login telah berakhir." };
+  try {
+    await deleteThread(user.id, threadId);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Percakapan gagal dihapus." };
   }
 }

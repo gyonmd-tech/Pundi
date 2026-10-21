@@ -95,5 +95,5 @@ Video hero dibuat dengan Remotion di folder `video/`:
 cd video
 npm i
 npm run dev      # Remotion Studio untuk mengedit
-npm run render   # menulis public/landing/*.mp4 dan poster *.jpg
+npm run render:hero   # video latar hero (loop) → public/landing/hero-loop*.mp4 + poster
 ```

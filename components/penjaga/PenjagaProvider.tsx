@@ -15,17 +15,47 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useApp } from "@/lib/data/store";
 import {
   confirmDraftsAction,
+  deleteChatThreadAction,
+  getChatThreadAction,
   getPendingDraftsAction,
+  listChatThreadsAction,
   getPenjagaStatusAction,
   rejectDraftsAction,
   type PenjagaStatus,
 } from "@/actions/penjaga";
 import { parseStory } from "@/lib/penjaga/demoParser";
-import type { AgentDraft, DraftEdit, PenjagaChatMessage, PenjagaMood } from "@/lib/penjaga/types";
+import type { AgentDraft, ChatThread, DraftEdit, PenjagaChatMessage, PenjagaMood } from "@/lib/penjaga/types";
 import type { Account, Transaction } from "@/lib/data/mock";
 import { formatRupiah } from "@/lib/utils/formatter";
 
 const DRAFT_POLL_MS = 30_000;
+const DEMO_HISTORY_KEY = "pundi-penjaga-history";
+const DEMO_MAX_THREADS = 30;
+
+/* Mode demo: riwayat disimpan di perangkat (localStorage). */
+type DemoHistory = { thread: ChatThread; messages: PenjagaChatMessage[] }[];
+
+function readDemoHistory(): DemoHistory {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DEMO_HISTORY_KEY) || "[]") as DemoHistory;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDemoHistory(history: DemoHistory) {
+  try {
+    localStorage.setItem(DEMO_HISTORY_KEY, JSON.stringify(history.slice(0, DEMO_MAX_THREADS)));
+  } catch {
+    // Penyimpanan penuh/dinonaktifkan — riwayat demo cukup hidup di memori.
+  }
+}
+
+function demoTitle(text: string) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length <= 48 ? clean : `${clean.slice(0, 46)}…`;
+}
 
 interface PenjagaContextValue {
   status: PenjagaStatus | null;
@@ -34,6 +64,12 @@ interface PenjagaContextValue {
   mood: PenjagaMood;
   busy: boolean;
   send: (text: string) => Promise<void>;
+  threads: ChatThread[];
+  activeThreadId: string | null;
+  historyLoading: boolean;
+  openThread: (id: string) => Promise<void>;
+  newChat: () => void;
+  deleteThread: (id: string) => Promise<void>;
   confirm: (ids: string[], edits: Record<string, DraftEdit>) => Promise<{ saved: number; failed: { draftId: string; error: string }[] }>;
   reject: (ids: string[]) => Promise<void>;
   refreshDrafts: () => Promise<void>;
@@ -78,6 +114,11 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
   const { state, dispatch, connection } = useApp();
   const [status, setStatus] = useState<PenjagaStatus | null>(null);
   const [messages, setMessages] = useState<PenjagaChatMessage[]>([]);
+  const [threads, setThreads] = useState<ChatThread[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const activeThreadRef = useRef<string | null>(null);
+  useEffect(() => { activeThreadRef.current = activeThreadId; }, [activeThreadId]);
   const [drafts, setDrafts] = useState<AgentDraft[]>([]);
   const [phase, setPhase] = useState<"idle" | "thinking" | "talking">("idle");
   const [flash, setFlash] = useState<"happy" | "alert" | null>(null);
@@ -101,6 +142,68 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
     getPenjagaStatusAction().then((result) => { if (active) setStatus(result); });
     return () => { active = false; };
   }, [connection.status]);
+
+  const isDemoChat = status?.chat === "demo";
+
+  // Daftar percakapan: cloud dari Appwrite, demo dari perangkat.
+  useEffect(() => {
+    if (!status) return;
+    let active = true;
+    if (isDemoChat) {
+      const history = readDemoHistory();
+      Promise.resolve().then(() => { if (active) setThreads(history.map((item) => item.thread)); });
+    } else if (isCloud) {
+      listChatThreadsAction().then((result) => { if (active && !result.error) setThreads(result.data); });
+    }
+    return () => { active = false; };
+  }, [isCloud, isDemoChat, status]);
+
+  const touchThread = useCallback((thread: ChatThread) => {
+    setThreads((current) => [thread, ...current.filter((item) => item.id !== thread.id)]);
+  }, []);
+
+  const openThread = useCallback(async (id: string) => {
+    if (id === activeThreadRef.current) return;
+    activeThreadRef.current = id;
+    setActiveThreadId(id);
+    if (isDemoChat) {
+      setMessages(readDemoHistory().find((item) => item.thread.id === id)?.messages ?? []);
+      return;
+    }
+    setHistoryLoading(true);
+    setMessages([]);
+    const result = await getChatThreadAction(id);
+    if (activeThreadRef.current !== id) return;
+    setHistoryLoading(false);
+    if (result.error) {
+      activeThreadRef.current = null;
+      setActiveThreadId(null);
+      setMessages([{ id: nextId("msg"), role: "assistant", content: result.error, error: true }]);
+      return;
+    }
+    setMessages(result.data);
+  }, [isDemoChat]);
+
+  const newChat = useCallback(() => {
+    activeThreadRef.current = null;
+    setActiveThreadId(null);
+    setHistoryLoading(false);
+    setMessages([]);
+  }, []);
+
+  const deleteThread = useCallback(async (id: string) => {
+    setThreads((current) => current.filter((thread) => thread.id !== id));
+    if (activeThreadRef.current === id) newChat();
+    if (isDemoChat) {
+      writeDemoHistory(readDemoHistory().filter((item) => item.thread.id !== id));
+      return;
+    }
+    const result = await deleteChatThreadAction(id);
+    if (!result.success) {
+      const list = await listChatThreadsAction();
+      if (!list.error) setThreads(list.data);
+    }
+  }, [isDemoChat, newChat]);
 
   const refreshDrafts = useCallback(async () => {
     if (!isCloud) return;
@@ -162,11 +265,11 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
     if (!created.length) showFlash("alert", 1800);
   }, [patchMessage, showFlash, state.accounts, state.categories]);
 
-  const sendCloud = useCallback(async (history: PenjagaChatMessage[], replyId: string) => {
+  const sendCloud = useCallback(async (text: string, replyId: string) => {
     const response = await fetch("/api/penjaga/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: history.filter((message) => !message.error).map(({ role, content }) => ({ role, content })) }),
+      body: JSON.stringify({ threadId: activeThreadRef.current, message: text }),
     });
     if (!response.ok || !response.body) {
       const body = await response.json().catch(() => ({})) as { error?: string };
@@ -185,8 +288,12 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
       buffer = lines.pop() ?? "";
       for (const line of lines) {
         if (!line.trim()) continue;
-        const event = JSON.parse(line) as { t: string; v?: string; name?: string; message?: string };
-        if (event.t === "delta" && event.v) {
+        const event = JSON.parse(line) as { t: string; v?: string; name?: string; message?: string; id?: string; title?: string };
+        if (event.t === "thread" && event.id) {
+          activeThreadRef.current = event.id;
+          setActiveThreadId(event.id);
+          touchThread({ id: event.id, title: event.title ?? "Percakapan baru", preview: text, lastMessageAt: new Date().toISOString() });
+        } else if (event.t === "delta" && event.v) {
           setPhase("talking");
           patchMessage(replyId, (message) => ({ ...message, content: message.content + event.v }));
         } else if (event.t === "tool" && event.name) {
@@ -200,21 +307,35 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
         }
       }
     }
+    const threadId = activeThreadRef.current;
+    if (threadId) {
+      setThreads((current) => {
+        const thread = current.find((item) => item.id === threadId);
+        return thread ? [{ ...thread, lastMessageAt: new Date().toISOString() }, ...current.filter((item) => item.id !== threadId)] : current;
+      });
+    }
     if (touchedDrafts) await refreshDrafts();
     else refreshDrafts();
-  }, [patchMessage, refreshDrafts]);
+  }, [patchMessage, refreshDrafts, touchThread]);
 
   const send = useCallback(async (raw: string) => {
     const text = raw.trim();
     if (!text || phase !== "idle" || !status) return;
     const userMessage: PenjagaChatMessage = { id: nextId("msg"), role: "user", content: text };
     const reply: PenjagaChatMessage = { id: nextId("msg"), role: "assistant", content: "" };
-    const history = [...messages, userMessage];
-    setMessages([...history, reply]);
+    setMessages((current) => [...current, userMessage, reply]);
     setPhase("thinking");
+
+    const demo = status.chat === "demo";
+    let demoThreadId = activeThreadRef.current;
+    if (demo && !demoThreadId) {
+      demoThreadId = nextId("thread");
+      activeThreadRef.current = demoThreadId;
+      setActiveThreadId(demoThreadId);
+    }
     try {
-      if (status.chat === "demo") await sendDemo(text, reply.id);
-      else await sendCloud(history, reply.id);
+      if (demo) await sendDemo(text, reply.id);
+      else await sendCloud(text, reply.id);
     } catch (error) {
       patchMessage(reply.id, (message) => ({
         ...message,
@@ -224,8 +345,27 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
       showFlash("alert");
     } finally {
       setPhase("idle");
+      if (demo && demoThreadId) persistDemoRef.current = { id: demoThreadId, firstText: text };
     }
-  }, [messages, patchMessage, phase, sendCloud, sendDemo, showFlash, status]);
+  }, [patchMessage, phase, sendCloud, sendDemo, showFlash, status]);
+
+  // Mode demo: simpan percakapan ke perangkat setelah balasan selesai.
+  const persistDemoRef = useRef<{ id: string; firstText: string } | null>(null);
+  useEffect(() => {
+    const pending = persistDemoRef.current;
+    if (!pending || phase !== "idle") return;
+    persistDemoRef.current = null;
+    const history = readDemoHistory();
+    const existing = history.find((item) => item.thread.id === pending.id);
+    const thread: ChatThread = {
+      id: pending.id,
+      title: existing?.thread.title ?? demoTitle(pending.firstText),
+      preview: messages.at(-1)?.content.slice(0, 200),
+      lastMessageAt: new Date().toISOString(),
+    };
+    writeDemoHistory([{ thread, messages }, ...history.filter((item) => item.thread.id !== pending.id)]);
+    Promise.resolve().then(() => touchThread(thread));
+  }, [messages, phase, touchThread]);
 
   const applyLocally = useCallback((transactions: Transaction[]) => {
     const accounts = new Map<string, Account>(accountsRef.current.map((account) => [account.id, account]));
@@ -308,11 +448,17 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
     mood,
     busy: phase !== "idle",
     send,
+    threads,
+    activeThreadId,
+    historyLoading,
+    openThread,
+    newChat,
+    deleteThread,
     confirm,
     reject,
     refreshDrafts,
     celebrate: () => showFlash("happy"),
-  }), [confirm, drafts, messages, mood, phase, refreshDrafts, reject, send, showFlash, status]);
+  }), [activeThreadId, confirm, deleteThread, drafts, historyLoading, messages, mood, newChat, openThread, phase, refreshDrafts, reject, send, showFlash, status, threads]);
 
   return <PenjagaContext.Provider value={value}>{children}</PenjagaContext.Provider>;
 }
