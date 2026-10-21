@@ -13,7 +13,7 @@ import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { recordAuditLog } from "@/lib/appwrite/auditLog";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { generateAgentToken } from "@/lib/penjaga/tokens";
-import { getHermesChatAccess, type HermesChatAccess } from "@/lib/penjaga/config";
+import { getPenjagaEngine, type HermesChatAccess, type PenjagaEngine } from "@/lib/penjaga/config";
 import { confirmDrafts, listDrafts, rejectDrafts } from "@/lib/penjaga/service";
 import type { AgentDraft, AgentTokenInfo, DraftEdit } from "@/lib/penjaga/types";
 import type { Transaction } from "@/lib/data/mock";
@@ -23,13 +23,17 @@ const MAX_ACTIVE_TOKENS = 5;
 export interface PenjagaStatus {
   mode: "guest" | "demo" | "cloud";
   chat: HermesChatAccess | "demo";
+  /** Mesin chat aktif: Hermes milik pengguna atau LLM langsung dari server Pundi. */
+  engine?: PenjagaEngine;
+  model?: string;
 }
 
 export async function getPenjagaStatusAction(): Promise<PenjagaStatus> {
   const user = await getAuthUserAction();
   if (!user) return { mode: "guest", chat: "demo" };
   if (user.isDemo) return { mode: "demo", chat: "demo" };
-  return { mode: "cloud", chat: getHermesChatAccess(user.email) };
+  const { access, engine, model } = getPenjagaEngine(user.email);
+  return { mode: "cloud", chat: access, engine, model };
 }
 
 export async function getPendingDraftsAction(): Promise<{ data: AgentDraft[]; error?: string }> {

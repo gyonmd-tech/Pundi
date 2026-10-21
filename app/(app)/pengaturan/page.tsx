@@ -31,6 +31,7 @@ import { Button, IconButton } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils/cn";
 import { SettingsCard } from "@/components/settings/SettingsCard";
+import { ConnectHermesCard } from "@/components/penjaga/ConnectHermesCard";
 import { PreferenceToggle } from "@/components/settings/PreferenceToggle";
 import { AccountManagerModal } from "@/components/settings/AccountManagerModal";
 import { ProfileNameModal } from "@/components/settings/ProfileNameModal";
@@ -190,6 +191,12 @@ export default function PengaturanPage() {
       </Card>
 
       <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12">
+
+        <div id="penjaga" className="scroll-mt-24 lg:col-span-12">
+          <SettingsCard title="Penjaga AI" description="Mesin chat Penjaga dan koneksi Hermes Agent lewat MCP." icon={ShieldCheck} tone="violet">
+            <ConnectHermesCard />
+          </SettingsCard>
+        </div>
 
         <SettingsCard title="Preferensi aplikasi" description="Atur pengalaman harian tanpa meninggalkan halaman." icon={Palette} tone="mint" className="lg:col-span-6">
           <div className="grid gap-3 sm:grid-cols-2">

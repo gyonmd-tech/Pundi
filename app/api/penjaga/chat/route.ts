@@ -9,7 +9,8 @@
  *   {"t":"done"}              {"t":"error","message":"..."}
  */
 import { getAuthUserAction } from "@/actions/auth";
-import { getHermesChatAccess, getHermesConfig } from "@/lib/penjaga/config";
+import { getHermesConfig, getPenjagaEngine } from "@/lib/penjaga/config";
+import { runDirectAgent } from "@/lib/penjaga/directAgent";
 import { PENJAGA_INSTRUCTIONS } from "@/lib/penjaga/tools";
 import { todayInJakarta } from "@/lib/penjaga/service";
 import { checkRateLimit } from "@/lib/security/rateLimit";
@@ -46,12 +47,33 @@ function toolNameFrom(data: unknown): string | undefined {
   return typeof candidate === "string" ? candidate : undefined;
 }
 
+const NDJSON_HEADERS = { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" };
+
+/** Mesin LLM langsung: server Pundi menjalankan model + tool Pundi sendiri. */
+function directResponse(userId: string, system: string, messages: IncomingMessage[], signal: AbortSignal) {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (payload: Record<string, unknown>) => controller.enqueue(encoder.encode(`${JSON.stringify(payload)}\n`));
+      try {
+        await runDirectAgent(userId, system, messages.slice(-12), send, signal);
+        send({ t: "done" });
+      } catch (error) {
+        send({ t: "error", message: error instanceof Error ? error.message : "AI Penjaga gagal menjawab." });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+  return new Response(stream, { headers: NDJSON_HEADERS });
+}
+
 export async function POST(request: Request) {
   const user = await getAuthUserAction();
   if (!user || user.isDemo) return Response.json({ error: "Masuk dengan akun untuk mengobrol dengan Hermes." }, { status: 401 });
 
-  const access = getHermesChatAccess(user.email);
-  if (access === "not-configured") return Response.json({ error: "Hermes Agent belum dihubungkan di server Pundi." }, { status: 503 });
+  const { access, engine } = getPenjagaEngine(user.email);
+  if (access === "not-configured") return Response.json({ error: "AI Penjaga belum diaktifkan di server Pundi." }, { status: 503 });
   if (access === "not-owner") return Response.json({ error: "Hermes Agent ini hanya melayani pemiliknya." }, { status: 403 });
 
   const limit = checkRateLimit(`penjaga-chat:${user.id}`, 30, 60_000);
@@ -63,12 +85,14 @@ export async function POST(request: Request) {
     return Response.json({ error: "Pesan kosong." }, { status: 400 });
   }
 
-  const config = getHermesConfig();
   const today = todayInJakarta();
   const system = `${PENJAGA_INSTRUCTIONS} Pengguna: ${user.name || "pemilik Pundi"}. Hari ini ${today} (WIB). ` +
     "Pesan ini datang dari panel Penjaga di aplikasi Pundi: pengguna meninjau dan menyimpan draft langsung di aplikasi, " +
     "jadi setelah membuat draft cukup beri ringkasan singkat dan arahkan untuk menekan tombol Simpan.";
 
+  if (engine === "direct") return directResponse(user.id, system, messages, request.signal);
+
+  const config = getHermesConfig();
   let upstream: Response;
   try {
     upstream = await fetch(`${config.baseUrl}/chat/completions`, {
@@ -147,7 +171,5 @@ export async function POST(request: Request) {
     },
   });
 
-  return new Response(stream, {
-    headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" },
-  });
+  return new Response(stream, { headers: NDJSON_HEADERS });
 }

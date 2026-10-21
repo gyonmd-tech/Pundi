@@ -188,18 +188,13 @@ export function CardsSkeleton() {
 
 export function PenjagaSkeleton() {
   return (
-    <div className="grid gap-4 lg:grid-cols-12" role="status" aria-label="Memuat Penjaga">
-      <SkeletonRise className="overflow-hidden rounded-[22px] border border-brand-600/10 bg-surface-high shadow-card lg:col-span-7">
-        <div className="flex items-end gap-4 bg-brand-700 p-5">
-          <PenjagaCharacter mood="sleeping" size={96} grounded={false} title="" />
-          <div className="flex-1 space-y-2 pb-2"><Skeleton onBrand className="h-3 w-24" /><Skeleton onBrand className="h-7 w-32" delay={100} /></div>
-        </div>
-        <div className="space-y-3 p-5">{[0, 1, 2].map((index) => <Skeleton key={index} className="h-12 w-full" delay={index * 100} />)}</div>
-      </SkeletonRise>
-      <SkeletonRise delay={150} className="space-y-3 rounded-[22px] border border-brand-600/10 bg-surface-high p-5 shadow-card lg:col-span-5">
-        <Skeleton className="h-5 w-40" />
-        {[0, 1].map((index) => <Skeleton key={index} className="h-24 w-full" delay={index * 120} />)}
-      </SkeletonRise>
+    <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5 pt-10" role="status" aria-label="Memuat Penjaga">
+      <PenjagaCharacter mood="thinking" size={120} title="" />
+      <Skeleton className="h-8 w-72 max-w-full" delay={80} />
+      <Skeleton className="h-4 w-96 max-w-full" delay={160} />
+      <div className="mt-4 grid w-full gap-2.5 sm:grid-cols-3">
+        {[0, 1, 2].map((index) => <Skeleton key={index} className="h-24 w-full rounded-[18px]" delay={220 + index * 90} />)}
+      </div>
     </div>
   );
 }

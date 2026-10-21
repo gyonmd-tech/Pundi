@@ -30,8 +30,8 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "render": "npm run render:desktop && npm run render:mobile && npm run render:posters",
-    "render:desktop": "remotion render PundiStory ../public/landing/pundi-story.mp4 --codec=h264 --crf=24 --port=3123 && remotion render PundiStory ../public/landing/pundi-story.webm --codec=vp9 --crf=34 --port=3123",
-    "render:mobile": "remotion render PundiStoryMobile ../public/landing/pundi-story-mobile.mp4 --codec=h264 --crf=24 --port=3123 && remotion render PundiStoryMobile ../public/landing/pundi-story-mobile.webm --codec=vp9 --crf=34 --port=3123",
+    "render:desktop": "remotion render PundiStory ../public/landing/pundi-story.mp4 --codec=h264 --crf=24 --port=3123",
+    "render:mobile": "remotion render PundiStoryMobile ../public/landing/pundi-story-mobile.mp4 --codec=h264 --crf=24 --port=3123",
     "render:posters": "remotion still PundiStory ../public/landing/pundi-story-poster.jpg --frame=200 --image-format=jpeg --jpeg-quality=82 --port=3123 && remotion still PundiStoryMobile ../public/landing/pundi-story-mobile-poster.jpg --frame=200 --image-format=jpeg --jpeg-quality=82 --port=3123"
   },
   "allowScripts": {
