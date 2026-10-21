@@ -16,4 +16,6 @@ export const COLLECTIONS = {
   AUDIT_LOGS: "audit_logs",
   AGENT_TOKENS: "agent_tokens",
   AGENT_DRAFTS: "agent_drafts",
+  CHAT_THREADS: "chat_threads",
+  CHAT_MESSAGES: "chat_messages",
 } as const;

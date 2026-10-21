@@ -13,3 +13,12 @@
 ## Tech debt
 - zod (75KB gzip) di halaman Pengaturan (CategoryFormModal) — bisa diganti validasi ringan/`zod/mini`.
 - Modal halaman masih markup sendiri-sendiri (belum memakai komponen `Modal`).
+
+## Paket B (selesai)
+- Skema `chat_threads`, `chat_messages` di `appwrite.json` (+ konstanta koleksi).
+- `lib/penjaga/history.ts`: list/create/get/append/delete dengan verifikasi pemilik; judul dari pesan pertama (tanpa AI).
+- `/api/penjaga/chat` kini menerima `{threadId?, message}`; menyimpan pesan pengguna, konteks 12 pesan terakhir dari DB, jawaban disimpan di `finally` (juga saat klien pergi); event NDJSON baru `thread`.
+- Actions `listChatThreadsAction/getChatThreadAction/deleteChatThreadAction`.
+- Provider: `threads`, `activeThreadId`, `openThread`, `newChat`, `deleteThread`, `historyLoading`; mode demo menyimpan ke localStorage (`pundi-penjaga-history`, maks 30).
+- UI: `ChatHistory` (grup Hari ini/Kemarin/7 hari/Lebih lama), panel kiri lg+, sheet di ponsel, skeleton saat memuat, sinkron URL `?c=`.
+- Tech debt: draft demo tidak ikut disimpan per thread (draft tetap global).

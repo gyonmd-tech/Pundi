@@ -1,3 +1,3 @@
 # Handoff
 
-Paket A selesai (PR terpisah). Lanjut Paket B — history chat (ADR-002): B1 skema + history.ts, B2 route chat simpan pesan, B3 actions + state thread, B4 UI panel/sheet + URL, B5 demo localStorage.
+Paket B selesai (PR bertumpuk di atas Paket A). Lanjut Paket C: C1 BudgetWizard 3 langkah (masalah utama: alur membuat), C2 Kalkulator hub kartu + tampilan fokus.

@@ -16,6 +16,7 @@ import { PenjagaAvatar } from "./PenjagaAvatar";
 import { PenjagaCharacter } from "./PenjagaCharacter";
 import { DraftReview } from "./DraftReview";
 import { ChatMarkdown } from "./ChatMarkdown";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { toolLabel, usePenjaga } from "./PenjagaProvider";
 
 const SUGGESTIONS = [
@@ -31,7 +32,7 @@ function useChatAvailability() {
 }
 
 export function PenjagaThread() {
-  const { messages, drafts, mood, send, busy } = usePenjaga();
+  const { messages, drafts, mood, send, busy, historyLoading } = usePenjaga();
   const { connection } = useApp();
   const { disabled, status } = useChatAvailability();
   const endRef = useRef<HTMLDivElement>(null);
@@ -40,6 +41,19 @@ export function PenjagaThread() {
   useEffect(() => {
     if (messages.length || drafts.length) endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, drafts.length]);
+
+  if (historyLoading) {
+    return (
+      <div className="mx-auto w-full max-w-3xl space-y-6 px-1 pt-6" role="status" aria-label="Memuat percakapan">
+        <Skeleton className="ml-auto h-11 w-2/3 rounded-[20px]" />
+        <div className="flex gap-3">
+          <Skeleton className="h-8 w-8 shrink-0 rounded-full" delay={80} />
+          <div className="flex-1 space-y-2"><Skeleton className="h-4 w-11/12" delay={140} /><Skeleton className="h-4 w-3/4" delay={200} /><Skeleton className="h-4 w-1/2" delay={260} /></div>
+        </div>
+        <Skeleton className="ml-auto h-11 w-1/2 rounded-[20px]" delay={320} />
+      </div>
+    );
+  }
 
   if (messages.length === 0) {
     return (
