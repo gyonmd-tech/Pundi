@@ -29,7 +29,7 @@ function CopyBlock({ label, value }: { label: string; value: string }) {
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? "Tersalin" : "Salin"}
         </button>
       </div>
-      <pre className="max-w-full overflow-x-auto rounded-[14px] bg-brand-950 p-3.5 text-[12px] leading-relaxed text-brand-100"><code>{value}</code></pre>
+      <pre className="max-w-full overflow-x-auto rounded-[14px] bg-[#112772] p-3.5 text-[12px] leading-relaxed text-[#E7EFFF]"><code>{value}</code></pre>
     </div>
   );
 }

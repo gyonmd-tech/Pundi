@@ -54,13 +54,13 @@ export default function PenjagaPage() {
             <div className="relative flex items-end gap-3 sm:gap-5">
               <PenjagaCharacter mood={mood} size={104} className="-mb-2 shrink-0 sm:w-[128px]" />
               <div className="min-w-0 flex-1 pb-1">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand-200">Penjaga Pundi</p>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#CADCFF]">Penjaga Pundi</p>
                 <h1 className="font-display text-2xl font-black tracking-[-0.03em] sm:text-3xl">Hermes</h1>
                 <span className={cn(
                   "mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold",
-                  status?.chat === "ready" ? "bg-mint/20 text-white" : "bg-white/12 text-brand-100",
+                  status?.chat === "ready" ? "bg-mint/20 text-white" : "bg-white/12 text-[#E7EFFF]",
                 )}>
-                  <span className={cn("h-1.5 w-1.5 rounded-full", status?.chat === "ready" ? "animate-pulse bg-[#4ADE9B]" : status?.chat === "demo" ? "bg-brass" : "bg-brand-300")} />
+                  <span className={cn("h-1.5 w-1.5 rounded-full", status?.chat === "ready" ? "animate-pulse bg-[#4ADE9B]" : status?.chat === "demo" ? "bg-brass" : "bg-[#8FBCFF]")} />
                   {statusLabel}
                 </span>
               </div>
@@ -70,11 +70,11 @@ export default function PenjagaPage() {
             </p>
             <div className="relative mt-3 grid grid-cols-2 gap-2 text-[11px]">
               <div className="rounded-[14px] bg-white/8 px-3 py-2">
-                <p className="text-brand-200">Pengeluaran hari ini</p>
+                <p className="text-[#CADCFF]">Pengeluaran hari ini</p>
                 <p className="mt-0.5 truncate text-sm font-bold tabular-nums">{formatRupiah(spentToday)}</p>
               </div>
               <a href="#draft-title" className="rounded-[14px] bg-white/8 px-3 py-2 transition hover:bg-white/14 lg:pointer-events-none">
-                <p className="flex items-center gap-1 text-brand-200">Draft menunggu <ChevronDown className="h-3 w-3 lg:hidden" /></p>
+                <p className="flex items-center gap-1 text-[#CADCFF]">Draft menunggu <ChevronDown className="h-3 w-3 lg:hidden" /></p>
                 <p className="mt-0.5 text-sm font-bold tabular-nums">{drafts.length}</p>
               </a>
             </div>

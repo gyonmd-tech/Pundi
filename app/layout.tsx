@@ -18,6 +18,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pundi-theta.vercel.app"),
   title: {
     template: "%s | Pundi",
     default: "Pundi — Satu dashboard untuk semua arus keuanganmu",

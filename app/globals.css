@@ -181,10 +181,6 @@ textarea::placeholder {
   box-shadow: var(--shadow-clay-soft);
 }
 
-:root[data-theme="dark"] .material-button.secondary {
-  background: var(--color-surface-high);
-}
-
 .eyebrow {
   font-size: 0.6875rem;
   font-weight: 700;
@@ -355,26 +351,40 @@ input[data-search-input="true"]:focus-visible {
 
 .card[data-tone] { background: var(--color-surface-high); }
 
-/*
- * Tema gelap — tint brand terang.
- * Ramp brand sengaja sama di kedua tema (lihat styles/tokens.css), sehingga
- * permukaan bg-brand-50/100/200 tampil sebagai kotak terang menyilaukan di
- * atas latar gelap. Di tema gelap tint tersebut diganti versi transparan,
- * dan teks brand gelap (700–900) diterangkan agar tetap terbaca — kecuali
- * di atas permukaan putih (bg-white) yang memang tetap terang.
- */
-:root[data-theme="dark"] .bg-brand-50,
-:root[data-theme="dark"] .hover\:bg-brand-50:hover,
-:root[data-theme="dark"] .active\:bg-brand-50:active { background-color: rgba(92, 143, 242, 0.1); }
-:root[data-theme="dark"] .bg-brand-50\/60 { background-color: rgba(92, 143, 242, 0.07); }
-:root[data-theme="dark"] .bg-brand-100,
-:root[data-theme="dark"] .hover\:bg-brand-100:hover { background-color: rgba(92, 143, 242, 0.17); }
-:root[data-theme="dark"] .bg-brand-200 { background-color: rgba(92, 143, 242, 0.26); }
-:root[data-theme="dark"] .border-brand-200,
-:root[data-theme="dark"] .border-brand-50 { border-color: rgba(140, 170, 255, 0.2); }
-:root[data-theme="dark"] .ring-brand-50,
-:root[data-theme="dark"] .ring-brand-200\/70 { --tw-ring-color: rgba(140, 170, 255, 0.18); }
-:root[data-theme="dark"] :is(.text-brand-700, .text-brand-800, .text-brand-900):not(.bg-white, .bg-white *) { color: var(--color-brand-300); }
+/* ── Tema gelap: kontras teks ──────────────────────────────────────────
+   Shade brand gelap (700–950) & warna "-ink" semantik dirancang untuk teks di
+   atas latar terang. Di tema gelap teks tersebut dicerahkan agar tetap
+   terbaca; pemakaiannya sebagai latar (bg-*) tidak terpengaruh. */
+:root[data-theme="dark"] :is(.text-pine, .text-sky, .text-brand-500, .text-brand-600) { color: var(--color-text-brand); }
+:root[data-theme="dark"] :is(.text-brand-700, .text-brand-800, .text-brand-900, .text-brand-950) { color: var(--color-text-brand-strong); }
+:root[data-theme="dark"] .text-ember-ink { color: var(--color-text-ember); }
+:root[data-theme="dark"] .text-mint-ink { color: var(--color-text-mint); }
+:root[data-theme="dark"] .text-warning-ink { color: var(--color-text-warning); }
+:root[data-theme="dark"] .text-lavender-ink { color: var(--color-text-lavender); }
+:root[data-theme="dark"] .text-cyan-ink { color: var(--color-text-cyan); }
+:root[data-theme="dark"] .eyebrow:not([class*="text-"]) { color: var(--color-text-brand); }
+
+/* Garis tepi kontrol form memakai warna permukaan (tak terlihat di terang);
+   di gelap butuh garis nyata agar kolom input tetap terbaca batasnya. */
+:root[data-theme="dark"] .border-surface-high\/80 { border-color: var(--color-rule-strong); }
+
+:root[data-theme="dark"] .glass-panel { background: rgba(18, 29, 51, 0.92); }
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 10% -10%, rgba(92, 143, 242, 0.12), transparent 32rem),
+    radial-gradient(circle at 100% 14%, rgba(36, 89, 222, 0.10), transparent 28rem),
+    var(--color-paper);
+}
+:root[data-theme="dark"] .card:hover { border-color: rgba(140, 170, 255, 0.28); }
+
+/* Aset yang punya versi terang & gelap (mis. logo). */
+:root:not([data-theme="dark"]) .theme-dark-only,
+:root[data-theme="dark"] .theme-light-only { display: none; }
+
+/* Dialog halaman berada di dalam lapisan konten (z-10), jadi navigasi bawah
+   ponsel (z-40) bisa menutupi tombol aksinya. Sembunyikan nav selama ada
+   dialog modal terbuka. */
+body:has([aria-modal="true"]) nav[aria-label="Navigasi mobile"] { display: none; }
 
 /* Target sentuh minimal 36px di perangkat layar sentuh tanpa mengubah tampilan desktop. */
 @media (pointer: coarse) {

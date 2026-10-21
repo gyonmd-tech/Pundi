@@ -62,7 +62,8 @@ export function AuthPanel({ mode, active, onSwitch }: AuthPanelProps) {
     >
       <div className="my-auto w-full max-w-[410px] text-center">
         <Link href="/" aria-label="Kembali ke halaman utama Pundi" tabIndex={active ? 0 : -1} className="inline-flex rounded-[14px] p-1 transition hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine/25">
-          <Image src="/PUNDI-brand-assets/pundi-logo.svg" alt="Pundi" width={150} height={44} priority className="h-9 w-auto object-contain sm:h-10" />
+          <Image src="/PUNDI-brand-assets/pundi-logo.svg" alt="Pundi" width={150} height={44} priority className="theme-light-only h-9 w-auto object-contain sm:h-10" />
+          <Image src="/PUNDI-brand-assets/pundi-logo-white.svg" alt="Pundi" width={150} height={44} priority className="theme-dark-only h-9 w-auto object-contain sm:h-10" />
         </Link>
 
         <h1 className="mt-5 text-3xl font-black sm:mt-7 sm:text-4xl tracking-[-0.05em] text-ink">{isSignup ? "Sign up" : "Login"}</h1>

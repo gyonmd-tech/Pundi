@@ -21,6 +21,9 @@ import {
   TrendingUp,
   PlusCircle,
   Tag,
+  Gift,
+  Fuel,
+  Coffee,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -39,6 +42,9 @@ const iconMap: Record<string, LucideIcon> = {
   laptop:          Laptop,
   "trending-up":   TrendingUp,
   "plus-circle":   PlusCircle,
+  gift:            Gift,
+  fuel:            Fuel,
+  coffee:          Coffee,
 };
 
 interface CategoryIconProps {

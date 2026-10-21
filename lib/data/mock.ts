@@ -89,11 +89,20 @@ export interface Debt {
   updatedAt?: Date;
 }
 
+export type BudgetCadence = "daily" | "weekly" | "monthly";
+
 export interface Budget {
   id: string;
   categoryId: string;
   period: string; // "YYYY-MM"
+  /** Total sebulan. Untuk anggaran harian/mingguan diturunkan dari cadenceAmount. */
   limitAmount: number;
+  /** Jatah per hari / minggu / bulan. Kosong = "monthly" (perilaku lama). */
+  cadence?: BudgetCadence;
+  /** Nominal jatah per unit cadence (mis. Rp50.000 per hari). */
+  cadenceAmount?: number;
+  /** Sisa (atau kelebihan) jatah sebelumnya terbawa ke hari/minggu berikutnya. */
+  rollover?: boolean;
 }
 
 export interface Goal {
@@ -149,7 +158,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   accentColor: "brand",
 };
 
-export const CURRENT_PERIOD = new Date().toISOString().slice(0, 7);
+export const CURRENT_PERIOD = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
 const CURRENT_MONTH_LABEL = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date());
 
 // ── Accounts ──────────────────────────────────────────────────────────
@@ -182,6 +191,7 @@ export const mockCategories: Category[] = [
   { id: "cat-e7", name: "Pendidikan", type: "expense", icon: "book", color: "#5B4AEF" },
   { id: "cat-e8", name: "Tabungan & Investasi", type: "expense", icon: "piggy-bank", color: "#5B4AEF" },
   { id: "cat-e9", name: "Lainnya (Keluar)", type: "expense", icon: "more-horizontal", color: "#9B72E8" },
+  { id: "cat-e10", name: "Self Reward", type: "expense", icon: "gift", color: "#7B61D1" },
 ];
 
 // ── Transactions (12 bulan: Sep 2025 – Agu 2026) ──────────────────────
@@ -203,6 +213,8 @@ export const mockTransactions: Transaction[] = [
   { id: "tx-007", accountId: "acc-1", categoryId: "cat-e6", type: "expense", amount: 185_000, date: txDate(0, 7), note: `Listrik & internet ${CURRENT_MONTH_LABEL}`, tags: ["tagihan"] },
   { id: "tx-008", accountId: "acc-2", categoryId: "cat-e2", type: "expense", amount: 45_000, date: txDate(0, 8), note: "Bensin motor", tags: [] },
   { id: "tx-009", accountId: "acc-1", categoryId: "cat-e1", type: "expense", amount: 35_000, date: txDate(0, 9), note: "Beli mie ayam + es teh", tags: [] },
+  { id: "tx-sr1", accountId: "acc-2", categoryId: "cat-e10", type: "expense", amount: 85_000, date: txDate(0, 4), note: "Self reward: es krim + skincare mini", tags: ["self-reward"] },
+  { id: "tx-sr2", accountId: "acc-2", categoryId: "cat-e10", type: "expense", amount: 60_000, date: txDate(0, 10), note: "Self reward: kopi susu favorit", tags: ["self-reward"] },
   { id: "tx-010", accountId: "acc-1", categoryId: "cat-e3", type: "expense", amount: 856_000, date: txDate(0, 10), note: "Belanja bulanan Indomaret", tags: ["bulanan"] },
   { id: "tx-011", accountId: "acc-2", categoryId: "cat-e4", type: "expense", amount: 95_000, date: txDate(0, 11), note: "Netflix + Spotify", tags: ["langganan"] },
   { id: "tx-012", accountId: "acc-1", categoryId: "cat-e1", type: "expense", amount: 53_000, date: txDate(0, 12), note: "Soto Betawi Cak Min", tags: [] },
@@ -270,13 +282,21 @@ export const mockTransactions: Transaction[] = [
 
 // ── Budgets (bulan ini: Agustus 2026) ─────────────────────────────────
 
+function daysInCurrentPeriod() {
+  const [year, month] = CURRENT_PERIOD.split("-").map(Number);
+  return new Date(year, month, 0).getDate();
+}
+function monthlyFromDaily(amount: number) { return amount * daysInCurrentPeriod(); }
+function monthlyFromWeekly(amount: number) { return Math.round((amount * daysInCurrentPeriod()) / 7); }
+
 export const mockBudgets: Budget[] = [
-  { id: "bud-1", categoryId: "cat-e1", period: CURRENT_PERIOD, limitAmount: 2_000_000 },
-  { id: "bud-2", categoryId: "cat-e2", period: CURRENT_PERIOD, limitAmount: 1_000_000 },
+  { id: "bud-1", categoryId: "cat-e1", period: CURRENT_PERIOD, limitAmount: monthlyFromDaily(65_000), cadence: "daily", cadenceAmount: 65_000, rollover: true },
+  { id: "bud-2", categoryId: "cat-e2", period: CURRENT_PERIOD, limitAmount: monthlyFromWeekly(225_000), cadence: "weekly", cadenceAmount: 225_000, rollover: true },
   { id: "bud-3", categoryId: "cat-e3", period: CURRENT_PERIOD, limitAmount: 1_200_000 },
   { id: "bud-4", categoryId: "cat-e4", period: CURRENT_PERIOD, limitAmount: 600_000 },
   { id: "bud-5", categoryId: "cat-e5", period: CURRENT_PERIOD, limitAmount: 300_000 },
   { id: "bud-6", categoryId: "cat-e6", period: CURRENT_PERIOD, limitAmount: 250_000 },
+  { id: "bud-7", categoryId: "cat-e10", period: CURRENT_PERIOD, limitAmount: monthlyFromWeekly(100_000), cadence: "weekly", cadenceAmount: 100_000, rollover: false },
 ];
 
 // ── Goals ──────────────────────────────────────────────────────────────

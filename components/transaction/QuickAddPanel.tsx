@@ -58,9 +58,11 @@ function mergeClientChanges(...groups: Map<string, number>[]) {
 interface QuickAddPanelProps {
   onClose: () => void;
   transaction?: Transaction;
+  /** Nominal awal untuk transaksi baru (mis. dari kalkulator uang). */
+  initialAmount?: number;
 }
 
-export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
+export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddPanelProps) {
   const accounts = useAccounts().filter((account) => account.isActive);
   const categories = useCategories();
   const transactions = useTransactions();
@@ -77,7 +79,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
     ? preferences.defaultAccountId
     : accounts[0]?.id;
   const [mode, setMode] = React.useState<EntryMode>(initialMode);
-  const [amount, setAmount] = React.useState(transaction ? String(transaction.amount) : "");
+  const [amount, setAmount] = React.useState(transaction ? String(transaction.amount) : initialAmount ? String(initialAmount) : "");
   const [accountId, setAccountId] = React.useState(transaction?.accountId || defaultAccountId || "");
   const [destinationAccountId, setDestinationAccountId] = React.useState(transaction?.destinationAccountId || "");
   const [categoryId, setCategoryId] = React.useState(transaction?.categoryId || "");
@@ -236,7 +238,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
   }
 
   return (
-    <form onSubmit={submit} className="flex h-full min-h-0 flex-col bg-[linear-gradient(155deg,#FFFFFF_0%,#FCFBFF_58%,#F5F1FF_100%)]">
+    <form onSubmit={submit} className="flex h-full min-h-0 flex-col bg-[linear-gradient(155deg,var(--color-surface-high)_0%,var(--color-surface)_58%,var(--color-lavender-10)_100%)]">
       <header className="flex shrink-0 items-start justify-between gap-4 border-b border-rule/70 px-4 py-4 sm:px-5 sm:py-5">
         <div>
           <p className="eyebrow">{transaction ? "Perbaiki catatan" : "Catatan baru"}</p>
@@ -251,7 +253,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:space-y-5 sm:px-5 sm:py-5">
-        <div className="grid grid-cols-5 gap-1 rounded-[20px] border border-white/80 bg-[linear-gradient(145deg,#F1EEFA,#FBFAFF)] p-1.5 shadow-[inset_2px_2px_7px_rgba(65,49,130,.08),inset_-2px_-2px_7px_rgba(255,255,255,.9)]">
+        <div className="grid grid-cols-5 gap-1 rounded-[20px] border border-surface-high/80 bg-[linear-gradient(145deg,var(--color-lavender-10),var(--color-surface))] p-1.5 shadow-[inset_2px_2px_7px_rgba(65,49,130,.08),inset_-2px_-2px_7px_rgba(255,255,255,.9)]">
           {transactionTypes.map((item) => {
             const Icon = item.icon;
             const active = mode === item.value;
@@ -279,7 +281,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
         ) : null}
 
         {isAdjustment ? (
-          <div className="rounded-[18px] border border-violet-200/70 bg-[linear-gradient(145deg,#FAF8FF,#F1EDFF)] px-4 py-3 text-xs leading-relaxed text-violet-800 shadow-clay-soft">
+          <div className="rounded-[18px] border border-violet-200/70 bg-[linear-gradient(145deg,var(--color-surface),var(--color-lavender-10))] px-4 py-3 text-xs leading-relaxed text-violet-800 shadow-clay-soft">
             Isi saldo nyata pada tanggal yang dipilih. Selisih dihitung otomatis dan tidak masuk ke grafik arus kas.
           </div>
         ) : null}
@@ -293,7 +295,7 @@ export function QuickAddPanel({ onClose, transaction }: QuickAddPanelProps) {
               value={amount}
               onChange={(event) => setAmount(event.target.value.replace(/\D/g, ""))}
               placeholder="0"
-              className="h-14 rounded-[18px] border-white/80 bg-[linear-gradient(145deg,#F8F6FF,#EEE9FF)] pl-12 font-mono text-xl font-semibold tracking-tight"
+              className="h-14 rounded-[18px] border-surface-high/80 bg-[linear-gradient(145deg,var(--color-surface),var(--color-lavender-10))] pl-12 font-mono text-xl font-semibold tracking-tight"
             />
           </div>
         </Field>

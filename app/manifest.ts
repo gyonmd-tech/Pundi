@@ -40,6 +40,12 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: "/PUNDI-brand-assets/maskable-icon-192.png", sizes: "192x192" }],
       },
       {
+        name: "Kalkulator Uang",
+        short_name: "Kalkulator",
+        url: "/kalkulator",
+        icons: [{ src: "/PUNDI-brand-assets/maskable-icon-192.png", sizes: "192x192" }],
+      },
+      {
         name: "Arus Kas",
         url: "/arus-kas",
         icons: [{ src: "/PUNDI-brand-assets/maskable-icon-192.png", sizes: "192x192" }],

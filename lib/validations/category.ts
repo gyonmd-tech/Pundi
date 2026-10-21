@@ -15,7 +15,7 @@ import { z } from "zod";
 export const CATEGORY_ICONS = [
   "utensils", "car", "shopping-bag", "music", "heart", "zap", "book",
   "piggy-bank", "more-horizontal", "briefcase", "laptop", "trending-up",
-  "plus-circle", "tag",
+  "plus-circle", "tag", "gift", "fuel", "coffee",
 ] as const;
 
 export const CATEGORY_COLORS = [

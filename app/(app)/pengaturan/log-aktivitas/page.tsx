@@ -139,7 +139,7 @@ export default function LogAktivitasPage() {
         {loading ? (
           <div className="flex items-center justify-center gap-2 p-10 text-sm text-ink-muted"><Loader2 className="h-4 w-4 animate-spin" /> Memuat log aktivitas…</div>
         ) : error ? (
-          <p className="p-6 text-center text-sm text-ember">{error}</p>
+          <p className="mx-auto max-w-xl p-6 text-center text-sm leading-relaxed text-ember-ink">{error}</p>
         ) : items.length === 0 ? (
           <p className="p-10 text-center text-sm text-ink-muted">Belum ada aktivitas yang tercatat pada filter ini.</p>
         ) : (
