@@ -53,7 +53,8 @@ const TOOL_LABELS: Record<string, string> = {
 };
 
 export function toolLabel(name: string) {
-  const short = name.replace(/^mcp[_-]pundi[_-]/, "").replace(/^pundi[._-]/, "pundi_");
+  // Hermes menamai tool MCP "mcp__<server>__<tool>", mis. mcp__pundi__pundi_buat_draft.
+  const short = name.replace(/^mcp[_-]+pundi[_-]+/, "").replace(/^pundi[._-]/, "pundi_");
   return TOOL_LABELS[short] ?? TOOL_LABELS[name] ?? name;
 }
 
