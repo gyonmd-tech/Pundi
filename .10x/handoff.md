@@ -1,2 +1,3 @@
-# Handoff
-Discovery selesai. Menunggu konfirmasi temuan & jawaban brainstorming dari pengguna untuk `design-revamp` (7 permintaan: mobile density, bug web + input fokus chat, history chat Penjaga, redesign Kalkulator, audit bug & performa, perbaikan Anggaran, rombak landing).
+# Handoff → SDE
+
+Mulai Paket A sesuai `.10x/decisions/engineering-manager/design-revamp.md` (A1 → A5). ADR-001 untuk popover/modal. Setelah A selesai: tulis `sde/` dan `qa/`, buka PR A, lanjut Paket B.
