@@ -218,9 +218,14 @@ textarea::placeholder {
   border-radius: var(--radius-sm);
 }
 
+/* Input "polos" (pencarian, kolom chat Penjaga, isian inline draft):
+   tanpa garis, outline, maupun bayangan fokus. */
 input[data-search-input="true"],
 input[data-search-input="true"]:focus,
-input[data-search-input="true"]:focus-visible {
+input[data-search-input="true"]:focus-visible,
+[data-bare-input="true"],
+[data-bare-input="true"]:focus,
+[data-bare-input="true"]:focus-visible {
   min-height: 0;
   border: 0 !important;
   border-radius: 0 !important;
@@ -266,6 +271,21 @@ input[data-search-input="true"]:focus-visible {
 @media (max-width: 768px) {
   .card { padding: var(--card-padding-mobile); }
   .glass-panel { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+}
+
+/*
+ * Kerapatan ponsel: root 15px membuat semua ukuran berbasis rem (jarak,
+ * tinggi kontrol, teks utility) menyusut ±6% secara konsisten di seluruh
+ * aplikasi. Kolom isian dikunci 16px — di bawah itu iOS Safari/WebView
+ * otomatis memperbesar tampilan saat kolom disentuh.
+ */
+@media (max-width: 639px) {
+  html { font-size: 15px; }
+  .page-title { font-size: 1.5rem; line-height: 1.15; }
+  .page-subtitle { font-size: 0.8125rem; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

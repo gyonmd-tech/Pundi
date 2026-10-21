@@ -1,3 +1,3 @@
-# Handoff → SDE
+# Handoff
 
-Mulai Paket A sesuai `.10x/decisions/engineering-manager/design-revamp.md` (A1 → A5). ADR-001 untuk popover/modal. Setelah A selesai: tulis `sde/` dan `qa/`, buka PR A, lanjut Paket B.
+Paket A selesai (PR terpisah). Lanjut Paket B — history chat (ADR-002): B1 skema + history.ts, B2 route chat simpan pesan, B3 actions + state thread, B4 UI panel/sheet + URL, B5 demo localStorage.
