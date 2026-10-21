@@ -28,3 +28,11 @@
 - `app/(app)/kalkulator/page.tsx`: hub 6 kartu bergradasi → tampilan fokus dengan tombol kembali; hash URL via `useSyncExternalStore`; Back browser sinkron. Keypad diperkecil di ponsel (muat di atas bottom nav).
 - Skeleton rute `/kalkulator` memakai kerangka kartu.
 - Insiden: cache dev `.next/dev` rusak setelah aplikasi tertutup paksa (semua rute 404) → dihapus & dibuat ulang.
+
+## Paket D (selesai)
+- Remotion `HeroLoop` (10 dtk, semua gerak periodik 10/5/2,5 dtk → frame akhir = awal; periode karakter Penjaga di video disesuaikan). Render `npm run render:hero` → `public/landing/hero-loop{,-mobile}.mp4` + poster.
+- `components/landing/motion.tsx`: `useScrollStory` (rAF + lerp, CSS var --p/--aN, aktif hanya saat terlihat), `Reveal`, `SectionHeading`.
+- `components/landing/ScrollStory.tsx`: storyboard 4 babak di section sticky 420svh dengan mockup ponsel (chat terketik → draft masuk → centang tersimpan → saldo menghitung, grafik tergambar, anggaran terisi).
+- `LandingVideo.tsx` → `HeroVideoBackdrop` (poster di bawah video, fade-in saat siap, tombol jeda, reduced-motion = poster).
+- `app/page.tsx` ditulis ulang: header transparan → padat saat scroll (logo menyesuaikan tema), hero video latar (desktop) / blok video di bawah teks (ponsel), section Penjaga/Fitur/Keamanan/FAQ/CTA memakai pola judul & reveal yang sama, FAQ beranimasi tinggi.
+- Dihapus: `PenjagaShowcase.tsx`, video cerita lama di `public/landing`.
