@@ -61,7 +61,6 @@ export function LandingVideo() {
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       >
-        <source src={`${base}.webm`} type="video/webm" />
         <source src={`${base}.mp4`} type="video/mp4" />
       </video>
       <button

@@ -45,7 +45,21 @@ npm run db:setup
 
 Token bisa dicabut kapan saja dari halaman yang sama. Setiap token terikat ke satu akun, dan semua aksi Hermes tercatat di **Pengaturan → Log aktivitas** dengan label *Penjaga*.
 
-## 3. (Opsional) Chat Hermes langsung di aplikasi
+## 3. Aktifkan chat di aplikasi — pilihan A: AI langsung (disarankan)
+
+Server Pundi memanggil model AI sendiri dan menjalankan tool Pundi atas nama pengguna yang login. Tidak perlu PC menyala atau tunnel, dan berjalan di web maupun aplikasi mobile.
+
+Isi Environment Variables di Vercel, lalu redeploy:
+
+```env
+PENJAGA_LLM_API_KEY=kunci-api-dari-penyedia
+PENJAGA_LLM_BASE_URL=https://inference-api.nousresearch.com/v1   # atau https://openrouter.ai/api/v1
+PENJAGA_LLM_MODEL=nama-model-yang-mendukung-tool-calling
+```
+
+Hemat biaya: riwayat chat dipotong 12 pesan terakhir, jawaban dibatasi sekitar 700 token, dan maksimal 5 putaran tool per pesan.
+
+## 3b. Pilihan B: Chat lewat Hermes milikmu
 
 1. Aktifkan API server Hermes di `~/.hermes/.env`:
 
@@ -81,5 +95,5 @@ Video hero dibuat dengan Remotion di folder `video/`:
 cd video
 npm i
 npm run dev      # Remotion Studio untuk mengedit
-npm run render   # menulis public/landing/*.mp4|webm|jpg
+npm run render   # menulis public/landing/*.mp4 dan poster *.jpg
 ```

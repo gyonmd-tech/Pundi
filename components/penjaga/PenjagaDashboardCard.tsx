@@ -25,7 +25,7 @@ export function PenjagaDashboardCard() {
         <p className="mt-0.5 text-sm font-bold leading-snug text-ink">
           {pending
             ? `${pending} draft menunggu persetujuanmu`
-            : asleep ? "Hubungkan Hermes untuk mencatat lewat cerita" : "Ceritakan harimu, biar aku yang mencatat"}
+            : asleep ? "Aktifkan AI Penjaga untuk mencatat lewat cerita" : "Ceritakan harimu, biar aku yang mencatat"}
         </p>
         <p className="mt-0.5 truncate text-xs text-ink-muted">
           {pending ? `Total pengeluaran ${formatRupiah(total)} · tinjau & simpan` : "Pencatatan manual tetap tersedia lewat tombol +"}
