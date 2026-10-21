@@ -11,6 +11,7 @@
  * Stack: Recharts AreaChart + custom SVG untuk baseline
  */
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   AreaChart,
   Area,
@@ -96,9 +97,11 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
 // Skeleton loading
 function ChartSkeleton() {
   return (
-    <div className="w-full h-48 flex items-end gap-3 px-4 pb-4 animate-pulse">
+    <div className="w-full h-48 flex items-end gap-3 px-4 pb-4">
       {["80%", "55%", "70%", "90%", "45%", "65%"].map((h, i) => (
-        <div key={i} className="flex-1 rounded-sm" style={{ height: h, backgroundColor: "var(--color-rule)", opacity: 0.3 }} />
+        <div key={i} className="flex-1 skeleton-bar" style={{ height: h, animationDelay: `${i * 110}ms` }}>
+          <Skeleton className="h-full w-full rounded-[8px]" delay={i * 90} />
+        </div>
       ))}
     </div>
   );

@@ -6,6 +6,7 @@
  * hover elevation, hairline micro-glow, dan delta indicator ▲/▼.
  */
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { formatAmount, formatDelta } from "@/lib/utils/formatter";
@@ -80,15 +81,15 @@ export function SummaryCard({
   if (loading) {
     return (
       <div
-        className={cn("card animate-pulse", className)}
+        className={cn("card", className)}
         style={{ borderColor: "var(--color-rule)" }}
       >
         <div className="flex justify-between items-start mb-3">
-          <div className="h-4 w-24 rounded-sm bg-rule opacity-50" />
-          <div className="h-8 w-8 rounded-sm bg-rule opacity-30" />
+          <Skeleton className="h-4 w-24 rounded-[6px]" />
+          <Skeleton className="h-8 w-8 rounded-[10px]" delay={60} />
         </div>
-        <div className="h-8 w-40 rounded-sm bg-rule opacity-50 mb-2" />
-        <div className="h-4 w-20 rounded-sm bg-rule opacity-30" />
+        <Skeleton className="h-8 w-40 rounded-[8px] mb-2" delay={120} />
+        <Skeleton className="h-4 w-20 rounded-[6px]" delay={180} />
       </div>
     );
   }

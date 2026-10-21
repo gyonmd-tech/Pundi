@@ -1,5 +1,6 @@
 @import "../styles/tokens.css";
 @import "tailwindcss";
+@import "../styles/motion.css";
 @config "../tailwind.config.ts";
 
 * {
@@ -384,3 +385,18 @@ input[data-search-input="true"]:focus-visible {
    ponsel (z-40) bisa menutupi tombol aksinya. Sembunyikan nav selama ada
    dialog modal terbuka. */
 body:has([aria-modal="true"]) nav[aria-label="Navigasi mobile"] { display: none; }
+
+/* Target sentuh minimal 36px di perangkat layar sentuh tanpa mengubah tampilan desktop. */
+@media (pointer: coarse) {
+  .tap-target {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+  }
+}
+
+/* Label mikro 10px terlalu kecil dibaca di layar ponsel. */
+@media (max-width: 639px) {
+  .text-\[10px\] { font-size: 0.6875rem; }
+}

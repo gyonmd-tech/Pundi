@@ -1,0 +1,149 @@
+/*
+ * styles/motion.css
+ * Lapisan motion Pundi.
+ *
+ * 1. Utility enter-animation (`animate-in fade-in slide-in-from-bottom-2
+ *    zoom-in-95 duration-300`). Kelas-kelas ini sudah dipakai di banyak
+ *    komponen tetapi sebelumnya tidak punya implementasi (tidak ada plugin
+ *    tailwindcss-animate), jadi tidak pernah beranimasi.
+ * 2. Skeleton "motion graphics": kilau menyapu, garis grafik yang
+ *    tergambar, donat yang berputar — lihat components/ui/Skeleton.tsx.
+ */
+
+@keyframes pundi-enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale(var(--tw-enter-scale, 1));
+  }
+}
+
+@utility animate-in {
+  animation: pundi-enter var(--tw-duration, 260ms) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@utility fade-in {
+  --tw-enter-opacity: 0;
+}
+@utility zoom-in-* {
+  --tw-enter-scale: calc(--value(integer) * 1%);
+}
+@utility slide-in-from-top-* {
+  --tw-enter-translate-y: calc(--value(integer) * var(--spacing) * -1);
+}
+@utility slide-in-from-bottom-* {
+  --tw-enter-translate-y: calc(--value(integer) * var(--spacing));
+}
+@utility slide-in-from-left-* {
+  --tw-enter-translate-x: calc(--value(integer) * var(--spacing) * -1);
+}
+@utility slide-in-from-right-* {
+  --tw-enter-translate-x: calc(--value(integer) * var(--spacing));
+}
+@utility slide-in-from-bottom {
+  --tw-enter-translate-y: 100%;
+}
+@utility slide-in-from-right {
+  --tw-enter-translate-x: 100%;
+}
+
+/* ---------- Skeleton ---------- */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--skeleton-base, color-mix(in srgb, var(--color-brand-200) 55%, var(--color-brand-50)));
+  border-radius: 14px;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform: translateX(-100%);
+  background: linear-gradient(100deg, transparent 20%, var(--skeleton-shine, rgba(255, 255, 255, 0.65)) 50%, transparent 80%);
+  animation: pundi-shimmer 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: var(--skeleton-delay, 0ms);
+}
+
+.skeleton-on-brand {
+  --skeleton-base: rgba(255, 255, 255, 0.16);
+  --skeleton-shine: rgba(255, 255, 255, 0.35);
+}
+
+:root[data-theme="dark"] .skeleton {
+  --skeleton-base: rgba(92, 143, 242, 0.13);
+  --skeleton-shine: rgba(255, 255, 255, 0.08);
+}
+:root[data-theme="dark"] .skeleton.skeleton-on-brand {
+  --skeleton-base: rgba(255, 255, 255, 0.14);
+  --skeleton-shine: rgba(255, 255, 255, 0.22);
+}
+
+.skeleton-rise {
+  animation: pundi-enter 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --tw-enter-opacity: 0;
+  --tw-enter-translate-y: 14px;
+  animation-delay: var(--skeleton-delay, 0ms);
+}
+
+.skeleton-line-draw {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: pundi-draw 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.skeleton-bar {
+  transform-origin: bottom;
+  transform-box: fill-box;
+  animation: pundi-bar 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.skeleton-spin {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: pundi-spin 2.4s linear infinite;
+}
+
+.skeleton-coin {
+  animation: pundi-coin 1.6s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+@keyframes pundi-indeterminate {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+@keyframes pundi-shimmer {
+  to { transform: translateX(100%); }
+}
+@keyframes pundi-draw {
+  0% { stroke-dashoffset: 600; opacity: 0.3; }
+  55% { stroke-dashoffset: 0; opacity: 1; }
+  85%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes pundi-bar {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+@keyframes pundi-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pundi-coin {
+  0% { transform: translateY(-18px) scale(0.8); opacity: 0; }
+  30% { opacity: 1; }
+  70% { transform: translateY(10px) scale(1); opacity: 1; }
+  100% { transform: translateY(14px) scale(0.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .skeleton-rise,
+  .skeleton::after,
+  .skeleton-line-draw,
+  .skeleton-bar,
+  .skeleton-spin,
+  .skeleton-coin {
+    animation: none !important;
+  }
+  .skeleton-line-draw { stroke-dashoffset: 0; }
+}

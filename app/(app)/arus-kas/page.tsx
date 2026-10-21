@@ -6,6 +6,7 @@
  * dengan CategoryIcon, savings rate gauge, dan toast feedback.
  */
 
+import { ChartSkeleton } from "@/components/ui/Skeleton";
 import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { formatRupiah } from "@/lib/utils/formatter";
@@ -14,7 +15,7 @@ import { useToast } from "@/lib/context/ToastContext";
 import { TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
-const chartLoading = () => <div className="h-64 animate-pulse rounded-[18px] bg-pine-10/70" aria-label="Memuat grafik" />;
+const chartLoading = () => <ChartSkeleton variant="bars" />;
 const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart").then((module) => module.CashFlowChart), { ssr: false, loading: chartLoading });
 const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), { ssr: false, loading: chartLoading });
 

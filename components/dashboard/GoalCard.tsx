@@ -6,6 +6,7 @@
  * hover elevation, dan status tercapai (vintage brass styling).
  */
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import React from "react";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -41,10 +42,10 @@ export function GoalCard({
 }: GoalCardProps) {
   if (loading) {
     return (
-      <div className={cn("card animate-pulse", className)}>
-        <div className="h-4 w-32 bg-rule opacity-40 rounded-sm mb-3" />
-        <div className="h-2 w-full bg-rule opacity-30 rounded-full mb-2" />
-        <div className="h-4 w-24 bg-rule opacity-40 rounded-sm" />
+      <div className={cn("card", className)}>
+        <Skeleton className="h-4 w-32 rounded-[6px] mb-3" />
+        <Skeleton className="h-2 w-full rounded-full mb-2" delay={80} />
+        <Skeleton className="h-4 w-24 rounded-[6px]" delay={160} />
       </div>
     );
   }

@@ -3,7 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeftRight, ChevronRight, Download, LayoutDashboard, LayoutGrid, LogOut, PieChart, Plus, Share, X } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, Download, LayoutDashboard, LayoutGrid, LogOut, Plus, Share, X } from "lucide-react";
+import { PenjagaAvatar } from "@/components/penjaga/PenjagaAvatar";
+import { usePenjaga } from "@/components/penjaga/PenjagaProvider";
 import { logoutAction } from "@/actions/auth";
 import { useApp, useInsights } from "@/lib/data/store";
 import { useInstallPrompt } from "@/lib/hooks/useInstallPrompt";
@@ -13,7 +15,7 @@ import { getNavigation, isRouteActive } from "./navigation";
 const primary = [
   { href: "/dashboard", label: "Beranda", icon: LayoutDashboard },
   { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight },
-  { href: "/anggaran", label: "Anggaran", icon: PieChart },
+  { href: "/penjaga", label: "Penjaga", icon: PenjagaNavIcon },
 ];
 const primaryHrefs = new Set(primary.map((item) => item.href));
 
@@ -28,7 +30,8 @@ export function MobileBottomNav({ onQuickAdd }: { onQuickAdd?: () => void }) {
     setMoreOpen(false);
   }
 
-  const secondary = getNavigation(unread).filter((item) => !primaryHrefs.has(item.href));
+  const { drafts } = usePenjaga();
+  const secondary = getNavigation(unread, drafts.length).filter((item) => !primaryHrefs.has(item.href));
   const moreActive = secondary.some((item) => isRouteActive(pathname, item.href));
 
   return (
@@ -51,7 +54,7 @@ export function MobileBottomNav({ onQuickAdd }: { onQuickAdd?: () => void }) {
               <Plus className="h-6 w-6" strokeWidth={2.4} />
             </button>
           </div>
-          <NavButton href={primary[2].href} label={primary[2].label} icon={primary[2].icon} active={isRouteActive(pathname, primary[2].href)} />
+          <NavButton href={primary[2].href} label={primary[2].label} icon={primary[2].icon} active={isRouteActive(pathname, primary[2].href)} badge={drafts.length} />
           <NavButton
             label="Lainnya"
             icon={LayoutGrid}
@@ -75,6 +78,10 @@ interface NavButtonProps {
   badge?: number;
   onClick?: () => void;
   ariaExpanded?: boolean;
+}
+
+function PenjagaNavIcon({ className }: { className?: string; strokeWidth?: number }) {
+  return <PenjagaAvatar size={24} className={className} />;
 }
 
 function NavButton({ href, label, icon: Icon, active, badge, onClick, ariaExpanded }: NavButtonProps) {
