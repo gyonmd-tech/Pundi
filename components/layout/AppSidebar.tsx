@@ -12,6 +12,7 @@ import { IconButton } from "@/components/ui/Button";
 import { getAvatarUrl } from "@/lib/appwrite/storage";
 import { getNavigation, isRouteActive } from "./navigation";
 import { SidebarItem } from "./SidebarItem";
+import { usePenjaga } from "@/components/penjaga/PenjagaProvider";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -20,7 +21,8 @@ export function AppSidebar() {
   const { connection } = useApp();
   const preferences = usePreferences();
   const { isCollapsed, toggleSidebar } = useSidebar();
-  const navigation = getNavigation(insights.filter((item) => !item.isRead).length);
+  const { drafts } = usePenjaga();
+  const navigation = getNavigation(insights.filter((item) => !item.isRead).length, drafts.length);
   const displayName = connection.userName ?? (connection.mode === "cloud" ? "Pengguna Pundi" : "Sarah Dewi");
   const initials = displayName.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
 

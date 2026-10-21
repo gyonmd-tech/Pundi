@@ -12,6 +12,8 @@ Pundi adalah aplikasi pencatatan keuangan personal untuk mengelola transaksi, an
 - Integrasi Appwrite untuk autentikasi dan penyimpanan cloud.
 - Ekspor data transaksi ke Excel.
 - Layout responsif untuk desktop, tablet, dan ponsel.
+- **Penjaga**: Hermes Agent sebagai penjaga keuangan. Ceritakan harimu, dan Hermes menyusun draft transaksi lewat MCP server Pundi untuk kamu setujui. Panduan lengkap: [docs/PENJAGA_HERMES.md](docs/PENJAGA_HERMES.md).
+- Video motion graphics landing page dari proyek Remotion di `video/`.
 
 ## Persyaratan
 

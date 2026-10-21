@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartSkeleton } from "@/components/ui/Skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Input } from "@/components/ui/Input";
 /**
@@ -23,7 +24,7 @@ import { createAssetAction, deleteAssetAction, updateAssetAction } from "@/actio
 
 const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), {
   ssr: false,
-  loading: () => <div className="h-64 animate-pulse rounded-[18px] bg-pine-10/70" aria-label="Memuat grafik" />,
+  loading: () => <ChartSkeleton />,
 });
 
 const assetTypeConfig: Record<AssetType, { label: string; icon: any; color: string }> = {
@@ -289,7 +290,7 @@ export default function AsetPage() {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={() => openEdit(asset)}
-                      className="p-1.5 rounded-card text-ink-muted hover:text-pine active:bg-pine-10 transition-colors"
+                      className="tap-target p-1.5 rounded-card text-ink-muted hover:text-pine active:bg-pine-10 transition-colors"
                       title="Edit aset"
                       aria-label="Edit aset"
                     >
@@ -297,7 +298,7 @@ export default function AsetPage() {
                     </button>
                     <button
                       onClick={() => setDeleteId(asset.id)}
-                      className="p-1.5 rounded-card text-ink-muted hover:text-ember active:bg-ember-10 transition-colors"
+                      className="tap-target p-1.5 rounded-card text-ink-muted hover:text-ember active:bg-ember-10 transition-colors"
                       title="Hapus aset"
                       aria-label="Hapus aset"
                     >
@@ -430,7 +431,7 @@ export default function AsetPage() {
                     </TableCell>
 
                     <TableCell className="px-4 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-1 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100">
                         <button
                           onClick={() => openEdit(asset)}
                           className="p-1.5 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"

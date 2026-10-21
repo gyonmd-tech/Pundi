@@ -13,9 +13,9 @@ import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 
 export type AuditEntityType =
   | "account" | "transaction" | "budget" | "goal" | "asset"
-  | "debt" | "category" | "recurring_rule" | "insight" | "preferences" | "avatar";
+  | "debt" | "category" | "recurring_rule" | "insight" | "preferences" | "avatar" | "agent_token" | "agent_draft";
 export type AuditAction = "create" | "update" | "delete" | "toggle" | "generate" | "payment";
-export type AuditActor = "user" | "system";
+export type AuditActor = "user" | "system" | "agent";
 
 export interface AuditLogEntry {
   entityType: AuditEntityType;

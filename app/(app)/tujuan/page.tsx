@@ -250,13 +250,13 @@ export default function TujuanPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <button type="button" onClick={() => toggleContribution(contributionRule)} className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title={contributionRule.isActive ? "Jeda" : "Lanjutkan"} aria-label={contributionRule.isActive ? "Jeda kontribusi" : "Lanjutkan kontribusi"}>
+                      <button type="button" onClick={() => toggleContribution(contributionRule)} className="tap-target p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title={contributionRule.isActive ? "Jeda" : "Lanjutkan"} aria-label={contributionRule.isActive ? "Jeda kontribusi" : "Lanjutkan kontribusi"}>
                         {contributionRule.isActive ? <Pause size={13} /> : <Play size={13} />}
                       </button>
-                      <button type="button" onClick={() => setContributionGoal(g)} className="p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title="Edit kontribusi" aria-label="Edit kontribusi otomatis">
+                      <button type="button" onClick={() => setContributionGoal(g)} className="tap-target p-1.5 rounded-card text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title="Edit kontribusi" aria-label="Edit kontribusi otomatis">
                         <Pencil size={13} />
                       </button>
-                      <button type="button" onClick={() => removeContribution(contributionRule)} className="p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors" title="Hapus kontribusi" aria-label="Hapus kontribusi otomatis">
+                      <button type="button" onClick={() => removeContribution(contributionRule)} className="tap-target p-1.5 rounded-card text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors" title="Hapus kontribusi" aria-label="Hapus kontribusi otomatis">
                         <Trash2 size={13} />
                       </button>
                     </div>

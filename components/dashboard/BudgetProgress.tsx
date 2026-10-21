@@ -5,6 +5,7 @@
  * Progress bar per kategori anggaran dengan status badge, visual icon, dan hover highlight.
  */
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import React from "react";
 import { cn } from "@/lib/utils/cn";
 import { formatRupiah, calcProgress, getBudgetStatus, type BudgetStatus } from "@/lib/utils/formatter";
@@ -70,10 +71,10 @@ export function BudgetProgress({
     return (
       <div className={cn("py-3.5 border-b", className)} style={{ borderColor: "var(--color-rule)" }}>
         <div className="flex justify-between mb-2">
-          <div className="h-4 w-28 bg-rule opacity-40 rounded-sm animate-pulse" />
-          <div className="h-4 w-20 bg-rule opacity-40 rounded-sm animate-pulse" />
+          <Skeleton className="h-4 w-28 rounded-[6px]" />
+          <Skeleton className="h-4 w-20 rounded-[6px]" delay={80} />
         </div>
-        <div className="h-2 w-full bg-rule opacity-30 rounded-full animate-pulse" />
+        <Skeleton className="h-2 w-full rounded-full" delay={160} />
       </div>
     );
   }
@@ -132,7 +133,7 @@ export function BudgetProgress({
               {onEdit && (
                 <button
                   onClick={onEdit}
-                  className="p-1 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
+                  className="tap-target p-1 rounded text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
                   title="Edit batas anggaran"
                   aria-label="Edit batas anggaran"
                 >
@@ -142,7 +143,7 @@ export function BudgetProgress({
               {onDelete && (
                 <button
                   onClick={onDelete}
-                  className="p-1 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
+                  className="tap-target p-1 rounded text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
                   title="Hapus anggaran"
                   aria-label="Hapus anggaran"
                 >

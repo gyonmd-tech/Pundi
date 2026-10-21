@@ -10,6 +10,7 @@
  * - Wajib ada angka nominal, bukan hanya persentase
  */
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { formatRupiah, formatRupiahShort } from "@/lib/utils/formatter";
 import { cn } from "@/lib/utils/cn";
@@ -69,13 +70,13 @@ function CustomTooltip({ active, payload }: TooltipProps) {
 export function CategoryBreakdownChart({ data, className, loading = false }: CategoryBreakdownChartProps) {
   if (loading) {
     return (
-      <div className={`animate-pulse ${className}`}>
-        <div className="w-28 h-28 rounded-full mx-auto mb-4" style={{ backgroundColor: "var(--color-rule)", opacity: 0.3 }} />
+      <div className={className}>
+        <Skeleton className="w-28 h-28 rounded-full mx-auto mb-4" />
         <div className="space-y-2">
           {[1, 2, 3].map(i => (
             <div key={i} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--color-rule)", opacity: 0.4 }} />
-              <div className="h-3 flex-1 rounded-sm" style={{ backgroundColor: "var(--color-rule)", opacity: 0.3 }} />
+              <Skeleton className="w-2 h-2 rounded-full" delay={i * 90} />
+              <Skeleton className="h-3 flex-1 rounded-[6px]" delay={i * 90 + 60} />
             </div>
           ))}
         </div>

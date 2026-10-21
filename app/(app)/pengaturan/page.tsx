@@ -290,7 +290,7 @@ export default function PengaturanPage() {
                 </div>
                 <IconButton
                   variant="ghost"
-                  className="h-7 min-h-7 w-7 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-ember-10 hover:text-ember"
+                  className="tap-target h-7 min-h-7 w-7 shrink-0 transition-opacity hover:bg-ember-10 hover:text-ember [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100"
                   aria-label={`Hapus kategori ${category.name}`}
                   onClick={(event) => handleDeleteCategory(category, event)}
                 >

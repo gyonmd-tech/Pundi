@@ -211,6 +211,50 @@
             { "key": "idx_user_entity", "type": "key", "attributes": ["userId", "entityType"] },
             { "key": "idx_user_created", "type": "key", "attributes": ["userId", "$createdAt"] }
           ]
+        },
+        {
+          "$id": "agent_tokens",
+          "name": "agent_tokens",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "label", "type": "string", "size": 80, "required": true },
+            { "key": "tokenHash", "type": "string", "size": 64, "required": true },
+            { "key": "prefix", "type": "string", "size": 16, "required": true },
+            { "key": "lastUsedAt", "type": "datetime", "required": false },
+            { "key": "revoked", "type": "boolean", "required": false, "default": false }
+          ],
+          "indexes": [
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] },
+            { "key": "idx_hash", "type": "unique", "attributes": ["tokenHash"] }
+          ]
+        },
+        {
+          "$id": "agent_drafts",
+          "name": "agent_drafts",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "status", "type": "enum", "elements": ["pending", "confirmed", "rejected"], "required": true },
+            { "key": "source", "type": "string", "size": 32, "required": true },
+            { "key": "type", "type": "enum", "elements": ["income", "expense", "transfer"], "required": true },
+            { "key": "amount", "type": "integer", "required": true },
+            { "key": "accountId", "type": "string", "size": 36, "required": false },
+            { "key": "destinationAccountId", "type": "string", "size": 36, "required": false },
+            { "key": "categoryId", "type": "string", "size": 36, "required": false },
+            { "key": "date", "type": "datetime", "required": true },
+            { "key": "note", "type": "string", "size": 500, "required": false },
+            { "key": "rawText", "type": "string", "size": 1000, "required": false },
+            { "key": "transactionId", "type": "string", "size": 36, "required": false }
+          ],
+          "indexes": [
+            { "key": "idx_user_status", "type": "key", "attributes": ["userId", "status"] },
+            { "key": "idx_user_date", "type": "key", "attributes": ["userId", "date"] }
+          ]
         }
       ]
     }

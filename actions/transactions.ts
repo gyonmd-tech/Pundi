@@ -3,9 +3,9 @@
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
-import { ID, Query, type Models } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
-import { mockTransactions, type Account, type Transaction } from "@/lib/data/mock";
+import { mockTransactions, type Transaction } from "@/lib/data/mock";
 import {
   applyBalanceChanges,
   documentPayload,
@@ -17,77 +17,9 @@ import {
 } from "@/lib/appwrite/transactionHelpers";
 import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
 import { recordAuditLog } from "@/lib/appwrite/auditLog";
+import { createTransactionForUser, transactionFromDocument, validateTransaction } from "@/lib/appwrite/transactionService";
 
 export type { TransactionInput };
-
-interface TransactionFields {
-  accountId: string;
-  destinationAccountId?: string;
-  transferKind?: Transaction["transferKind"];
-  recordKind?: Transaction["recordKind"];
-  recurringRuleId?: string;
-  debtId?: string;
-  observedBalance?: number;
-  categoryId?: string;
-  type: Transaction["type"];
-  amount: number;
-  date: string;
-  note?: string;
-  tags?: string[];
-}
-
-function transactionFromDocument(document: Models.Document): Transaction {
-  const fields = document as unknown as TransactionFields;
-  return {
-    id: document.$id,
-    accountId: fields.accountId,
-    destinationAccountId: fields.destinationAccountId || undefined,
-    transferKind: fields.transferKind || undefined,
-    recordKind: fields.recordKind || "standard",
-    recurringRuleId: fields.recurringRuleId || undefined,
-    debtId: fields.debtId || undefined,
-    observedBalance: fields.observedBalance == null ? undefined : Number(fields.observedBalance),
-    categoryId: fields.categoryId || undefined,
-    type: fields.type,
-    amount: Number(fields.amount),
-    date: new Date(fields.date),
-    createdAt: new Date(document.$createdAt),
-    note: fields.note || undefined,
-    tags: fields.tags || [],
-  };
-}
-
-async function validateTransaction(
-  databases: Awaited<ReturnType<typeof createAdminServerClient>>["databases"],
-  userId: string,
-  payload: TransactionInput,
-) {
-  if (!Number.isSafeInteger(payload.amount) || payload.amount <= 0) {
-    throw new Error("Nominal transaksi harus berupa angka bulat yang lebih besar dari nol.");
-  }
-  if (!["income", "expense", "transfer"].includes(payload.type)) {
-    throw new Error("Jenis transaksi tidak valid.");
-  }
-  if (Number.isNaN(payload.date.getTime())) throw new Error("Tanggal transaksi tidak valid.");
-
-  const source = await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, payload.accountId, userId) as unknown as Account;
-  if (payload.categoryId) {
-    const category = await getOwnedDocument(databases, COLLECTIONS.CATEGORIES, payload.categoryId, userId);
-    if (payload.type !== "transfer" && category.type !== payload.type) {
-      throw new Error("Kategori tidak sesuai dengan jenis transaksi.");
-    }
-  }
-
-  if (payload.type === "transfer") {
-    if (!payload.destinationAccountId) throw new Error("Pilih rekening tujuan transfer.");
-    if (payload.destinationAccountId === payload.accountId) throw new Error("Rekening sumber dan tujuan harus berbeda.");
-    const destination = await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, payload.destinationAccountId, userId) as unknown as Account;
-    if (payload.transferKind === "cash_withdrawal") {
-      if (source.type === "cash") throw new Error("Sumber tarik tunai harus rekening non-tunai.");
-      if (destination.type !== "cash") throw new Error("Tujuan tarik tunai harus rekening berjenis uang tunai.");
-    }
-  }
-}
 
 export async function createBalanceAdjustmentAction(payload: {
   accountId: string;
@@ -188,22 +120,8 @@ export async function createTransactionAction(payload: TransactionInput) {
 
   try {
     const { databases } = await createAdminServerClient();
-    await validateTransaction(databases, user.id, payload);
-    const rollback = await applyBalanceChanges(databases, user.id, getBalanceChanges(payload));
-    try {
-      const document = await databases.createDocument(
-        DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, payload),
-        documentPermissions(user.id),
-      );
-      await recordAuditLog(databases, user.id, {
-        entityType: "transaction", entityId: document.$id, action: "create",
-        summary: `Mencatat transaksi ${payload.type}`, after: payload,
-      });
-      return { success: true, id: document.$id, createdAt: document.$createdAt };
-    } catch (error) {
-      await rollback();
-      throw error;
-    }
+    const document = await createTransactionForUser(databases, user.id, payload);
+    return { success: true, id: document.$id, createdAt: document.$createdAt };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : "Transaksi gagal disimpan." };
   }

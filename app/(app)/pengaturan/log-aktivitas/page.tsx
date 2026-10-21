@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, History, Loader2, User, Bot } from "lucide-react";
+import { ArrowLeft, History, Loader2, User, Bot, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -31,6 +31,8 @@ const entityLabels: Record<AuditEntityType, string> = {
   insight: "Insight",
   preferences: "Preferensi",
   avatar: "Avatar",
+  agent_token: "Token Penjaga",
+  agent_draft: "Draft Penjaga",
 };
 
 const actionLabels: Record<AuditAction, string> = {
@@ -150,10 +152,10 @@ export default function LogAktivitasPage() {
                     <span className="text-[11px] font-bold uppercase tracking-wide text-ink-muted">{entityLabels[item.entityType]}</span>
                     <span className={cn(
                       "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
-                      item.actor === "system" ? "bg-brand-50 text-brand-700" : "bg-mint-10 text-mint-ink",
+                      item.actor === "system" ? "bg-brand-50 text-brand-700" : item.actor === "agent" ? "bg-lavender-10 text-lavender-ink" : "bg-mint-10 text-mint-ink",
                     )}>
-                      {item.actor === "system" ? <Bot className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                      {item.actor === "system" ? "Otomatis" : "Manual"}
+                      {item.actor === "system" ? <Bot className="h-3 w-3" /> : item.actor === "agent" ? <ShieldCheck className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                      {item.actor === "system" ? "Otomatis" : item.actor === "agent" ? "Penjaga" : "Manual"}
                     </span>
                   </div>
                   <p className="mt-1.5 truncate text-sm font-semibold text-ink">{item.summary}</p>

@@ -1,6 +1,8 @@
 "use client";
 
 
+import { PenjagaDashboardCard } from "@/components/penjaga/PenjagaDashboardCard";
+import { ChartSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
@@ -38,7 +40,7 @@ import {
 } from "@/lib/data/store";
 import type { Transaction } from "@/lib/data/mock";
 
-const chartLoading = () => <div className="h-64 animate-pulse rounded-[18px] bg-pine-10/70" aria-label="Memuat grafik" />;
+const chartLoading = () => <ChartSkeleton />;
 const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart").then((module) => module.CashFlowChart), { ssr: false, loading: chartLoading });
 const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), { ssr: false, loading: chartLoading });
 const AccountBalanceChart = dynamic(() => import("@/components/charts/AccountBalanceChart").then((module) => module.AccountBalanceChart), { ssr: false, loading: chartLoading });
@@ -183,6 +185,8 @@ export default function DashboardPage() {
           Lihat rekomendasi
         </Link>
       </header>
+
+      <PenjagaDashboardCard />
 
       <SafeToSpendCard result={safeToSpend} />
 

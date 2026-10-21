@@ -1,11 +1,12 @@
-import { ArrowLeftRight, ClipboardCheck, HandCoins, LayoutDashboard, Lightbulb, PieChart, Settings, Target, TrendingUp, Wallet } from "lucide-react";
+import { ArrowLeftRight, ClipboardCheck, HandCoins, LayoutDashboard, Lightbulb, PieChart, Settings, ShieldCheck, Target, TrendingUp, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavigationItem { href: string; label: string; icon: LucideIcon; badge?: number }
 
-export function getNavigation(unread = 0): NavigationItem[] {
+export function getNavigation(unread = 0, pendingDrafts = 0): NavigationItem[] {
   return [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/penjaga", label: "Penjaga", icon: ShieldCheck, badge: pendingDrafts },
     { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight },
     { href: "/anggaran", label: "Anggaran", icon: PieChart },
     { href: "/arus-kas", label: "Arus Kas", icon: TrendingUp },

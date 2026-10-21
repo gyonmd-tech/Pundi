@@ -12,12 +12,13 @@ import {
   Menu,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   WalletCards,
   X,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { LandingVideo } from "@/components/landing/LandingVideo";
+import { PenjagaShowcase } from "@/components/landing/PenjagaShowcase";
 
 const features = [
   {
@@ -82,7 +83,6 @@ const footerColumns = [
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
-  const monthLabel = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date());
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-paper text-ink">
@@ -101,6 +101,7 @@ export default function HomePage() {
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-semibold text-ink-muted md:flex" aria-label="Navigasi utama">
+            <Link href="#penjaga" className="transition-colors hover:text-ink">Penjaga</Link>
             <Link href="#fitur" className="transition-colors hover:text-ink">Fitur</Link>
             <Link href="#cara-kerja" className="transition-colors hover:text-ink">Cara kerja</Link>
             <Link href="#keamanan" className="transition-colors hover:text-ink">Penyimpanan data</Link>
@@ -127,6 +128,7 @@ export default function HomePage() {
           <div className="border-t border-rule bg-paper px-4 py-4 md:hidden">
             <nav className="grid gap-1 text-sm font-semibold">
               {[
+                ["#penjaga", "Penjaga"],
                 ["#fitur", "Fitur"],
                 ["#cara-kerja", "Cara kerja"],
                 ["#keamanan", "Penyimpanan data"],
@@ -148,13 +150,13 @@ export default function HomePage() {
       <section className="relative mx-auto max-w-[80rem] px-4 pb-16 pt-16 text-center sm:px-6 sm:pt-24 lg:px-8">
         <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-rule bg-surface-high px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-muted">
           <Sparkles size={13} className="text-pine" />
-          Keuangan harian, dibuat lebih tenang
+          Baru · Penjaga bertenaga Hermes Agent
         </div>
         <h1 className="mx-auto mt-6 max-w-4xl font-display text-[clamp(2.5rem,6.5vw,4.75rem)] font-extrabold leading-[1.02] tracking-[-0.04em]">
-          Catatan keuangan yang tetap <span className="text-brand-600">nyambung dengan saldo nyata.</span>
+          Ceritakan harimu. <span className="text-brand-600">Penjaga yang mencatat.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-ink-muted sm:text-lg">
-          Pundi menyatukan transaksi, transfer, cash, utang, anggaran, dan koreksi saldo ke satu buku yang dapat kamu periksa kembali kapan saja.
+          Pundi menyatukan transaksi, transfer, cash, utang, dan anggaran ke satu buku — kini dijaga Hermes Agent yang mengubah ceritamu jadi catatan rapi. Pencatatan manual tetap ada kapan pun kamu mau.
         </p>
         <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
           <Link href="/signup" className="flex-1"><Button type="button" size="lg" className="w-full">Mulai kelola uang <ArrowRight size={17} /></Button></Link>
@@ -168,69 +170,13 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="relative mx-auto mt-14 max-w-4xl">
-          <div className="overflow-hidden rounded-[1.5rem] border border-rule bg-surface-high shadow-float">
-            <div className="flex items-center gap-1.5 border-b border-rule bg-paper px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-ember/50" />
-              <span className="h-2.5 w-2.5 rounded-full bg-brass/50" />
-              <span className="h-2.5 w-2.5 rounded-full bg-mint/50" />
-              <span className="ml-3 text-[11px] font-semibold text-ink-soft">Contoh tampilan · {monthLabel}</span>
-            </div>
-            <div className="p-4 sm:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-ink-muted">Kondisi finansialmu</p>
-                  <p className="mt-1 text-[10px] font-semibold text-ink-soft">Data ilustrasi, bukan angka pengguna sungguhan</p>
-                </div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pine text-white">
-                  <TrendingUp size={17} />
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-xl bg-brand-600 p-4 text-white sm:col-span-2">
-                  <p className="text-xs font-semibold text-white/60">Total saldo (contoh)</p>
-                  <p className="mt-2 font-mono text-2xl font-medium tracking-[-0.05em]">Rp24.849.500</p>
-                  <span className="mt-4 inline-flex rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white/85">+8,2% bulan ini</span>
-                </div>
-                <div className="rounded-xl border border-rule bg-mint-10 p-4">
-                  <p className="text-xs font-semibold text-ink-muted">Rasio tabungan</p>
-                  <p className="mt-2 font-mono text-2xl font-medium text-mint-ink">32,4%</p>
-                  <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-surface-high">
-                    <div className="h-full w-[64%] rounded-full bg-mint" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 grid gap-3 md:grid-cols-5">
-                <div className="rounded-xl border border-rule bg-paper p-4 md:col-span-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-ink">Arus kas</p>
-                    <p className="text-[10px] font-bold text-ink-muted">6 bulan</p>
-                  </div>
-                  <div className="mt-5 flex h-24 items-end gap-2">
-                    {[45, 58, 48, 76, 62, 88].map((height, index) => (
-                      <div key={height + index} className="flex h-full flex-1 items-end gap-1">
-                        <div className="w-1/2 rounded-t-sm bg-pine" style={{ height: `${height}%` }} />
-                        <div className="w-1/2 rounded-t-sm bg-ember/65" style={{ height: `${Math.max(25, height - 24)}%` }} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded-xl border border-rule bg-brass-10 p-4 md:col-span-2">
-                  <p className="text-xs font-bold text-ink">Anggaran makan</p>
-                  <div className="mx-auto mt-4 flex h-20 w-20 items-center justify-center rounded-full bg-surface-high ring-[8px] ring-brass/30">
-                    <div className="text-center">
-                      <p className="font-mono text-lg font-medium">68%</p>
-                      <p className="text-[9px] font-bold text-ink-muted">terpakai</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="relative mx-auto mt-12 max-w-5xl sm:mt-14">
+          <div aria-hidden className="absolute -inset-x-10 -bottom-10 top-10 -z-10 rounded-[3rem] bg-[radial-gradient(ellipse_at_center,rgba(36,89,222,.22),transparent_70%)] blur-2xl" />
+          <LandingVideo />
         </div>
       </section>
+
+      <PenjagaShowcase />
 
       <section id="fitur" className="relative mx-auto max-w-[80rem] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
