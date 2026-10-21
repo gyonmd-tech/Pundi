@@ -13,18 +13,19 @@ export const Penjaga: React.FC<{ mood?: Mood; size?: number; style?: React.CSSPr
   const { fps } = useVideoConfig();
   const t = frame / fps;
 
-  const float = -5 * (0.5 - 0.5 * Math.cos((TAU * t) / 3.2));
-  const jump = mood === "happy" ? -18 * Math.abs(Math.sin((Math.PI * t) / 0.9)) : 0;
+  // Semua periode membagi habis 10 dtk (2,5 · 5 · 10) agar HeroLoop berulang tanpa sentakan.
+  const float = -5 * (0.5 - 0.5 * Math.cos((TAU * t) / 2.5));
+  const jump = mood === "happy" ? -18 * Math.abs(Math.sin((Math.PI * t) / 1.0)) : 0;
   const bodyY = mood === "happy" ? jump : float;
-  const orbY = -6 * (0.5 - 0.5 * Math.cos((TAU * t) / (mood === "thinking" ? 1.2 : 2.6)));
-  const orbScale = 1 + (mood === "thinking" ? 0.15 : 0.06) * (0.5 - 0.5 * Math.cos((TAU * t) / (mood === "thinking" ? 1.2 : 2.6)));
-  const capeSkew = -3 * (0.5 - 0.5 * Math.cos((TAU * t) / 3.2));
-  const headTilt = mood === "thinking" ? -4 - 2 * Math.sin((TAU * t) / 2.4) : 2.5 * Math.sin((TAU * t) / 6.4);
-  const blinkPhase = (t % 4.2) / 4.2;
+  const orbY = -6 * (0.5 - 0.5 * Math.cos((TAU * t) / (mood === "thinking" ? 1.25 : 2.5)));
+  const orbScale = 1 + (mood === "thinking" ? 0.15 : 0.06) * (0.5 - 0.5 * Math.cos((TAU * t) / (mood === "thinking" ? 1.25 : 2.5)));
+  const capeSkew = -3 * (0.5 - 0.5 * Math.cos((TAU * t) / 2.5));
+  const headTilt = mood === "thinking" ? -4 - 2 * Math.sin((TAU * t) / 2.5) : 2.5 * Math.sin((TAU * t) / 5);
+  const blinkPhase = (t % 5) / 5;
   const blink = blinkPhase > 0.92 && blinkPhase < 0.97 ? 0.1 : 1;
-  const wave = mood === "happy" ? -38 * (0.5 - 0.5 * Math.cos((TAU * t) / 0.45))
-    : mood === "talking" ? -30 * (0.5 - 0.5 * Math.cos((TAU * t) / 1.1)) : 0;
-  const mouthOpen = 0.4 + 0.7 * Math.abs(Math.sin(TAU * t * 1.8));
+  const wave = mood === "happy" ? -38 * (0.5 - 0.5 * Math.cos((TAU * t) / 0.5))
+    : mood === "talking" ? -30 * (0.5 - 0.5 * Math.cos((TAU * t) / 1.25)) : 0;
+  const mouthOpen = 0.4 + 0.7 * Math.abs(Math.sin(TAU * t * 2));
   const shadowScale = mood === "happy" ? 1 - Math.abs(jump) / 40 : 1 - Math.abs(float) / 40;
   const happy = mood === "happy";
 
@@ -111,7 +112,7 @@ export const Penjaga: React.FC<{ mood?: Mood; size?: number; style?: React.CSSPr
       {mood === "thinking" ? (
         <g fill="#8FBCFF">
           {[[150, 54, 4.5], [163, 44, 5.5], [178, 32, 6.5]].map(([x, y, r], index) => {
-            const phase = ((t - index * 0.2) % 1.4) / 1.4;
+            const phase = ((t - index * 0.2 + 10) % 1.25) / 1.25;
             const on = phase < 0.4 ? phase / 0.4 : Math.max(0, 1 - (phase - 0.4) / 0.6);
             return <circle key={index} cx={x} cy={y} r={r * (0.7 + 0.3 * on)} opacity={0.15 + 0.85 * on} />;
           })}
@@ -121,7 +122,7 @@ export const Penjaga: React.FC<{ mood?: Mood; size?: number; style?: React.CSSPr
       {happy ? (
         <g fill="#F2B544">
           {[[44, 66, 1], [160, 76, 0.75], [152, 32, 0.6]].map(([x, y, s], index) => {
-            const phase = ((t + index * 0.3) % 1.2) / 1.2;
+            const phase = ((t + index * 0.3) % 1.25) / 1.25;
             const k = Math.sin(Math.PI * phase);
             return (
               <path key={index} transform={`translate(${x} ${y}) rotate(${45 * phase}) scale(${s * (0.4 + 0.7 * k)})`} opacity={k} d="M0 -11 L3 -3 L11 0 L3 3 L0 11 L-3 3 L-11 0 L-3 -3 Z" />
