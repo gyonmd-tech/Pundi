@@ -21,9 +21,16 @@
  */
 import { normalizeEnvironmentValue } from "@/lib/appwrite/config";
 
+/** Tambah /v1 hanya untuk URL tanpa path (mis. https://hermes.domainmu.com);
+ *  URL ber-path dibiarkan, mis. Gemini https://…/v1beta/openai. */
 function withV1(raw: string) {
   const url = raw.replace(/\/+$/, "");
-  return url ? (url.endsWith("/v1") ? url : `${url}/v1`) : "";
+  if (!url) return "";
+  try {
+    return new URL(url).pathname === "/" ? `${url}/v1` : url;
+  } catch {
+    return url;
+  }
 }
 
 export function getHermesConfig() {

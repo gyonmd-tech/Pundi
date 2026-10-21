@@ -40,6 +40,21 @@ function describeHttpError(status: number, body: string) {
   return `Penyedia AI membalas status ${status}.`;
 }
 
+/** Daftar model dari endpoint /models penyedia — untuk pesan error yang bisa langsung ditindaklanjuti. */
+async function listModels(baseUrl: string, apiKey: string) {
+  try {
+    const response = await fetch(`${baseUrl}/models`, { headers: { Authorization: `Bearer ${apiKey}` } });
+    if (!response.ok) return [];
+    const data = await response.json() as { data?: { id?: string }[] };
+    return (data.data ?? [])
+      .map((model) => String(model.id ?? ""))
+      .filter((id) => id && !/whisper|tts|embed|guard|vision|image|audio/i.test(id))
+      .slice(0, 12);
+  } catch {
+    return [];
+  }
+}
+
 export async function runDirectAgent(
   userId: string,
   system: string,
@@ -64,7 +79,15 @@ export async function runDirectAgent(
       }),
       signal,
     });
-    if (!response.ok) throw new Error(describeHttpError(response.status, await response.text().catch(() => "")));
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      let message = describeHttpError(response.status, body);
+      if (/model_not_found|does not exist|not found/i.test(body)) {
+        const available = await listModels(config.baseUrl, config.apiKey);
+        if (available.length) message = `Model "${config.model}" tidak tersedia. Ganti PENJAGA_LLM_MODEL dengan salah satu: ${available.join(", ")}`;
+      }
+      throw new Error(message);
+    }
 
     const data = await response.json() as { choices?: { message?: { content?: string | null; tool_calls?: ToolCall[] } }[] };
     const message = data.choices?.[0]?.message;
