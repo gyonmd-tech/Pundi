@@ -258,6 +258,41 @@
             { "key": "idx_user_status", "type": "key", "attributes": ["userId", "status"] },
             { "key": "idx_user_date", "type": "key", "attributes": ["userId", "date"] }
           ]
+        },
+        {
+          "$id": "chat_threads",
+          "name": "chat_threads",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "title", "type": "string", "size": 120, "required": true },
+            { "key": "preview", "type": "string", "size": 200, "required": false },
+            { "key": "lastMessageAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "idx_user_last", "type": "key", "attributes": ["userId", "lastMessageAt"] }
+          ]
+        },
+        {
+          "$id": "chat_messages",
+          "name": "chat_messages",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "threadId", "type": "string", "size": 36, "required": true },
+            { "key": "role", "type": "enum", "elements": ["user", "assistant"], "required": true },
+            { "key": "content", "type": "string", "size": 12000, "required": true },
+            { "key": "tools", "type": "string", "size": 64, "required": false, "array": true },
+            { "key": "error", "type": "boolean", "required": false, "default": false }
+          ],
+          "indexes": [
+            { "key": "idx_thread", "type": "key", "attributes": ["threadId", "$createdAt"] },
+            { "key": "idx_user", "type": "key", "attributes": ["userId"] }
+          ]
         }
       ]
     }
