@@ -22,3 +22,9 @@
 - Provider: `threads`, `activeThreadId`, `openThread`, `newChat`, `deleteThread`, `historyLoading`; mode demo menyimpan ke localStorage (`pundi-penjaga-history`, maks 30).
 - UI: `ChatHistory` (grup Hari ini/Kemarin/7 hari/Lebih lama), panel kiri lg+, sheet di ponsel, skeleton saat memuat, sinkron URL `?c=`.
 - Tech debt: draft demo tidak ikut disimpan per thread (draft tetap global).
+
+## Paket C (selesai)
+- `components/budget/BudgetWizard.tsx`: 3 langkah (Kategori → Jatah → Cek) di dalam `Modal` portal; kategori yang sudah dianggarkan diredupkan, rata-rata belanja bulanan sebagai patokan; kalimat "Batas Rp __ setiap hari/minggu/bulan" + saran kebiasaan + pratinjau total sebulan & per hari; "Jatah fleksibel" dipindah ke Opsi lanjutan dengan contoh angka nyata. Mode ubah melewati langkah kategori. Halaman Anggaran kehilangan ±200 baris form lama.
+- `app/(app)/kalkulator/page.tsx`: hub 6 kartu bergradasi → tampilan fokus dengan tombol kembali; hash URL via `useSyncExternalStore`; Back browser sinkron. Keypad diperkecil di ponsel (muat di atas bottom nav).
+- Skeleton rute `/kalkulator` memakai kerangka kartu.
+- Insiden: cache dev `.next/dev` rusak setelah aplikasi tertutup paksa (semua rute 404) → dihapus & dibuat ulang.

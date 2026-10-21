@@ -200,7 +200,7 @@ export function PenjagaSkeleton() {
 }
 
 const LIST_ROUTES = ["/transaksi", "/pengaturan/log-aktivitas", "/utang", "/insight", "/catatan-kondisi"];
-const CARD_ROUTES = ["/anggaran", "/tujuan", "/aset", "/pengaturan"];
+const CARD_ROUTES = ["/anggaran", "/tujuan", "/aset", "/pengaturan", "/kalkulator"];
 
 /** Kerangka yang cocok dengan halaman yang sedang dibuka. */
 export function RouteSkeleton() {

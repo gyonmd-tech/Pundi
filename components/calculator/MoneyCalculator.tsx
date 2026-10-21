@@ -150,7 +150,7 @@ export function MoneyCalculator() {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,26rem)_1fr] lg:items-start">
       <section className="overflow-hidden rounded-[26px] border border-rule bg-surface-high shadow-card">
-        <div className="bg-brand-900 px-5 pb-5 pt-4 text-white">
+        <div className="bg-brand-900 px-5 pb-4 pt-3 text-white sm:pb-5 sm:pt-4">
           <p className="min-h-6 break-all text-right font-mono text-sm text-white/65" aria-label="Ekspresi">{expression ? formatExpression(expression) : "0"}</p>
           <p className="mt-1 break-all text-right font-mono text-[clamp(2rem,9vw,2.6rem)] font-bold leading-tight tabular-nums tracking-[-0.04em]" aria-live="polite">
             <span className="mr-1 text-lg font-semibold text-white/60">Rp</span>{formatNumber(shown)}
@@ -166,7 +166,7 @@ export function MoneyCalculator() {
           ))}
         </div>
 
-        <div className="grid grid-cols-4 gap-2 p-3">
+        <div className="grid grid-cols-4 gap-1.5 p-2.5 sm:gap-2 sm:p-3">
           {KEYS.map((key) => {
             const label = key.kind === "digit" ? key.label ?? key.value : key.label;
             return (
@@ -176,7 +176,7 @@ export function MoneyCalculator() {
                 onClick={() => press(key)}
                 aria-label={key.kind === "back" ? "Hapus satu digit" : key.kind === "clear" ? "Hapus semua" : label}
                 className={cn(
-                  "grid h-14 place-items-center rounded-[18px] text-xl font-bold transition active:scale-95 sm:h-16",
+                  "grid h-[3.2rem] place-items-center rounded-[16px] text-xl font-bold transition active:scale-95 sm:h-16 sm:rounded-[18px]",
                   key.kind === "digit" || key.kind === "decimal" ? "bg-surface text-ink hover:bg-surface-soft" : "",
                   key.kind === "op" || key.kind === "percent" ? "bg-brand-50 text-[1.6rem] text-brand-700 hover:bg-brand-100" : "",
                   key.kind === "clear" || key.kind === "back" ? "bg-ember-10 text-ember-ink hover:brightness-95" : "",
@@ -190,7 +190,7 @@ export function MoneyCalculator() {
           })}
         </div>
 
-        <div className="grid grid-cols-2 gap-2 border-t border-rule p-3">
+        <div className="grid grid-cols-2 gap-2 border-t border-rule p-2.5 sm:p-3">
           <Button type="button" variant="outline" onClick={copyResult} disabled={!shown}><Copy className="h-4 w-4" />Salin</Button>
           <Button type="button" onClick={() => openQuickAdd({ amount: Math.round(Math.abs(shown)) })} disabled={!shown}><NotebookPen className="h-4 w-4" />Catat transaksi</Button>
         </div>
