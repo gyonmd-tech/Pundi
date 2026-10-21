@@ -15,6 +15,7 @@ import { useApp } from "@/lib/data/store";
 import { PenjagaAvatar } from "./PenjagaAvatar";
 import { PenjagaCharacter } from "./PenjagaCharacter";
 import { DraftReview } from "./DraftReview";
+import { ChatMarkdown } from "./ChatMarkdown";
 import { toolLabel, usePenjaga } from "./PenjagaProvider";
 
 const SUGGESTIONS = [
@@ -42,12 +43,12 @@ export function PenjagaThread() {
 
   if (messages.length === 0) {
     return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col items-center px-1 pb-6 pt-6 text-center sm:pt-12">
-        <PenjagaCharacter mood={mood} size={132} title="Penjaga" />
-        <h1 className="mt-4 font-display text-[clamp(1.6rem,4.5vw,2.4rem)] font-black leading-tight tracking-[-0.035em] text-ink">
+      <div className="mx-auto flex w-full max-w-3xl flex-col items-center px-1 pb-6 pt-2 text-center sm:pt-12">
+        <PenjagaCharacter mood={mood} size={132} title="Penjaga" className="h-auto w-[96px] sm:w-[132px]" />
+        <h1 className="mt-3 font-display text-[clamp(1.35rem,4.5vw,2.4rem)] font-black leading-tight tracking-[-0.035em] text-ink">
           {firstName ? `Halo, ${firstName}!` : "Halo!"} Ceritakan harimu.
         </h1>
-        <p className="mt-2 max-w-lg text-sm leading-relaxed text-ink-muted sm:text-[15px]">
+        <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed text-ink-muted sm:mt-2 sm:text-[15px]">
           Tulis seperti bercerita ke teman. Penjaga memecahnya menjadi catatan, kamu cukup periksa lalu tekan <b className="text-ink">Simpan</b>.
         </p>
         {disabled && status?.mode === "cloud" ? (
@@ -58,17 +59,17 @@ export function PenjagaThread() {
             <Settings2 className="h-4 w-4" /> AI Penjaga belum aktif — atur di Pengaturan
           </Link>
         ) : null}
-        <div className="mt-7 grid w-full gap-2.5 text-left sm:grid-cols-3">
+        <div className="mt-5 grid w-full gap-2 text-left sm:mt-7 sm:grid-cols-3 sm:gap-2.5">
           {SUGGESTIONS.map((suggestion) => (
             <button
               key={suggestion.title}
               type="button"
               disabled={disabled || busy}
               onClick={() => send(suggestion.text)}
-              className="group rounded-[18px] border border-rule bg-surface-high p-4 transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
+              className="group rounded-[16px] border border-rule bg-surface-high px-3.5 py-3 text-left transition sm:rounded-[18px] sm:p-4 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
             >
-              <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-pine">{suggestion.title}</span>
-              <span className="mt-1.5 block text-[13px] leading-snug text-ink-muted group-hover:text-ink">“{suggestion.text}”</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-pine">{suggestion.title}</span>
+              <span className="mt-1 block text-[13px] leading-snug text-ink-muted group-hover:text-ink">“{suggestion.text}”</span>
             </button>
           ))}
         </div>
@@ -101,11 +102,11 @@ export function PenjagaThread() {
               </div>
             ) : null}
             <div className={cn(
-              "mt-1.5 whitespace-pre-wrap break-words text-[15px] leading-relaxed",
+              "mt-1.5 break-words text-[15px] leading-relaxed",
               message.error ? "rounded-[14px] border border-ember/30 bg-ember-10 px-3.5 py-2.5 text-ember-ink" : "text-ink",
             )}>
               {message.error ? <TriangleAlert className="mb-1 h-4 w-4" aria-hidden /> : null}
-              {message.content || <TypingDots />}
+              {message.content ? (message.error ? message.content : <ChatMarkdown text={message.content} />) : <TypingDots />}
             </div>
           </div>
         </div>
@@ -149,7 +150,7 @@ export function PenjagaComposer() {
         className="mx-auto w-full max-w-3xl"
         onSubmit={(event) => { event.preventDefault(); submit(); }}
       >
-        <div className="flex items-end gap-2 rounded-[24px] border border-rule bg-surface-high p-2 pl-4 shadow-float transition focus-within:border-brand-300">
+        <div className="flex items-end gap-2 rounded-[24px] border border-rule bg-surface-high p-2 pl-4 shadow-float">
           <textarea
             ref={inputRef}
             rows={1}
@@ -159,6 +160,7 @@ export function PenjagaComposer() {
             onKeyDown={onKeyDown}
             placeholder={disabled ? (status?.mode === "cloud" ? "Aktifkan AI Penjaga di Pengaturan dulu" : "Menyiapkan Penjaga…") : "Ceritakan pengeluaranmu hari ini…"}
             aria-label="Pesan untuk Penjaga"
+            data-bare-input="true"
             className="max-h-[180px] min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-base leading-snug text-ink outline-none placeholder:text-ink-soft disabled:cursor-not-allowed"
           />
           <button

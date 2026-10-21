@@ -12,7 +12,6 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import React, { useState, useMemo } from "react";
 import { useApp, useTransactions, useAccounts, useCategories } from "@/lib/data/store";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
-import { downloadExcel } from "@/lib/utils/excelExport";
 import { useToast } from "@/lib/context/ToastContext";
 import {
   Search, Filter, Plus, Trash2, ArrowDownLeft, ArrowUpRight,
@@ -210,6 +209,8 @@ export default function TransaksiPage() {
     });
 
     try {
+      // exceljs (±260KB gzip) baru diunduh saat pengguna benar-benar mengekspor.
+      const { downloadExcel } = await import("@/lib/utils/excelExport");
       await downloadExcel({
         reportTitle:   "Laporan Mutasi Transaksi",
         period,

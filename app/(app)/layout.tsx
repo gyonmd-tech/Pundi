@@ -44,7 +44,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         />
 
         <div className="flex min-w-0 flex-1">
-          <main className="min-w-0 flex-1 overflow-x-clip px-4 py-5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0.5rem))] sm:px-6 md:pb-8 lg:px-8 lg:py-7">
+          <main className="min-w-0 flex-1 overflow-x-clip px-4 py-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0.5rem))] sm:px-6 sm:py-5 md:pb-8 lg:px-8 lg:py-7">
             <div className="mx-auto w-full max-w-[90rem] animate-in fade-in duration-300">{connection.status === "loading" ? <RouteSkeleton /> : children}</div>
           </main>
           <RightSidebar

@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { portalPanelStyle, useIsClient, usePortalPosition } from "./usePortalPosition";
 
 interface OptionData {
   value: string;
@@ -15,6 +17,10 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
     const [open, setOpen] = React.useState(false);
     const [internalValue, setInternalValue] = React.useState(String(defaultValue ?? ""));
     const rootRef = React.useRef<HTMLDivElement>(null);
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
+    const panelRef = React.useRef<HTMLDivElement>(null);
+    const isClient = useIsClient();
+    const position = usePortalPosition(triggerRef, open, { preferredHeight: 264 });
     const options = React.Children.toArray(children).flatMap<OptionData>((child) => {
       if (!React.isValidElement<{ value?: string | number; disabled?: boolean; children?: React.ReactNode }>(child) || child.type !== "option") return [];
       return [{ value: String(child.props.value ?? ""), label: child.props.children, disabled: Boolean(child.props.disabled) }];
@@ -24,7 +30,8 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
 
     React.useEffect(() => {
       function onOutside(event: MouseEvent) {
-        if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+        const target = event.target as Node;
+        if (!rootRef.current?.contains(target) && !panelRef.current?.contains(target)) setOpen(false);
       }
       function onKey(event: KeyboardEvent) {
         if (event.key === "Escape") setOpen(false);
@@ -48,6 +55,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
       <div ref={rootRef} className="relative w-full">
         <select ref={ref} id={id} name={name} value={currentValue} onChange={onChange} disabled={disabled} tabIndex={-1} aria-hidden className="sr-only" {...props}>{children}</select>
         <button
+          ref={triggerRef}
           type="button"
           disabled={disabled}
           aria-label={ariaLabel}
@@ -62,8 +70,16 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
           <span className="min-w-0 flex-1 truncate">{selected?.label ?? "Pilih opsi"}</span>
           <ChevronDown className={cn("h-4 w-4 shrink-0 text-pine transition-transform", open && "rotate-180")} />
         </button>
-        {open ? (
-          <div role="listbox" className="absolute left-0 right-0 top-full z-[70] mt-2 max-h-64 overflow-y-auto rounded-[16px] border border-pine/12 bg-surface-high p-1.5 shadow-float animate-in fade-in slide-in-from-top-1">
+        {open && isClient && position ? createPortal(
+          <div
+            ref={panelRef}
+            role="listbox"
+            style={portalPanelStyle(position)}
+            className={cn(
+              "z-[90] overflow-y-auto overscroll-contain rounded-[16px] border border-pine/12 bg-surface-high p-1.5 shadow-float animate-in fade-in",
+              position.placement === "bottom" ? "slide-in-from-top-1" : "slide-in-from-bottom-1",
+            )}
+          >
             {options.map((option) => (
               <button
                 key={option.value}
@@ -82,7 +98,8 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
                 {option.value === currentValue ? <Check className="h-4 w-4 shrink-0" /> : null}
               </button>
             ))}
-          </div>
+          </div>,
+          document.body,
         ) : null}
       </div>
     );

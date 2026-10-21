@@ -49,9 +49,9 @@ export function MobileBottomNav({ onQuickAdd }: { onQuickAdd?: () => void }) {
               type="button"
               onClick={onQuickAdd}
               aria-label="Tambah transaksi"
-              className="-mt-7 grid h-14 w-14 place-items-center rounded-[20px] border-4 border-paper bg-brand-600 text-white shadow-[0_10px_24px_rgba(36,89,222,.35)] transition active:scale-95"
+              className="-mt-6 grid h-[3.25rem] w-[3.25rem] place-items-center rounded-[18px] border-4 border-paper bg-brand-600 text-white shadow-[0_10px_24px_rgba(36,89,222,.35)] transition active:scale-95"
             >
-              <Plus className="h-6 w-6" strokeWidth={2.4} />
+              <Plus className="h-[22px] w-[22px]" strokeWidth={2.4} />
             </button>
           </div>
           <NavButton href={primary[2].href} label={primary[2].label} icon={primary[2].icon} active={isRouteActive(pathname, primary[2].href)} badge={drafts.length} />

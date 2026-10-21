@@ -142,7 +142,8 @@ function DraftItem({ draft, index, error, onEdit, onReject }: {
               onChange={(event) => onEdit({ note: event.target.value })}
               placeholder={meta.label}
               aria-label="Catatan"
-              className="min-w-0 flex-1 rounded-[8px] bg-transparent py-0.5 text-sm font-semibold text-ink outline-none placeholder:text-ink-soft focus:bg-surface-high"
+              data-bare-input="true"
+              className="min-w-0 flex-1 rounded-[8px] bg-transparent py-0.5 text-sm font-semibold text-ink outline-none placeholder:text-ink-soft"
             />
             <button
               type="button"
@@ -158,7 +159,7 @@ function DraftItem({ draft, index, error, onEdit, onReject }: {
               {meta.label} · {date.toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
               {draft.source === "hermes" ? " · via Hermes" : ""}
             </p>
-            <label className="flex shrink-0 items-baseline gap-1 rounded-[10px] px-1.5 py-0.5 transition focus-within:bg-surface-high focus-within:ring-2 focus-within:ring-brand-300">
+            <label className="flex shrink-0 items-baseline gap-1 rounded-[10px] px-1.5 py-0.5">
               <span className="text-[11px] font-bold text-ink-muted">Rp</span>
               <input
                 inputMode="numeric"
@@ -168,6 +169,7 @@ function DraftItem({ draft, index, error, onEdit, onReject }: {
                   if (amount > 0) onEdit({ amount });
                 }}
                 aria-label="Nominal"
+                data-bare-input="true"
                 style={{ width: `${String(draft.amount).length + 0.4 * Math.floor((String(draft.amount).length - 1) / 3) + 0.3}ch` }}
                 className="min-w-[3ch] bg-transparent text-right text-[15px] font-bold tabular-nums text-ink outline-none"
               />

@@ -17,8 +17,11 @@
   }
 }
 
+/* fill-mode "backwards" (bukan "both"): setelah selesai, transform dilepas.
+   Transform yang tertahan menjadikan elemen "containing block" bagi
+   descendant position:fixed — modal di dalamnya jadi terkurung & terpotong. */
 @utility animate-in {
-  animation: pundi-enter var(--tw-duration, 260ms) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: pundi-enter var(--tw-duration, 260ms) cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 @utility fade-in {
   --tw-enter-opacity: 0;
@@ -81,7 +84,7 @@
 }
 
 .skeleton-rise {
-  animation: pundi-enter 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: pundi-enter 520ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
   --tw-enter-opacity: 0;
   --tw-enter-translate-y: 14px;
   animation-delay: var(--skeleton-delay, 0ms);
