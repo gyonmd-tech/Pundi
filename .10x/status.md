@@ -9,3 +9,9 @@
 - [x] B1–B5 History chat (cloud perlu `npm run db:setup`)
 - [x] C1 Wizard anggaran · [x] C2 Kalkulator hub
 - [x] D1–D4 Landing
+
+# Status — app-maturity (2026-11-08)
+- **Fase:** Analisis QA selesai — `.10x/decisions/qa/app-maturity.md`, laporan `.10x/reviews/2026-11-08-qa-report.md`
+- **Selesai sebelumnya (branch `claude/funny-rubin-vb2jww`):** landing ringan baru, mobile `/` → `/login`, login ringan di ponsel.
+- **Test otomatis:** belum ada (0). CI belum ada.
+- **Risiko pemblokir rilis "matang":** R1 saldo tanpa atomic/transaksi, R2 recurring bisa dobel, R3 batas 500 transaksi.
