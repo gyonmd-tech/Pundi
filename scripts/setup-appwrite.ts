@@ -8,6 +8,7 @@ import { Client, Databases, Storage } from "node-appwrite";
 import fs from "fs";
 import path from "path";
 import schema from "../appwrite.json";
+import { applyAppwriteSchema } from "./lib/applyAppwriteSchema";
 
 // Helper to load env files without external dependencies
 function loadEnv(file: string) {
@@ -66,124 +67,19 @@ const client = new Client()
 const databases = new Databases(client);
 const storage = new Storage(client);
 
-async function setup() {
-  console.log(`\n🚀 Memulai inisialisasi database Appwrite pada project: ${projectId}...`);
+console.log(`\n🚀 Memulai inisialisasi database Appwrite pada project: ${projectId}...`);
 
-  // 1. Buat Database jika belum ada
-  try {
-    await databases.get(databaseId);
-    console.log(`✓ Database '${databaseId}' sudah ada.`);
-  } catch (err: any) {
-    if (err.code === 404) {
-      await databases.create(databaseId, databaseId, true);
-      console.log(`✓ Berhasil membuat Database '${databaseId}'.`);
-    } else {
-      console.error(`✕ Gagal memeriksa database:`, err.message);
+applyAppwriteSchema({ databases, storage, databaseId, schema })
+  .then((failures) => {
+    if (failures.length > 0) {
+      console.error(`\n✕ ${failures.length} bagian skema gagal dibuat:`);
+      for (const failure of failures) console.error(`  - ${failure}`);
+      console.error("Perbaiki appwrite.json (atau project Appwrite), lalu jalankan ulang npm run db:setup.\n");
       process.exit(1);
     }
-  }
-
-  // 2. Buat Collections dari schema appwrite.json
-  const collections = schema.databases[0]?.collections || [];
-
-  for (const col of collections) {
-    console.log(`\n📦 Memproses collection: ${col.name} (${col.$id})...`);
-    let collectionExists = false;
-
-    try {
-      await databases.getCollection(databaseId, col.$id);
-      console.log(`  ✓ Collection '${col.name}' sudah ada.`);
-      collectionExists = true;
-    } catch (err: any) {
-      if (err.code === 404) {
-        // Collection-level permissions sengaja dibiarkan kosong ([]): akses
-        // ditentukan per-dokumen (documentSecurity: true) lewat
-        // Permission.read/update/delete(Role.user(userId)) yang diset saat
-        // createDocument di actions/*.ts. Ini defense-in-depth — hari ini
-        // semua panggilan tetap lewat admin API key (bypass permission
-        // Appwrite), tapi dokumen sudah benar-benar terkunci per pengguna
-        // seandainya session client (non-admin) suatu saat dipakai langsung.
-        await databases.createCollection(databaseId, col.$id, col.name, [], col.documentSecurity, col.enabled);
-        console.log(`  ✓ Berhasil membuat Collection '${col.name}'.`);
-        collectionExists = true;
-      } else {
-        console.warn(`  ✕ Gagal membuat collection: ${err.message}`);
-      }
-    }
-
-    if (!collectionExists) continue;
-
-    // 3. Buat Attributes
-    for (const rawAttr of col.attributes || []) {
-      const attr = rawAttr as any;
-      try {
-        if (attr.type === "string") {
-          await databases.createStringAttribute(databaseId, col.$id, attr.key, attr.size || 255, attr.required || false, attr.default ?? undefined, attr.array || false);
-        } else if (attr.type === "integer") {
-          await databases.createIntegerAttribute(databaseId, col.$id, attr.key, attr.required || false, undefined, undefined, attr.default ?? undefined, attr.array || false);
-        } else if (attr.type === "double") {
-          await databases.createFloatAttribute(databaseId, col.$id, attr.key, attr.required || false, undefined, undefined, attr.default ?? undefined, attr.array || false);
-        } else if (attr.type === "boolean") {
-          await databases.createBooleanAttribute(databaseId, col.$id, attr.key, attr.required || false, attr.default ?? undefined, attr.array || false);
-        } else if (attr.type === "datetime") {
-          await databases.createDatetimeAttribute(databaseId, col.$id, attr.key, attr.required || false, attr.default ?? undefined, attr.array || false);
-        } else if (attr.type === "enum" && attr.elements) {
-          await databases.createEnumAttribute(databaseId, col.$id, attr.key, attr.elements, attr.required || false, attr.default ?? undefined, attr.array || false);
-        }
-        console.log(`    + Attribute '${attr.key}' (${attr.type}) dibuat.`);
-      } catch (err: any) {
-        if (err.code === 409) {
-          // Attribute already exists
-        } else {
-          console.log(`    ℹ Attribute '${attr.key}': ${err.message}`);
-        }
-      }
-    }
-
-    // 4. Buat Indexes
-    for (const idx of col.indexes || []) {
-      try {
-        await databases.createIndex(databaseId, col.$id, idx.key, idx.type as any, idx.attributes);
-        console.log(`    + Index '${idx.key}' dibuat.`);
-      } catch (err: any) {
-        if (err.code !== 409) {
-          console.log(`    ℹ Index '${idx.key}': ${err.message}`);
-        }
-      }
-    }
-  }
-
-  console.log(`\n🎉 Seluruh ${collections.length} Collections dan Attributes Appwrite berhasil diinisialisasi!\n`);
-
-  // 5. Buat Storage Buckets (mis. avatar profil) dari schema appwrite.json
-  const buckets = (schema as { buckets?: any[] }).buckets || [];
-  for (const bucket of buckets) {
-    console.log(`\n🪣 Memproses bucket: ${bucket.name} (${bucket.$id})...`);
-    try {
-      await storage.getBucket(bucket.$id);
-      console.log(`  ✓ Bucket '${bucket.name}' sudah ada.`);
-    } catch (err: any) {
-      if (err.code === 404) {
-        await storage.createBucket({
-          bucketId: bucket.$id,
-          name: bucket.name,
-          permissions: bucket.$permissions || [],
-          fileSecurity: bucket.fileSecurity,
-          enabled: bucket.enabled,
-          maximumFileSize: bucket.maximumFileSize,
-          allowedFileExtensions: bucket.allowedFileExtensions,
-          compression: bucket.compression,
-          encryption: bucket.encryption,
-          antivirus: bucket.antivirus,
-        });
-        console.log(`  ✓ Berhasil membuat bucket '${bucket.name}'.`);
-      } else {
-        console.warn(`  ✕ Gagal membuat bucket: ${err.message}`);
-      }
-    }
-  }
-}
-
-setup().catch((e) => {
-  console.error("Error during setup:", e);
-});
+    console.log(`\n🎉 Seluruh collection, atribut, index, dan bucket Appwrite sesuai skema.\n`);
+  })
+  .catch((e) => {
+    console.error("Error during setup:", e);
+    process.exit(1);
+  });
