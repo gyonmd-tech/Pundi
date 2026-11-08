@@ -16,6 +16,9 @@ const RATE_LIMIT_MESSAGE = "Terlalu banyak percobaan. Silakan coba lagi beberapa
 
 const SESSION_COOKIE_NAME = "pundi-session";
 
+/** Satu-satunya email yang masuk ke mode demo (data contoh di memori, tanpa Appwrite). */
+const DEMO_EMAIL = "demo@pundi.id";
+
 function authErrorMessage(error: unknown, fallback: string) {
   const raw = error instanceof Error ? error.message : "";
   const message = raw.toLowerCase();
@@ -56,7 +59,7 @@ export async function getAuthUserAction(): Promise<UserSession | null> {
     return {
       id: "demo-user-1",
       name: "Sarah Dewi",
-      email: "demo@pundi.id",
+      email: DEMO_EMAIL,
       isDemo: true,
     };
   }
@@ -84,7 +87,7 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
     return { success: false, error: RATE_LIMIT_MESSAGE };
   }
 
-  if (email === "demo@pundi.id" || email === "sarah@email.com") {
+  if (email === DEMO_EMAIL) {
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, "demo-session-token", {
       httpOnly: true,

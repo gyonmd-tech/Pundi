@@ -406,13 +406,11 @@ input[data-search-input="true"]:focus-visible,
    dialog modal terbuka. */
 body:has([aria-modal="true"]) nav[aria-label="Navigasi mobile"] { display: none; }
 
-/* Target sentuh minimal 36px di perangkat layar sentuh tanpa mengubah tampilan desktop. */
+/* Kontrol kecil berpusat di dalam target sentuhnya (ukuran minimal: lihat aturan 44px di bawah). */
 @media (pointer: coarse) {
   .tap-target {
     display: inline-grid;
     place-items: center;
-    min-width: 2.25rem;
-    min-height: 2.25rem;
   }
 }
 
@@ -421,8 +419,23 @@ body:has([aria-modal="true"]) nav[aria-label="Navigasi mobile"] { display: none;
   .text-\[10px\] { font-size: 0.6875rem; }
 }
 
-/* Area sentuh minimal ±44px di layar sentuh untuk tautan/tombol yang tampilannya
-   kecil (mis. "Kelola", sakelar preferensi) tanpa mengubah ukuran visualnya. */
+/* Target sentuh minimal 44px (anjuran Apple HIG / Material) untuk semua kontrol
+   di layar sentuh. Sengaja di luar @layer agar menang atas utilitas Tailwind
+   seperti h-9/min-h-9: di ponsel html bernilai 15px, sehingga ukuran rem ikut
+   mengecil (h-10 = 38px). Dalam px karena alasan yang sama. Tautan teks inline
+   tidak terpengaruh (min-height tak berlaku untuk elemen inline). Kontrol yang
+   lebarnya dibatasi grid (mis. tanggal kalender) diberi .tap-exempt-width. */
+@media (pointer: coarse) {
+  :where(button, [role="button"], [role="switch"], [role="tab"], a[href], summary, select):not(.tap-exempt) {
+    min-height: 44px;
+  }
+  :where(button, [role="button"], [role="switch"], [role="tab"], a[href], summary, select):not(.tap-exempt, .tap-exempt-width) {
+    min-width: 44px;
+  }
+}
+
+/* Area sentuh tambahan untuk tautan/tombol yang tampilannya kecil (mis. tautan
+   teks "Kelola") tanpa mengubah ukuran visualnya. */
 @media (pointer: coarse) {
   .tap-target { position: relative; }
   .tap-target::after { content: ""; position: absolute; inset: -10px -6px; }

@@ -44,6 +44,15 @@ test("semua halaman aplikasi muat tanpa error & tanpa geser horizontal di ponsel
     await expect(page.getByText("Memuat data keuangan")).toHaveCount(0, { timeout: 15_000 });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
     expect(overflow, `${route} meluber horizontal`).toBe(false);
+    // Target sentuh minimal 44px (aturan di app/globals.css). Tautan teks inline dikecualikan.
+    const smallTargets = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('button, [role="button"], [role="switch"], [role="tab"], a[href], summary, select')]
+        .filter((el) => getComputedStyle(el).display !== "inline" && !el.closest(".tap-exempt"))
+        .map((el) => ({ el, rect: el.getBoundingClientRect() }))
+        .filter(({ rect }) => rect.width > 0 && rect.height > 0 && rect.height < 43.5)
+        .map(({ el, rect }) => `${(el.getAttribute("aria-label") || el.textContent || el.tagName).trim().slice(0, 30)} (${Math.round(rect.height)}px)`),
+    );
+    expect(smallTargets, `${route}: target sentuh < 44px`).toEqual([]);
   }
   expect(errors).toEqual([]);
 });
