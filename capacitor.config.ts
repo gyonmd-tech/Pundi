@@ -8,6 +8,9 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * di dalam WebView layar penuh — setiap deploy web otomatis memperbarui app
  * tanpa rilis ulang ke Play Store / App Store.
  *
+ * Aplikasi dibuka di "/?source=app": proxy.ts mengarahkan ke /login, atau
+ * langsung ke /dashboard bila sesi masih tersimpan.
+ *
  * Default memuat produksi di https://pundi-theta.vercel.app. Untuk menguji
  * deploy lain (mis. preview Vercel), timpa lewat env:
  *   PUNDI_APP_URL=https://alamat-lain.vercel.app npm run mobile:sync
@@ -21,7 +24,7 @@ const config: CapacitorConfig = {
   webDir: "mobile/www",
   backgroundColor: "#F4F7FC",
   server: {
-    url: `${appUrl}/dashboard`,
+    url: `${appUrl}/?source=app`,
     cleartext: appUrl.startsWith("http://"),
     allowNavigation: [new URL(appUrl).host, "*.appwrite.io", "*.cloud.appwrite.io"],
     errorPath: "index.html",
