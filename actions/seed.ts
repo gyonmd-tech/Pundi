@@ -12,9 +12,7 @@
  */
 
 import { createAdminServerClient } from "@/lib/appwrite/server";
-import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
-import { Permission, Role, ID } from "node-appwrite";
-import { mockCategories } from "@/lib/data/mock";
+import { seedDefaultsForUser } from "@/lib/appwrite/seedDefaults";
 import { getAuthUserAction } from "./auth";
 
 export async function seedDefaultCategoriesAction() {
@@ -27,45 +25,7 @@ export async function seedDefaultCategoriesAction() {
 
   try {
     const { databases } = await createAdminServerClient();
-    const permissions = [
-      Permission.read(Role.user(userId)),
-      Permission.update(Role.user(userId)),
-      Permission.delete(Role.user(userId)),
-    ];
-
-    // 1. Buat Akun default
-    await databases.createDocument(
-      DATABASE_ID,
-      COLLECTIONS.ACCOUNTS,
-      ID.unique(),
-      {
-        userId,
-        name: "Dompet Utama / Rekening Bank",
-        type: "bank",
-        balance: 0,
-        colorTag: "#1B4B3F",
-        isActive: true,
-      },
-      permissions
-    );
-
-    // 2. Buat Kategori default
-    for (const cat of mockCategories) {
-      await databases.createDocument(
-        DATABASE_ID,
-        COLLECTIONS.CATEGORIES,
-        ID.unique(),
-        {
-          userId,
-          name: cat.name,
-          type: cat.type,
-          icon: cat.icon,
-          color: cat.color,
-        },
-        permissions
-      );
-    }
-
+    await seedDefaultsForUser(databases, userId);
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

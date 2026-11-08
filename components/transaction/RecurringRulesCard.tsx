@@ -226,13 +226,13 @@ export function RecurringRulesCard() {
                   </span>
                   <div className="flex w-full shrink-0 items-center justify-end gap-2 border-t border-rule pt-2.5 sm:w-auto sm:border-0 sm:pt-0">
                     {!rule.isActive && <Badge tone="neutral" className="text-[10px]">Dijeda</Badge>}
-                    <IconButton variant="outline" className="h-8 min-h-8 w-8" onClick={() => toggleActive(rule)} aria-label={rule.isActive ? "Jeda aturan" : "Lanjutkan aturan"} title={rule.isActive ? "Jeda" : "Lanjutkan"}>
+                    <IconButton variant="outline" className="h-10 min-h-10 w-10 sm:h-8 sm:min-h-8 sm:w-8" onClick={() => toggleActive(rule)} aria-label={rule.isActive ? "Jeda aturan" : "Lanjutkan aturan"} title={rule.isActive ? "Jeda" : "Lanjutkan"}>
                       {rule.isActive ? <Pause size={14} /> : <Play size={14} />}
                     </IconButton>
-                    <IconButton variant="outline" className="h-8 min-h-8 w-8" onClick={() => openEdit(rule)} aria-label="Edit aturan" title="Edit">
+                    <IconButton variant="outline" className="h-10 min-h-10 w-10 sm:h-8 sm:min-h-8 sm:w-8" onClick={() => openEdit(rule)} aria-label="Edit aturan" title="Edit">
                       <Pencil size={14} />
                     </IconButton>
-                    <IconButton variant="outline" className="h-8 min-h-8 w-8" onClick={() => remove(rule)} aria-label="Hapus aturan" title="Hapus">
+                    <IconButton variant="outline" className="h-10 min-h-10 w-10 sm:h-8 sm:min-h-8 sm:w-8" onClick={() => remove(rule)} aria-label="Hapus aturan" title="Hapus">
                       <Trash2 size={14} />
                     </IconButton>
                   </div>

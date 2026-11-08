@@ -73,3 +73,12 @@ Analisis selesai; menunggu keputusan pengguna soal prioritas (lihat handoff).
 - CI: .github/workflows/ci.yml (lint, typecheck, test, build).
 - Performa (Pixel 7 emulasi, mode demo, JS tak terkompresi untuk tampil): dashboard 1.229→743 KB, penjaga 1.070→792 KB; transaksi/anggaran tetap ±740–775 KB. Chart dimuat saat mendekati layar; QuickAddPanel dimuat saat dibuka; zod dikeluarkan dari bundle klien.
 - Belum: target 600 KB belum tercapai (sisa ±410 KB framework + layout bersama); belum diuji ke Appwrite asli (increment/decrement butuh Appwrite ≥1.7) dan belum di perangkat fisik; belum ada e2e Playwright di CI.
+
+## Hasil Fase 3 + gerbang rilis (2026-11-08)
+- Audit 15 rute di 360px: 0 overflow horizontal, 0 error console. Tap target <32px diperbaiki (tautan dashboard, tombol aturan berulang, sakelar & filter pengaturan, tombol tambah aset/tujuan) — `.tap-target` memperluas area sentuh di layar sentuh. Sisa: banyak kontrol 34–38px (lolos WCAG 2.5.8 AA 24px, di bawah anjuran 44px).
+- R4: `checkSharedRateLimit` (koleksi `rate_limits`, increment atomik dengan max) untuk login, signup, chat, MCP; fallback ke limiter memori bila koleksi belum ada. Butuh `npm run db:setup`.
+- R5: seed data awal idempoten (ID deterministik); signup tidak lagi gagal karena seed; bootstrap mengulang seed bila akun & kategori kosong.
+- R6: avatar privat (Role.user) disajikan lewat `/api/avatar/[fileId]` yang memeriksa pemilik. File lama yang sudah publik tetap publik sampai pengguna unggah ulang.
+- Test: 34 Vitest + 7 e2e Playwright (Pixel 7 + desktop), stabil 3x berturut-turut. CI menjalankan semuanya.
+- `npm run test:appwrite`: uji asap ke Appwrite asli (saldo paralel, recurring paralel, rate limit) — BELUM dijalankan (tidak ada kredensial di sesi ini).
+- Asumsi yang perlu dibuktikan oleh test:appwrite: Appwrite menolak increment yang melewati `max` dengan kode 400 (kode lain → fallback memori, tidak memblokir login).

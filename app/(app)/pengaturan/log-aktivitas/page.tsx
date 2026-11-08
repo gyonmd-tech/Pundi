@@ -101,7 +101,7 @@ export default function LogAktivitasPage() {
   return (
     <div className="w-full min-w-0 max-w-[70rem] space-y-5 font-ui sm:space-y-6">
       <header>
-        <Link href="/pengaturan" className="inline-flex items-center gap-1.5 text-xs font-bold text-ink-muted transition hover:text-ink">
+        <Link href="/pengaturan" className="tap-target inline-flex items-center gap-1.5 text-xs font-bold text-ink-muted transition hover:text-ink">
           <ArrowLeft className="h-3.5 w-3.5" /> Kembali ke Pengaturan
         </Link>
         <h1 className="page-title mt-2 flex items-center gap-2"><History size={22} className="text-pine" /> Log Aktivitas</h1>

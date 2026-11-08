@@ -227,7 +227,7 @@ export default function DashboardPage() {
               <p className="eyebrow">Analitik</p>
               <h2 className="mt-1 text-heading font-bold text-ink">Arus kas enam bulan</h2>
             </div>
-            <Link href="/arus-kas" className="flex items-center gap-1 text-xs font-bold text-pine hover:underline">
+            <Link href="/arus-kas" className="flex items-center gap-1 tap-target text-xs font-bold text-pine hover:underline">
               Detail <ArrowRight size={14} />
             </Link>
           </div>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
               <p className="eyebrow">Komposisi</p>
               <h2 className="mt-1 text-heading font-bold text-ink">Pengeluaran</h2>
             </div>
-            <Link href="/anggaran" className="text-xs font-bold text-pine hover:underline">Kelola</Link>
+            <Link href="/anggaran" className="tap-target text-xs font-bold text-pine hover:underline">Kelola</Link>
           </div>
           <CategoryBreakdownChart data={breakdown} />
         </article>
@@ -287,7 +287,7 @@ export default function DashboardPage() {
               <p className="eyebrow">Aktivitas terbaru</p>
               <h2 className="mt-1 text-heading font-bold text-ink">Transaksi terkini</h2>
             </div>
-            <Link href="/transaksi" className="flex items-center gap-1 text-xs font-bold text-pine hover:underline">
+            <Link href="/transaksi" className="flex items-center gap-1 tap-target text-xs font-bold text-pine hover:underline">
               Semua <ArrowRight size={14} />
             </Link>
           </div>
@@ -326,7 +326,7 @@ export default function DashboardPage() {
               <p className="eyebrow">7 hari ke depan</p>
               <h2 className="mt-1 flex items-center gap-2 text-heading font-bold text-ink"><Repeat size={15} className="text-ink-muted" /> Akan datang</h2>
             </div>
-            <Link href="/transaksi" className="flex items-center gap-1 text-xs font-bold text-pine hover:underline">
+            <Link href="/transaksi" className="flex items-center gap-1 tap-target text-xs font-bold text-pine hover:underline">
               Kelola <ArrowRight size={14} />
             </Link>
           </div>
@@ -361,7 +361,7 @@ export default function DashboardPage() {
                 <p className="eyebrow">Kontrol</p>
                 <h2 className="mt-1 text-heading font-bold text-ink">Anggaran utama</h2>
               </div>
-              <Link href="/anggaran" className="text-xs font-bold text-pine hover:underline">Atur</Link>
+              <Link href="/anggaran" className="tap-target text-xs font-bold text-pine hover:underline">Atur</Link>
             </div>
             <div className="space-y-1">
               {budgetsWithSpent.slice(0, 3).map((budget) => (
@@ -384,14 +384,14 @@ export default function DashboardPage() {
                 <p className="eyebrow">Target</p>
                 <h2 className="mt-1 text-heading font-bold text-ink">Tujuan terdekat</h2>
               </div>
-              <Link href="/tujuan" className="text-xs font-bold text-pine hover:underline">Semua</Link>
+              <Link href="/tujuan" className="tap-target text-xs font-bold text-pine hover:underline">Semua</Link>
             </div>
             {goals.slice(0, 1).map((goal) => (
               <GoalCard key={goal.id} {...goal} monthlySavings={1_200_000} />
             ))}
           </article>
-        <article data-widget-id="payable" className="card h-full border-brand-600/10 bg-surface-high"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember-ink">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openPayable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-ember-ink hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-ink text-white shadow-card"><HandCoins /></div></div></article>
-        <article data-widget-id="receivable" className="card h-full border-brand-600/10 bg-surface-high"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint-ink">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openReceivable)}</p><Link href="/utang" className="mt-2 inline-flex text-xs font-bold text-mint-ink hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-ink text-white shadow-card"><WalletCards /></div></div></article>
+        <article data-widget-id="payable" className="card h-full border-brand-600/10 bg-surface-high"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember-ink">Utang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openPayable)}</p><Link href="/utang" className="tap-target mt-2 inline-flex text-xs font-bold text-ember-ink hover:underline">Kelola utang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-ink text-white shadow-card"><HandCoins /></div></div></article>
+        <article data-widget-id="receivable" className="card h-full border-brand-600/10 bg-surface-high"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint-ink">Piutang aktif</p><p className="mt-2 text-2xl font-black text-ink">{formatRupiah(openReceivable)}</p><Link href="/utang" className="tap-target mt-2 inline-flex text-xs font-bold text-mint-ink hover:underline">Lihat piutang <ArrowRight className="ml-1 h-4 w-4" /></Link></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-ink text-white shadow-card"><WalletCards /></div></div></article>
 
       <section data-widget-id="insights" className="card h-full border-brand-600/10 bg-surface-high">
         <div className="mb-4 flex items-center justify-between border-b border-rule pb-4">
@@ -404,7 +404,7 @@ export default function DashboardPage() {
               <h2 className="mt-1 text-heading font-bold text-ink">Rekomendasi yang bisa dilakukan</h2>
             </div>
           </div>
-          <Link href="/insight" className="hidden items-center gap-1 text-xs font-bold text-pine hover:underline sm:flex">
+          <Link href="/insight" className="hidden items-center gap-1 tap-target text-xs font-bold text-pine hover:underline sm:flex">
             Semua insight <ArrowRight size={14} />
           </Link>
         </div>

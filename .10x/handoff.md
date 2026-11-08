@@ -1,6 +1,10 @@
 # Handoff
 
-## Current Handoff (QA, 2026-11-08 — Fase 1+2 selesai)
+## Current Handoff (QA, 2026-11-08 — Fase 1–3 selesai, PR dibuat)
+- Gerbang rilis tersisa (manual, butuh pemilik): `npm run db:setup`, `npm run test:appwrite`, uji 1 Android + 1 iPhone.
+- Detail: `.10x/decisions/qa/app-maturity.md` bagian "Hasil Fase 3".
+
+## Previous Handoff (QA, 2026-11-08 — Fase 1+2 selesai)
 - Detail hasil di `.10x/decisions/qa/app-maturity.md` bagian "Hasil Fase 1 + 2".
 - Sebelum rilis: jalankan alur tambah/ubah/hapus transaksi sekali di Appwrite Cloud asli (memastikan increment/decrement tersedia), lalu uji di 1 Android + 1 iPhone.
 - Berikutnya: Fase 3 (UX mobile per halaman, R4–R6), e2e Playwright di CI.

@@ -18,7 +18,7 @@ import { runDirectAgent } from "@/lib/penjaga/directAgent";
 import { appendMessage, createThread, getThreadMessages } from "@/lib/penjaga/history";
 import { PENJAGA_INSTRUCTIONS } from "@/lib/penjaga/tools";
 import { todayInJakarta } from "@/lib/penjaga/service";
-import { checkRateLimit } from "@/lib/security/rateLimit";
+import { checkSharedRateLimit } from "@/lib/security/sharedRateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
   if (access === "not-configured") return Response.json({ error: "AI Penjaga belum diaktifkan di server Pundi." }, { status: 503 });
   if (access === "not-owner") return Response.json({ error: "Hermes Agent ini hanya melayani pemiliknya." }, { status: 403 });
 
-  const limit = checkRateLimit(`penjaga-chat:${user.id}`, 30, 60_000);
+  const limit = await checkSharedRateLimit(`penjaga-chat:${user.id}`, 30, 60_000);
   if (!limit.allowed) return Response.json({ error: "Pelan-pelan dulu ya — coba lagi sebentar lagi." }, { status: 429 });
 
   const body = await request.json().catch(() => null) as { threadId?: unknown; message?: unknown } | null;

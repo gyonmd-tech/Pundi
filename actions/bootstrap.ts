@@ -7,6 +7,7 @@ import { getAuthUserAction } from "./auth";
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
 import { generateDueRecurringTransactions } from "@/lib/appwrite/recurringGenerator";
 import { listAllDocuments } from "@/lib/appwrite/pagination";
+import { seedDefaultsForUser } from "@/lib/appwrite/seedDefaults";
 import { generateInsights } from "@/lib/appwrite/insightGenerator";
 import { getPreferencesAction } from "./preferences";
 import {
@@ -159,7 +160,7 @@ export async function getAppBootstrapAction(): Promise<{
       listAllDocuments(databases, collectionId, queries, { maxDocuments }).then((documents) => ({ documents }));
     const byUser = [Query.equal("userId", user.id)];
 
-    const [accounts, categories, transactions, budgets, goals, assets, insights, debts, recurringRules, preferences] = await Promise.all([
+    const [initialAccounts, initialCategories, transactions, budgets, goals, assets, insights, debts, recurringRules, preferences] = await Promise.all([
       all(COLLECTIONS.ACCOUNTS, byUser),
       all(COLLECTIONS.CATEGORIES, byUser),
       all(COLLECTIONS.TRANSACTIONS, [...byUser, Query.orderDesc("date")]),
@@ -171,6 +172,18 @@ export async function getAppBootstrapAction(): Promise<{
       all(COLLECTIONS.RECURRING_RULES, [...byUser, Query.orderAsc("nextOccurrence")]),
       getPreferencesAction(),
     ]);
+
+    let accounts = initialAccounts;
+    let categories = initialCategories;
+    // Pengguna baru yang seed-nya gagal saat signup: ulangi sekali di sini.
+    if (accounts.documents.length === 0 && categories.documents.length === 0) {
+      try {
+        await seedDefaultsForUser(databases, user.id);
+        [accounts, categories] = await Promise.all([all(COLLECTIONS.ACCOUNTS, byUser), all(COLLECTIONS.CATEGORIES, byUser)]);
+      } catch (error) {
+        console.error("Seed ulang data awal gagal:", error instanceof Error ? error.message : error);
+      }
+    }
 
     const mappedAccounts = accounts.documents.map((doc) => {
       const f = fields<AccountFields>(doc);
