@@ -204,7 +204,7 @@
             { "key": "entityType", "type": "string", "size": 32, "required": true },
             { "key": "entityId", "type": "string", "size": 36, "required": false },
             { "key": "action", "type": "string", "size": 16, "required": true },
-            { "key": "actor", "type": "string", "size": 16, "required": true, "default": "user" },
+            { "key": "actor", "type": "string", "size": 16, "required": false, "default": "user" },
             { "key": "summary", "type": "string", "size": 500, "required": true },
             { "key": "before", "type": "string", "size": 2000, "required": false },
             { "key": "after", "type": "string", "size": 2000, "required": false }
