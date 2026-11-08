@@ -98,11 +98,17 @@ export async function deleteAccountAction(id: string) {
     if (accounts.total <= 1) throw new Error("Minimal satu rekening harus tetap tersedia.");
     if (Number(account.balance) !== 0) throw new Error("Kosongkan atau pindahkan saldo rekening sebelum menghapusnya.");
 
-    const transactions = await databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
-      Query.equal("userId", user.id),
-      Query.limit(500),
+    // Cek langsung ke database (bukan menyaring 500 transaksi pertama) agar
+    // riwayat lama pun terdeteksi.
+    const [asSource, asDestination] = await Promise.all([
+      databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
+        Query.equal("userId", user.id), Query.equal("accountId", id), Query.limit(1),
+      ]),
+      databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
+        Query.equal("userId", user.id), Query.equal("destinationAccountId", id), Query.limit(1),
+      ]),
     ]);
-    if (transactions.documents.some((transaction) => transaction.accountId === id || transaction.destinationAccountId === id)) throw new Error("Rekening memiliki riwayat transaksi. Nonaktifkan rekening agar riwayat tetap utuh.");
+    if (asSource.documents.length > 0 || asDestination.documents.length > 0) throw new Error("Rekening memiliki riwayat transaksi. Nonaktifkan rekening agar riwayat tetap utuh.");
 
     await databases.deleteDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, id);
     await recordAuditLog(databases, user.id, {

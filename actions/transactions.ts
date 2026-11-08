@@ -17,6 +17,7 @@ import {
 } from "@/lib/appwrite/transactionHelpers";
 import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
 import { recordAuditLog } from "@/lib/appwrite/auditLog";
+import { listAllDocuments } from "@/lib/appwrite/pagination";
 import { createTransactionForUser, transactionFromDocument, validateTransaction } from "@/lib/appwrite/transactionService";
 
 export type { TransactionInput };
@@ -48,13 +49,14 @@ export async function createBalanceAdjustmentAction(payload: {
     const account = await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, payload.accountId, user.id);
     const snapshotEnd = new Date(payload.date);
     snapshotEnd.setHours(23, 59, 59, 999);
-    const response = await databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
+    // Semua transaksi setelah tanggal kondisi (bukan hanya 500 pertama) —
+    // delta salah hitung bila ada yang terlewat.
+    const laterDocuments = await listAllDocuments(databases, COLLECTIONS.TRANSACTIONS, [
       Query.equal("userId", user.id),
       Query.greaterThan("date", snapshotEnd.toISOString()),
-      Query.limit(500),
-    ]);
+    ], { maxDocuments: 50_000 });
 
-    const recentTransactions = response.documents.map((document) => transactionFromDocument(document));
+    const recentTransactions = laterDocuments.map((document) => transactionFromDocument(document));
     const currentBalance = Number(account.balance || 0);
     const delta = computeObservedDelta(recentTransactions, payload.accountId, currentBalance, payload.observedBalance, snapshotEnd);
     const type: Transaction["type"] = delta < 0 ? "expense" : "income";
@@ -69,9 +71,8 @@ export async function createBalanceAdjustmentAction(payload: {
       observedBalance: payload.observedBalance,
     };
 
-    await databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, payload.accountId, {
-      balance: currentBalance + delta,
-    });
+    // Atomik: geser saldo sebesar delta, bukan menimpa dengan nilai hasil hitung.
+    const rollback = await applyBalanceChanges(databases, user.id, new Map([[payload.accountId, delta]]));
     try {
       const document = await databases.createDocument(
         DATABASE_ID, COLLECTIONS.TRANSACTIONS, ID.unique(), documentPayload(user.id, transaction),
@@ -91,7 +92,7 @@ export async function createBalanceAdjustmentAction(payload: {
         type,
       };
     } catch (error) {
-      await databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, payload.accountId, { balance: currentBalance });
+      await rollback();
       throw error;
     }
   } catch (error: unknown) {
@@ -105,10 +106,10 @@ export async function getTransactionsAction(): Promise<{ data: Transaction[]; er
 
   try {
     const { databases } = await createAdminServerClient();
-    const response = await databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
-      Query.equal("userId", user.id), Query.orderDesc("date"), Query.limit(500),
+    const documents = await listAllDocuments(databases, COLLECTIONS.TRANSACTIONS, [
+      Query.equal("userId", user.id), Query.orderDesc("date"),
     ]);
-    return { data: response.documents.map((document) => transactionFromDocument(document)) };
+    return { data: documents.map((document) => transactionFromDocument(document)) };
   } catch (error: unknown) {
     return { data: [], error: error instanceof Error ? error.message : "Transaksi tidak dapat dimuat." };
   }
