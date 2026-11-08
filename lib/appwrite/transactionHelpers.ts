@@ -43,38 +43,52 @@ export function negateChanges(changes: BalanceChanges) {
   return new Map([...changes].map(([accountId, delta]) => [accountId, -delta]));
 }
 
+type BalanceDatabases = Pick<
+  Awaited<ReturnType<typeof createAdminServerClient>>["databases"],
+  "getDocument" | "incrementDocumentAttribute" | "decrementDocumentAttribute"
+>;
+
+/**
+ * Geser saldo satu rekening secara ATOMIK di sisi Appwrite (increment /
+ * decrement), bukan baca-lalu-tulis. Dua mutasi bersamaan (dua tab, Penjaga
+ * + input manual, transaksi berulang) tidak lagi saling menimpa.
+ */
+export async function shiftBalance(databases: BalanceDatabases, accountId: string, delta: number) {
+  if (delta === 0) return;
+  const params = { databaseId: DATABASE_ID, collectionId: COLLECTIONS.ACCOUNTS, documentId: accountId, attribute: "balance" };
+  if (delta > 0) await databases.incrementDocumentAttribute({ ...params, value: delta });
+  else await databases.decrementDocumentAttribute({ ...params, value: -delta });
+}
+
+/**
+ * Terapkan perubahan saldo (setelah memastikan semua rekening milik userId).
+ * Bila salah satu gagal, perubahan yang sudah masuk dibalik dengan delta
+ * kebalikannya. Mengembalikan fungsi rollback yang juga membalik delta —
+ * aman walau ada mutasi lain di antaranya, karena tidak menimpa dengan
+ * snapshot lama.
+ */
 export async function applyBalanceChanges(
-  databases: Awaited<ReturnType<typeof createAdminServerClient>>["databases"],
+  databases: BalanceDatabases,
   userId: string,
   changes: BalanceChanges,
 ) {
-  const snapshots = new Map<string, number>();
   for (const accountId of changes.keys()) {
-    const account = await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, accountId, userId);
-    snapshots.set(accountId, Number(account.balance ?? 0));
+    await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, accountId, userId);
   }
 
-  const applied: string[] = [];
+  const applied: [string, number][] = [];
   try {
     for (const [accountId, delta] of changes) {
-      await databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, accountId, {
-        balance: (snapshots.get(accountId) || 0) + delta,
-      });
-      applied.push(accountId);
+      await shiftBalance(databases, accountId, delta);
+      applied.push([accountId, delta]);
     }
   } catch (error) {
-    await Promise.allSettled(applied.map((accountId) =>
-      databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, accountId, {
-        balance: snapshots.get(accountId) || 0,
-      })
-    ));
+    await Promise.allSettled(applied.map(([accountId, delta]) => shiftBalance(databases, accountId, -delta)));
     throw error;
   }
 
   return async () => {
-    await Promise.allSettled([...snapshots].map(([accountId, balance]) =>
-      databases.updateDocument(DATABASE_ID, COLLECTIONS.ACCOUNTS, accountId, { balance })
-    ));
+    await Promise.allSettled(applied.map(([accountId, delta]) => shiftBalance(databases, accountId, -delta)));
   };
 }
 

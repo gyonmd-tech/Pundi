@@ -14,7 +14,7 @@
  */
 import { bearerToken, resolveAgentToken } from "@/lib/penjaga/tokens";
 import { PENJAGA_INSTRUCTIONS, penjagaTools } from "@/lib/penjaga/tools";
-import { checkRateLimit } from "@/lib/security/rateLimit";
+import { checkSharedRateLimit } from "@/lib/security/sharedRateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,7 +55,7 @@ async function handle(message: JsonRpcRequest, userId: string) {
       const name = String(message.params?.name ?? "");
       const tool = penjagaTools.find((item) => item.name === name);
       if (!tool) return failure(id, -32602, `Tool tidak dikenal: ${name}`);
-      const limit = checkRateLimit(`mcp:${userId}`, CALLS_PER_MINUTE, 60_000);
+      const limit = await checkSharedRateLimit(`mcp:${userId}`, CALLS_PER_MINUTE, 60_000);
       if (!limit.allowed) {
         return result(id, { isError: true, content: [{ type: "text", text: `Terlalu banyak permintaan. Coba lagi dalam ${limit.retryAfterSeconds} detik.` }] });
       }

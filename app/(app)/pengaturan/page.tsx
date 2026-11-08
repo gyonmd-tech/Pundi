@@ -278,7 +278,7 @@ export default function PengaturanPage() {
           action={<Button type="button" size="sm" onClick={openNewCategory}><Plus className="h-3.5 w-3.5" />Tambah</Button>}
         >
           <div className="mb-4 flex max-w-full items-center gap-1 overflow-x-auto rounded-[14px] bg-brand-50 p-1">
-            {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-8 flex-1 whitespace-nowrap rounded-[10px] px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-surface-high hover:text-ink")}>{label}</button>)}
+            {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-10 sm:min-h-8 flex-1 whitespace-nowrap rounded-[10px] px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-surface-high hover:text-ink")}>{label}</button>)}
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredCategories.map((category) => (

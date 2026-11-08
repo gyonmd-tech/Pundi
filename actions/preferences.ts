@@ -81,7 +81,7 @@ export async function uploadAvatarAction(formData: FormData): Promise<{ success:
       fileId: ID.unique(),
       file: InputFile.fromBuffer(buffer, file.name || "avatar"),
       permissions: [
-        Permission.read(Role.any()),
+        Permission.read(Role.user(user.id)),
         Permission.update(Role.user(user.id)),
         Permission.delete(Role.user(user.id)),
       ],

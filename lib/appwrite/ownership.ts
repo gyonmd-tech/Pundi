@@ -2,7 +2,7 @@ import type { Databases } from "node-appwrite";
 import { DATABASE_ID } from "@/lib/appwrite/collections";
 
 export async function getOwnedDocument(
-  databases: Databases,
+  databases: Pick<Databases, "getDocument">,
   collectionId: string,
   documentId: string,
   userId: string,

@@ -1,6 +1,5 @@
 "use client";
 
-import { ChartSkeleton } from "@/components/ui/Skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Input } from "@/components/ui/Input";
 /**
@@ -10,7 +9,7 @@ import { Input } from "@/components/ui/Input";
  */
 
 import React, { useState } from "react";
-import dynamic from "next/dynamic";
+import { CategoryBreakdownChart } from "@/components/charts/lazy";
 import { useApp, useAssets } from "@/lib/data/store";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { getAssetPnL, type AssetType, type Asset } from "@/lib/data/mock";
@@ -22,10 +21,6 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { createAssetAction, deleteAssetAction, updateAssetAction } from "@/actions/assets";
 
-const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), {
-  ssr: false,
-  loading: () => <ChartSkeleton />,
-});
 
 const assetTypeConfig: Record<AssetType, { label: string; icon: any; color: string }> = {
   stock:       { label: "Saham",       icon: TrendingUp,       color: "var(--color-pine)" },
@@ -161,7 +156,7 @@ export default function AsetPage() {
         <button
           onClick={openAdd}
           className={cn(
-            "flex items-center gap-2 px-3.5 xs:px-4 py-2 rounded-card text-xs sm:text-small font-semibold shadow-sm",
+            "flex min-h-10 items-center gap-2 px-3.5 xs:px-4 py-2 rounded-card text-xs sm:text-small font-semibold shadow-sm",
             "transition-all duration-200 hover:brightness-105 active:scale-95 group"
           )}
           style={{ backgroundColor: "var(--color-pine)", color: "white", fontFamily: "var(--font-ui)" }}

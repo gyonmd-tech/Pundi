@@ -4,7 +4,8 @@ import { createAdminServerClient, createSessionServerClient } from "@/lib/appwri
 import { cookies, headers } from "next/headers";
 import { ID } from "node-appwrite";
 import { seedDefaultCategoriesAction } from "./seed";
-import { checkRateLimit, getClientIpFromHeaders } from "@/lib/security/rateLimit";
+import { getClientIpFromHeaders } from "@/lib/security/rateLimit";
+import { checkSharedRateLimit } from "@/lib/security/sharedRateLimit";
 
 const LOGIN_LIMIT = 10; // percobaan
 const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 menit
@@ -78,7 +79,7 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
   }
 
   const ip = getClientIpFromHeaders(await headers());
-  const loginCheck = checkRateLimit(`login:${ip}:${email}`, LOGIN_LIMIT, LOGIN_WINDOW_MS);
+  const loginCheck = await checkSharedRateLimit(`login:${ip}:${email}`, LOGIN_LIMIT, LOGIN_WINDOW_MS);
   if (!loginCheck.allowed) {
     return { success: false, error: RATE_LIMIT_MESSAGE };
   }
@@ -129,7 +130,7 @@ export async function signUpAction(formData: FormData): Promise<{ success: boole
   }
 
   const ip = getClientIpFromHeaders(await headers());
-  const signupCheck = checkRateLimit(`signup:${ip}`, SIGNUP_LIMIT, SIGNUP_WINDOW_MS);
+  const signupCheck = await checkSharedRateLimit(`signup:${ip}`, SIGNUP_LIMIT, SIGNUP_WINDOW_MS);
   if (!signupCheck.allowed) {
     return { success: false, error: RATE_LIMIT_MESSAGE };
   }
@@ -148,10 +149,11 @@ export async function signUpAction(formData: FormData): Promise<{ success: boole
       maxAge: 60 * 60 * 24 * 7,
     });
 
+    // Akun & sesi sudah jadi. Bila seed gagal, JANGAN laporkan signup gagal
+    // (pengguna akan mencoba daftar ulang dan ditolak "email sudah terdaftar");
+    // seed diulang otomatis saat aplikasi dibuka (lihat getAppBootstrapAction).
     const seeded = await seedDefaultCategoriesAction();
-    if (!seeded.success) {
-      return { success: false, error: "Akun dibuat, tetapi data awal gagal disiapkan. Silakan masuk kembali." };
-    }
+    if (!seeded.success) console.error("Seed data awal gagal, akan diulang saat bootstrap:", seeded.error);
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: authErrorMessage(error, "Gagal mendaftar akun baru.") };

@@ -1,6 +1,14 @@
 "use client";
 
-import { QuickAddPanel } from "@/components/transaction/QuickAddPanel";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+// Panel (form + DatePicker) baru diunduh saat pertama kali dibuka — tidak ikut
+// membebani pemuatan awal setiap halaman.
+const QuickAddPanel = dynamic(() => import("@/components/transaction/QuickAddPanel").then((m) => m.QuickAddPanel), {
+  ssr: false,
+  loading: () => <div className="grid h-full place-items-center text-ink-muted"><Loader2 className="h-6 w-6 animate-spin" aria-label="Memuat formulir" /></div>,
+});
 import { useQuickAdd } from "@/lib/context/QuickAddContext";
 
 interface RightSidebarProps {

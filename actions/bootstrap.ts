@@ -1,22 +1,15 @@
 "use server";
 
-import { ID, Query, type Models } from "node-appwrite";
+import { Query, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
-import { getOwnedDocument } from "@/lib/appwrite/ownership";
 import { getAuthUserAction } from "./auth";
-import {
-  applyBalanceChanges,
-  documentPayload,
-  documentPermissions,
-  getBalanceChanges,
-  type TransactionInput,
-} from "@/lib/appwrite/transactionHelpers";
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
-import { getNextOccurrence } from "@/lib/utils/recurrence";
+import { generateDueRecurringTransactions } from "@/lib/appwrite/recurringGenerator";
+import { listAllDocuments } from "@/lib/appwrite/pagination";
+import { seedDefaultsForUser } from "@/lib/appwrite/seedDefaults";
 import { generateInsights } from "@/lib/appwrite/insightGenerator";
 import { getPreferencesAction } from "./preferences";
-import { recordAuditLog } from "@/lib/appwrite/auditLog";
 import {
   mockAccounts,
   mockAssets,
@@ -51,123 +44,6 @@ export interface AppBootstrapData {
   debts: Debt[];
   recurringRules: RecurringRule[];
   preferences: UserPreferences;
-}
-
-const MAX_CATCHUP_PER_RULE = 24;
-
-/**
- * Buat transaksi yang jatuh tempo untuk aturan berulang aktif, lalu majukan
- * nextOccurrence. Dipanggil dari getAppBootstrapAction setiap data pengguna
- * dimuat — tidak ada cron/Appwrite Function, jadi transaksi baru terbentuk
- * "saat aplikasi dibuka berikutnya", bukan persis tengah malam. Dibatasi
- * MAX_CATCHUP_PER_RULE per aturan agar pengguna yang lama tidak membuka app
- * tidak memicu ratusan transaksi sekaligus.
- */
-async function generateDueRecurringTransactions(
-  databases: Awaited<ReturnType<typeof createAdminServerClient>>["databases"],
-  userId: string,
-  dueRuleDocs: Models.Document[],
-) {
-  const now = new Date();
-
-  for (const doc of dueRuleDocs) {
-    const rule = recurringRuleFromDocument(doc);
-    let occurrence = rule.nextOccurrence;
-    let lastGenerated: Date | undefined;
-    let generated = 0;
-    let active = rule.isActive;
-
-    while (occurrence <= now && generated < MAX_CATCHUP_PER_RULE) {
-      if (rule.endDate && occurrence > rule.endDate) {
-        active = false;
-        break;
-      }
-
-      const txInput: TransactionInput = {
-        accountId: rule.accountId,
-        destinationAccountId: rule.destinationAccountId,
-        transferKind: rule.type === "transfer" ? "account" : undefined,
-        recordKind: "recurring",
-        recurringRuleId: rule.id,
-        categoryId: rule.categoryId,
-        type: rule.type,
-        amount: rule.amount,
-        date: occurrence,
-        note: rule.note,
-        tags: [],
-      };
-
-      try {
-        const rollback = await applyBalanceChanges(databases, userId, getBalanceChanges(txInput));
-        try {
-          await databases.createDocument(
-            DATABASE_ID,
-            COLLECTIONS.TRANSACTIONS,
-            ID.unique(),
-            documentPayload(userId, txInput),
-            documentPermissions(userId),
-          );
-        } catch (error) {
-          await rollback();
-          throw error;
-        }
-      } catch (error) {
-        console.error(
-          `Gagal membuat transaksi berulang untuk aturan ${rule.id}:`,
-          error instanceof Error ? error.message : error,
-        );
-        break;
-      }
-
-      lastGenerated = occurrence;
-      generated += 1;
-      occurrence = getNextOccurrence(occurrence, rule.frequency);
-      if (rule.endDate && occurrence > rule.endDate) {
-        active = false;
-        break;
-      }
-    }
-
-    if (generated > 0 || active !== rule.isActive) {
-      await databases.updateDocument(DATABASE_ID, COLLECTIONS.RECURRING_RULES, rule.id, {
-        nextOccurrence: occurrence.toISOString(),
-        ...(lastGenerated ? { lastGeneratedDate: lastGenerated.toISOString() } : {}),
-        isActive: active,
-      });
-    }
-
-    if (generated > 0) {
-      await recordAuditLog(databases, userId, {
-        entityType: "recurring_rule", entityId: rule.id, action: "generate", actor: "system",
-        summary: `Membuat ${generated} transaksi otomatis dari aturan "${rule.note || rule.type}"`,
-        after: { generated, lastGenerated: lastGenerated?.toISOString() },
-      });
-    }
-
-    // Kontribusi tujuan otomatis: naikkan currentAmount goal sekali per
-    // rule per pemanggilan (bukan per-occurrence) sebesar total yang
-    // berhasil digenerate barusan.
-    if (rule.goalId && generated > 0) {
-      try {
-        const goalDoc = await getOwnedDocument(databases, COLLECTIONS.GOALS, rule.goalId, userId);
-        const currentAmount = Number(goalDoc.currentAmount ?? 0);
-        const contribution = generated * rule.amount;
-        await databases.updateDocument(DATABASE_ID, COLLECTIONS.GOALS, rule.goalId, {
-          currentAmount: currentAmount + contribution,
-        });
-        await recordAuditLog(databases, userId, {
-          entityType: "goal", entityId: rule.goalId, action: "generate", actor: "system",
-          summary: `Kontribusi otomatis Rp ${contribution.toLocaleString("id-ID")} dari aturan berulang`,
-          before: { currentAmount }, after: { currentAmount: currentAmount + contribution },
-        });
-      } catch (error) {
-        console.error(
-          `Gagal memperbarui progres tujuan ${rule.goalId} dari aturan ${rule.id}:`,
-          error instanceof Error ? error.message : error,
-        );
-      }
-    }
-  }
 }
 
 function fields<T>(doc: Models.Document): T {
@@ -267,7 +143,6 @@ export async function getAppBootstrapAction(): Promise<{
 
   try {
     const { databases } = await createAdminServerClient();
-    const userQuery = [Query.equal("userId", user.id), Query.limit(500)];
 
     const dueRules = await databases.listDocuments(DATABASE_ID, COLLECTIONS.RECURRING_RULES, [
       Query.equal("userId", user.id),
@@ -279,30 +154,36 @@ export async function getAppBootstrapAction(): Promise<{
       await generateDueRecurringTransactions(databases, user.id, dueRules.documents);
     }
 
-    const [accounts, categories, transactions, budgets, goals, assets, insights, debts, recurringRules, preferences] = await Promise.all([
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.ACCOUNTS, userQuery),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.CATEGORIES, userQuery),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.TRANSACTIONS, [
-        Query.equal("userId", user.id),
-        Query.orderDesc("date"),
-        Query.limit(500),
-      ]),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.BUDGETS, userQuery),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.GOALS, userQuery),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.ASSETS, userQuery),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.INSIGHTS, [
-        Query.equal("userId", user.id),
-        Query.orderDesc("$createdAt"),
-        Query.limit(500),
-      ]),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.DEBTS, [
-        Query.equal("userId", user.id), Query.orderDesc("$createdAt"), Query.limit(500),
-      ]),
-      databases.listDocuments(DATABASE_ID, COLLECTIONS.RECURRING_RULES, [
-        Query.equal("userId", user.id), Query.orderAsc("nextOccurrence"), Query.limit(200),
-      ]),
+    // Semua koleksi diambil lewat cursor pagination — tidak ada lagi data yang
+    // diam-diam terpotong di 500 dokumen.
+    const all = (collectionId: string, queries: string[], maxDocuments?: number) =>
+      listAllDocuments(databases, collectionId, queries, { maxDocuments }).then((documents) => ({ documents }));
+    const byUser = [Query.equal("userId", user.id)];
+
+    const [initialAccounts, initialCategories, transactions, budgets, goals, assets, insights, debts, recurringRules, preferences] = await Promise.all([
+      all(COLLECTIONS.ACCOUNTS, byUser),
+      all(COLLECTIONS.CATEGORIES, byUser),
+      all(COLLECTIONS.TRANSACTIONS, [...byUser, Query.orderDesc("date")]),
+      all(COLLECTIONS.BUDGETS, byUser),
+      all(COLLECTIONS.GOALS, byUser),
+      all(COLLECTIONS.ASSETS, byUser),
+      all(COLLECTIONS.INSIGHTS, [...byUser, Query.orderDesc("$createdAt")]),
+      all(COLLECTIONS.DEBTS, [...byUser, Query.orderDesc("$createdAt")]),
+      all(COLLECTIONS.RECURRING_RULES, [...byUser, Query.orderAsc("nextOccurrence")]),
       getPreferencesAction(),
     ]);
+
+    let accounts = initialAccounts;
+    let categories = initialCategories;
+    // Pengguna baru yang seed-nya gagal saat signup: ulangi sekali di sini.
+    if (accounts.documents.length === 0 && categories.documents.length === 0) {
+      try {
+        await seedDefaultsForUser(databases, user.id);
+        [accounts, categories] = await Promise.all([all(COLLECTIONS.ACCOUNTS, byUser), all(COLLECTIONS.CATEGORIES, byUser)]);
+      } catch (error) {
+        console.error("Seed ulang data awal gagal:", error instanceof Error ? error.message : error);
+      }
+    }
 
     const mappedAccounts = accounts.documents.map((doc) => {
       const f = fields<AccountFields>(doc);

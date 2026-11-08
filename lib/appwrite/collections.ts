@@ -18,4 +18,5 @@ export const COLLECTIONS = {
   AGENT_DRAFTS: "agent_drafts",
   CHAT_THREADS: "chat_threads",
   CHAT_MESSAGES: "chat_messages",
+  RATE_LIMITS: "rate_limits",
 } as const;

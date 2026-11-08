@@ -6,18 +6,14 @@
  * dengan CategoryIcon, savings rate gauge, dan toast feedback.
  */
 
-import { ChartSkeleton } from "@/components/ui/Skeleton";
 import React, { useMemo, useState } from "react";
-import dynamic from "next/dynamic";
+import { CashFlowChart, CategoryBreakdownChart } from "@/components/charts/lazy";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { useCategories, useTransactions } from "@/lib/data/store";
 import { useToast } from "@/lib/context/ToastContext";
 import { TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
-const chartLoading = () => <ChartSkeleton variant="bars" />;
-const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart").then((module) => module.CashFlowChart), { ssr: false, loading: chartLoading });
-const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), { ssr: false, loading: chartLoading });
 
 const MONTHS = Array.from({ length: 6 }, (_, monthsAgo) => {
   const date = new Date();

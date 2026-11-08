@@ -9,9 +9,10 @@
  * Bukan file "use server" — mengikuti pola transactionHelpers.ts/
  * recurringMapper.ts yang sudah ada.
  */
-import { ID, Permission, Role, type Models } from "node-appwrite";
+import { Permission, Role, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
+import { createHash } from "node:crypto";
 import { getBudgetStatus } from "@/lib/utils/formatter";
 import type { Budget, Category, Goal, Insight, RecurringRule, Transaction } from "@/lib/data/mock";
 import { recordAuditLog } from "@/lib/appwrite/auditLog";
@@ -44,6 +45,10 @@ function categorySpend(transactions: Transaction[], categoryId: string, monthDat
     .reduce((sum, t) => sum + t.amount, 0);
 }
 
+export function insightDocumentId(userId: string, key: string) {
+  return "i" + createHash("sha256").update(`${userId}|${key}`).digest("hex").slice(0, 35);
+}
+
 export async function generateInsights(
   databases: Awaited<ReturnType<typeof createAdminServerClient>>["databases"],
   userId: string,
@@ -64,10 +69,12 @@ export async function generateInsights(
     if (existingKeys.has(key)) return;
     existingKeys.add(key); // cegah duplikat dalam satu pemanggilan yang sama
     try {
+      // ID deterministik per pengguna + key: dua pemuatan bersamaan (dua tab)
+      // tidak bisa membuat insight yang sama dua kali — yang kedua kena 409.
       const document = await databases.createDocument(
         DATABASE_ID,
         COLLECTIONS.INSIGHTS,
-        ID.unique(),
+        insightDocumentId(userId, key),
         { userId, type, message, isRead: false, key },
         [
           Permission.read(Role.user(userId)),
@@ -81,6 +88,7 @@ export async function generateInsights(
         summary: message,
       });
     } catch (error) {
+      if ((error as { code?: number })?.code === 409) return; // sudah dibuat oleh pemuatan lain
       console.error(`Gagal membuat insight (${key}):`, error instanceof Error ? error.message : error);
     }
   }

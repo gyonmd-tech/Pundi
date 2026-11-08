@@ -87,6 +87,10 @@ npm run lint      # pemeriksaan ESLint
 npm run build     # build produksi
 npm run start     # menjalankan build produksi
 npm run db:setup  # menyiapkan resource Appwrite
+npm run typecheck # pemeriksaan TypeScript
+npm test          # unit & integrasi (Vitest, tanpa Appwrite)
+npm run test:e2e  # e2e Playwright di build produksi (mode demo)
+npm run test:appwrite   # uji asap ke Appwrite asli (butuh .env.local)
 npm run mobile:sync     # sinkronkan konfigurasi ke proyek Android & iOS
 npm run mobile:android  # buka proyek Android di Android Studio
 npm run mobile:ios      # buka proyek iOS di Xcode
@@ -111,9 +115,18 @@ mobile/www/          halaman cadangan app native saat server tidak terjangkau
 
 ## Pemeriksaan sebelum rilis
 
+CI (`.github/workflows/ci.yml`) menjalankan lint, typecheck, test, build, dan e2e di setiap PR. Secara lokal:
+
 ```bash
-npm run lint
-npm run build
+npm run lint && npm run typecheck && npm test
+npm run build && npm run test:e2e
 ```
 
-Build produksi mendukung semua route utama: `/`, `/login`, `/signup`, `/dashboard`, `/transaksi`, `/anggaran`, `/arus-kas`, `/aset`, `/tujuan`, `/insight`, dan `/pengaturan`.
+Sebelum rilis ke pengguna, jalankan juga sekali terhadap Appwrite asli:
+
+```bash
+npm run db:setup        # sekali, membuat koleksi baru (mis. rate_limits)
+npm run test:appwrite   # membuat pengguna uji sementara, lalu menghapusnya
+```
+
+Lalu coba alur login → tambah transaksi → keluar di satu ponsel Android dan satu iPhone.

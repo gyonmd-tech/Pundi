@@ -150,12 +150,18 @@ export async function recordDebtPaymentAction(id: string, amount: number, accoun
     const previous = await getOwnedDocument(databases, COLLECTIONS.DEBTS, id, user.id);
     const remaining = Number(previous.remainingAmount);
     if (amount > remaining) throw new Error("Pembayaran tidak boleh melebihi sisa utang.");
-    const remainingAmount = remaining - amount;
+    // Kurangi sisa utang secara atomik (min 0) — dua pembayaran bersamaan
+    // tidak saling menimpa dan tidak bisa membuat sisa negatif. Ini yang wajib
+    // berhasil; jejak transaksi di bawah bersifat best-effort.
+    const decremented = await databases.decrementDocumentAttribute({
+      databaseId: DATABASE_ID, collectionId: COLLECTIONS.DEBTS, documentId: id,
+      attribute: "remainingAmount", value: amount, min: 0,
+    });
+    const remainingAmount = Number(decremented.remainingAmount);
     const status = remainingAmount === 0 ? "paid" : "open";
-    // Update dulu — ini yang wajib berhasil. Jejak transaksi di bawah bersifat
-    // best-effort: kalau gagal, pembayaran tetap tercatat (tidak di-rollback),
-    // hanya jejaknya di buku transaksi yang tidak lengkap.
-    const document = await databases.updateDocument(DATABASE_ID, COLLECTIONS.DEBTS, id, { remainingAmount, status });
+    const document = previous.status === status
+      ? decremented
+      : await databases.updateDocument(DATABASE_ID, COLLECTIONS.DEBTS, id, { status });
 
     let transactionId: string | undefined;
     let warning: string | undefined;

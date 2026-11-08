@@ -12,20 +12,9 @@
  */
 import { z } from "zod";
 
-export const CATEGORY_ICONS = [
-  "utensils", "car", "shopping-bag", "music", "heart", "zap", "book",
-  "piggy-bank", "more-horizontal", "briefcase", "laptop", "trending-up",
-  "plus-circle", "tag", "gift", "fuel", "coffee",
-] as const;
+import { CATEGORY_COLORS, CATEGORY_ICONS } from "./categoryOptions";
 
-export const CATEGORY_COLORS = [
-  { value: "#2459DE", label: "Biru" },
-  { value: "#159B78", label: "Hijau" },
-  { value: "#E95766", label: "Merah" },
-  { value: "#D99418", label: "Kuning" },
-  { value: "#7B61D1", label: "Ungu" },
-  { value: "#168AA0", label: "Cyan" },
-] as const;
+export { CATEGORY_COLORS, CATEGORY_ICONS };
 
 const categoryColorValues = CATEGORY_COLORS.map((c) => c.value) as [string, ...string[]];
 

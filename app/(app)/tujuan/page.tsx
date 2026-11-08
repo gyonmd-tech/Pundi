@@ -180,7 +180,7 @@ export default function TujuanPage() {
         <button
           onClick={openAdd}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-card text-small font-semibold shadow-sm",
+            "flex min-h-10 items-center gap-2 px-4 py-2 rounded-card text-small font-semibold shadow-sm",
             "transition-all duration-200 hover:brightness-105 active:scale-95 group"
           )}
           style={{ backgroundColor: "var(--color-pine)", color: "white", fontFamily: "var(--font-ui)" }}

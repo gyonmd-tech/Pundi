@@ -293,6 +293,21 @@
             { "key": "idx_thread", "type": "key", "attributes": ["threadId", "$createdAt"] },
             { "key": "idx_user", "type": "key", "attributes": ["userId"] }
           ]
+        },
+        {
+          "$id": "rate_limits",
+          "name": "rate_limits",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "key", "type": "string", "size": 128, "required": true },
+            { "key": "count", "type": "integer", "required": true },
+            { "key": "expiresAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "idx_expires", "type": "key", "attributes": ["expiresAt"] }
+          ]
         }
       ]
     }
