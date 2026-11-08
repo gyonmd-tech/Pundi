@@ -13,7 +13,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Catat transaksi, atur anggaran, pantau arus kas, aset, dan tujuan keuangan dalam satu aplikasi.",
     lang: "id",
     dir: "ltr",
-    start_url: "/dashboard?source=pwa",
+    // "/" + source=pwa → proxy.ts mengarahkan ke /login (atau /dashboard bila sudah masuk).
+    start_url: "/?source=pwa",
     scope: "/",
     display: "standalone",
     display_override: ["window-controls-overlay", "standalone"],

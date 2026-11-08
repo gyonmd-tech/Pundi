@@ -13,8 +13,35 @@ import type { NextRequest } from "next/server";
  *    melindunginya — otorisasi tetap wajib diverifikasi di setiap Server
  *    Action (sudah dilakukan lewat getAuthUserAction + getOwnedDocument).
  */
+const MOBILE_UA = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile|Capacitor/i;
+
+/**
+ * Pintu masuk "/" untuk aplikasi:
+ * - Perangkat mobile (browser ponsel / WebView Capacitor) dan aplikasi
+ *   terpasang (`?source=pwa|app`) tidak melihat landing page — langsung ke
+ *   /login, atau ke /dashboard bila cookie sesi sudah ada.
+ * - `?web=1` memaksa landing page tetap tampil (mis. ingin melihat info produk).
+ * Cookie hanya dicek keberadaannya untuk memilih tujuan; validasi sesi tetap
+ * dilakukan di server action seperti biasa.
+ */
+function appEntryRedirect(request: NextRequest): NextResponse | null {
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname !== "/" || searchParams.get("web") === "1") return null;
+
+  const source = searchParams.get("source");
+  const fromInstalledApp = source === "pwa" || source === "app";
+  const isMobile = MOBILE_UA.test(request.headers.get("user-agent") ?? "");
+  if (!fromInstalledApp && !isMobile) return null;
+
+  const hasSession = Boolean(request.cookies.get("pundi-session")?.value);
+  const target = new URL(hasSession ? "/dashboard" : "/login", request.url);
+  return NextResponse.redirect(target);
+}
+
 export function proxy(request: NextRequest) {
-  const response = NextResponse.next();
+  const response = appEntryRedirect(request) ?? NextResponse.next();
+  // Respons "/" berbeda per perangkat & sesi — jangan sampai di-cache bersama.
+  if (request.nextUrl.pathname === "/") response.headers.set("Vary", "User-Agent, Cookie");
 
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");

@@ -15,8 +15,8 @@
   left: 0;
   display: flex;
   width: 100%;
-  min-height: calc(100vh - var(--visual-size));
-  min-height: calc(100dvh - var(--visual-size));
+  min-height: 100vh;
+  min-height: 100dvh;
   align-items: center;
   justify-content: center;
   background: var(--color-surface-high);
@@ -36,6 +36,8 @@
 }
 
 .visualPanel {
+  /* Ponsel: panel ilustrasi disembunyikan agar login ringan & form penuh layar. */
+  display: none;
   position: relative;
   z-index: 30;
   top: auto;
@@ -135,6 +137,11 @@
   .illustrationFloat {
     animation: illustration-float 6s ease-in-out infinite;
   }
+
+  .illustration {
+    background: url("/illustrasi-authpage.webp") center / contain no-repeat;
+    filter: drop-shadow(0 28px 38px rgba(17, 13, 72, .3));
+  }
   .formsGrid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -155,6 +162,7 @@
   }
 
   .visualPanel {
+    display: flex;
     position: absolute;
     top: 0;
     width: 50%;
