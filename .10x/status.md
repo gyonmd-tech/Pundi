@@ -15,3 +15,4 @@
 - **Selesai sebelumnya (branch `claude/funny-rubin-vb2jww`):** landing ringan baru, mobile `/` → `/login`, login ringan di ponsel.
 - **Test otomatis:** belum ada (0). CI belum ada.
 - **Risiko pemblokir rilis "matang":** R1 saldo tanpa atomic/transaksi, R2 recurring bisa dobel, R3 batas 500 transaksi.
+- **Fase 1 & 2 (2026-11-08):** R1–R3 selesai + 27 test + CI; dashboard mobile 1.229→743 KB JS. Sisa: verifikasi di Appwrite asli & perangkat fisik, e2e, target 600 KB.

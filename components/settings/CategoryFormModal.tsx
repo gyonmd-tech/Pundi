@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Input";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils/cn";
-import { CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/validations/category";
+import { CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/validations/categoryOptions";
 import type { Category, CategoryType } from "@/lib/data/mock";
 import { createCategoryAction, updateCategoryAction } from "@/actions/categories";
 import { useToast } from "@/lib/context/ToastContext";

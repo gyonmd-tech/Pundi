@@ -154,7 +154,7 @@ export async function getAppBootstrapAction(): Promise<{
     }
 
     // Semua koleksi diambil lewat cursor pagination — tidak ada lagi data yang
-    // diam-diam terpotong di 500 dokumen. Insight lama cukup 200 terbaru.
+    // diam-diam terpotong di 500 dokumen.
     const all = (collectionId: string, queries: string[], maxDocuments?: number) =>
       listAllDocuments(databases, collectionId, queries, { maxDocuments }).then((documents) => ({ documents }));
     const byUser = [Query.equal("userId", user.id)];
@@ -166,7 +166,7 @@ export async function getAppBootstrapAction(): Promise<{
       all(COLLECTIONS.BUDGETS, byUser),
       all(COLLECTIONS.GOALS, byUser),
       all(COLLECTIONS.ASSETS, byUser),
-      all(COLLECTIONS.INSIGHTS, [...byUser, Query.orderDesc("$createdAt")], 200),
+      all(COLLECTIONS.INSIGHTS, [...byUser, Query.orderDesc("$createdAt")]),
       all(COLLECTIONS.DEBTS, [...byUser, Query.orderDesc("$createdAt")]),
       all(COLLECTIONS.RECURRING_RULES, [...byUser, Query.orderAsc("nextOccurrence")]),
       getPreferencesAction(),

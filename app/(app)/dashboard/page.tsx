@@ -2,9 +2,8 @@
 
 
 import { PenjagaDashboardCard } from "@/components/penjaga/PenjagaDashboardCard";
-import { ChartSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { CashFlowChart, CategoryBreakdownChart, AccountBalanceChart, SpendingMomentumChart } from "@/components/charts/lazy";
 import {
   ArrowRight,
   Sparkles,
@@ -41,11 +40,6 @@ import {
 } from "@/lib/data/store";
 import type { Transaction } from "@/lib/data/mock";
 
-const chartLoading = () => <ChartSkeleton />;
-const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart").then((module) => module.CashFlowChart), { ssr: false, loading: chartLoading });
-const CategoryBreakdownChart = dynamic(() => import("@/components/charts/CategoryBreakdownChart").then((module) => module.CategoryBreakdownChart), { ssr: false, loading: chartLoading });
-const AccountBalanceChart = dynamic(() => import("@/components/charts/AccountBalanceChart").then((module) => module.AccountBalanceChart), { ssr: false, loading: chartLoading });
-const SpendingMomentumChart = dynamic(() => import("@/components/charts/SpendingMomentumChart").then((module) => module.SpendingMomentumChart), { ssr: false, loading: chartLoading });
 
 function isSameMonth(date: Date, target: Date) {
   return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth();

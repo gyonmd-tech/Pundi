@@ -83,3 +83,18 @@ describe("paginasi tanpa batas 500 (R3)", () => {
     expect(docs).toHaveLength(600);
   });
 });
+
+describe("insight idempoten", () => {
+  it("dua pemuatan bersamaan tidak menggandakan insight", async () => {
+    const { generateInsights } = await import("@/lib/appwrite/insightGenerator");
+    const ctx = {
+      categories: [], transactions: [], budgets: [], recurringRules: [],
+      goals: [{ id: "g1", name: "Liburan", targetAmount: 100, currentAmount: 100, targetDate: new Date() }],
+    };
+    await Promise.all([
+      generateInsights(dbs(), "u1", ctx, []),
+      generateInsights(dbs(), "u1", ctx, []),
+    ]);
+    expect(db.all(COLLECTIONS.INSIGHTS)).toHaveLength(1);
+  });
+});

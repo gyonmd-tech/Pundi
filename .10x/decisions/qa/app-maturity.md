@@ -64,3 +64,12 @@ dan belum di perangkat fisik.
 
 ## Status
 Analisis selesai; menunggu keputusan pengguna soal prioritas (lihat handoff).
+
+## Hasil Fase 1 + 2 (2026-11-08, branch claude/funny-rubin-vb2jww)
+- R1 selesai: saldo via increment/decrement atomik; rollback membalik delta. Catatan kondisi, pembayaran utang (decrement min 0), kontribusi tujuan juga atomik.
+- R2 selesai: transaksi berulang & insight memakai ID dokumen deterministik → idempoten saat pemuatan paralel.
+- R3 selesai: listAllDocuments (cursor) menggantikan limit 500; hapus rekening cek riwayat langsung ke DB (bug baru ditemukan & diperbaiki).
+- Test: 27 Vitest (unit + integrasi dengan fake Appwrite yang menyela operasi). Diverifikasi: dengan kode saldo lama, 50 pengeluaran paralel → 49 hilang (test merah); kode baru hijau.
+- CI: .github/workflows/ci.yml (lint, typecheck, test, build).
+- Performa (Pixel 7 emulasi, mode demo, JS tak terkompresi untuk tampil): dashboard 1.229→743 KB, penjaga 1.070→792 KB; transaksi/anggaran tetap ±740–775 KB. Chart dimuat saat mendekati layar; QuickAddPanel dimuat saat dibuka; zod dikeluarkan dari bundle klien.
+- Belum: target 600 KB belum tercapai (sisa ±410 KB framework + layout bersama); belum diuji ke Appwrite asli (increment/decrement butuh Appwrite ≥1.7) dan belum di perangkat fisik; belum ada e2e Playwright di CI.
