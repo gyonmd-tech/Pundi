@@ -113,7 +113,7 @@ export default function HomePage() {
           <div className="flex flex-col items-start gap-4 rounded-3xl bg-brand-950 p-7 text-white sm:flex-row sm:items-center sm:justify-between sm:p-10">
             <div>
               <h2 className="font-display text-2xl font-extrabold">Siap merapikan keuanganmu?</h2>
-              <p className="mt-1 text-sm text-white/75">Daftar dalam satu menit, atau jelajahi dulu lewat mode demo.</p>
+              <p className="mt-1 text-sm text-white/80">Daftar dalam satu menit, atau jelajahi dulu lewat mode demo.</p>
             </div>
             <Link href="/signup" className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-brand-950">
               Buat akun <ArrowRight size={16} aria-hidden />

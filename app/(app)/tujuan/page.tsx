@@ -182,13 +182,13 @@ export default function TujuanPage() {
       <section className="hero-surface relative overflow-hidden rounded-panel p-5 text-white sm:p-6">
         <div className="flex items-end justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-white/75">Total terkumpul</p>
+            <p className="text-xs font-medium text-white/80">Total terkumpul</p>
             <p className="figure-display mt-1.5 truncate text-[clamp(2rem,6vw,3rem)] leading-none">{formatRupiah(totalSaved)}</p>
-            <p className="mt-2 text-xs text-white/70 tabular-nums">dari target {formatRupiah(totalTarget)}</p>
+            <p className="mt-2 text-xs text-white/80 tabular-nums">dari target {formatRupiah(totalTarget)}</p>
           </div>
           <div className="shrink-0 text-right">
             <p className="figure-display text-[2rem] leading-none text-lime">{totalTarget > 0 ? calcProgress(totalSaved, totalTarget) : 0}%</p>
-            <p className="mt-1.5 text-xs text-white/70">{completedCount}/{goals.length} tercapai</p>
+            <p className="mt-1.5 text-xs text-white/80">{completedCount}/{goals.length} tercapai</p>
           </div>
         </div>
         <div className="progress-track mt-4 bg-white/15" aria-hidden>

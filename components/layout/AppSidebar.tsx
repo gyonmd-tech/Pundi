@@ -77,7 +77,7 @@ export function AppSidebar() {
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-2.5 py-4" aria-label="Navigasi utama">
-        {!isCollapsed ? <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-white/55">Menu utama</p> : null}
+        {!isCollapsed ? <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-white/80">Menu utama</p> : null}
         <div className="space-y-1.5">
           {navigation.map((item) => <SidebarItem key={item.href} item={item} active={isRouteActive(pathname, item.href)} collapsed={isCollapsed} />)}
         </div>
@@ -93,8 +93,8 @@ export function AppSidebar() {
           </Link>
           {!isCollapsed ? (
             <>
-              <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-white">{displayName}</p><p className="text-[10px] font-medium text-white/60">{connection.mode === "cloud" ? "Akun cloud" : "Mode demo"}</p></div>
-              <IconButton type="button" variant="ghost" size="icon" aria-label="Keluar dari akun" onClick={async () => { await logoutAction(); router.replace("/login"); router.refresh(); }} className="h-9 min-h-9 w-9 text-white/75 hover:bg-white/15 hover:text-white"><LogOut className="h-4 w-4" /></IconButton>
+              <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-white">{displayName}</p><p className="text-[10px] font-medium text-white/80">{connection.mode === "cloud" ? "Akun cloud" : "Mode demo"}</p></div>
+              <IconButton type="button" variant="ghost" size="icon" aria-label="Keluar dari akun" onClick={async () => { await logoutAction(); router.replace("/login"); router.refresh(); }} className="h-9 min-h-9 w-9 text-white/80 hover:bg-white/15 hover:text-white"><LogOut className="h-4 w-4" /></IconButton>
             </>
           ) : null}
         </div>

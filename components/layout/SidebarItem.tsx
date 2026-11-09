@@ -14,7 +14,7 @@ export function SidebarItem({ item, active, collapsed }: { item: NavigationItem;
         collapsed ? "justify-center px-0" : "px-3",
         active
           ? "border-white bg-white font-semibold text-[var(--color-brand-900)] shadow-[0_10px_22px_rgba(7,28,70,0.24)]"
-          : "border-transparent font-medium text-white/70 hover:border-white/10 hover:bg-white/10 hover:font-semibold hover:text-white"
+          : "border-transparent font-medium text-white/80 hover:border-white/10 hover:bg-white/10 hover:font-semibold hover:text-white"
       )}
     >
       <span className="grid h-7 w-7 place-items-center bg-transparent">

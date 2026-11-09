@@ -300,11 +300,11 @@ export default function TransaksiPage() {
             className={cn("flex min-h-[104px] items-start justify-between gap-3 p-4 sm:min-h-[132px] sm:gap-4 sm:p-5", s.type === "net" && "col-span-2 sm:col-span-1")}
           >
             <div className="min-w-0 self-stretch">
-              <p className={cn("text-[10px] font-bold uppercase tracking-[0.08em] sm:text-[11px]", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.label}</p>
+              <p className={cn("text-[10px] font-bold uppercase tracking-[0.08em] sm:text-[11px]", s.type === "net" ? "text-white/80" : "text-ink-muted")}>{s.label}</p>
               <p className={cn("mt-2 whitespace-nowrap tabular-nums font-ui text-[clamp(1rem,4.6vw,1.35rem)] font-bold sm:mt-3 sm:text-[clamp(1.35rem,2.2vw,1.8rem)] tracking-[-0.045em]", s.type === "income" ? "text-mint-ink" : s.type === "expense" ? "text-ember-ink" : "text-white")}>
                 {s.type === "net" && totals.income < totals.expense ? "−" : ""}{formatRupiah(Math.abs(s.amount))}
               </p>
-              <p className={cn("mt-1.5 text-[11px] font-medium sm:mt-2 sm:text-xs", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.caption}</p>
+              <p className={cn("mt-1.5 text-[11px] font-medium sm:mt-2 sm:text-xs", s.type === "net" ? "text-white/80" : "text-ink-muted")}>{s.caption}</p>
             </div>
             <div className={cn("h-11 w-11 shrink-0 place-items-center rounded-sm text-white shadow-card", s.type === "net" ? "grid" : "hidden sm:grid", s.type === "income" ? "bg-mint-ink" : s.type === "expense" ? "bg-ember-ink" : "bg-white/15")}>
               <s.icon className="h-5 w-5" />
@@ -642,7 +642,7 @@ export default function TransaksiPage() {
               <div className="relative overflow-hidden rounded-card bg-brand-600 p-5 text-white shadow-[0_14px_30px_color-mix(in_srgb,var(--color-brand-600)_22%,transparent)]">
                 <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] border-white/10" />
                 <div className="relative flex items-start justify-between gap-4">
-                  <div><p className="text-xs font-bold text-white/70">Nominal transaksi</p><p className="mt-2 font-ui text-3xl font-bold tracking-[-0.045em] tabular-nums">{detailTransaction.type === "income" ? "+" : detailTransaction.type === "expense" ? "−" : ""}{formatRupiah(detailTransaction.amount)}</p></div>
+                  <div><p className="text-xs font-bold text-white/80">Nominal transaksi</p><p className="mt-2 font-ui text-3xl font-bold tracking-[-0.045em] tabular-nums">{detailTransaction.type === "income" ? "+" : detailTransaction.type === "expense" ? "−" : ""}{formatRupiah(detailTransaction.amount)}</p></div>
                   <div className="grid h-11 w-11 place-items-center rounded-sm bg-white/15"><DetailIcon className="h-5 w-5" /></div>
                 </div>
                 <Badge tone={detailTransaction.transferKind === "cash_withdrawal" ? "primary" : detailTransaction.type === "income" ? "success" : detailTransaction.type === "expense" ? "danger" : "warning"} className="relative mt-4">{cfg.label}</Badge>

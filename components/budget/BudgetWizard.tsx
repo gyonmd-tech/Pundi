@@ -251,11 +251,11 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
                 {category ? <span className="rounded-xs bg-white p-0.5"><CategoryIcon icon={category.icon} color={category.color} size={14} containerSize="sm" /></span> : null}
                 <p className="font-bold">{category?.name}</p>
               </div>
-              <p className="mt-4 text-xs font-semibold text-white/70">Jatah per {unit}</p>
+              <p className="mt-4 text-xs font-semibold text-white/80">Jatah per {unit}</p>
               <p className="font-display text-3xl font-black tabular-nums tracking-[-0.03em]">{formatRupiah(value)}</p>
               <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-sm bg-white/12 p-2.5"><p className="text-white/70">Sebulan</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(monthly)}</p></div>
-                <div className="rounded-sm bg-white/12 p-2.5"><p className="text-white/70">Per hari</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(perDay)}</p></div>
+                <div className="rounded-sm bg-white/12 p-2.5"><p className="text-white/80">Sebulan</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(monthly)}</p></div>
+                <div className="rounded-sm bg-white/12 p-2.5"><p className="text-white/80">Per hari</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(perDay)}</p></div>
               </div>
             </div>
 

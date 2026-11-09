@@ -119,11 +119,11 @@ export default function KalkulatorPage() {
               <span aria-hidden className="absolute -right-8 -top-10 -z-10 h-32 w-32 rounded-full border-[18px] border-white/10 transition duration-500 group-hover:scale-110" />
               <span className="flex items-start justify-between">
                 <span className="grid h-10 w-10 place-items-center rounded-sm bg-white/15 backdrop-blur-sm"><Icon className="h-5 w-5" /></span>
-                <ArrowUpRight className="h-4 w-4 text-white/60 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
+                <ArrowUpRight className="h-4 w-4 text-white/80 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
               </span>
               <span className="mt-auto pt-4">
                 <span className="block text-[15px] font-extrabold leading-tight sm:text-base">{item.label}</span>
-                <span className="mt-1 line-clamp-2 block text-xs leading-snug text-white/75">{item.description}</span>
+                <span className="mt-1 line-clamp-2 block text-xs leading-snug text-white/80">{item.description}</span>
                 <span className="mt-2 hidden rounded-full bg-white/12 px-2 py-0.5 font-mono text-[11px] text-white/85 sm:inline-block">{item.example}</span>
               </span>
             </button>

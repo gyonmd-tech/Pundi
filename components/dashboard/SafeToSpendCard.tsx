@@ -30,18 +30,18 @@ export function SafeToSpendCard({ result }: { result: SafeToSpendResult }) {
             <Wallet size={21} />
           </div>
           <div>
-            <p className="text-small font-semibold text-white/70">Aman dibelanjakan hari ini</p>
+            <p className="text-small font-semibold text-white/80">Aman dibelanjakan hari ini</p>
             {isOverExtended ? (
               <>
                 <p className="mt-1 text-2xl font-extrabold tracking-[-0.03em] sm:text-3xl">Rencana bulan ini terlampaui</p>
-                <p className="mt-1 text-xs text-white/70">Tagihan dan anggaran yang sudah direncanakan lebih besar dari saldo cair saat ini.</p>
+                <p className="mt-1 text-xs text-white/80">Tagihan dan anggaran yang sudah direncanakan lebih besar dari saldo cair saat ini.</p>
               </>
             ) : (
               <>
                 <p className="figure-display mt-1 text-[clamp(2.1rem,4.5vw,3.25rem)] leading-none">
                   {formatRupiah(perDay)}
                 </p>
-                <p className="mt-1 text-xs text-white/70">per hari · {daysRemaining} hari tersisa bulan ini, di luar tagihan &amp; anggaran yang sudah direncanakan</p>
+                <p className="mt-1 text-xs text-white/80">per hari · {daysRemaining} hari tersisa bulan ini, di luar tagihan &amp; anggaran yang sudah direncanakan</p>
               </>
             )}
           </div>
@@ -58,19 +58,19 @@ export function SafeToSpendCard({ result }: { result: SafeToSpendResult }) {
       {expanded && (
         <div className="relative mt-5 grid gap-2 border-t border-white/15 pt-4 text-xs sm:grid-cols-3">
           <div className="rounded-2xl bg-white/10 p-3">
-            <p className="text-white/60">Saldo cair</p>
+            <p className="text-white/80">Saldo cair</p>
             <p className="mt-1 font-mono font-bold tabular-nums">{formatRupiah(liquidBalance)}</p>
-            <p className="mt-0.5 text-[10px] text-white/50">Bank, e-wallet, tunai</p>
+            <p className="mt-0.5 text-[10px] text-white/80">Bank, e-wallet, tunai</p>
           </div>
           <div className="rounded-2xl bg-white/10 p-3">
-            <p className="text-white/60">Tagihan akan datang</p>
+            <p className="text-white/80">Tagihan akan datang</p>
             <p className="mt-1 font-mono font-bold tabular-nums">− {formatRupiah(upcomingBills)}</p>
-            <p className="mt-0.5 text-[10px] text-white/50">Sisa bulan ini</p>
+            <p className="mt-0.5 text-[10px] text-white/80">Sisa bulan ini</p>
           </div>
           <div className="rounded-2xl bg-white/10 p-3">
-            <p className="text-white/60">Anggaran tersisa</p>
+            <p className="text-white/80">Anggaran tersisa</p>
             <p className="mt-1 font-mono font-bold tabular-nums">− {formatRupiah(budgetReserved)}</p>
-            <p className="mt-0.5 text-[10px] text-white/50">Sudah direncanakan per kategori</p>
+            <p className="mt-0.5 text-[10px] text-white/80">Sudah direncanakan per kategori</p>
           </div>
         </div>
       )}

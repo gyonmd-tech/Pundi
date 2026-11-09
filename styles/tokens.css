@@ -14,7 +14,7 @@
   /* Text */
   --color-ink: #0F1729;
   --color-ink-muted: #556075;
-  --color-ink-soft: #8590A3;
+  --color-ink-soft: #5F6A7D;
 
   /* Pundi brand. Legacy pine aliases remain until page-by-page migration. */
   --color-brand-950: #0E1A5C;
@@ -39,6 +39,13 @@
   --color-lime: #C5F04A;
   --color-lime-ink: #3F5A00;
   --color-lime-10: #F3FCD9;
+
+  /* Warna TEKS semantik (lolos WCAG AA 4,5:1 di permukaan terang). Warna
+     semantik dasar (mint/ember/brass/pine) untuk isian, ikon, dan grafik. */
+  --color-pine-text: var(--color-brand-700);
+  --color-mint-text: var(--color-mint-ink);
+  --color-ember-text: var(--color-ember-ink);
+  --color-brass-text: var(--color-warning-ink);
 
   /* Semantic */
   --color-ember: #E5484D;
@@ -169,7 +176,7 @@
 
   --color-ink: #EEF1F8;
   --color-ink-muted: #9AA4B8;
-  --color-ink-soft: #6F7A90;
+  --color-ink-soft: #8A95AB;
 
   --color-rule: #252F45;
   --color-rule-strong: #34405A;
@@ -193,6 +200,10 @@
   --color-brand-300: #36489A;
 
   --color-lime-10: #26300F;
+  --color-pine-text: #9DB0FA;
+  --color-mint-text: #4FD6AC;
+  --color-ember-text: #FF8D99;
+  --color-brass-text: #F5BF55;
   --color-ember-10: #3A1719;
   --color-ember-20: #5E2427;
   --color-brass-10: #382A0E;

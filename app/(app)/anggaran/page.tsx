@@ -95,9 +95,9 @@ export default function AnggaranPage() {
 
       {/* Ringkasan: satu kartu hero — angka utama + tiga angka pendukung. */}
       <section className="hero-surface relative overflow-hidden rounded-panel p-5 text-white sm:p-6">
-        <p className="flex items-center gap-1.5 text-xs font-medium text-white/75"><Wallet className="h-3.5 w-3.5" />Bisa dipakai hari ini</p>
+        <p className="flex items-center gap-1.5 text-xs font-medium text-white/80"><Wallet className="h-3.5 w-3.5" />Bisa dipakai hari ini</p>
         <p className="figure-display mt-1.5 text-[clamp(2.1rem,6vw,3rem)] leading-none">{formatRupiah(todayAvailable)}</p>
-        <p className="mt-2 text-xs text-white/70">Gabungan sisa jatah semua anggaran untuk hari ini</p>
+        <p className="mt-2 text-xs text-white/80">Gabungan sisa jatah semua anggaran untuk hari ini</p>
         <div className="progress-track mt-4 bg-white/15" aria-hidden>
           <span className={cn("progress-fill", totalSpent > totalLimit ? "bg-ember" : "bg-lime")} style={{ width: `${totalLimit > 0 ? Math.min(100, (totalSpent / totalLimit) * 100) : 0}%` }} />
         </div>
@@ -113,7 +113,7 @@ export default function AnggaranPage() {
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ember/15 text-ember-ink"><AlertTriangle className="h-4.5 w-4.5" /></span>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-ember-ink">{overRows.length} anggaran lewat jatah</p>
-            <p className="mt-0.5 text-xs text-ember-ink/80">
+            <p className="mt-0.5 text-xs text-ember-ink">
               <strong>{overRows.map((row) => row.category?.name).filter(Boolean).join(", ")}</strong> sudah melewati jatah periode berjalan. Kurangi pengeluaran di kategori ini agar sisa bulan tetap aman.
             </p>
           </div>
@@ -165,7 +165,7 @@ export default function AnggaranPage() {
 function SummaryStat({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
     <div className="min-w-0">
-      <dt className="truncate text-[11px] text-white/65">{label}</dt>
+      <dt className="truncate text-[11px] text-white/80">{label}</dt>
       <dd className={cn("mt-0.5 truncate text-sm font-semibold tabular-nums sm:text-base", danger ? "text-[#FFB4B8]" : "text-white")}>{value}</dd>
     </div>
   );
