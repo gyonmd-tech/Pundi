@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useReducer, useState, type ReactNode } from "react";
-import { getAppBootstrapAction, type AppBootstrapData } from "@/actions/bootstrap";
+import type { AppBootstrap, AppBootstrapData } from "@/lib/appwrite/bootstrap";
 import {
   DEFAULT_PREFERENCES,
   type Account,
@@ -62,6 +62,7 @@ type Action =
   | { type: "DELETE_ASSET"; payload: string }
   | { type: "MARK_INSIGHT_READ"; payload: string }
   | { type: "MARK_ALL_READ" }
+  | { type: "MERGE_INSIGHTS"; payload: Insight[] }
   | { type: "ADD_CATEGORY"; payload: Category }
   | { type: "UPDATE_CATEGORY"; payload: Category }
   | { type: "DELETE_CATEGORY"; payload: string }
@@ -133,6 +134,15 @@ function reducer(state: AppState, action: Action): AppState {
           insight.id === action.payload ? { ...insight, isRead: true } : insight
         ),
       };
+    case "MERGE_INSIGHTS": {
+      const known = new Set(state.insights.map((insight) => insight.id));
+      const fresh = action.payload.filter((insight) => !known.has(insight.id));
+      if (!fresh.length) return state;
+      return {
+        ...state,
+        insights: [...fresh, ...state.insights].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+      };
+    }
     case "MARK_ALL_READ":
       return { ...state, insights: state.insights.map((insight) => ({ ...insight, isRead: true })) };
     case "ADD_CATEGORY":
@@ -182,7 +192,7 @@ interface AppContextValue {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-export function AppProvider({ children }: { children: ReactNode }) {
+export function AppProvider({ children, bootstrap }: { children: ReactNode; bootstrap: AppBootstrap }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [connection, setConnection] = useState<ConnectionState>({
     mode: "guest",
@@ -192,7 +202,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    getAppBootstrapAction().then((result) => {
+    bootstrap.result.then((result) => {
       if (!active) return;
       let data = result.data;
       if ((result.mode === "demo" || result.mode === "guest") && typeof window !== "undefined") {
@@ -211,12 +221,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         userEmail: result.userEmail,
         error: result.error,
       });
+      // Insight baru dibuat di server setelah data awal; gabungkan begitu tiba.
+      bootstrap.newInsights.then((insights) => {
+        if (active && insights.length) dispatch({ type: "MERGE_INSIGHTS", payload: insights });
+      }, () => undefined);
+    }, (error: unknown) => {
+      if (!active) return;
+      setConnection({ mode: "cloud", status: "error", error: error instanceof Error ? error.message : "Data tidak dapat dimuat." });
     });
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [bootstrap]);
 
   return (
     <AppContext.Provider value={{ state, dispatch, connection }}>
