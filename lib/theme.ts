@@ -5,6 +5,7 @@
  * inline pra-hidrasi di app/layout.tsx (mencegah flash warna saat load).
  */
 import type { AccentColor, ThemeMode } from "@/lib/data/mock";
+import { syncNativeStatusBar } from "@/lib/native";
 
 export const THEME_CACHE_KEY = "pundi-theme-cache";
 export const ACCENT_CACHE_KEY = "pundi-accent-cache";
@@ -42,6 +43,8 @@ export function applyTheme(theme: ThemeMode) {
   document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
     meta.content = resolved === "dark" ? "#0B0F1A" : "#F3F4F7";
   });
+  // Aplikasi native: warna ikon status bar ikut tema (tanpa efek di browser).
+  syncNativeStatusBar(resolved);
   try {
     localStorage.setItem(THEME_CACHE_KEY, resolved);
   } catch {

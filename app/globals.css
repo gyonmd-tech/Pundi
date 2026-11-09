@@ -111,8 +111,8 @@ textarea::placeholder {
   html, body { overscroll-behavior-y: none; }
 }
 
-.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0.5rem); }
-.pt-safe { padding-top: env(safe-area-inset-top, 0.5rem); }
+.pb-safe { padding-bottom: var(--safe-area-inset-bottom,env(safe-area-inset-bottom, 0.5rem)); }
+.pt-safe { padding-top: var(--safe-area-inset-top,env(safe-area-inset-top, 0.5rem)); }
 
 .tabular-nums,
 [data-type="amount"],

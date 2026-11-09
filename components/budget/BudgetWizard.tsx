@@ -284,7 +284,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
         )}
       </div>
 
-      <footer className="sticky bottom-0 flex gap-3 border-t border-rule bg-surface-high px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4">
+      <footer className="sticky bottom-0 flex gap-3 border-t border-rule bg-surface-high px-5 py-4 pb-[max(1rem,var(--safe-area-inset-bottom,env(safe-area-inset-bottom)))] sm:pb-4">
         {step > firstStep ? (
           <Button type="button" variant="outline" onClick={() => setStep(step - 1)} disabled={saving}>
             <ArrowLeft className="h-4 w-4" /> Kembali
