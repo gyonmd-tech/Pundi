@@ -1,15 +1,22 @@
-"use server";
-
+/**
+ * Memuat seluruh data awal aplikasi untuk pengguna yang sedang masuk.
+ *
+ * Dipanggil oleh layout server `app/(app)/layout.tsx` saat halaman diminta,
+ * sehingga query Appwrite berjalan paralel dengan unduhan JS di ponsel dan
+ * hasilnya di-stream ke klien (bukan menunggu JS selesai lalu memanggil
+ * server action). Insight baru dibuat terpisah (`newInsights`) agar tidak
+ * menahan tampilan pertama.
+ */
 import { Query, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
-import { getAuthUserAction } from "./auth";
+import { getAuthUserAction } from "@/actions/auth";
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
 import { generateDueRecurringTransactions } from "@/lib/appwrite/recurringGenerator";
 import { listAllDocuments } from "@/lib/appwrite/pagination";
 import { seedDefaultsForUser } from "@/lib/appwrite/seedDefaults";
 import { generateInsights } from "@/lib/appwrite/insightGenerator";
-import { getPreferencesAction } from "./preferences";
+import { getPreferencesAction } from "@/actions/preferences";
 import {
   mockAccounts,
   mockAssets,
@@ -129,17 +136,55 @@ const demoData: AppBootstrapData = {
   preferences: DEFAULT_PREFERENCES,
 };
 
-export async function getAppBootstrapAction(): Promise<{
+export interface AppBootstrapResult {
   mode: "guest" | "demo" | "cloud";
   data: AppBootstrapData;
   userName?: string;
   userEmail?: string;
   error?: string;
-}> {
+}
+
+export interface AppBootstrap {
+  /** Data untuk tampilan pertama. */
+  result: Promise<AppBootstrapResult>;
+  /** Insight yang baru dibuat dari data di atas; menyusul setelah `result`. */
+  newInsights: Promise<Insight[]>;
+}
+
+/** Sengaja tidak async: kedua promise dikembalikan tanpa ditunggu agar bisa di-stream. */
+export function loadAppBootstrap(): AppBootstrap {
+  let resolveInputs!: (inputs: InsightInputs | null) => void;
+  const inputs = new Promise<InsightInputs | null>((resolve) => { resolveInputs = resolve; });
+  const result = loadInitialData(resolveInputs).catch((error: unknown) => {
+    resolveInputs(null);
+    throw error;
+  });
+  const newInsights = inputs.then(async (input) => {
+    if (!input) return [];
+    try {
+      return await generateInsights(input.databases, input.userId, input.data, input.existing);
+    } catch (error) {
+      console.error("Gagal membuat insight baru:", error instanceof Error ? error.message : error);
+      return [];
+    }
+  });
+  return { result, newInsights };
+}
+
+type InsightInputs = {
+  databases: Awaited<ReturnType<typeof createAdminServerClient>>["databases"];
+  userId: string;
+  data: Parameters<typeof generateInsights>[2];
+  existing: Parameters<typeof generateInsights>[3];
+};
+
+async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | null) => void): Promise<AppBootstrapResult> {
   const user = await getAuthUserAction();
 
-  if (!user) return { mode: "guest", data: demoData };
-  if (user.isDemo) return { mode: "demo", data: demoData, userName: user.name, userEmail: user.email };
+  if (!user || user.isDemo) {
+    provideInsightInputs(null);
+    return user ? { mode: "demo", data: demoData, userName: user.name, userEmail: user.email } : { mode: "guest", data: demoData };
+  }
 
   try {
     const { databases } = await createAdminServerClient();
@@ -289,21 +334,18 @@ export async function getAppBootstrapAction(): Promise<{
     });
     const mappedRecurringRules = recurringRules.documents.map(recurringRuleFromDocument);
 
-    const newInsights = await generateInsights(
+    provideInsightInputs({
       databases,
-      user.id,
-      {
+      userId: user.id,
+      data: {
         categories: mappedCategories,
         transactions: mappedTransactions,
         budgets: mappedBudgets,
         goals: mappedGoals,
         recurringRules: mappedRecurringRules,
       },
-      insights.documents,
-    );
-    const mergedInsights = [...newInsights, ...mappedExistingInsights].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+      existing: insights.documents,
+    });
 
     return {
       mode: "cloud",
@@ -316,13 +358,14 @@ export async function getAppBootstrapAction(): Promise<{
         budgets: mappedBudgets,
         goals: mappedGoals,
         assets: mappedAssets,
-        insights: mergedInsights,
+        insights: mappedExistingInsights,
         debts: mappedDebts,
         recurringRules: mappedRecurringRules,
         preferences,
       },
     };
   } catch (error: unknown) {
+    provideInsightInputs(null);
     const message = error instanceof Error ? error.message : "Data cloud tidak dapat dimuat.";
     return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [], recurringRules: [], preferences: DEFAULT_PREFERENCES }, userName: user.name, userEmail: user.email, error: message };
   }
