@@ -2,14 +2,15 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
-const badgeVariants = cva("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold shadow-[0_5px_12px_rgba(19,43,94,.12)]", {
+// Chip tonal: latar lembut + teks gelap senada, terbaca di terang & gelap.
+const badgeVariants = cva("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold leading-5", {
   variants: {
     tone: {
-      neutral: "border-brand-900 bg-brand-900 text-white",
-      primary: "border-brand-600 bg-brand-600 text-white",
-      success: "border-mint-ink bg-mint-ink text-white",
-      warning: "border-warning-ink bg-warning-ink text-white",
-      danger: "border-ember-ink bg-ember-ink text-white",
+      neutral: "border-rule bg-surface-soft text-ink-muted",
+      primary: "border-transparent bg-brand-100 text-brand-700",
+      success: "border-transparent bg-mint-10 text-mint-ink",
+      warning: "border-transparent bg-warning-10 text-warning-ink",
+      danger: "border-transparent bg-ember-10 text-ember-ink",
     },
   },
   defaultVariants: { tone: "neutral" },

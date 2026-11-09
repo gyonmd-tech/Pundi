@@ -2,198 +2,107 @@
 
 /**
  * components/dashboard/GoalCard.tsx
- * Kartu progress tujuan tabungan dengan estimasi tanggal tercapai,
- * hover elevation, dan status tercapai (vintage brass styling).
+ * Kartu tujuan tabungan: cincin kemajuan, jumlah terkumpul, sisa, batas &
+ * estimasi tanggal tercapai. `children` dirender sebagai kaki kartu (mis.
+ * kontribusi otomatis di halaman Tujuan).
  */
 
-import { Skeleton } from "@/components/ui/Skeleton";
 import React from "react";
 import { cn } from "@/lib/utils/cn";
-import {
-  formatRupiah,
-  formatDate,
-  calcProgress,
-  estimateGoalDate,
-} from "@/lib/utils/formatter";
-import { Target, CalendarDays, TrendingUp, CheckCircle2, Edit2, Trash2 } from "lucide-react";
+import { formatRupiah, formatDate, calcProgress, estimateGoalDate } from "@/lib/utils/formatter";
+import { CalendarDays, Check, Pencil, Sparkles, Trash2 } from "lucide-react";
 
 interface GoalCardProps {
-  name:            string;
-  targetAmount:    number;
-  currentAmount:   number;
-  targetDate:      Date;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: Date;
   monthlySavings?: number;
-  className?:      string;
-  loading?:        boolean;
-  onEdit?:         () => void;
-  onDelete?:       () => void;
+  className?: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  children?: React.ReactNode;
 }
 
-export function GoalCard({
-  name,
-  targetAmount,
-  currentAmount,
-  targetDate,
-  monthlySavings = 1_200_000,
-  className,
-  loading = false,
-  onEdit,
-  onDelete,
-}: GoalCardProps) {
-  if (loading) {
-    return (
-      <div className={cn("card", className)}>
-        <Skeleton className="h-4 w-32 rounded-[6px] mb-3" />
-        <Skeleton className="h-2 w-full rounded-full mb-2" delay={80} />
-        <Skeleton className="h-4 w-24 rounded-[6px]" delay={160} />
-      </div>
-    );
-  }
+const RING = 56;
+const STROKE = 6;
+const RADIUS = (RING - STROKE) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
+function ProgressRing({ progress, completed }: { progress: number; completed: boolean }) {
+  const value = Math.min(progress, 100);
+  return (
+    <div className="relative shrink-0" style={{ width: RING, height: RING }}>
+      <svg width={RING} height={RING} className="-rotate-90" aria-hidden>
+        <circle cx={RING / 2} cy={RING / 2} r={RADIUS} fill="none" stroke="var(--color-surface-soft)" strokeWidth={STROKE} />
+        <circle
+          className="goal-ring"
+          cx={RING / 2}
+          cy={RING / 2}
+          r={RADIUS}
+          fill="none"
+          stroke={completed ? "var(--color-mint)" : "var(--color-brand-600)"}
+          strokeWidth={STROKE}
+          strokeLinecap="round"
+          strokeDasharray={CIRCUMFERENCE}
+          strokeDashoffset={CIRCUMFERENCE * (1 - value / 100)}
+          style={{ "--ring-from": CIRCUMFERENCE } as React.CSSProperties}
+        />
+      </svg>
+      <span className="absolute inset-0 grid place-items-center text-[13px] font-semibold text-ink tabular-nums">
+        {completed ? <Check className="h-5 w-5 text-mint-ink" strokeWidth={2.5} /> : `${progress}%`}
+      </span>
+    </div>
+  );
+}
+
+export function GoalCard({ name, targetAmount, currentAmount, targetDate, monthlySavings = 1_200_000, className, onEdit, onDelete, children }: GoalCardProps) {
   const progress = calcProgress(currentAmount, targetAmount);
   const isCompleted = progress >= 100;
-  const estimatedDate = !isCompleted && monthlySavings
-    ? estimateGoalDate(currentAmount, targetAmount, monthlySavings)
-    : null;
+  const estimatedDate = !isCompleted && monthlySavings ? estimateGoalDate(currentAmount, targetAmount, monthlySavings) : null;
+  const remaining = Math.max(targetAmount - currentAmount, 0);
 
   return (
-    <div
-      className={cn(
-        "card group relative overflow-hidden transition-all duration-300 ease-out",
-        "hover:-translate-y-0.5 hover:shadow-card hover:border-pine/40 cursor-default",
-        isCompleted && "border-brass/60 bg-brass-10/20",
-        className
-      )}
-      style={{
-        borderColor: isCompleted ? "var(--color-brass)" : "var(--color-rule)",
-        backgroundColor: "var(--color-surface)",
-      }}
-    >
-      {/* Header: icon + name + progress badge + inline actions */}
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div
-            className="w-8 h-8 rounded-card flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
-            style={{
-              backgroundColor: isCompleted
-                ? "var(--color-brass-10)"
-                : "var(--color-pine-10)",
-              border: isCompleted ? "1px solid var(--color-brass-30)" : "1px solid var(--color-pine-30)",
-            }}
-          >
-            {isCompleted ? (
-              <CheckCircle2 size={16} strokeWidth={2} style={{ color: "var(--color-brass)" }} />
-            ) : (
-              <Target size={16} strokeWidth={1.8} style={{ color: "var(--color-pine)" }} />
-            )}
+    <article className={cn("flex h-full flex-col rounded-card border bg-surface-high shadow-card", isCompleted ? "border-mint/35" : "border-rule", className)}>
+      <div className="flex-1 p-4 sm:p-5">
+        <header className="flex items-start gap-3.5">
+          <ProgressRing progress={progress} completed={isCompleted} />
+          <div className="min-w-0 flex-1 pt-0.5">
+            <h3 className="line-clamp-2 break-words text-[15px] font-semibold leading-snug text-ink">{name}</h3>
+            <p className="mt-0.5 text-xs text-ink-muted tabular-nums">Target {formatRupiah(targetAmount)}</p>
           </div>
-
-          <div className="min-w-0 flex-1">
-            <span
-              className="line-clamp-2 block break-words text-body font-semibold text-ink group-hover:text-pine transition-colors leading-snug"
-              style={{ fontFamily: "var(--font-ui)" }}
-            >
-              {name}
-            </span>
-            <span className="text-[11px] text-ink-muted block font-mono">
-              Target: {formatRupiah(targetAmount)}
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Progress Percentage Badge + Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <span
-            className="tabular-nums text-xs font-mono font-bold px-2 py-0.5 rounded-full"
-            style={{
-              backgroundColor: isCompleted ? "var(--color-brass-10)" : "var(--color-pine-10)",
-              color: isCompleted ? "var(--color-brass)" : "var(--color-pine)",
-            }}
-          >
-            {progress}%
-          </span>
-
-          {(onEdit || onDelete) && (
-            <div className="flex items-center gap-0.5 border-l border-rule/50 pl-1">
-              {onEdit && (
-                <button
-                  onClick={onEdit}
-                  className="grid h-9 w-9 place-items-center rounded-lg sm:h-auto sm:w-auto sm:p-1 text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors"
-                  title="Edit tujuan"
-                  aria-label="Edit tujuan"
-                >
-                  <Edit2 size={13} strokeWidth={2} />
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  onClick={onDelete}
-                  className="grid h-9 w-9 place-items-center rounded-lg sm:h-auto sm:w-auto sm:p-1 text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors"
-                  title="Hapus tujuan"
-                  aria-label="Hapus tujuan"
-                >
-                  <Trash2 size={13} strokeWidth={2} />
-                </button>
-              )}
+          {(onEdit || onDelete) ? (
+            <div className="-mr-2 -mt-2 flex shrink-0">
+              {onEdit ? <button type="button" onClick={onEdit} title="Edit tujuan" aria-label="Edit tujuan" className="grid h-9 w-9 place-items-center rounded-full text-ink-soft transition-colors hover:bg-surface-soft hover:text-ink"><Pencil className="h-3.5 w-3.5" /></button> : null}
+              {onDelete ? <button type="button" onClick={onDelete} title="Hapus tujuan" aria-label="Hapus tujuan" className="grid h-9 w-9 place-items-center rounded-full text-ink-soft transition-colors hover:bg-ember-10 hover:text-ember-ink"><Trash2 className="h-3.5 w-3.5" /></button> : null}
             </div>
+          ) : null}
+        </header>
+
+        <div className="mt-4 flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs text-ink-muted">Terkumpul</p>
+            <p className="figure-display mt-0.5 truncate text-[1.6rem] leading-none text-ink">{formatRupiah(currentAmount)}</p>
+          </div>
+          {!isCompleted ? (
+            <p className="shrink-0 text-right text-xs text-ink-muted">Kurang<br /><b className="font-semibold text-ink tabular-nums">{formatRupiah(remaining)}</b></p>
+          ) : (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-mint-10 px-2.5 py-1 text-[11px] font-semibold text-mint-ink"><Check className="h-3 w-3" />Tercapai</span>
           )}
         </div>
-      </div>
 
-      {/* Progress Bar */}
-      <div
-        className="h-2 rounded-full mb-3 overflow-hidden shadow-inner"
-        style={{ backgroundColor: "var(--color-rule)" }}
-        role="progressbar"
-        aria-valuenow={progress}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
-        <div
-          className="h-full rounded-full transition-all duration-700 ease-out"
-          style={{
-            width: `${Math.min(progress, 100)}%`,
-            backgroundColor: isCompleted
-              ? "var(--color-brass)"
-              : "var(--color-pine)",
-          }}
-        />
-      </div>
-
-      {/* Numerical Details */}
-      <div className="flex items-center justify-between gap-2 mb-2.5 text-xs font-mono">
-        <span className="text-ink-muted">
-          Terkumpul: <strong className="text-ink font-semibold">{formatRupiah(currentAmount)}</strong>
-        </span>
-        <span className="text-ink-muted">
-          Sisa: <strong className="text-pine">{formatRupiah(Math.max(targetAmount - currentAmount, 0))}</strong>
-        </span>
-      </div>
-
-      {/* Footer: dates metadata */}
-      <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-rule/50 text-xs">
-        <div className="flex items-center gap-1 text-ink-muted">
-          <CalendarDays size={12} strokeWidth={1.8} />
-          <span suppressHydrationWarning style={{ fontFamily: "var(--font-ui)" }}>
-            Batas: {formatDate(targetDate, "short")}
-          </span>
+        <div className="progress-track mt-3" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Kemajuan ${name}`}>
+          <span className={cn("progress-fill", isCompleted ? "bg-mint" : "bg-brand-600")} style={{ width: `${Math.min(progress, 100)}%` }} />
         </div>
 
-        {estimatedDate && !isCompleted && (
-          <div className="flex items-center gap-1 text-pine font-medium">
-            <TrendingUp size={12} strokeWidth={1.8} />
-            <span suppressHydrationWarning style={{ fontFamily: "var(--font-ui)" }}>
-              Estimasi: {formatDate(estimatedDate, "short")}
-            </span>
-          </div>
-        )}
-
-        {isCompleted && (
-          <span className="text-brass font-bold flex items-center gap-1" style={{ color: "var(--color-brass)" }}>
-            ✓ Selesai
-          </span>
-        )}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
+          <span className="inline-flex items-center gap-1 text-ink-muted" suppressHydrationWarning><CalendarDays className="h-3.5 w-3.5" />Batas {formatDate(targetDate, "short")}</span>
+          {estimatedDate ? (
+            <span className="inline-flex items-center gap-1 font-medium text-brand-700" suppressHydrationWarning><Sparkles className="h-3.5 w-3.5" />Estimasi {formatDate(estimatedDate, "short")}</span>
+          ) : null}
+        </div>
       </div>
-    </div>
+      {children ? <div className="border-t border-rule">{children}</div> : null}
+    </article>
   );
 }

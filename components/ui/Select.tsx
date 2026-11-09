@@ -63,7 +63,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
           aria-expanded={open}
           onClick={() => setOpen((state) => !state)}
           className={cn(
-            "flex h-11 w-full items-center justify-between gap-3 rounded-[15px] border border-rule bg-surface-high px-3.5 text-left text-sm font-semibold text-ink outline-none shadow-clay-soft transition hover:border-pine/25 focus-visible:border-pine/40 focus-visible:ring-4 focus-visible:ring-pine/10 disabled:opacity-50",
+            "flex h-11 w-full items-center justify-between gap-3 rounded-sm border border-rule bg-surface-high px-3.5 text-left text-sm font-semibold text-ink outline-none shadow-clay-soft transition hover:border-pine/25 focus-visible:border-pine/40 focus-visible:ring-4 focus-visible:ring-pine/10 disabled:opacity-50",
             className,
           )}
         >
@@ -76,7 +76,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
             role="listbox"
             style={portalPanelStyle(position)}
             className={cn(
-              "z-[90] overflow-y-auto overscroll-contain rounded-[16px] border border-pine/12 bg-surface-high p-1.5 shadow-float animate-in fade-in",
+              "z-[90] overflow-y-auto overscroll-contain rounded-sm border border-pine/12 bg-surface-high p-1.5 shadow-float animate-in fade-in",
               position.placement === "bottom" ? "slide-in-from-top-1" : "slide-in-from-bottom-1",
             )}
           >

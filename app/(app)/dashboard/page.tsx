@@ -3,7 +3,7 @@
 
 import { PenjagaDashboardCard } from "@/components/penjaga/PenjagaDashboardCard";
 import Link from "next/link";
-import { CashFlowChart, CategoryBreakdownChart, AccountBalanceChart, SpendingMomentumChart } from "@/components/charts/lazy";
+import { CashFlowChart, CategoryBreakdownChart, AccountBalanceChart, SpendingMomentumChart } from "@/components/charts/deferred";
 import {
   ArrowRight,
   Sparkles,
@@ -13,14 +13,10 @@ import {
   HandCoins,
   Repeat,
 } from "lucide-react";
-import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { cadenceAmountOf, CADENCE_LABEL } from "@/lib/utils/budgetPace";
-import { BudgetProgress } from "@/components/dashboard/BudgetProgress";
-import { GoalCard } from "@/components/dashboard/GoalCard";
-import { InsightFeed } from "@/components/dashboard/InsightFeed";
 import { SafeToSpendCard } from "@/components/dashboard/SafeToSpendCard";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Badge } from "@/components/ui/Badge";
@@ -38,6 +34,18 @@ import {
   usePreferences,
   useRecurringRules,
 } from "@/lib/data/store";
+import { deferUntilVisible } from "@/components/ui/deferUntilVisible";
+
+// Bagian di bawah lipatan: kodenya diunduh saat mendekati layar.
+function block(height: string) {
+  return function SectionSkeleton() {
+    return <div className="skeleton w-full rounded-card" style={{ height }} />;
+  };
+}
+const DashboardCalendar = deferUntilVisible(() => import("@/components/dashboard/DashboardCalendar").then((m) => m.DashboardCalendar), { fallback: block("18rem") });
+const BudgetProgress = deferUntilVisible(() => import("@/components/dashboard/BudgetProgress").then((m) => m.BudgetProgress), { fallback: block("4.5rem") });
+const GoalCard = deferUntilVisible(() => import("@/components/dashboard/GoalCard").then((m) => m.GoalCard), { fallback: block("12rem") });
+const InsightFeed = deferUntilVisible(() => import("@/components/dashboard/InsightFeed").then((m) => m.InsightFeed), { fallback: block("10rem") });
 import type { Transaction } from "@/lib/data/mock";
 
 
@@ -186,20 +194,19 @@ export default function DashboardPage() {
       <SafeToSpendCard result={safeToSpend} />
 
       <DashboardLayout>
-        <Card variant="highlight" data-widget-id="balance" className="relative h-full overflow-hidden rounded-[1.75rem] p-5 sm:p-7">
+        <Card variant="highlight" data-widget-id="balance" className="relative h-full overflow-hidden rounded-panel p-5 sm:p-7">
           <div className="absolute -right-14 -top-20 h-56 w-56 rounded-full border-[34px] border-white/8" />
-          <div className="absolute -bottom-20 right-1/4 h-40 w-40 rounded-full bg-brand-500/35" />
           <div className="relative">
             <div className="flex items-start justify-between">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white shadow-card">
                 <WalletCards size={21} />
               </div>
-              <span className="rounded-full bg-surface-high px-3 py-1 text-[11px] font-bold text-brand-900 shadow-card">
+              <span className="rounded-full bg-lime px-3 py-1 text-[11px] font-semibold text-lime-ink">
                 {accounts.length} akun aktif
               </span>
             </div>
             <p className="mt-8 text-small font-semibold text-white/70">Total saldo tersedia</p>
-            <p className="mt-1 font-ui tabular-nums text-[clamp(1.9rem,4vw,3.25rem)] font-semibold tracking-[-0.06em]">
+            <p className="figure-display mt-1 text-[clamp(2.1rem,4.5vw,3.5rem)] leading-none">
               {formatAmount(totalBalance, preferences.compactNumbers)}
             </p>
             <SummarySparkline values={balanceTrend} className="mt-5 text-white" />

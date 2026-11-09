@@ -33,15 +33,16 @@ import { cn } from "@/lib/utils/cn";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { ConnectHermesCard } from "@/components/penjaga/ConnectHermesCard";
 import { PreferenceToggle } from "@/components/settings/PreferenceToggle";
-import { AccountManagerModal } from "@/components/settings/AccountManagerModal";
-import { ProfileNameModal } from "@/components/settings/ProfileNameModal";
-import { CategoryFormModal } from "@/components/settings/CategoryFormModal";
-import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
 import { deleteCategoryAction } from "@/actions/categories";
 import { updatePreferencesAction } from "@/actions/preferences";
 import { useToast } from "@/lib/context/ToastContext";
 import { buildBackupPayload, downloadBackupJson } from "@/lib/utils/backupExport";
+import dynamic from "next/dynamic";
+
+// Modal pengaturan diunduh saat dibuka, bukan bersama halaman.
+const AccountManagerModal = dynamic(() => import("@/components/settings/AccountManagerModal").then((m) => m.AccountManagerModal), { ssr: false });
+const ProfileNameModal = dynamic(() => import("@/components/settings/ProfileNameModal").then((m) => m.ProfileNameModal), { ssr: false });
+const CategoryFormModal = dynamic(() => import("@/components/settings/CategoryFormModal").then((m) => m.CategoryFormModal), { ssr: false });
 import { getAvatarUrl } from "@/lib/appwrite/storage";
 
 const accountTypeLabel: Record<string, string> = {
@@ -61,7 +62,7 @@ const themeOptions: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
 ];
 
 const accentOptions: { value: AccentColor; label: string; swatch: string }[] = [
-  { value: "brand", label: "Biru (default)", swatch: "#2459DE" },
+  { value: "brand", label: "Biru (default)", swatch: "#2D4FE6" },
   { value: "mint", label: "Hijau", swatch: "#159B78" },
   { value: "ember", label: "Merah", swatch: "#E95766" },
   { value: "lavender", label: "Ungu", swatch: "#7B61D1" },
@@ -161,11 +162,9 @@ export default function PengaturanPage() {
         </div>
       </header>
 
-      <Card variant="highlight" className="relative overflow-hidden p-5 sm:p-8">
-        <div className="absolute -right-12 -top-20 h-44 w-44 rounded-full border-[26px] border-white/10" />
-        <div className="absolute -bottom-28 -left-12 h-44 w-44 rounded-full bg-brand-500/35" />
-        <div className="relative flex flex-col items-center justify-center text-center sm:flex-row sm:text-left">
-          <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[24px] bg-surface-high sm:h-24 sm:w-24 sm:rounded-[28px] text-2xl font-black text-brand-900 shadow-[0_14px_30px_rgba(17,39,114,.24)]">
+      <section className="hero-surface relative overflow-hidden rounded-panel p-5 text-white sm:p-6">
+        <div className="flex items-center gap-4">
+          <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full bg-white/95 text-xl font-semibold text-brand-900 ring-4 ring-white/15 sm:h-20 sm:w-20">
             {preferences.avatarFileId ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={getAvatarUrl(preferences.avatarFileId)} alt="" className="h-full w-full object-cover" />
@@ -173,22 +172,18 @@ export default function PengaturanPage() {
               displayName.split(" ").slice(0, 2).map((name) => name[0]).join("")
             )}
           </div>
-          <div className="mt-4 min-w-0 sm:ml-5 sm:mt-0">
-            <Badge tone="success"><ShieldCheck className="h-3.5 w-3.5" />Terverifikasi</Badge>
-            <h2 className="mt-2 truncate text-2xl font-bold sm:text-3xl tracking-[-0.035em] text-white">{displayName}</h2>
-            <p className="mt-0.5 truncate text-sm font-medium text-white/70">{displayEmail}</p>
-            <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => setProfileOpen(true)}><Pencil className="h-3.5 w-3.5" />Ubah profil</Button>
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-lime"><ShieldCheck className="h-3.5 w-3.5" />Terverifikasi</p>
+            <h2 className="figure-display mt-1 truncate text-[1.6rem] leading-tight text-white sm:text-[2rem]">{displayName}</h2>
+            <p className="truncate text-sm text-white/70">{displayEmail}</p>
           </div>
+          <Button type="button" variant="outline" size="sm" className="hidden shrink-0 border-white/25 bg-white/10 text-white hover:bg-white/20 sm:inline-flex" onClick={() => setProfileOpen(true)}><Pencil className="h-3.5 w-3.5" />Ubah profil</Button>
         </div>
-        <div className="relative mt-6 grid grid-cols-2 overflow-hidden rounded-[20px] border border-white/15 bg-brand-900/55 sm:mt-7 xl:grid-cols-4">
-          {[["Nama lengkap", displayName], ["Mata uang", "Rupiah Indonesia (IDR)"], ["Format angka", "1.234.567"], ["Bahasa", "Bahasa Indonesia"]].map(([label, value], index) => (
-            <button key={label} type="button" disabled={index !== 0} onClick={index === 0 ? () => setProfileOpen(true) : undefined} className="min-w-0 border-b border-r border-white/10 px-3 py-3 text-center disabled:cursor-default sm:px-4 sm:py-3.5 [&:nth-child(2)]:border-r-0 [&:nth-child(3)]:border-b-0 [&:nth-child(4)]:border-b-0 [&:nth-child(4)]:border-r-0 xl:border-b-0 xl:[&:nth-child(2)]:border-r xl:[&:nth-child(3)]:border-r xl:last:border-r-0">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.08em] text-white/55">{label}</span>
-              <span className="mt-1.5 block break-words text-[13px] font-bold leading-snug text-white sm:truncate sm:text-sm">{value}</span>
-            </button>
-          ))}
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/15 pt-4 text-xs text-white/80">
+          {["Rupiah (IDR)", "1.234.567", "Bahasa Indonesia"].map((value) => <span key={value} className="rounded-full bg-white/10 px-2.5 py-1">{value}</span>)}
+          <Button type="button" variant="outline" size="sm" className="ml-auto border-white/25 bg-white/10 text-white hover:bg-white/20 sm:hidden" onClick={() => setProfileOpen(true)}><Pencil className="h-3.5 w-3.5" />Ubah profil</Button>
         </div>
-      </Card>
+      </section>
 
       <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12">
 
@@ -203,7 +198,7 @@ export default function PengaturanPage() {
             <PreferenceToggle label="Notifikasi pengingat" description="Peringatan anggaran dan transaksi penting." icon={BellRing} checked={preferences.notifications} onChange={(checked) => savePreference({ notifications: checked })} tone="pine" />
             <PreferenceToggle label="Insight otomatis" description="Ringkasan pola keuangan yang relevan." icon={Sparkles} checked={preferences.autoInsights} onChange={(checked) => savePreference({ autoInsights: checked })} tone="mint" />
             <PreferenceToggle label="Angka ringkas" description="Tampilkan jutaan sebagai jt pada ringkasan utama." icon={Database} checked={preferences.compactNumbers} onChange={(checked) => savePreference({ compactNumbers: checked })} tone="sky" />
-            <div className="flex items-center gap-3 rounded-[18px] bg-brand-50 p-3.5 text-left sm:p-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-brand-900 text-white"><Languages className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-extrabold text-ink">Bahasa &amp; wilayah</span><span className="mt-0.5 block text-xs text-ink-muted">Indonesia · Asia/Jakarta</span></span></div>
+            <div className="flex items-center gap-3 rounded-sm border border-rule bg-surface p-3.5 text-left"><Languages className="h-[18px] w-[18px] shrink-0 text-ink" /><span className="min-w-0 flex-1"><span className="block text-sm font-extrabold text-ink">Bahasa &amp; wilayah</span><span className="mt-0.5 block text-xs text-ink-muted">Indonesia · Asia/Jakarta</span></span></div>
           </div>
           <div className="mt-3">
             <label className="mb-1.5 block text-xs font-bold text-ink-muted">Akun default untuk transaksi baru</label>
@@ -224,7 +219,7 @@ export default function PengaturanPage() {
                   type="button"
                   onClick={() => savePreference({ theme: value })}
                   className={cn(
-                    "flex flex-col items-center gap-1.5 rounded-[14px] border px-2 py-3 text-xs font-bold transition",
+                    "flex flex-col items-center gap-1.5 rounded-sm border px-2 py-3 text-xs font-bold transition",
                     preferences.theme === value ? "border-brand-600 bg-brand-50 text-brand-700" : "border-rule text-ink-muted hover:bg-paper",
                   )}
                 >
@@ -258,14 +253,14 @@ export default function PengaturanPage() {
         <SettingsCard title="Akun & dompet" description="Tambah, ubah, nonaktifkan, atau hapus sumber dana." icon={Wallet} tone="blue" className="lg:col-span-6" action={<Button type="button" size="sm" onClick={openNewAccount}><Plus className="h-3.5 w-3.5" />Tambah</Button>}>
           <div className="grid gap-3">
             {accounts.map((account) => (
-              <button key={account.id} type="button" onClick={() => openAccount(account)} className="group flex min-w-0 items-center gap-3 rounded-[18px] border border-brand-600/10 bg-brand-50 p-3.5 text-left transition-colors hover:bg-brand-100">
+              <button key={account.id} type="button" onClick={() => openAccount(account)} className="group flex min-w-0 items-center gap-3 rounded-card border border-brand-600/10 bg-brand-50 p-3.5 text-left transition-colors hover:bg-brand-100">
                 <span className="h-10 w-2 shrink-0 rounded-full" style={{ backgroundColor: account.colorTag }} />
                 <span className="min-w-0 flex-1"><span className="block truncate text-sm font-extrabold text-ink">{account.name}</span><span className="mt-0.5 block truncate text-[11px] text-ink-muted">{accountTypeLabel[account.type] ?? account.type}</span></span>
                 <span className="shrink-0 text-right"><span className="block text-sm font-black tabular-nums text-ink">{formatRupiah(account.balance)}</span><span className={cn("text-[10px] font-bold", account.isActive ? "text-mint" : "text-ink-muted")}>{account.isActive ? "Aktif" : "Nonaktif"}</span></span>
                 <ChevronRight className="h-4 w-4 shrink-0 text-ink-muted transition group-hover:translate-x-0.5 group-hover:text-pine" />
               </button>
             ))}
-            {!accounts.length && connection.status !== "loading" ? <button type="button" onClick={openNewAccount} className="rounded-[18px] border border-dashed border-sky/30 bg-surface-high/60 p-6 text-sm font-bold text-sky">Tambah rekening pertama</button> : null}
+            {!accounts.length && connection.status !== "loading" ? <button type="button" onClick={openNewAccount} className="rounded-card border border-dashed border-sky/30 bg-surface-high/60 p-6 text-sm font-bold text-sky">Tambah rekening pertama</button> : null}
           </div>
         </SettingsCard>
 
@@ -277,8 +272,8 @@ export default function PengaturanPage() {
           className="lg:col-span-12"
           action={<Button type="button" size="sm" onClick={openNewCategory}><Plus className="h-3.5 w-3.5" />Tambah</Button>}
         >
-          <div className="mb-4 flex max-w-full items-center gap-1 overflow-x-auto rounded-[14px] bg-brand-50 p-1">
-            {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-10 sm:min-h-8 flex-1 whitespace-nowrap rounded-[10px] px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-surface-high hover:text-ink")}>{label}</button>)}
+          <div className="mb-4 flex max-w-full items-center gap-1 overflow-x-auto rounded-sm bg-brand-50 p-1">
+            {([["all", "Semua"], ["expense", "Keluar"], ["income", "Masuk"]] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setCategoryFilter(id)} className={cn("min-h-10 sm:min-h-8 flex-1 whitespace-nowrap rounded-xs px-3 text-xs font-extrabold transition", categoryFilter === id ? "bg-pine text-white shadow-sm" : "text-ink-muted hover:bg-surface-high hover:text-ink")}>{label}</button>)}
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredCategories.map((category) => (
@@ -288,7 +283,7 @@ export default function PengaturanPage() {
                 tabIndex={0}
                 onClick={() => openCategory(category)}
                 onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCategory(category); } }}
-                className="group flex min-w-0 cursor-pointer items-center gap-2.5 rounded-[15px] border border-brand-600/10 bg-surface-high p-2.5 text-left transition-colors hover:bg-brand-50"
+                className="group flex min-w-0 cursor-pointer items-center gap-2.5 rounded-sm border border-brand-600/10 bg-surface-high p-2.5 text-left transition-colors hover:bg-brand-50"
               >
                 <CategoryIcon icon={category.icon} color={category.color} size={15} containerSize="md" />
                 <div className="min-w-0 flex-1">
@@ -332,12 +327,12 @@ export default function PengaturanPage() {
         </SettingsCard>
       </div>
 
-      <CategoryFormModal key={`${editingCategory?.id ?? "new-category"}-${categoryModalOpen}`} open={categoryModalOpen} category={editingCategory} onClose={() => setCategoryModalOpen(false)} />
+      {categoryModalOpen ? <CategoryFormModal key={`${editingCategory?.id ?? "new-category"}-${categoryModalOpen}`} open={categoryModalOpen} category={editingCategory} onClose={() => setCategoryModalOpen(false)} /> : null}
 
-      <footer className="flex items-center gap-3 rounded-[22px] border border-brand-600/10 bg-surface-high p-4 shadow-card sm:p-5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-brand-900 text-white shadow-card"><Info className="h-4 w-4" /></span><div><p className="text-sm font-extrabold text-ink">Pundi Personal Finance</p><p className="text-xs text-ink-muted">Next.js 16 · Appwrite · Versi 1.0.0</p></div></footer>
+      <footer className="flex items-center gap-3 rounded-card border border-brand-600/10 bg-surface-high p-4 shadow-card sm:p-5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-brand-900 text-white shadow-card"><Info className="h-4 w-4" /></span><div><p className="text-sm font-extrabold text-ink">Pundi Personal Finance</p><p className="text-xs text-ink-muted">Next.js 16 · Appwrite · Versi 1.0.0</p></div></footer>
 
-      <AccountManagerModal key={editingAccount?.id ?? "new-account"} open={accountModalOpen} account={editingAccount} onClose={() => setAccountModalOpen(false)} />
-      <ProfileNameModal
+      {accountModalOpen ? <AccountManagerModal key={editingAccount?.id ?? "new-account"} open={accountModalOpen} account={editingAccount} onClose={() => setAccountModalOpen(false)} /> : null}
+      {profileOpen ? <ProfileNameModal
         key={`profile-${displayName}`}
         open={profileOpen}
         currentName={displayName}
@@ -347,7 +342,7 @@ export default function PengaturanPage() {
         onClose={() => setProfileOpen(false)}
         onSaved={setProfileName}
         onAvatarUploaded={(fileId) => dispatch({ type: "UPDATE_PREFERENCES", payload: { ...preferences, avatarFileId: fileId } })}
-      />
+      /> : null}
     </div>
   );
 }

@@ -20,10 +20,10 @@ export function Modal({ open, onClose, title, description, children, className }
   if (!open || !isClient) return null;
   // Portal ke <body>: modal tidak ikut terkurung/terpotong oleh wadah halaman.
   return createPortal(
-    <div className="fixed inset-0 z-[80] grid place-items-end bg-[var(--color-scrim)] p-0 backdrop-blur-sm sm:place-items-center sm:p-4" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
-      <section role="dialog" aria-modal="true" aria-labelledby="modal-title" className={cn("max-h-[92vh] w-full overflow-y-auto rounded-t-[24px] border border-rule bg-surface-high shadow-float sm:max-w-xl sm:rounded-[24px]", className)}>
+    <div className="modal-scrim fixed inset-0 z-[80] grid place-items-end bg-[var(--color-scrim)] p-0 backdrop-blur-[3px] sm:place-items-center sm:p-4" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
+      <section role="dialog" aria-modal="true" aria-labelledby="modal-title" className={cn("modal-panel max-h-[92vh] w-full overflow-y-auto rounded-t-panel border border-rule bg-surface-high shadow-float sm:max-w-xl sm:rounded-panel", className)}>
         <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-rule bg-surface-high/95 p-5 backdrop-blur">
-          <div><h2 id="modal-title" className="text-lg font-extrabold text-ink">{title}</h2>{description ? <p className="mt-1 text-xs text-ink-muted">{description}</p> : null}</div>
+          <div><h2 id="modal-title" className="text-lg font-semibold text-ink">{title}</h2>{description ? <p className="mt-1 text-xs text-ink-muted">{description}</p> : null}</div>
           <IconButton type="button" variant="ghost" aria-label="Tutup dialog" onClick={onClose}><X className="h-5 w-5" /></IconButton>
         </header>
         {children}

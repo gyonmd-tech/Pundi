@@ -23,7 +23,6 @@ import {
   rejectDraftsAction,
   type PenjagaStatus,
 } from "@/actions/penjaga";
-import { parseStory } from "@/lib/penjaga/demoParser";
 import type { AgentDraft, ChatThread, DraftEdit, PenjagaChatMessage, PenjagaMood } from "@/lib/penjaga/types";
 import type { Account, Transaction } from "@/lib/data/mock";
 import { formatRupiah } from "@/lib/utils/formatter";
@@ -231,7 +230,8 @@ export function PenjagaProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const sendDemo = useCallback(async (text: string, replyId: string) => {
-    await wait(900);
+    // Parser demo hanya dibutuhkan saat chat latihan dipakai — tidak ikut bundle awal.
+    const [{ parseStory }] = await Promise.all([import("@/lib/penjaga/demoParser"), wait(900)]);
     const parsed = parseStory(text, state.accounts, state.categories);
     const now = new Date().toISOString();
     const created: AgentDraft[] = parsed.map((item) => ({

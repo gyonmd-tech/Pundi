@@ -16,7 +16,7 @@ export function PenjagaDashboardCard() {
   return (
     <Link
       href="/penjaga"
-      className="group relative flex items-center gap-3 overflow-hidden rounded-[22px] border border-brand-600/10 bg-surface-high py-2 pl-2 pr-4 shadow-card transition hover:border-brand-300 active:scale-[.99] sm:gap-4"
+      className="group relative flex items-center gap-3 overflow-hidden rounded-card border border-brand-600/10 bg-surface-high py-2 pl-2 pr-4 shadow-card transition hover:border-brand-300 active:scale-[.99] sm:gap-4"
     >
       <span aria-hidden className="absolute inset-y-0 left-0 w-28 bg-[radial-gradient(circle_at_40%_60%,rgba(92,143,242,.22),transparent_70%)]" />
       <PenjagaCharacter mood={pending ? "talking" : mood} size={64} title="Penjaga" className="relative shrink-0" />

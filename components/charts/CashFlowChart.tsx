@@ -2,240 +2,88 @@
 
 /**
  * components/charts/CashFlowChart.tsx
- * Area chart arus kas (income vs expense) 6 bulan terakhir.
- *
- * Signature element: LEDGER BASELINE — garis dasar tegas (1.5px, warna rule)
- * yang membentang penuh lebar chart, meniru garis dasar buku kas.
- * (DESIGN.md § 4.6 — elemen non-negotiable identitas visual Pundi)
- *
- * Stack: Recharts AreaChart + custom SVG untuk baseline
+ * Area chart arus kas (pemasukan vs pengeluaran) per bulan, SVG murni.
+ * Ledger baseline: garis dasar tegas di nilai nol, membentang penuh lebar.
  */
-
-import { Skeleton } from "@/components/ui/Skeleton";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-} from "recharts";
-import { formatRupiahShort, formatRupiah } from "@/lib/utils/formatter";
+import { useState } from "react";
+import { formatRupiah, formatRupiahShort } from "@/lib/utils/formatter";
 import { cn } from "@/lib/utils/cn";
+import { ChartLegend, ChartTooltip, TooltipRow, monotonePath, nearestIndex, niceScale, useElementWidth } from "./chartKit";
 
 interface CashFlowDataPoint {
-  month:   string;  // "Jan", "Feb", ...
-  income:  number;
+  month: string;
+  income: number;
   expense: number;
 }
 
-interface CashFlowChartProps {
-  data:      CashFlowDataPoint[];
-  className?: string;
-  loading?:  boolean;
-}
+const HEIGHT = 240;
+const PAD = { top: 12, right: 12, bottom: 28, left: 72 };
+const INCOME = "var(--chart-income-color)";
+const EXPENSE = "var(--chart-expense-color)";
 
-// Custom Tooltip
-interface TooltipEntry {
-  dataKey: string;
-  color:   string;
-  value:   number;
-}
-
-interface TooltipProps {
-  active?:  boolean;
-  payload?: TooltipEntry[];
-  label?:   string;
-}
-
-function CustomTooltip({ active, payload, label }: TooltipProps) {
-  if (!active || !payload?.length) return null;
-
-  return (
-    <div
-      className="rounded-card px-3 py-2.5 shadow-float"
-      style={{
-        backgroundColor: "var(--color-surface-high)",
-        border: "var(--border-hairline)",
-        fontFamily: "var(--font-ui)",
-      }}
-    >
-      <p
-        className="text-small font-medium mb-1.5"
-        style={{ color: "var(--color-ink-muted)" }}
-      >
-        {label}
-      </p>
-      {payload.map((entry) => (
-        <div key={entry.dataKey} className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1.5">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span
-              className="text-small"
-              style={{ color: "var(--color-ink-muted)" }}
-            >
-              {entry.dataKey === "income" ? "Pemasukan" : "Pengeluaran"}
-            </span>
-          </div>
-          <span
-            className="tabular-nums text-small font-medium"
-            style={{ fontFamily: "var(--font-mono)", color: "var(--color-ink)" }}
-          >
-            {formatRupiah(entry.value)}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Skeleton loading
-function ChartSkeleton() {
-  return (
-    <div className="w-full h-48 flex items-end gap-3 px-4 pb-4">
-      {["80%", "55%", "70%", "90%", "45%", "65%"].map((h, i) => (
-        <div key={i} className="flex-1 skeleton-bar" style={{ height: h, animationDelay: `${i * 110}ms` }}>
-          <Skeleton className="h-full w-full rounded-[8px]" delay={i * 90} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function CashFlowChart({ data, className, loading = false }: CashFlowChartProps) {
-  if (loading) {
-    return (
-      <div className={className}>
-        <ChartSkeleton />
-      </div>
-    );
-  }
+export function CashFlowChart({ data, className }: { data: CashFlowDataPoint[]; className?: string }) {
+  const { ref, width } = useElementWidth<HTMLDivElement>();
+  const [active, setActive] = useState<number | null>(null);
 
   if (!data?.length) {
     return (
-      <div
-        className={`flex flex-col items-center justify-center h-48 rounded-card border ${className}`}
-        style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-paper)" }}
-      >
-        {/* Empty state with baseline — sesuai DESIGN.md § 4.6 */}
-        <svg width="100%" height="2" style={{ marginBottom: "12px" }}>
-          <line x1="0" y1="1" x2="100%" y2="1" stroke="var(--color-rule)" strokeWidth="1.5" />
-        </svg>
-        <p
-          className="text-small text-center"
-          style={{ color: "var(--color-ink-muted)", fontFamily: "var(--font-ui)" }}
-        >
-          Tambahkan transaksi untuk melihat tren arus kasmu
-        </p>
+      <div className={cn("flex h-48 flex-col items-center justify-center gap-3 rounded-card border border-rule bg-paper px-6", className)}>
+        <span className="h-px w-full bg-rule-strong" />
+        <p className="text-small text-center text-ink-muted">Tambahkan transaksi untuk melihat tren arus kasmu</p>
       </div>
     );
   }
 
+  const innerWidth = Math.max(width - PAD.left - PAD.right, 1);
+  const innerHeight = HEIGHT - PAD.top - PAD.bottom;
+  const { top, ticks } = niceScale(Math.max(...data.flatMap((point) => [point.income, point.expense])));
+  const xs = data.map((_, index) => PAD.left + (data.length === 1 ? innerWidth / 2 : (index / (data.length - 1)) * innerWidth));
+  const y = (value: number) => PAD.top + innerHeight - (value / top) * innerHeight;
+  const baseline = y(0);
+  const line = (key: "income" | "expense") => monotonePath(data.map((point, index) => [xs[index], y(point[key])]));
+  const area = (key: "income" | "expense") => `${line(key)}L${xs.at(-1)},${baseline}L${xs[0]},${baseline}Z`;
+  const point = active === null ? null : data[active];
+
   return (
-    <div className={cn("w-full min-w-0 overflow-hidden", className)}>
-      <ResponsiveContainer width="100%" height={240}>
-        <AreaChart
-          data={data}
-          margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
-        >
-          <defs>
-            {/* Income gradient */}
-            <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#159B78" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#159B78" stopOpacity={0.01} />
-            </linearGradient>
-            {/* Expense gradient */}
-            <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#E95766" stopOpacity={0.12} />
-              <stop offset="95%" stopColor="#E95766" stopOpacity={0.01} />
-            </linearGradient>
-          </defs>
-
-          {/* Grid — sangat subtle */}
-          <CartesianGrid
-            strokeDasharray="4 7"
-            horizontal={true}
-            vertical={false}
-            stroke="var(--color-rule)"
-            strokeOpacity={0.8}
-          />
-
-          {/* LEDGER BASELINE — signature element, wajib ada */}
-          <ReferenceLine
-            y={0}
-            stroke="var(--color-rule)"
-            strokeWidth={1.5}
-            strokeLinecap="square"
-          />
-
-          <XAxis
-            dataKey="month"
-            tick={{
-              fill: "var(--color-ink-muted)",
-              fontFamily: "var(--font-ui)",
-              fontSize: 12,
-            }}
-            axisLine={false}
-            tickLine={false}
-            dy={8}
-          />
-
-          <YAxis
-            tickFormatter={formatRupiahShort}
-            tick={{
-              fill: "var(--color-ink-muted)",
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-            }}
-            axisLine={false}
-            tickLine={false}
-            width={72}
-          />
-
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: "var(--color-rule)", strokeWidth: 1 }} />
-
-          {/* Income area */}
-          <Area
-            type="monotone"
-            dataKey="income"
-            isAnimationActive={false}
-            stroke="var(--color-mint)"
-            strokeWidth={2.5}
-            fill="url(#incomeGradient)"
-            dot={false}
-            activeDot={{ r: 5, fill: "var(--color-mint)", stroke: "white", strokeWidth: 2 }}
-          />
-
-          {/* Expense area */}
-          <Area
-            type="monotone"
-            dataKey="expense"
-            isAnimationActive={false}
-            stroke="var(--color-ember)"
-            strokeWidth={2.5}
-            fill="url(#expenseGradient)"
-            dot={false}
-            activeDot={{ r: 5, fill: "var(--color-ember)", stroke: "white", strokeWidth: 2 }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-
-      {/* Legend — inline, bukan terpisah */}
-      <div className="flex items-center gap-4 mt-3 justify-end">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: "var(--color-mint)" }} />
-          <span className="text-small" style={{ fontFamily: "var(--font-ui)", color: "var(--color-ink-muted)" }}>Pemasukan</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: "var(--color-ember)" }} />
-          <span className="text-small" style={{ fontFamily: "var(--font-ui)", color: "var(--color-ink-muted)" }}>Pengeluaran</span>
-        </div>
+    <div className={cn("w-full min-w-0", className)}>
+      <div ref={ref} className="relative" style={{ height: HEIGHT }}>
+        {width > 0 ? (
+          <svg width={width} height={HEIGHT} className="chart-enter block touch-pan-y" role="img" aria-label="Grafik arus kas pemasukan dan pengeluaran per bulan"
+            onPointerMove={(event) => setActive(nearestIndex(event, xs))} onPointerDown={(event) => setActive(nearestIndex(event, xs))} onPointerLeave={(event) => { if (event.pointerType === "mouse") setActive(null); }}>
+            <defs>
+              <linearGradient id="cf-income" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={INCOME} stopOpacity="0.22" /><stop offset="100%" stopColor={INCOME} stopOpacity="0" /></linearGradient>
+              <linearGradient id="cf-expense" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={EXPENSE} stopOpacity="0.18" /><stop offset="100%" stopColor={EXPENSE} stopOpacity="0" /></linearGradient>
+            </defs>
+            {ticks.map((tick) => (
+              <g key={tick}>
+                {tick > 0 ? <line x1={PAD.left} x2={width - PAD.right} y1={y(tick)} y2={y(tick)} stroke="var(--color-rule)" strokeDasharray="3 6" /> : null}
+                <text x={PAD.left - 10} y={y(tick)} dy="0.32em" textAnchor="end" className="chart-axis">{formatRupiahShort(tick)}</text>
+              </g>
+            ))}
+            {data.map((item, index) => <text key={item.month} x={xs[index]} y={HEIGHT - 8} textAnchor="middle" className="chart-axis">{item.month}</text>)}
+            <path d={area("income")} fill="url(#cf-income)" />
+            <path d={area("expense")} fill="url(#cf-expense)" />
+            <path d={line("income")} className="chart-line" fill="none" stroke={INCOME} strokeWidth="2.5" strokeLinecap="round" />
+            <path d={line("expense")} className="chart-line" fill="none" stroke={EXPENSE} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1={PAD.left} x2={width - PAD.right} y1={baseline} y2={baseline} className="chart-baseline" strokeLinecap="square" />
+            {active !== null ? (
+              <g>
+                <line x1={xs[active]} x2={xs[active]} y1={PAD.top} y2={baseline} stroke="var(--color-rule-strong)" />
+                <circle cx={xs[active]} cy={y(data[active].income)} r="5" fill={INCOME} stroke="var(--color-surface-high)" strokeWidth="2" />
+                <circle cx={xs[active]} cy={y(data[active].expense)} r="5" fill={EXPENSE} stroke="var(--color-surface-high)" strokeWidth="2" />
+              </g>
+            ) : null}
+          </svg>
+        ) : null}
+        {point && active !== null ? (
+          <ChartTooltip x={xs[active]} width={width}>
+            <p className="mb-1 text-[12px] font-semibold text-ink">{point.month}</p>
+            <TooltipRow color={INCOME} label="Pemasukan" value={formatRupiah(point.income)} />
+            <TooltipRow color={EXPENSE} label="Pengeluaran" value={formatRupiah(point.expense)} />
+          </ChartTooltip>
+        ) : null}
       </div>
+      <ChartLegend className="mt-3" items={[{ color: INCOME, label: "Pemasukan" }, { color: EXPENSE, label: "Pengeluaran" }]} />
     </div>
   );
 }

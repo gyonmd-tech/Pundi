@@ -81,7 +81,7 @@ export default function KalkulatorPage() {
           >
             <ArrowLeft className="h-[18px] w-[18px]" />
           </button>
-          <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-gradient-to-br text-white shadow-card", tool.gradient)}>
+          <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-sm bg-gradient-to-br text-white shadow-card", tool.gradient)}>
             <Icon className="h-5 w-5" />
           </span>
           <div className="min-w-0">
@@ -112,13 +112,13 @@ export default function KalkulatorPage() {
               onClick={() => open(item.id)}
               style={{ animationDelay: `${index * 45}ms` }}
               className={cn(
-                "group relative isolate flex min-h-[9.5rem] flex-col overflow-hidden rounded-[22px] bg-gradient-to-br p-4 text-left text-white shadow-card transition duration-200 animate-in fade-in slide-in-from-bottom-2 hover:-translate-y-0.5 hover:shadow-float active:scale-[.98] sm:min-h-[11rem] sm:p-5",
+                "group relative isolate flex min-h-[9.5rem] flex-col overflow-hidden rounded-card bg-gradient-to-br p-4 text-left text-white shadow-card transition duration-200 animate-in fade-in slide-in-from-bottom-2 hover:-translate-y-0.5 hover:shadow-float active:scale-[.98] sm:min-h-[11rem] sm:p-5",
                 item.gradient,
               )}
             >
               <span aria-hidden className="absolute -right-8 -top-10 -z-10 h-32 w-32 rounded-full border-[18px] border-white/10 transition duration-500 group-hover:scale-110" />
               <span className="flex items-start justify-between">
-                <span className="grid h-10 w-10 place-items-center rounded-[13px] bg-white/15 backdrop-blur-sm"><Icon className="h-5 w-5" /></span>
+                <span className="grid h-10 w-10 place-items-center rounded-sm bg-white/15 backdrop-blur-sm"><Icon className="h-5 w-5" /></span>
                 <ArrowUpRight className="h-4 w-4 text-white/60 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
               </span>
               <span className="mt-auto pt-4">

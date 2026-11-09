@@ -61,7 +61,7 @@ export function AuthPanel({ mode, active, onSwitch }: AuthPanelProps) {
       inert={!active}
     >
       <div className="my-auto w-full max-w-[410px] text-center">
-        <Link href="/?web=1" aria-label="Kembali ke halaman utama Pundi" tabIndex={active ? 0 : -1} className="inline-flex rounded-[14px] p-1 transition hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine/25">
+        <Link href="/?web=1" aria-label="Kembali ke halaman utama Pundi" tabIndex={active ? 0 : -1} className="inline-flex rounded-sm p-1 transition hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine/25">
           <Image src="/PUNDI-brand-assets/pundi-logo.svg" alt="Pundi" width={150} height={44} priority className="theme-light-only h-9 w-auto object-contain sm:h-10" />
           <Image src="/PUNDI-brand-assets/pundi-logo-white.svg" alt="Pundi" width={150} height={44} priority className="theme-dark-only h-9 w-auto object-contain sm:h-10" />
         </Link>
@@ -84,7 +84,7 @@ export function AuthPanel({ mode, active, onSwitch }: AuthPanelProps) {
             suffix={<button type="button" tabIndex={active ? 0 : -1} onClick={() => setShowPassword((visible) => !visible)} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted transition hover:bg-paper hover:text-pine focus-visible:shadow-none" aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>}
           />
 
-          {error ? <div role="alert" aria-live="polite" className="rounded-[12px] bg-ember-10 px-4 py-3 text-left text-xs font-semibold leading-relaxed text-ember">{error}</div> : null}
+          {error ? <div role="alert" aria-live="polite" className="rounded-sm bg-ember-10 px-4 py-3 text-left text-xs font-semibold leading-relaxed text-ember">{error}</div> : null}
 
           <Button type="submit" size="lg" loading={pending} tabIndex={active ? 0 : -1} className="group w-full shadow-[0_12px_28px_rgba(91,74,239,.24)]">
             {pending ? "Memproses..." : isSignup ? "Sign up" : "Login"}

@@ -45,7 +45,7 @@ export function ChatHistory({ onNavigate, className }: { onNavigate?: () => void
         type="button"
         disabled={busy}
         onClick={() => { newChat(); onNavigate?.(); }}
-        className="flex h-11 w-full shrink-0 items-center gap-2.5 rounded-[14px] border border-rule bg-surface-high px-3.5 text-sm font-bold text-ink transition hover:border-brand-300 hover:text-brand-600 active:scale-[.99] disabled:opacity-50"
+        className="flex h-11 w-full shrink-0 items-center gap-2.5 rounded-sm border border-rule bg-surface-high px-3.5 text-sm font-bold text-ink transition hover:border-brand-300 hover:text-brand-600 active:scale-[.99] disabled:opacity-50"
       >
         <MessageSquarePlus className="h-[18px] w-[18px] text-brand-600" /> Chat baru
       </button>
@@ -67,7 +67,7 @@ export function ChatHistory({ onNavigate, className }: { onNavigate?: () => void
                       onClick={() => { openThread(thread.id); onNavigate?.(); }}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex w-full flex-col rounded-[12px] py-2 pl-3 pr-9 text-left transition disabled:opacity-60",
+                        "flex w-full flex-col rounded-sm py-2 pl-3 pr-9 text-left transition disabled:opacity-60",
                         active ? "bg-brand-600/10 text-ink" : "text-ink-muted hover:bg-surface-high hover:text-ink",
                       )}
                     >

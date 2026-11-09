@@ -67,7 +67,7 @@ export function CategoryIcon({
   const sizeClasses = {
     sm: "h-7 w-7 rounded-[9px]",
     md: "h-9 w-9 rounded-[11px]",
-    lg: "h-11 w-11 rounded-[14px]",
+    lg: "h-11 w-11 rounded-sm",
   };
 
   return (
@@ -88,11 +88,11 @@ export function CategoryIcon({
         style={{
           backgroundColor: color || "var(--color-brand-600)",
           backgroundImage: `linear-gradient(145deg, color-mix(in srgb, ${color || "var(--color-brand-600)"} 82%, white 18%), color-mix(in srgb, ${color || "var(--color-brand-600)"} 82%, black 18%))`,
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,.36), inset 0 -1px 0 rgba(17,39,114,.16)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,.36), inset 0 -1px 0 rgba(15,23,41,.16)",
         }}
       >
         <span aria-hidden="true" className="absolute -right-2 -top-2 h-5 w-5 rounded-full bg-white/20" />
-        <IconComponent className="relative drop-shadow-[0_1px_1px_rgba(17,39,114,.28)]" size={size} strokeWidth={2.25} />
+        <IconComponent className="relative drop-shadow-[0_1px_1px_rgba(15,23,41,.28)]" size={size} strokeWidth={2.25} />
         <span aria-hidden="true" className="absolute bottom-1 right-1 h-1 w-1 rounded-full bg-white/80" />
       </span>
     </div>

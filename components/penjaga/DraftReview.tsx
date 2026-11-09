@@ -64,7 +64,7 @@ export function DraftReview({ className }: { className?: string }) {
   }
 
   return (
-    <section className={cn("rounded-[22px] border border-brand-600/10 bg-surface-high shadow-card", className)} aria-labelledby="draft-title">
+    <section className={cn("rounded-card border border-brand-600/10 bg-surface-high shadow-card", className)} aria-labelledby="draft-title">
       <header className="flex flex-wrap items-center justify-between gap-3 p-5 pb-3">
         <div className="min-w-0">
           <h2 id="draft-title" className="font-display text-lg font-semibold tracking-[-0.02em] text-ink">
@@ -128,11 +128,11 @@ function DraftItem({ draft, index, error, onEdit, onReject }: {
 
   return (
     <li
-      className="animate-in fade-in slide-in-from-bottom-2 rounded-[18px] border border-rule bg-paper p-3"
+      className="animate-in fade-in slide-in-from-bottom-2 rounded-card border border-rule bg-paper p-3"
       style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
     >
       <div className="flex items-start gap-3">
-        <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[13px]", meta.tone)}>
+        <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-sm", meta.tone)}>
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
@@ -159,7 +159,7 @@ function DraftItem({ draft, index, error, onEdit, onReject }: {
               {meta.label} · {date.toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
               {draft.source === "hermes" ? " · via Hermes" : ""}
             </p>
-            <label className="flex shrink-0 items-baseline gap-1 rounded-[10px] px-1.5 py-0.5">
+            <label className="flex shrink-0 items-baseline gap-1 rounded-xs px-1.5 py-0.5">
               <span className="text-[11px] font-bold text-ink-muted">Rp</span>
               <input
                 inputMode="numeric"

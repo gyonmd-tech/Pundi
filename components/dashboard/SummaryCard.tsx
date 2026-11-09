@@ -86,7 +86,7 @@ export function SummaryCard({
       >
         <div className="flex justify-between items-start mb-3">
           <Skeleton className="h-4 w-24 rounded-[6px]" />
-          <Skeleton className="h-8 w-8 rounded-[10px]" delay={60} />
+          <Skeleton className="h-8 w-8 rounded-xs" delay={60} />
         </div>
         <Skeleton className="h-8 w-40 rounded-[8px] mb-2" delay={120} />
         <Skeleton className="h-4 w-20 rounded-[6px]" delay={180} />
@@ -138,7 +138,7 @@ export function SummaryCard({
         </div>
 
         {Icon && (
-          <div className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[14px] shadow-card", tone.icon)}>
+          <div className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-sm shadow-card", tone.icon)}>
             <Icon size={18} strokeWidth={1.9} />
           </div>
         )}

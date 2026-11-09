@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
@@ -28,7 +27,7 @@ export function AppSidebar() {
 
   return (
     <aside className={cn(
-      "fixed bottom-3 left-3 top-3 z-30 hidden flex-col overflow-hidden rounded-[28px] bg-brand-900 shadow-[0_18px_44px_rgba(17,39,114,.20)] transition-[width] duration-300 md:flex",
+      "fixed bottom-3 left-3 top-3 z-30 hidden flex-col overflow-hidden rounded-panel bg-brand-900 shadow-[0_18px_44px_rgba(15,23,41,.20)] transition-[width] duration-300 md:flex",
       isCollapsed ? "w-[72px]" : "w-[252px]"
     )}>
       <div className={cn("relative flex shrink-0 items-start justify-center overflow-hidden", isCollapsed ? "h-[108px]" : "h-[128px]")}>
@@ -64,13 +63,16 @@ export function AppSidebar() {
           onClick={toggleSidebar}
           aria-label={isCollapsed ? "Buka sidebar" : "Tutup sidebar"}
           title={isCollapsed ? "Buka sidebar" : "Tutup sidebar"}
-          className="relative z-10 mt-3 flex min-h-16 w-full items-center justify-center px-3 transition hover:-translate-y-0.5 focus-visible:rounded-[18px] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand-500/20"
+          className="relative z-10 mt-3 flex min-h-16 w-full items-center justify-center px-3 transition hover:-translate-y-0.5 focus-visible:rounded-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand-500/20"
         >
+          {/* Logo statis memakai <img>: next/image menambah ±14 KB JS di setiap halaman. */}
+          {/* eslint-disable @next/next/no-img-element */}
           {isCollapsed ? (
-            <Image src="/PUNDI-brand-assets/pundi-symbol.svg" alt="Pundi" width={48} height={48} priority className="h-12 w-12 object-contain" />
+            <img src="/PUNDI-brand-assets/pundi-symbol.svg" alt="Pundi" width={48} height={48} fetchPriority="high" className="h-12 w-12 object-contain" />
           ) : (
-            <Image src="/PUNDI-brand-assets/pundi-logo.svg" alt="Pundi" width={156} height={48} priority className="h-12 w-auto object-contain" />
+            <img src="/PUNDI-brand-assets/pundi-logo.svg" alt="Pundi" width={156} height={48} fetchPriority="high" className="h-12 w-auto object-contain" />
           )}
+          {/* eslint-enable @next/next/no-img-element */}
         </button>
       </div>
 
@@ -82,7 +84,7 @@ export function AppSidebar() {
       </nav>
 
       <div className="border-t border-white/10 p-2.5">
-        <div className={cn("flex items-center rounded-[18px] border border-white/15 bg-white/10 p-2 shadow-card", isCollapsed ? "justify-center" : "gap-2.5")}>
+        <div className={cn("flex items-center rounded-card border border-white/15 bg-white/10 p-2 shadow-card", isCollapsed ? "justify-center" : "gap-2.5")}>
           <Link href="/pengaturan" className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-xs font-bold text-[var(--color-brand-900)] shadow-card">
             {preferences.avatarFileId ? (
               // eslint-disable-next-line @next/next/no-img-element

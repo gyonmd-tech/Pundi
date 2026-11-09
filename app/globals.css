@@ -26,10 +26,11 @@ body {
   max-width: 100vw;
   overflow-x: clip;
   background:
-    radial-gradient(circle at 10% -10%, rgba(143, 188, 255, 0.18), transparent 32rem),
-    radial-gradient(circle at 100% 14%, rgba(36, 89, 222, 0.08), transparent 28rem),
+    radial-gradient(60rem 28rem at 15% -12%, color-mix(in srgb, var(--color-brand-300) 22%, transparent), transparent 70%),
+    radial-gradient(40rem 22rem at 105% 0%, color-mix(in srgb, var(--color-lime) 12%, transparent), transparent 70%),
     var(--color-paper);
   color: var(--color-ink);
+  font-feature-settings: "ss01", "cv11";
   touch-action: pan-y;
 }
 
@@ -46,10 +47,22 @@ textarea {
   font: inherit;
 }
 
+/* Hierarki: h1 = Fraunces (serif lembut, identitas); h2/h3 = Geist tebal
+   agar judul kartu tetap ringkas dan mudah dipindai. */
 h1,
+.page-title {
+  font-family: var(--font-display);
+  font-weight: 500 !important;
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 60;
+  text-wrap: balance;
+}
+
 h2,
 h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
+  font-weight: 650;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 
@@ -106,7 +119,7 @@ textarea::placeholder {
 [data-type="number"] {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.01em;
 }
 
 .chart-baseline {
@@ -131,7 +144,7 @@ textarea::placeholder {
 
 @media (hover: hover) {
   .card:hover {
-    border-color: rgba(36, 89, 222, 0.22);
+    border-color: color-mix(in srgb, var(--color-brand-600) 22%, transparent);
     box-shadow: var(--shadow-card-hover);
   }
 }
@@ -161,13 +174,13 @@ textarea::placeholder {
   background: var(--color-pine);
   color: white;
   font-weight: 700;
-  box-shadow: 0 8px 18px rgba(36, 89, 222, 0.2);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--color-brand-600) 20%, transparent);
   transition: transform var(--duration-fast), box-shadow var(--duration-fast), background var(--duration-fast);
 }
 
 .material-button:hover {
   background: var(--color-pine-hover);
-  box-shadow: 0 10px 24px rgba(36, 89, 222, 0.26);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--color-brand-600) 26%, transparent);
 }
 
 .material-button:active {
@@ -183,8 +196,8 @@ textarea::placeholder {
 
 .eyebrow {
   font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-pine);
 }
@@ -193,9 +206,21 @@ textarea::placeholder {
   font-family: var(--font-display);
   font-size: var(--text-display-l);
   line-height: var(--leading-display-l);
-  font-weight: 700;
-  letter-spacing: -0.035em;
+
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 60;
+  letter-spacing: -0.025em;
   color: var(--color-ink);
+}
+
+/* Angka besar (saldo, total): Fraunces dengan angka tabular. */
+.figure-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 40;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .page-subtitle {
@@ -206,7 +231,7 @@ textarea::placeholder {
 
 .glass-panel {
   border: var(--border-hairline);
-  background: rgba(249, 251, 255, 0.94);
+  background: color-mix(in srgb, var(--color-surface-high) 94%, transparent);
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -281,7 +306,7 @@ input[data-search-input="true"]:focus-visible,
  */
 @media (max-width: 639px) {
   html { font-size: 15px; }
-  .page-title { font-size: 1.5rem; line-height: 1.15; }
+  .page-title { font-size: 1.75rem; line-height: 1.12; }
   .page-subtitle { font-size: 0.8125rem; }
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   textarea,
@@ -303,11 +328,15 @@ input[data-search-input="true"]:focus-visible,
   font-feature-settings: "kern" 1, "ss01" 1;
 }
 
-.dashboard-modern h1,
-.dashboard-modern h2,
-.dashboard-modern h3 {
+.dashboard-modern h1 {
   font-family: var(--font-display);
   letter-spacing: -0.025em;
+}
+
+.dashboard-modern h2,
+.dashboard-modern h3 {
+  font-family: var(--font-ui);
+  letter-spacing: -0.015em;
 }
 
 .dashboard-modern .font-mono {
@@ -330,11 +359,15 @@ input[data-search-input="true"]:focus-visible,
   font-feature-settings: "kern" 1, "ss01" 1;
 }
 
-.app-modern h1,
-.app-modern h2,
-.app-modern h3 {
+.app-modern h1 {
   font-family: var(--font-display);
   letter-spacing: -0.025em;
+}
+
+.app-modern h2,
+.app-modern h3 {
+  font-family: var(--font-ui);
+  letter-spacing: -0.015em;
 }
 
 .app-modern .font-mono {
@@ -354,12 +387,12 @@ input[data-search-input="true"]:focus-visible,
 .dashboard-modern [data-widget-id="calendar"] .card { background: var(--color-surface-high) !important; }
 
 .dashboard-puzzle.is-dragging {
-  background-color: rgba(36, 89, 222, 0.08);
+  background-color: color-mix(in srgb, var(--color-brand-600) 8%, transparent);
   background-image:
-    linear-gradient(rgba(36, 89, 222, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(36, 89, 222, 0.12) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--color-brand-600) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-brand-600) 12%, transparent) 1px, transparent 1px);
   background-size: 44px 44px;
-  box-shadow: inset 0 0 0 2px rgba(36, 89, 222, 0.16), var(--shadow-clay-soft);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-brand-600) 16%, transparent), var(--shadow-clay-soft);
 }
 
 @media (hover: hover) {
@@ -388,11 +421,11 @@ input[data-search-input="true"]:focus-visible,
    di gelap butuh garis nyata agar kolom input tetap terbaca batasnya. */
 :root[data-theme="dark"] .border-surface-high\/80 { border-color: var(--color-rule-strong); }
 
-:root[data-theme="dark"] .glass-panel { background: rgba(18, 29, 51, 0.92); }
+:root[data-theme="dark"] .glass-panel { background: color-mix(in srgb, var(--color-surface) 92%, transparent); }
 :root[data-theme="dark"] body {
   background:
-    radial-gradient(circle at 10% -10%, rgba(92, 143, 242, 0.12), transparent 32rem),
-    radial-gradient(circle at 100% 14%, rgba(36, 89, 222, 0.10), transparent 28rem),
+    radial-gradient(60rem 28rem at 15% -12%, color-mix(in srgb, var(--color-brand-500) 16%, transparent), transparent 70%),
+    radial-gradient(40rem 22rem at 105% 0%, color-mix(in srgb, var(--color-lime) 6%, transparent), transparent 70%),
     var(--color-paper);
 }
 :root[data-theme="dark"] .card:hover { border-color: rgba(140, 170, 255, 0.28); }
@@ -439,4 +472,44 @@ body:has([aria-modal="true"]) nav[aria-label="Navigasi mobile"] { display: none;
 @media (pointer: coarse) {
   .tap-target { position: relative; }
   .tap-target::after { content: ""; position: absolute; inset: -10px -6px; }
+}
+
+
+/* ---------- Identitas 2026-11 ---------- */
+
+/* Permukaan "hero": kobalt pekat dengan kilau lime tipis di sudut. */
+.hero-surface {
+  background:
+    radial-gradient(28rem 16rem at 110% -20%, color-mix(in srgb, var(--color-lime) 30%, transparent), transparent 60%),
+    radial-gradient(24rem 18rem at -10% 120%, color-mix(in srgb, var(--color-brand-400) 45%, transparent), transparent 60%),
+    linear-gradient(150deg, var(--color-brand-700), var(--color-brand-900));
+  box-shadow: 0 1px 2px rgba(15, 23, 41, 0.2), 0 18px 40px color-mix(in srgb, var(--color-brand-700) 28%, transparent);
+}
+
+/* Bilah kemajuan bersama: rel lembut + isi berwarna, mengisi saat muncul. */
+@layer components {
+  /* Di dalam layer agar utilitas seperti bg-white/15 bisa menimpa warna rel. */
+  .progress-track {
+    position: relative;
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: var(--color-surface-soft);
+  }
+  .progress-track > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+  }
+}
+
+/* Modal: tirai memudar; panel naik seperti sheet di ponsel, membesar di desktop. */
+.modal-scrim { animation: pundi-enter 200ms var(--ease-out) backwards; --tw-enter-opacity: 0; }
+.modal-panel { animation: pundi-sheet 380ms var(--ease-sheet) backwards; }
+@media (min-width: 640px) {
+  .modal-panel { animation: pundi-enter 260ms var(--ease-out) backwards; --tw-enter-opacity: 0; --tw-enter-scale: 0.96; --tw-enter-translate-y: 8px; }
+}
+@keyframes pundi-sheet { from { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .modal-scrim, .modal-panel { animation: none !important; }
 }

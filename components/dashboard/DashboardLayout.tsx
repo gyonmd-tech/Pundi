@@ -65,7 +65,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const byId = new Map(elements.map((element) => [element.props["data-widget-id"], element]));
 
   return <div className="space-y-4">
-    {canDrag ? <div className="hidden flex-wrap items-center justify-between gap-3 rounded-[22px] md:flex border border-brand-950 bg-brand-900 px-4 py-3 text-white shadow-card">
+    {canDrag ? <div className="hidden flex-wrap items-center justify-between gap-3 rounded-card md:flex border border-brand-950 bg-brand-900 px-4 py-3 text-white shadow-card">
       <div className="flex items-center gap-2 text-xs font-semibold"><Grip className="h-4 w-4" /><span>Tarik kartu langsung untuk menyusun puzzle dashboard.</span></div>
       <Button variant="outline" size="sm" onClick={() => setOrder([...ids])}><RotateCcw className="h-4 w-4" /> Atur ulang</Button>
     </div> : null}

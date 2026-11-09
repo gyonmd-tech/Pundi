@@ -21,7 +21,7 @@
    Transform yang tertahan menjadikan elemen "containing block" bagi
    descendant position:fixed — modal di dalamnya jadi terkurung & terpotong. */
 @utility animate-in {
-  animation: pundi-enter var(--tw-duration, 260ms) cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation: pundi-enter var(--tw-duration, 260ms) var(--ease-out) backwards;
 }
 @utility fade-in {
   --tw-enter-opacity: 0;
@@ -138,6 +138,80 @@
   100% { transform: translateY(14px) scale(0.6); opacity: 0; }
 }
 
+/* ---------- Identitas 2026-11: gerak halaman, kartu, chart ---------- */
+
+/* Masuk halaman: anak langsung naik bergantian (maks. 8 langkah). */
+.page-enter > * > * {
+  animation: pundi-enter var(--duration-enter) var(--ease-out) backwards;
+  --tw-enter-opacity: 0;
+  --tw-enter-translate-y: 10px;
+}
+.page-enter > * > *:nth-child(2) { animation-delay: calc(var(--stagger) * 1); }
+.page-enter > * > *:nth-child(3) { animation-delay: calc(var(--stagger) * 2); }
+.page-enter > * > *:nth-child(4) { animation-delay: calc(var(--stagger) * 3); }
+.page-enter > * > *:nth-child(5) { animation-delay: calc(var(--stagger) * 4); }
+.page-enter > * > *:nth-child(6) { animation-delay: calc(var(--stagger) * 5); }
+.page-enter > * > *:nth-child(7) { animation-delay: calc(var(--stagger) * 6); }
+.page-enter > * > *:nth-child(n + 8) { animation-delay: calc(var(--stagger) * 7); }
+
+/* Kartu daftar (anggaran, tujuan, rekening) masuk bergantian. */
+.stagger-children > * {
+  animation: pundi-enter var(--duration-enter) var(--ease-out) backwards;
+  --tw-enter-opacity: 0;
+  --tw-enter-translate-y: 8px;
+}
+.stagger-children > *:nth-child(2) { animation-delay: 40ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 80ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 160ms; }
+.stagger-children > *:nth-child(n + 6) { animation-delay: 200ms; }
+
+/* Bilah kemajuan mengisi dari kiri saat muncul. */
+.progress-fill {
+  transform-origin: left center;
+  animation: pundi-grow-x 700ms var(--ease-out) backwards;
+  animation-delay: 120ms;
+}
+
+/* Chart SVG (components/charts). */
+.chart-axis {
+  fill: var(--color-ink-soft);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.chart-enter { animation: pundi-enter 420ms var(--ease-out) backwards; --tw-enter-opacity: 0; }
+.chart-line {
+  stroke-dasharray: 2400;
+  stroke-dashoffset: 0;
+  animation: pundi-draw-in 900ms var(--ease-in-out) backwards;
+}
+.chart-bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: pundi-grow-y 560ms var(--ease-out) backwards;
+}
+.chart-donut circle { animation: pundi-enter 520ms var(--ease-out) backwards; --tw-enter-opacity: 0; --tw-enter-scale: 0.94; transform-origin: center; transform-box: fill-box; }
+.chart-tooltip {
+  padding: 0.5rem 0.75rem;
+  border: var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-surface-high) 96%, transparent);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(8px);
+  animation: pundi-enter 160ms var(--ease-out) backwards;
+  --tw-enter-opacity: 0;
+  --tw-enter-translate-y: 4px;
+}
+
+/* Umpan balik tekan untuk kartu yang bisa diketuk. */
+.pressable { transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out), border-color var(--duration-normal) var(--ease-out); }
+.pressable:active { transform: scale(0.985); }
+
+@keyframes pundi-grow-x { from { transform: scaleX(0); } }
+@keyframes pundi-grow-y { from { transform: scaleY(0); } }
+@keyframes pundi-draw-in { from { stroke-dashoffset: 2400; } }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-in,
   .skeleton-rise,
@@ -145,8 +219,22 @@
   .skeleton-line-draw,
   .skeleton-bar,
   .skeleton-spin,
-  .skeleton-coin {
+  .skeleton-coin,
+  .page-enter > * > *,
+  .stagger-children > *,
+  .progress-fill,
+  .chart-enter,
+  .chart-line,
+  .chart-bar,
+  .chart-donut circle,
+  .chart-tooltip {
     animation: none !important;
   }
+  .pressable:active { transform: none; }
   .skeleton-line-draw { stroke-dashoffset: 0; }
 }
+
+/* Cincin kemajuan tujuan: berputar mengisi dari nol saat muncul. */
+.goal-ring { transition: stroke-dashoffset 600ms var(--ease-out); animation: pundi-ring 900ms var(--ease-out) backwards; animation-delay: 120ms; }
+@keyframes pundi-ring { from { stroke-dashoffset: var(--ring-from); } }
+@media (prefers-reduced-motion: reduce) { .goal-ring { animation: none !important; } }

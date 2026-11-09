@@ -27,7 +27,7 @@ export function NotificationDropdown() {
 
   return (
     <Dropdown
-      contentClassName="w-[min(25rem,calc(100vw-1.5rem))] overflow-hidden rounded-[22px] border-brand-200 p-0"
+      contentClassName="w-[min(25rem,calc(100vw-1.5rem))] overflow-hidden rounded-card border-brand-200 p-0"
       trigger={({ open, toggle }) => (
         <div className="relative">
           <button
@@ -35,7 +35,7 @@ export function NotificationDropdown() {
             aria-label={`${unread.length} notifikasi belum dibaca`}
             aria-expanded={open}
             onClick={toggle}
-            className={`grid h-10 w-10 place-items-center rounded-[14px] border transition-all sm:h-11 sm:w-11 sm:rounded-[16px] ${open ? "border-brand-600 bg-brand-600 text-white shadow-[0_8px_20px_rgba(36,89,222,.22)]" : "border-brand-200 bg-surface-high text-brand-700 shadow-card hover:border-brand-300 hover:bg-brand-50"}`}
+            className={`grid h-10 w-10 place-items-center rounded-sm border transition-all sm:h-11 sm:w-11 sm:rounded-sm ${open ? "border-brand-600 bg-brand-600 text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--color-brand-600)_22%,transparent)]" : "border-brand-200 bg-surface-high text-brand-700 shadow-card hover:border-brand-300 hover:bg-brand-50"}`}
           >
             <Bell className="h-[18px] w-[18px]" strokeWidth={1.9} />
           </button>
@@ -55,7 +55,7 @@ export function NotificationDropdown() {
 
           <div className="max-h-[22rem] space-y-1 overflow-y-auto p-2">
             {insights.slice(0, 5).map((insight) => (
-              <article key={insight.id} className={`flex gap-3 rounded-[15px] p-3 transition ${insight.isRead ? "hover:bg-paper" : "bg-brand-50 hover:bg-brand-100"}`}>
+              <article key={insight.id} className={`flex gap-3 rounded-sm p-3 transition ${insight.isRead ? "hover:bg-paper" : "bg-brand-50 hover:bg-brand-100"}`}>
                 <span className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-[11px] ${insight.isRead ? "bg-paper text-ink-muted" : "bg-surface-high text-brand-700 shadow-card"}`}><Lightbulb className="h-4 w-4" /></span>
                 <div className="min-w-0 flex-1"><p className="line-clamp-2 text-xs font-medium leading-relaxed text-ink">{insight.message}</p><time className="mt-1.5 block text-[10px] font-medium text-ink-muted">{formatDate(insight.createdAt, "time")}</time></div>
                 {!insight.isRead ? <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-600" /> : null}
@@ -64,7 +64,7 @@ export function NotificationDropdown() {
           </div>
 
           <div className="border-t border-rule bg-surface-high p-2">
-            <Link href="/insight" onClick={close} className="flex min-h-11 items-center justify-between rounded-[14px] px-3 text-xs font-bold text-pine transition hover:bg-pine-10">Buka pusat insight<ChevronRight className="h-4 w-4" /></Link>
+            <Link href="/insight" onClick={close} className="flex min-h-11 items-center justify-between rounded-sm px-3 text-xs font-bold text-pine transition hover:bg-pine-10">Buka pusat insight<ChevronRight className="h-4 w-4" /></Link>
           </div>
         </>
       )}

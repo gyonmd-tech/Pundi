@@ -253,7 +253,7 @@ export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddP
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:space-y-5 sm:px-5 sm:py-5">
-        <div className="grid grid-cols-5 gap-1 rounded-[20px] border border-surface-high/80 bg-[linear-gradient(145deg,var(--color-lavender-10),var(--color-surface))] p-1.5 shadow-[inset_2px_2px_7px_rgba(65,49,130,.08),inset_-2px_-2px_7px_rgba(255,255,255,.9)]">
+        <div className="grid grid-cols-5 gap-1 rounded-card border border-surface-high/80 bg-[linear-gradient(145deg,var(--color-lavender-10),var(--color-surface))] p-1.5 shadow-[inset_2px_2px_7px_rgba(65,49,130,.08),inset_-2px_-2px_7px_rgba(255,255,255,.9)]">
           {transactionTypes.map((item) => {
             const Icon = item.icon;
             const active = mode === item.value;
@@ -263,7 +263,7 @@ export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddP
                 type="button"
                 onClick={() => chooseMode(item.value)}
                 className={cn(
-                  "flex min-h-13 min-w-0 flex-col items-center justify-center gap-1 rounded-[14px] border px-0.5 text-[9px] font-extrabold leading-none transition-all sm:text-[10px]",
+                  "flex min-h-13 min-w-0 flex-col items-center justify-center gap-1 rounded-sm border px-0.5 text-[9px] font-extrabold leading-none transition-all sm:text-[10px]",
                   active ? `${item.tone} shadow-clay-soft` : "border-transparent text-ink-muted hover:bg-surface-high/80 hover:text-ink"
                 )}
               >
@@ -275,13 +275,13 @@ export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddP
         </div>
 
         {mode === "cash_withdrawal" ? (
-          <div className="rounded-[16px] border border-sky-200 bg-sky-50 px-4 py-3 text-xs leading-relaxed text-sky-800">
+          <div className="rounded-sm border border-sky-200 bg-sky-50 px-4 py-3 text-xs leading-relaxed text-sky-800">
             Saldo dipindahkan dari rekening sumber ke akun tunai. Catatan ini tidak dihitung sebagai pemasukan atau pengeluaran.
           </div>
         ) : null}
 
         {isAdjustment ? (
-          <div className="rounded-[18px] border border-violet-200/70 bg-[linear-gradient(145deg,var(--color-surface),var(--color-lavender-10))] px-4 py-3 text-xs leading-relaxed text-violet-800 shadow-clay-soft">
+          <div className="rounded-card border border-violet-200/70 bg-[linear-gradient(145deg,var(--color-surface),var(--color-lavender-10))] px-4 py-3 text-xs leading-relaxed text-violet-800 shadow-clay-soft">
             Isi saldo nyata pada tanggal yang dipilih. Selisih dihitung otomatis dan tidak masuk ke grafik arus kas.
           </div>
         ) : null}
@@ -295,7 +295,7 @@ export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddP
               value={amount}
               onChange={(event) => setAmount(event.target.value.replace(/\D/g, ""))}
               placeholder="0"
-              className="h-14 rounded-[18px] border-surface-high/80 bg-[linear-gradient(145deg,var(--color-surface),var(--color-lavender-10))] pl-12 font-mono text-xl font-semibold tracking-tight"
+              className="h-14 rounded-card border-surface-high/80 bg-[linear-gradient(145deg,var(--color-surface),var(--color-lavender-10))] pl-12 font-mono text-xl font-semibold tracking-tight"
             />
           </div>
         </Field>
@@ -327,7 +327,7 @@ export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddP
                 </Select>
               </div>
             ) : (
-              <p className="rounded-[14px] border border-ember/20 bg-ember-10 p-3 text-xs text-ember">
+              <p className="rounded-sm border border-ember/20 bg-ember-10 p-3 text-xs text-ember">
                 {mode === "cash_withdrawal" ? "Buat akun berjenis Uang tunai di Pengaturan terlebih dahulu." : "Tambahkan rekening lain agar transfer dapat dilakukan."}
               </p>
             )}
@@ -348,7 +348,7 @@ export function QuickAddPanel({ onClose, transaction, initialAmount }: QuickAddP
         <Field label="Catatan" hint={`${note.length}/80`}>
           <div className="relative">
             <ReceiptText className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-ink-muted" />
-            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder={isAdjustment ? "Contoh: saldo setelah pengecekan rekening" : "Contoh: makan siang bersama tim"} className="min-h-24 w-full resize-none rounded-[16px] border border-rule bg-surface-high py-3 pl-10 pr-3 text-sm text-ink outline-none shadow-clay-soft transition placeholder:text-ink-muted/70 focus:border-pine/40 focus:ring-4 focus:ring-pine/10" />
+            <textarea value={note} maxLength={80} onChange={(event) => setNote(event.target.value)} placeholder={isAdjustment ? "Contoh: saldo setelah pengecekan rekening" : "Contoh: makan siang bersama tim"} className="min-h-24 w-full resize-none rounded-sm border border-rule bg-surface-high py-3 pl-10 pr-3 text-sm text-ink outline-none shadow-clay-soft transition placeholder:text-ink-muted/70 focus:border-pine/40 focus:ring-4 focus:ring-pine/10" />
           </div>
         </Field>
 

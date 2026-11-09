@@ -18,7 +18,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className
         aria-invalid={Boolean(error)}
         aria-describedby={error && id ? `${id}-error` : undefined}
         className={cn(
-          "h-11 w-full rounded-[15px] border border-rule bg-surface-high px-3.5 text-sm text-ink outline-none shadow-clay-soft transition-[border-color,box-shadow,background] placeholder:text-ink-muted/70 focus:border-pine/45 focus:shadow-[inset_2px_2px_7px_rgba(40,96,230,.08),0_0_0_4px_rgba(40,96,230,.1)]",
+          "h-11 w-full rounded-sm border border-rule bg-surface-high px-3.5 text-sm text-ink outline-none transition-[border-color,box-shadow,background] duration-150 placeholder:text-ink-soft hover:border-rule-strong focus:border-brand-500 focus:shadow-focus",
           icon && "pl-10",
           error && "border-ember focus:border-ember focus:ring-ember/15",
           className,
@@ -34,7 +34,7 @@ Input.displayName = "Input";
 export function Field({ label, hint, required, children, className }: { label: string; hint?: string; required?: boolean; children: React.ReactNode; className?: string }) {
   return (
     <label className={cn("block space-y-2", className)}>
-      <span className="flex items-center justify-between gap-3 text-xs font-bold text-ink">
+      <span className="flex items-center justify-between gap-3 text-xs font-semibold text-ink">
         <span>{label}{required ? <span className="ml-1 text-ember">*</span> : null}</span>
         {hint ? <span className="font-normal text-ink-muted">{hint}</span> : null}
       </span>

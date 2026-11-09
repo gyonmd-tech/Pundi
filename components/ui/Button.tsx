@@ -6,22 +6,22 @@ import { LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export const buttonVariants = cva(
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-[16px] border px-4 text-sm font-semibold tracking-[-0.01em] transition-[transform,box-shadow,background-color,border-color,color] duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand-500/20 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:translate-y-px",
+  "inline-flex min-h-10 select-none items-center justify-center gap-2 rounded-sm border px-4 text-sm font-semibold tracking-[-0.01em] transition-[transform,box-shadow,background-color,border-color,color] duration-150 ease-[var(--ease-out)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand-500/25 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:pointer-events-none disabled:opacity-45 active:scale-[0.97]",
   {
     variants: {
       variant: {
-        primary: "border-brand-600 bg-brand-600 text-white shadow-[0_8px_18px_rgba(36,89,222,.20)] hover:border-brand-700 hover:bg-brand-700 hover:shadow-[0_10px_24px_rgba(36,89,222,.25)]",
-        secondary: "border-brand-900 bg-brand-900 text-white shadow-[0_8px_18px_rgba(19,43,94,.20)] hover:bg-brand-950",
-        outline: "border-brand-200 bg-surface-high text-ink shadow-card hover:border-brand-300 hover:bg-brand-50",
-        ghost: "border-transparent bg-transparent text-ink-muted hover:bg-brand-50 hover:text-brand-800",
+        primary: "border-transparent bg-brand-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,.18),0_1px_2px_rgba(15,23,41,.12),0_6px_16px_color-mix(in_srgb,var(--color-brand-600)_24%,transparent)] hover:bg-brand-700",
+        secondary: "border-transparent bg-ink text-paper shadow-[0_1px_2px_rgba(15,23,41,.16)] hover:opacity-90",
+        outline: "border-rule bg-surface-high text-ink shadow-[0_1px_2px_rgba(15,23,41,.04)] hover:border-rule-strong hover:bg-surface",
+        ghost: "border-transparent bg-transparent text-ink-muted hover:bg-surface-soft hover:text-ink",
         danger: "border-ember-ink bg-ember-ink text-white shadow-card hover:brightness-95",
-        soft: "border-brand-800 bg-brand-800 text-white shadow-[0_8px_18px_rgba(23,54,143,.20)] hover:brightness-95",
-        success: "border-mint-ink bg-mint-ink text-white shadow-[0_8px_18px_rgba(11,107,84,.20)] hover:brightness-95",
+        soft: "border-transparent bg-brand-50 text-brand-700 hover:bg-brand-100",
+        success: "border-transparent bg-mint-ink text-white shadow-[0_1px_2px_rgba(15,23,41,.12)] hover:brightness-95",
       },
       size: {
-        sm: "min-h-9 rounded-[12px] px-3 text-xs",
+        sm: "min-h-9 rounded-sm px-3 text-xs",
         md: "min-h-10 px-4",
-        lg: "min-h-12 rounded-[16px] px-5 text-base",
+        lg: "min-h-12 rounded-sm px-5 text-base",
         icon: "h-10 min-h-10 w-10 px-0",
       },
     },

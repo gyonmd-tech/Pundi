@@ -2,6 +2,19 @@
 
 > Dokumen ini adalah **source of truth visual**. Skill UI/UX yang akan ditambahkan ke project wajib mengacu ke § 4 (Design System) sebelum membuat komponen apa pun — lihat aturan lengkap di AGENTS.md.
 
+## 0. Identitas 2026-11 (berlaku — menggantikan § 4.2, 4.3, 4.5, 4.8 di bawah)
+
+Sumber kebenaran nilai: `styles/tokens.css` (terang & gelap). Bagian § 4 di bawah dipertahankan sebagai sejarah filosofi "modern ledger"; prinsipnya (ledger baseline, angka tabular, warna semantik bukan dekorasi) tetap berlaku.
+
+| Aspek | Ketentuan |
+|---|---|
+| **Warna** | Brand **kobalt** (`brand-600` #2D4FE6, skala 50–950) di atas netral sejuk (`paper` #F3F4F7, `surface-high` #FFF, `ink` #0F1729). Aksen **lime** (`lime` #C5F04A) dipakai hemat: kemajuan di permukaan hero, chip penanda, kilau sudut hero. Semantik: `mint` (masuk/aman), `ember` (keluar/lewat), `warning`. |
+| **Tipografi** | **Fraunces** (serif lembut, optical size) untuk `h1`/`.page-title` (bobot 500) dan angka besar (`.figure-display`, angka tabular). **Geist** untuk UI, teks, judul kartu (`h2`/`h3` semibold), dan angka tabel (`tabular-nums`). |
+| **Permukaan** | Kartu: `surface-high` + hairline `rule` + bayangan tipis (`--shadow-card`). Hero (`.hero-surface`): gradien kobalt pekat + kilau lime; maksimal satu per layar. Radius: `xs` 10px, `sm` 14px (kontrol), `card` 20px, `panel` 24px — jangan pakai `rounded-[Npx]` baru. |
+| **Komponen** | Tombol: primary kobalt, secondary tinta, outline hairline, soft tonal; tekan = `scale(.97)`. Chip/Badge tonal (latar lembut + teks gelap). Baris preferensi = satu tombol `role="switch"`. Kemajuan: `.progress-track > .progress-fill`. |
+| **Motion** | `--ease-out` cubic-bezier(.16,1,.3,1), `--ease-sheet` untuk sheet bawah. Bagian halaman naik bergantian (`.page-enter`, 45 ms), daftar kartu `.stagger-children`, bilah & cincin mengisi saat muncul, chart menggambar diri (`components/charts`). Modal: sheet dari bawah di ponsel, skala halus di desktop. Semua mati di `prefers-reduced-motion`. |
+| **Chart** | SVG murni di `components/charts` (tanpa library). Ledger baseline tetap wajib; tooltip lewat sentuh & hover. |
+
 ## 1. Sitemap
 
 ```
