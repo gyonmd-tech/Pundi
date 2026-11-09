@@ -29,7 +29,7 @@ function CopyBlock({ label, value }: { label: string; value: string }) {
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? "Tersalin" : "Salin"}
         </button>
       </div>
-      <pre className="max-w-full overflow-x-auto rounded-[14px] bg-[#112772] p-3.5 text-[12px] leading-relaxed text-[#E7EFFF]"><code>{value}</code></pre>
+      <pre className="max-w-full overflow-x-auto rounded-sm bg-[#112772] p-3.5 text-[12px] leading-relaxed text-[#E7EFFF]"><code>{value}</code></pre>
     </div>
   );
 }
@@ -90,15 +90,15 @@ export function ConnectHermesCard({ className }: { className?: string }) {
       <section className="space-y-3" aria-labelledby="penjaga-chat-title">
         <h3 id="penjaga-chat-title" className="flex items-center gap-2 text-sm font-extrabold text-ink"><MessageSquare className="h-4 w-4 text-pine" /> Chat Penjaga di aplikasi</h3>
         {!isCloud ? (
-          <p className="rounded-[14px] bg-brand-50 p-3.5 text-xs leading-relaxed text-ink">
+          <p className="rounded-sm bg-brand-50 p-3.5 text-xs leading-relaxed text-ink">
             Kamu sedang di <b>mode latihan</b> — Penjaga memakai pengurai lokal. Masuk dengan akun Pundi untuk memakai AI sungguhan.
           </p>
         ) : chatState === "ready" ? (
-          <p className="rounded-[14px] bg-mint-10 p-3.5 text-xs leading-relaxed text-mint-ink">
+          <p className="rounded-sm bg-mint-10 p-3.5 text-xs leading-relaxed text-mint-ink">
             Aktif memakai <b>{engineLabel}</b>. Chat di web dan aplikasi mobile siap dipakai.
           </p>
         ) : (
-          <div className="space-y-2 rounded-[14px] bg-brand-50 p-3.5 text-xs leading-relaxed text-ink">
+          <div className="space-y-2 rounded-sm bg-brand-50 p-3.5 text-xs leading-relaxed text-ink">
             <p><b>Belum aktif.</b> Pilih salah satu, lalu isi Environment Variables di Vercel dan redeploy:</p>
             <p><b>A. AI langsung (disarankan)</b> — tanpa PC menyala: <code className="font-mono">PENJAGA_LLM_API_KEY</code>, <code className="font-mono">PENJAGA_LLM_MODEL</code>, opsional <code className="font-mono">PENJAGA_LLM_BASE_URL</code>.</p>
             <p><b>B. Hermes milikmu</b> — PC harus menyala + tunnel: <code className="font-mono">HERMES_API_URL</code>, <code className="font-mono">HERMES_API_KEY</code>, <code className="font-mono">PENJAGA_OWNER_EMAILS</code>.</p>
@@ -116,16 +116,16 @@ export function ConnectHermesCard({ className }: { className?: string }) {
             <li className="space-y-2.5">
               <p className="text-sm font-semibold text-ink"><span className="mr-2 text-brand-600">1.</span>Buat token akses</p>
               {freshToken ? (
-                <div className="rounded-[14px] border border-warning/40 bg-warning-10 p-3 text-xs text-warning-ink">
+                <div className="rounded-sm border border-warning/40 bg-warning-10 p-3 text-xs text-warning-ink">
                   Salin sekarang — token ini hanya ditampilkan sekali.
-                  <code className="mt-2 block break-all rounded-[10px] bg-surface-high p-2 font-mono text-[12px] text-ink">{freshToken}</code>
+                  <code className="mt-2 block break-all rounded-xs bg-surface-high p-2 font-mono text-[12px] text-ink">{freshToken}</code>
                 </div>
               ) : null}
               <Button size="sm" variant="outline" onClick={create} loading={creating}>
                 <KeyRound className="h-4 w-4" /> Buat token baru
               </Button>
               {tokens.length ? (
-                <ul className="divide-y divide-rule rounded-[14px] border border-rule">
+                <ul className="divide-y divide-rule rounded-sm border border-rule">
                   {tokens.map((token) => (
                     <li key={token.id} className="flex items-center gap-3 px-3 py-2.5">
                       <div className="min-w-0 flex-1">

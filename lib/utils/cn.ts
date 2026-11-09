@@ -1,10 +1,11 @@
 /**
  * lib/utils/cn.ts
- * Utility untuk menggabungkan Tailwind class dengan deduplication.
+ * Menggabungkan class Tailwind: clsx + mergeClasses (pengganti ringan
+ * tailwind-merge, lihat lib/utils/mergeClasses.ts).
  */
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { mergeClasses } from "./mergeClasses";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return mergeClasses(clsx(inputs));
 }

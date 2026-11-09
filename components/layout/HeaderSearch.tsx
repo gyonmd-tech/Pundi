@@ -99,14 +99,14 @@ export function HeaderSearch({ autoFocus = false }: { autoFocus?: boolean }) {
       </form>
 
       {open && normalized ? (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[20px] border border-brand-200 bg-surface-high p-2 shadow-float">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-card border border-brand-200 bg-surface-high p-2 shadow-float">
           {transactionResults.length ? (
             <div>
               <p className="px-3 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-muted">Transaksi</p>
               {transactionResults.map((transaction) => {
                 const category = categories.find((item) => item.id === transaction.categoryId)?.name ?? "Transfer";
                 return (
-                  <button key={transaction.id} type="button" onClick={() => navigate(`/transaksi?focus=${transaction.id}`)} className="flex min-h-12 w-full items-center gap-3 rounded-[13px] px-3 text-left transition hover:bg-brand-50">
+                  <button key={transaction.id} type="button" onClick={() => navigate(`/transaksi?focus=${transaction.id}`)} className="flex min-h-12 w-full items-center gap-3 rounded-sm px-3 text-left transition hover:bg-brand-50">
                     <span className={`h-8 w-1 rounded-full ${transaction.type === "income" ? "bg-mint" : transaction.type === "expense" ? "bg-ember" : "bg-brass"}`} />
                     <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold text-ink">{transaction.note || category}</span><span className="mt-0.5 block text-[10px] text-ink-muted">{category} · {formatDate(transaction.date, "short")}</span></span>
                     <span className="shrink-0 text-xs font-semibold tabular-nums text-ink">{formatRupiah(transaction.amount)}</span>
@@ -120,7 +120,7 @@ export function HeaderSearch({ autoFocus = false }: { autoFocus?: boolean }) {
             <div className={transactionResults.length ? "mt-2 border-t border-rule pt-2" : ""}>
               <p className="px-3 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-muted">Halaman</p>
               {pageResults.map((page) => (
-                <button key={page.href} type="button" onClick={() => navigate(page.href)} className="flex min-h-11 w-full items-center justify-between rounded-[13px] px-3 text-left transition hover:bg-paper">
+                <button key={page.href} type="button" onClick={() => navigate(page.href)} className="flex min-h-11 w-full items-center justify-between rounded-sm px-3 text-left transition hover:bg-paper">
                   <span><span className="block text-xs font-bold text-ink">{page.label}</span><span className="text-[10px] text-ink-muted">{page.description}</span></span>
                   <ArrowRight className="h-3.5 w-3.5 text-brand-600" />
                 </button>

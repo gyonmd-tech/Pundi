@@ -22,7 +22,7 @@ const config: CapacitorConfig = {
   appId: "id.pundi.app",
   appName: "Pundi",
   webDir: "mobile/www",
-  backgroundColor: "#F4F7FC",
+  backgroundColor: "#F3F4F7",
   server: {
     url: `${appUrl}/?source=app`,
     cleartext: appUrl.startsWith("http://"),

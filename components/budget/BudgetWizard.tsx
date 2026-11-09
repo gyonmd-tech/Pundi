@@ -163,7 +163,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
                   disabled={taken}
                   onClick={() => { setCategoryId(item.id); setStep(1); }}
                   className={cn(
-                    "flex min-h-14 items-center gap-2.5 rounded-[14px] border p-2.5 text-left transition active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-45",
+                    "flex min-h-14 items-center gap-2.5 rounded-sm border p-2.5 text-left transition active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-45",
                     categoryId === item.id ? "border-brand-600 bg-brand-600/10" : "border-rule bg-surface hover:border-brand-300",
                   )}
                 >
@@ -177,7 +177,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
                 </button>
               ))}
               {!hasSelfReward ? (
-                <button type="button" onClick={createSelfReward} className="flex min-h-14 items-center gap-2.5 rounded-[14px] border border-dashed border-lavender/60 p-2.5 text-left text-lavender-ink transition hover:bg-lavender-10">
+                <button type="button" onClick={createSelfReward} className="flex min-h-14 items-center gap-2.5 rounded-sm border border-dashed border-lavender/60 p-2.5 text-left text-lavender-ink transition hover:bg-lavender-10">
                   <span className="grid h-7 w-7 place-items-center rounded-lg bg-lavender-10"><Gift className="h-3.5 w-3.5" /></span>
                   <span className="text-[13px] font-bold">+ Self Reward</span>
                 </button>
@@ -191,7 +191,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
               <h3 className="text-base font-bold text-ink">Berapa batas untuk {category?.name ?? "kategori ini"}?</h3>
             </div>
 
-            <div className="mt-5 rounded-[20px] border border-rule bg-surface p-4">
+            <div className="mt-5 rounded-card border border-rule bg-surface p-4">
               <p className="text-sm font-semibold text-ink-muted">Batas belanja</p>
               <label className="mt-1 flex items-baseline gap-2">
                 <span className="text-xl font-bold text-brand-600">Rp</span>
@@ -208,7 +208,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
               </label>
               <div className="mt-3 flex items-center gap-2">
                 <span className="text-sm font-semibold text-ink-muted">setiap</span>
-                <div className="grid flex-1 grid-cols-3 gap-1 rounded-[14px] bg-surface-soft p-1" role="radiogroup" aria-label="Periode jatah">
+                <div className="grid flex-1 grid-cols-3 gap-1 rounded-sm bg-surface-soft p-1" role="radiogroup" aria-label="Periode jatah">
                   {CADENCES.map((option) => (
                     <button
                       key={option.value}
@@ -217,7 +217,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
                       aria-checked={cadence === option.value}
                       onClick={() => setCadence(option.value)}
                       className={cn(
-                        "h-9 rounded-[10px] text-sm font-bold transition",
+                        "h-9 rounded-xs text-sm font-bold transition",
                         cadence === option.value ? "bg-surface-high text-brand-600 shadow-card" : "text-ink-muted hover:text-ink",
                       )}
                     >
@@ -246,21 +246,21 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
         ) : (
           <div>
             <h3 className="text-base font-bold text-ink">Cek sebelum disimpan</h3>
-            <div className="mt-4 overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,#1D48B5,#2860E6)] p-5 text-white">
+            <div className="mt-4 overflow-hidden rounded-card bg-[linear-gradient(135deg,#1D48B5,#2860E6)] p-5 text-white">
               <div className="flex items-center gap-2.5">
-                {category ? <span className="rounded-[10px] bg-white p-0.5"><CategoryIcon icon={category.icon} color={category.color} size={14} containerSize="sm" /></span> : null}
+                {category ? <span className="rounded-xs bg-white p-0.5"><CategoryIcon icon={category.icon} color={category.color} size={14} containerSize="sm" /></span> : null}
                 <p className="font-bold">{category?.name}</p>
               </div>
               <p className="mt-4 text-xs font-semibold text-white/70">Jatah per {unit}</p>
               <p className="font-display text-3xl font-black tabular-nums tracking-[-0.03em]">{formatRupiah(value)}</p>
               <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-[12px] bg-white/12 p-2.5"><p className="text-white/70">Sebulan</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(monthly)}</p></div>
-                <div className="rounded-[12px] bg-white/12 p-2.5"><p className="text-white/70">Per hari</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(perDay)}</p></div>
+                <div className="rounded-sm bg-white/12 p-2.5"><p className="text-white/70">Sebulan</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(monthly)}</p></div>
+                <div className="rounded-sm bg-white/12 p-2.5"><p className="text-white/70">Per hari</p><p className="mt-0.5 text-sm font-bold tabular-nums">{formatRupiah(perDay)}</p></div>
               </div>
             </div>
 
             {cadence !== "monthly" ? (
-              <div className="mt-4 rounded-[16px] border border-rule">
+              <div className="mt-4 rounded-sm border border-rule">
                 <button type="button" onClick={() => setShowAdvanced((state) => !state)} aria-expanded={showAdvanced} className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold text-ink">
                   Opsi lanjutan
                   <ChevronDown className={cn("h-4 w-4 text-ink-muted transition", showAdvanced && "rotate-180")} />

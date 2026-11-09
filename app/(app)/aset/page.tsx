@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/Input";
  */
 
 import React, { useState } from "react";
-import { CategoryBreakdownChart } from "@/components/charts/lazy";
+import { CategoryBreakdownChart } from "@/components/charts";
 import { useApp, useAssets } from "@/lib/data/store";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { getAssetPnL, type AssetType, type Asset } from "@/lib/data/mock";

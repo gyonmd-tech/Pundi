@@ -45,12 +45,12 @@ export function PenjagaThread() {
   if (historyLoading) {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-6 px-1 pt-6" role="status" aria-label="Memuat percakapan">
-        <Skeleton className="ml-auto h-11 w-2/3 rounded-[20px]" />
+        <Skeleton className="ml-auto h-11 w-2/3 rounded-card" />
         <div className="flex gap-3">
           <Skeleton className="h-8 w-8 shrink-0 rounded-full" delay={80} />
           <div className="flex-1 space-y-2"><Skeleton className="h-4 w-11/12" delay={140} /><Skeleton className="h-4 w-3/4" delay={200} /><Skeleton className="h-4 w-1/2" delay={260} /></div>
         </div>
-        <Skeleton className="ml-auto h-11 w-1/2 rounded-[20px]" delay={320} />
+        <Skeleton className="ml-auto h-11 w-1/2 rounded-card" delay={320} />
       </div>
     );
   }
@@ -80,7 +80,7 @@ export function PenjagaThread() {
               type="button"
               disabled={disabled || busy}
               onClick={() => send(suggestion.text)}
-              className="group rounded-[16px] border border-rule bg-surface-high px-3.5 py-3 text-left transition sm:rounded-[18px] sm:p-4 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
+              className="group rounded-sm border border-rule bg-surface-high px-3.5 py-3 text-left transition sm:rounded-card sm:p-4 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-pine">{suggestion.title}</span>
               <span className="mt-1 block text-[13px] leading-snug text-ink-muted group-hover:text-ink">“{suggestion.text}”</span>
@@ -97,7 +97,7 @@ export function PenjagaThread() {
     <div className="mx-auto w-full max-w-3xl space-y-6 px-1 pb-6 pt-4" aria-live="polite">
       {messages.map((message) => message.role === "user" ? (
         <div key={message.id} className="flex justify-end">
-          <p className="max-w-[85%] whitespace-pre-wrap break-words rounded-[20px] rounded-br-[6px] bg-brand-600 px-4 py-2.5 text-[15px] leading-relaxed text-white shadow-[0_8px_18px_rgba(36,89,222,.18)]">
+          <p className="max-w-[85%] whitespace-pre-wrap break-words rounded-card rounded-br-[6px] bg-brand-600 px-4 py-2.5 text-[15px] leading-relaxed text-white shadow-[0_8px_18px_color-mix(in_srgb,var(--color-brand-600)_18%,transparent)]">
             {message.content}
           </p>
         </div>
@@ -117,7 +117,7 @@ export function PenjagaThread() {
             ) : null}
             <div className={cn(
               "mt-1.5 break-words text-[15px] leading-relaxed",
-              message.error ? "rounded-[14px] border border-ember/30 bg-ember-10 px-3.5 py-2.5 text-ember-ink" : "text-ink",
+              message.error ? "rounded-sm border border-ember/30 bg-ember-10 px-3.5 py-2.5 text-ember-ink" : "text-ink",
             )}>
               {message.error ? <TriangleAlert className="mb-1 h-4 w-4" aria-hidden /> : null}
               {message.content ? (message.error ? message.content : <ChatMarkdown text={message.content} />) : <TypingDots />}
@@ -164,7 +164,7 @@ export function PenjagaComposer() {
         className="mx-auto w-full max-w-3xl"
         onSubmit={(event) => { event.preventDefault(); submit(); }}
       >
-        <div className="flex items-end gap-2 rounded-[24px] border border-rule bg-surface-high p-2 pl-4 shadow-float">
+        <div className="flex items-end gap-2 rounded-panel border border-rule bg-surface-high p-2 pl-4 shadow-float">
           <textarea
             ref={inputRef}
             rows={1}
@@ -181,7 +181,7 @@ export function PenjagaComposer() {
             type="submit"
             disabled={!text.trim() || busy || disabled}
             aria-label="Kirim"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-600 text-white shadow-[0_6px_14px_rgba(36,89,222,.3)] transition active:scale-95 disabled:bg-rule disabled:text-ink-soft disabled:shadow-none"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-600 text-white shadow-[0_6px_14px_color-mix(in_srgb,var(--color-brand-600)_30%,transparent)] transition active:scale-95 disabled:bg-rule disabled:text-ink-soft disabled:shadow-none"
           >
             <ArrowUp className="h-5 w-5" strokeWidth={2.4} />
           </button>

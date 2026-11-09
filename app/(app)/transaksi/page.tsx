@@ -1,8 +1,6 @@
 "use client";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { Select } from "@/components/ui/Select";
-import { DatePicker } from "@/components/ui/DatePicker";
 /**
  * app/(app)/transaksi/page.tsx
  * Daftar transaksi lengkap dengan search bar, filter panel multi-kriteria,
@@ -10,6 +8,7 @@ import { DatePicker } from "@/components/ui/DatePicker";
  */
 
 import React, { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useApp, useTransactions, useAccounts, useCategories } from "@/lib/data/store";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
@@ -23,12 +22,16 @@ import type { Transaction, TransactionType } from "@/lib/data/mock";
 import { useQuickAdd } from "@/lib/context/QuickAddContext";
 import { deleteTransactionAction } from "@/actions/transactions";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
-import { QuickAddPanel } from "@/components/transaction/QuickAddPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button, IconButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { SearchField } from "@/components/ui/SearchField";
 import { RecurringRulesCard } from "@/components/transaction/RecurringRulesCard";
+import { SearchField } from "@/components/ui/SearchField";
+
+// Panel ubah transaksi & kontrol panel filter hanya diunduh saat dibuka.
+const Select = dynamic(() => import("@/components/ui/Select").then((m) => m.Select), { ssr: false });
+const DatePicker = dynamic(() => import("@/components/ui/DatePicker").then((m) => m.DatePicker), { ssr: false });
+const QuickAddPanel = dynamic(() => import("@/components/transaction/QuickAddPanel").then((m) => m.QuickAddPanel), { ssr: false });
 
 const typeLabel: Record<TransactionType, { label: string; icon: LucideIcon; color: string; bg: string }> = {
   income:   { label: "Pemasukan",   icon: ArrowUpRight,   color: "var(--color-pine)",   bg: "var(--color-pine-10)" },
@@ -303,7 +306,7 @@ export default function TransaksiPage() {
               </p>
               <p className={cn("mt-1.5 text-[11px] font-medium sm:mt-2 sm:text-xs", s.type === "net" ? "text-white/70" : "text-ink-muted")}>{s.caption}</p>
             </div>
-            <div className={cn("h-11 w-11 shrink-0 place-items-center rounded-[15px] text-white shadow-card", s.type === "net" ? "grid" : "hidden sm:grid", s.type === "income" ? "bg-mint-ink" : s.type === "expense" ? "bg-ember-ink" : "bg-white/15")}>
+            <div className={cn("h-11 w-11 shrink-0 place-items-center rounded-sm text-white shadow-card", s.type === "net" ? "grid" : "hidden sm:grid", s.type === "income" ? "bg-mint-ink" : s.type === "expense" ? "bg-ember-ink" : "bg-white/15")}>
               <s.icon className="h-5 w-5" />
             </div>
           </Card>
@@ -428,7 +431,7 @@ export default function TransaksiPage() {
       )}
 
       {/* Transaction Records Card / Table */}
-      <div className="overflow-hidden rounded-[24px] border border-brand-600/10 bg-surface-high shadow-card">
+      <div className="overflow-hidden rounded-panel border border-brand-600/10 bg-surface-high shadow-card">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
             <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
@@ -630,21 +633,21 @@ export default function TransaksiPage() {
         const cfg = detailTransaction.transferKind === "cash_withdrawal" ? cashWithdrawalLabel : typeLabel[detailTransaction.type];
         const DetailIcon = cfg.icon;
         return <div className="fixed inset-0 z-50 flex items-end justify-center bg-brand-950/55 backdrop-blur-[3px] sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Detail transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setDetailTransaction(null); }}>
-          <article className="w-full overflow-hidden rounded-t-[28px] border border-brand-600/10 bg-surface-high shadow-float sm:max-w-lg sm:rounded-[28px]">
+          <article className="w-full overflow-hidden rounded-t-[28px] border border-brand-600/10 bg-surface-high shadow-float sm:max-w-lg sm:rounded-panel">
             <header className="flex items-start justify-between gap-4 border-b border-rule px-5 py-5 sm:px-6">
               <div className="min-w-0"><p className="eyebrow">Detail transaksi</p><h2 className="mt-1 truncate text-2xl font-bold text-ink">{detailTransaction.note || category?.name || "Transaksi"}</h2></div>
               <IconButton onClick={() => setDetailTransaction(null)} variant="outline" aria-label="Tutup detail transaksi"><X size={17}/></IconButton>
             </header>
             <div className="p-5 sm:p-6">
-              <div className="relative overflow-hidden rounded-[22px] bg-brand-600 p-5 text-white shadow-[0_14px_30px_rgba(36,89,222,.22)]">
+              <div className="relative overflow-hidden rounded-card bg-brand-600 p-5 text-white shadow-[0_14px_30px_color-mix(in_srgb,var(--color-brand-600)_22%,transparent)]">
                 <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] border-white/10" />
                 <div className="relative flex items-start justify-between gap-4">
                   <div><p className="text-xs font-bold text-white/70">Nominal transaksi</p><p className="mt-2 font-ui text-3xl font-bold tracking-[-0.045em] tabular-nums">{detailTransaction.type === "income" ? "+" : detailTransaction.type === "expense" ? "−" : ""}{formatRupiah(detailTransaction.amount)}</p></div>
-                  <div className="grid h-11 w-11 place-items-center rounded-[15px] bg-white/15"><DetailIcon className="h-5 w-5" /></div>
+                  <div className="grid h-11 w-11 place-items-center rounded-sm bg-white/15"><DetailIcon className="h-5 w-5" /></div>
                 </div>
                 <Badge tone={detailTransaction.transferKind === "cash_withdrawal" ? "primary" : detailTransaction.type === "income" ? "success" : detailTransaction.type === "expense" ? "danger" : "warning"} className="relative mt-4">{cfg.label}</Badge>
               </div>
-              <dl className="mt-4 overflow-hidden rounded-[18px] border border-rule bg-surface-high">
+              <dl className="mt-4 overflow-hidden rounded-card border border-rule bg-surface-high">
               {[
                 ["Tanggal transaksi", formatDate(detailTransaction.date, "short")],
                 ["Dicatat pada", formatRecordedDate(detailTransaction.createdAt || detailTransaction.date)],
@@ -664,7 +667,7 @@ export default function TransaksiPage() {
 
       {editTransaction && (
         <div className="fixed inset-0 z-50 bg-[rgba(28,24,47,0.42)] backdrop-blur-[3px]" role="dialog" aria-modal="true" aria-label="Edit transaksi" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditTransaction(null); }}>
-          <aside className="absolute inset-y-0 right-0 w-full overflow-hidden bg-surface-high shadow-float sm:bottom-3 sm:right-3 sm:top-3 sm:max-w-[440px] sm:rounded-[26px] sm:border sm:border-pine/10">
+          <aside className="absolute inset-y-0 right-0 w-full overflow-hidden bg-surface-high shadow-float sm:bottom-3 sm:right-3 sm:top-3 sm:max-w-[440px] sm:rounded-panel sm:border sm:border-pine/10">
             <QuickAddPanel key={editTransaction.id} transaction={editTransaction} onClose={() => setEditTransaction(null)} />
           </aside>
         </div>

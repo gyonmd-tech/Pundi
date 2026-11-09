@@ -1,18 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Geist } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/providers/PwaRegister";
 
-const bricolage = Bricolage_Grotesque({
+// Identitas 2026-11: Fraunces (judul & angka besar, serif lembut dengan
+// optical size) + Geist (UI, teks, dan angka tabel dengan tabular numerals).
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-bricolage",
+  variable: "--font-fraunces",
   display: "swap",
+  axes: ["opsz", "SOFT"],
   preload: true,
 });
 
-const jakarta = Plus_Jakarta_Sans({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-jakarta",
+  variable: "--font-geist",
   display: "swap",
   preload: true,
 });
@@ -53,8 +56,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F4F7FC" },
-    { media: "(prefers-color-scheme: dark)", color: "#0C1424" },
+    { media: "(prefers-color-scheme: light)", color: "#F3F4F7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B0F1A" },
   ],
 };
 
@@ -76,7 +79,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${bricolage.variable} ${jakarta.variable} antialiased`}>
+      <body className={`${fraunces.variable} ${geist.variable} antialiased`}>
         <PwaRegister />
         {children}
       </body>

@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { CashFlowChart, CategoryBreakdownChart } from "@/components/charts/lazy";
+import { CashFlowChart, CategoryBreakdownChart } from "@/components/charts";
 import { formatRupiah } from "@/lib/utils/formatter";
 import { useCategories, useTransactions } from "@/lib/data/store";
 import { useToast } from "@/lib/context/ToastContext";

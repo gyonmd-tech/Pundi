@@ -10,7 +10,7 @@ export function SidebarItem({ item, active, collapsed }: { item: NavigationItem;
       aria-current={active ? "page" : undefined}
       title={collapsed ? item.label : undefined}
       className={cn(
-        "group relative flex min-h-11 items-center gap-3 rounded-[16px] border transition-[background-color,border-color,color,box-shadow] duration-200",
+        "group relative flex min-h-11 items-center gap-3 rounded-sm border transition-[background-color,border-color,color,box-shadow] duration-200",
         collapsed ? "justify-center px-0" : "px-3",
         active
           ? "border-white bg-white font-semibold text-[var(--color-brand-900)] shadow-[0_10px_22px_rgba(7,28,70,0.24)]"
@@ -29,7 +29,7 @@ export function SidebarItem({ item, active, collapsed }: { item: NavigationItem;
         <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-ember" />
       ) : null}
       {collapsed ? (
-        <span className="pointer-events-none absolute left-full z-50 ml-3 translate-x-[-4px] whitespace-nowrap rounded-[10px] bg-brand-950 px-2.5 py-1.5 text-xs font-semibold text-white opacity-0 shadow-float transition group-hover:translate-x-0 group-hover:opacity-100">{item.label}</span>
+        <span className="pointer-events-none absolute left-full z-50 ml-3 translate-x-[-4px] whitespace-nowrap rounded-xs bg-brand-950 px-2.5 py-1.5 text-xs font-semibold text-white opacity-0 shadow-float transition group-hover:translate-x-0 group-hover:opacity-100">{item.label}</span>
       ) : null}
     </Link>
   );

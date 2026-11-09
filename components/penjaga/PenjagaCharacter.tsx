@@ -192,7 +192,7 @@ export function PenjagaCharacter({ mood = "idle", size = 160, className, grounde
         </g>
       ) : null}
       {eyesClosed ? (
-        <g className={styles.zzz} fill="#5C8FF2" fontFamily="var(--font-bricolage), system-ui" fontWeight="800">
+        <g className={styles.zzz} fill="#5C8FF2" fontFamily="var(--font-geist), system-ui" fontWeight="800">
           <text x="140" y="56" fontSize="16">z</text>
           <text x="152" y="40" fontSize="20">z</text>
           <text x="166" y="22" fontSize="24">Z</text>

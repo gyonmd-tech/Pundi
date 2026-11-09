@@ -43,11 +43,12 @@ const config: Config = {
         lavender: { DEFAULT: "var(--color-lavender)", ink: "var(--color-lavender-ink)", 10: "var(--color-lavender-10)" },
         cyan: { DEFAULT: "var(--color-cyan)", ink: "var(--color-cyan-ink)", 10: "var(--color-cyan-10)" },
         rule: { DEFAULT: "var(--color-rule)", strong: "var(--color-rule-strong)" },
+        lime: { DEFAULT: "var(--color-lime)", ink: "var(--color-lime-ink)", 10: "var(--color-lime-10)" },
       },
       fontFamily: {
-        display: ["var(--font-bricolage)", "Segoe UI", "system-ui", "sans-serif"],
-        ui: ["var(--font-jakarta)", "Segoe UI", "system-ui", "sans-serif"],
-        mono: ["var(--font-jakarta)", "Segoe UI", "system-ui", "sans-serif"],
+        display: ["var(--font-display)"],
+        ui: ["var(--font-ui)"],
+        mono: ["var(--font-mono)"],
       },
       fontSize: {
         "display-xl": ["clamp(2.15rem,4vw,3.25rem)", { lineHeight: "1.08" }],
@@ -64,14 +65,16 @@ const config: Config = {
         "sidebar-sm": "5rem",
       },
       borderRadius: {
-        card: "1.375rem",
-        sm: "0.875rem",
-        DEFAULT: "0.875rem",
+        card: "var(--radius-card)",
+        panel: "var(--radius-panel)",
+        sm: "var(--radius-sm)",
+        xs: "var(--radius-xs)",
+        DEFAULT: "var(--radius-sm)",
       },
       boxShadow: {
-        card: "0 2px 4px rgba(20,43,135,.04),0 10px 24px rgba(20,43,135,.07)",
-        float: "0 12px 24px rgba(17,39,114,.10),0 28px 70px rgba(17,39,114,.16)",
-        focus: "0 0 0 4px rgba(40,96,230,.16)",
+        card: "var(--shadow-card)",
+        float: "var(--shadow-float)",
+        focus: "var(--shadow-focus)",
       },
       maxWidth: { container: "90rem" },
       keyframes: {

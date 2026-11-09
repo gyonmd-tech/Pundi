@@ -101,7 +101,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
                 type="button"
                 onClick={() => setIcon(iconKey)}
                 aria-label={iconKey}
-                className={cn("flex items-center justify-center rounded-[12px] p-1 transition", icon === iconKey ? "ring-2 ring-brand-500" : "ring-1 ring-transparent hover:ring-rule")}
+                className={cn("flex items-center justify-center rounded-sm p-1 transition", icon === iconKey ? "ring-2 ring-brand-500" : "ring-1 ring-transparent hover:ring-rule")}
               >
                 <CategoryIcon icon={iconKey} color={color} size={14} containerSize="sm" />
               </button>
@@ -128,7 +128,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-[14px] border border-rule bg-paper p-3">
+        <div className="flex items-center gap-3 rounded-sm border border-rule bg-paper p-3">
           <CategoryIcon icon={icon} color={color} size={16} containerSize="md" />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-ink">{name || "Nama kategori"}</p>

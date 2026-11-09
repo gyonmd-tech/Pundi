@@ -72,12 +72,12 @@ export function ProfileNameModal({ open, currentName, email, avatarFileId, isDem
   return (
     <Modal open={open} onClose={onClose} title="Ubah profil" description="Nama dan foto ini ditampilkan pada sidebar dan halaman pengaturan.">
       <form onSubmit={submit} className="space-y-5 p-5">
-        <div className="flex items-center gap-3 rounded-[18px] border border-pine/12 bg-pine-10/55 p-4">
+        <div className="flex items-center gap-3 rounded-card border border-pine/12 bg-pine-10/55 p-4">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingAvatar}
-            className="group relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[14px] bg-surface-high text-pine shadow-2xs"
+            className="group relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-sm bg-surface-high text-pine shadow-2xs"
             aria-label="Ubah foto profil"
             title="Ubah foto profil"
           >

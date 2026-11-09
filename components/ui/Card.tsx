@@ -3,13 +3,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
 const cardVariants = cva(
-  "rounded-[22px] border shadow-card transition-[transform,box-shadow,border-color] duration-200",
+  "rounded-card border shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[var(--ease-out)]",
   {
     variants: {
       variant: {
-        default: "border-brand-600/10 bg-surface-high text-ink",
-        highlight:
-          "border-brand-700 bg-brand-600 text-white shadow-[0_16px_36px_rgba(36,89,222,.24)]",
+        default: "border-rule bg-surface-high text-ink",
+        highlight: "hero-surface border-transparent text-white",
       },
     },
     defaultVariants: { variant: "default" },
@@ -29,7 +28,7 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 }
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn("font-display text-lg font-semibold tracking-[-0.02em] text-inherit", className)} {...props} />;
+  return <h2 className={cn("text-base font-semibold tracking-[-0.015em] text-inherit", className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {

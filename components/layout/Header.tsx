@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus, Search, X } from "lucide-react";
@@ -40,11 +39,12 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
 
   return (
     <header className="sticky top-0 z-20 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-4 sm:pt-3 lg:px-5">
-      <div className="rounded-[20px] border border-brand-200/80 bg-surface/95 p-2 shadow-card backdrop-blur-xl sm:rounded-[24px] sm:p-2.5">
+      <div className="rounded-card border border-brand-200/80 bg-surface/95 p-2 shadow-card backdrop-blur-xl sm:rounded-panel sm:p-2.5">
         <div className="flex min-h-11 flex-wrap items-center gap-2 lg:grid lg:min-h-12 lg:grid-cols-[minmax(320px,1fr)_minmax(280px,560px)_minmax(205px,auto)] lg:gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2 lg:col-start-1 lg:row-start-1">
-            <Link href="/dashboard" aria-label="Pundi — ke dashboard" className="shrink-0 overflow-hidden rounded-[13px] shadow-card md:hidden">
-              <Image src="/PUNDI-brand-assets/app-icon-192.png" alt="" width={40} height={40} className="h-10 w-10" priority />
+            <Link href="/dashboard" aria-label="Pundi — ke dashboard" className="shrink-0 overflow-hidden rounded-sm shadow-card md:hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element -- logo statis; next/image menambah ±14 KB JS di setiap halaman */}
+              <img src="/PUNDI-brand-assets/app-icon-192.png" alt="" width={40} height={40} className="h-10 w-10" fetchPriority="high" />
             </Link>
             <AccountDropdown selectedId={selectedAccountId} onSelect={(id) => onSelectAccount?.(id)} />
             <HeaderDateBadge />
@@ -60,7 +60,7 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
               onClick={() => setMobileSearchOpen((open) => !open)}
               aria-label={mobileSearchOpen ? "Tutup pencarian" : "Buka pencarian"}
               aria-expanded={mobileSearchOpen}
-              className="grid h-10 w-10 place-items-center rounded-[14px] border border-brand-200 bg-surface-high text-ink shadow-card transition active:scale-95 sm:hidden"
+              className="grid h-10 w-10 place-items-center rounded-sm border border-brand-200 bg-surface-high text-ink shadow-card transition active:scale-95 sm:hidden"
             >
               {mobileSearchOpen ? <X className="h-[18px] w-[18px]" /> : <Search className="h-[18px] w-[18px]" />}
             </button>

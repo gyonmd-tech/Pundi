@@ -37,7 +37,7 @@ export function MobileBottomNav({ onQuickAdd }: { onQuickAdd?: () => void }) {
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(17,39,114,.08)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(15,23,41,.08)] backdrop-blur-xl md:hidden"
         aria-label="Navigasi mobile"
       >
         <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-center px-1">
@@ -49,7 +49,7 @@ export function MobileBottomNav({ onQuickAdd }: { onQuickAdd?: () => void }) {
               type="button"
               onClick={onQuickAdd}
               aria-label="Tambah transaksi"
-              className="-mt-6 grid h-[3.25rem] w-[3.25rem] place-items-center rounded-[18px] border-4 border-paper bg-brand-600 text-white shadow-[0_10px_24px_rgba(36,89,222,.35)] transition active:scale-95"
+              className="-mt-6 grid h-[3.25rem] w-[3.25rem] place-items-center rounded-card border-4 border-paper bg-brand-600 text-white shadow-[0_10px_24px_color-mix(in_srgb,var(--color-brand-600)_35%,transparent)] transition active:scale-95"
             >
               <Plus className="h-[22px] w-[22px]" strokeWidth={2.4} />
             </button>
@@ -154,11 +154,11 @@ function MoreSheet({ pathname, items, onClose }: { pathname: string; items: Retu
                 onClick={onClose}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-[20px] border p-2 text-center transition active:scale-[0.97]",
-                  active ? "border-brand-600 bg-brand-600 text-white shadow-[0_10px_22px_rgba(36,89,222,.25)]" : "border-rule bg-surface text-ink",
+                  "relative flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-card border p-2 text-center transition active:scale-[0.97]",
+                  active ? "border-brand-600 bg-brand-600 text-white shadow-[0_10px_22px_color-mix(in_srgb,var(--color-brand-600)_25%,transparent)]" : "border-rule bg-surface text-ink",
                 )}
               >
-                <span className={cn("grid h-10 w-10 place-items-center rounded-[14px]", active ? "bg-white/15" : "bg-brand-100 text-brand-700")}>
+                <span className={cn("grid h-10 w-10 place-items-center rounded-sm", active ? "bg-white/15" : "bg-brand-100 text-brand-700")}>
                   <Icon className="h-5 w-5" />
                 </span>
                 <span className="text-[11px] font-bold leading-tight">{item.label}</span>
@@ -169,9 +169,9 @@ function MoreSheet({ pathname, items, onClose }: { pathname: string; items: Retu
         </div>
 
         {install.installable ? (
-          <div className="mt-4 overflow-hidden rounded-[22px] bg-brand-900 p-4 text-white">
+          <div className="mt-4 overflow-hidden rounded-card bg-brand-900 p-4 text-white">
             <button type="button" onClick={handleInstall} className="flex w-full items-center gap-3 text-left">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-white/15"><Download className="h-5 w-5" /></span>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-sm bg-white/15"><Download className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold">Pasang aplikasi Pundi</span>
                 <span className="block text-[11px] text-white/70">Buka langsung dari layar utama, tampil layar penuh.</span>
@@ -179,7 +179,7 @@ function MoreSheet({ pathname, items, onClose }: { pathname: string; items: Retu
               <ChevronRight className="h-5 w-5 shrink-0 text-white/70" />
             </button>
             {showIosHint ? (
-              <p className="mt-3 flex items-start gap-2 rounded-[14px] bg-white/10 p-3 text-[12px] leading-relaxed text-white/85">
+              <p className="mt-3 flex items-start gap-2 rounded-sm bg-white/10 p-3 text-[12px] leading-relaxed text-white/85">
                 <Share className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>Di Safari, ketuk tombol <b>Bagikan</b> lalu pilih <b>Tambah ke Layar Utama</b>.</span>
               </p>
@@ -191,12 +191,12 @@ function MoreSheet({ pathname, items, onClose }: { pathname: string; items: Retu
           <button
             type="button"
             onClick={async () => { await logoutAction(); onClose(); router.replace("/login"); router.refresh(); }}
-            className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[18px] border border-rule text-sm font-bold text-ember-ink active:bg-ember-10"
+            className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-card border border-rule text-sm font-bold text-ember-ink active:bg-ember-10"
           >
             <LogOut className="h-4 w-4" /> Keluar dari akun
           </button>
         ) : (
-          <Link href="/login" onClick={onClose} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[18px] border border-rule text-sm font-bold text-brand-700 active:bg-brand-50">
+          <Link href="/login" onClick={onClose} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-card border border-rule text-sm font-bold text-brand-700 active:bg-brand-50">
             Masuk / daftar untuk menyimpan data
           </Link>
         )}

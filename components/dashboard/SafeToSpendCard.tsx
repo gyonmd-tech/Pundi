@@ -20,8 +20,8 @@ export function SafeToSpendCard({ result }: { result: SafeToSpendResult }) {
 
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-[1.75rem] p-5 shadow-card sm:p-7",
-      isOverExtended ? "bg-ember-ink text-white" : "bg-brand-600 text-white",
+      "relative overflow-hidden rounded-panel p-5 sm:p-7",
+      isOverExtended ? "bg-ember-ink text-white shadow-card" : "hero-surface text-white",
     )}>
       <div className="absolute -right-10 -top-16 h-44 w-44 rounded-full border-[26px] border-white/10" />
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -38,7 +38,7 @@ export function SafeToSpendCard({ result }: { result: SafeToSpendResult }) {
               </>
             ) : (
               <>
-                <p className="mt-1 font-ui tabular-nums text-[clamp(1.9rem,4vw,3rem)] font-semibold tracking-[-0.05em]">
+                <p className="figure-display mt-1 text-[clamp(2.1rem,4.5vw,3.25rem)] leading-none">
                   {formatRupiah(perDay)}
                 </p>
                 <p className="mt-1 text-xs text-white/70">per hari · {daysRemaining} hari tersisa bulan ini, di luar tagihan &amp; anggaran yang sudah direncanakan</p>

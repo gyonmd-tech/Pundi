@@ -46,7 +46,7 @@ export function DatePicker({ value, onValueChange, className, min, max, ariaLabe
 
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
-      <button ref={triggerRef} type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen((state) => !state)} className="flex h-11 w-full items-center gap-3 rounded-[15px] border border-rule bg-surface-high px-3.5 text-left text-sm font-semibold text-ink shadow-clay-soft transition hover:border-pine/25 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine/10">
+      <button ref={triggerRef} type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen((state) => !state)} className="flex h-11 w-full items-center gap-3 rounded-sm border border-rule bg-surface-high px-3.5 text-left text-sm font-semibold text-ink shadow-clay-soft transition hover:border-pine/25 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine/10">
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[9px] bg-sky-10 text-sky"><CalendarDays className="h-3.5 w-3.5" /></span>
         <span className={cn("flex-1", !selected && "text-ink-muted")}>{selected ? dateFormatter.format(selected) : "Pilih tanggal"}</span>
         <ChevronRight className={cn("h-4 w-4 text-ink-muted transition", open && "rotate-90 text-pine")} />
@@ -57,14 +57,14 @@ export function DatePicker({ value, onValueChange, className, min, max, ariaLabe
           ref={panelRef}
           style={{ ...portalPanelStyle(position), width: Math.min(position.width, 320) }}
           className={cn(
-            "z-[90] overflow-y-auto overscroll-contain rounded-[18px] border border-pine/12 bg-surface-high p-3 shadow-float animate-in fade-in",
+            "z-[90] overflow-y-auto overscroll-contain rounded-card border border-pine/12 bg-surface-high p-3 shadow-float animate-in fade-in",
             position.placement === "bottom" ? "slide-in-from-top-1" : "slide-in-from-bottom-1",
           )}
         >
           <div className="mb-3 flex items-center justify-between">
-            <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="grid h-8 w-8 place-items-center rounded-[10px] text-ink-muted hover:bg-pine-10 hover:text-pine"><ChevronLeft className="h-4 w-4" /></button>
+            <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="grid h-8 w-8 place-items-center rounded-xs text-ink-muted hover:bg-pine-10 hover:text-pine"><ChevronLeft className="h-4 w-4" /></button>
             <p className="text-sm font-extrabold capitalize text-ink">{monthFormatter.format(month)}</p>
-            <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="grid h-8 w-8 place-items-center rounded-[10px] text-ink-muted hover:bg-pine-10 hover:text-pine"><ChevronRight className="h-4 w-4" /></button>
+            <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="grid h-8 w-8 place-items-center rounded-xs text-ink-muted hover:bg-pine-10 hover:text-pine"><ChevronRight className="h-4 w-4" /></button>
           </div>
           <div className="grid grid-cols-7 gap-1">
             {weekdays.map((day, index) => <span key={`${day}-${index}`} className="py-1 text-center text-[10px] font-extrabold text-ink-muted">{day}</span>)}
@@ -73,7 +73,7 @@ export function DatePicker({ value, onValueChange, className, min, max, ariaLabe
               const dayValue = toValue(day);
               const disabled = Boolean((min && dayValue < min) || (max && dayValue > max));
               const active = dayValue === value;
-              return <button key={dayValue} type="button" disabled={disabled} onClick={() => { onValueChange(dayValue); setOpen(false); }} className={cn("grid aspect-square place-items-center rounded-[10px] text-xs font-semibold transition", active ? "bg-pine text-white shadow-sm" : "text-ink hover:bg-paper", disabled && "pointer-events-none opacity-30")}>{active ? <Check className="h-3.5 w-3.5" /> : day.getDate()}</button>;
+              return <button key={dayValue} type="button" disabled={disabled} onClick={() => { onValueChange(dayValue); setOpen(false); }} className={cn("grid aspect-square place-items-center rounded-xs text-xs font-semibold transition", active ? "bg-pine text-white shadow-sm" : "text-ink hover:bg-paper", disabled && "pointer-events-none opacity-30")}>{active ? <Check className="h-3.5 w-3.5" /> : day.getDate()}</button>;
             })}
           </div>
         </div>,

@@ -149,7 +149,7 @@ export function MoneyCalculator() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,26rem)_1fr] lg:items-start">
-      <section className="overflow-hidden rounded-[26px] border border-rule bg-surface-high shadow-card">
+      <section className="overflow-hidden rounded-panel border border-rule bg-surface-high shadow-card">
         <div className="bg-brand-900 px-5 pb-4 pt-3 text-white sm:pb-5 sm:pt-4">
           <p className="min-h-6 break-all text-right font-mono text-sm text-white/65" aria-label="Ekspresi">{expression ? formatExpression(expression) : "0"}</p>
           <p className="mt-1 break-all text-right font-mono text-[clamp(2rem,9vw,2.6rem)] font-bold leading-tight tabular-nums tracking-[-0.04em]" aria-live="polite">
@@ -176,11 +176,11 @@ export function MoneyCalculator() {
                 onClick={() => press(key)}
                 aria-label={key.kind === "back" ? "Hapus satu digit" : key.kind === "clear" ? "Hapus semua" : label}
                 className={cn(
-                  "grid h-[3.2rem] place-items-center rounded-[16px] text-xl font-bold transition active:scale-95 sm:h-16 sm:rounded-[18px]",
+                  "grid h-[3.2rem] place-items-center rounded-sm text-xl font-bold transition active:scale-95 sm:h-16 sm:rounded-card",
                   key.kind === "digit" || key.kind === "decimal" ? "bg-surface text-ink hover:bg-surface-soft" : "",
                   key.kind === "op" || key.kind === "percent" ? "bg-brand-50 text-[1.6rem] text-brand-700 hover:bg-brand-100" : "",
                   key.kind === "clear" || key.kind === "back" ? "bg-ember-10 text-ember-ink hover:brightness-95" : "",
-                  key.kind === "equals" ? "bg-brand-600 text-white shadow-[0_8px_18px_rgba(36,89,222,.3)] hover:bg-brand-700" : "",
+                  key.kind === "equals" ? "bg-brand-600 text-white shadow-[0_8px_18px_color-mix(in_srgb,var(--color-brand-600)_30%,transparent)] hover:bg-brand-700" : "",
                   key.kind === "digit" && key.value === "000" ? "text-lg" : "",
                 )}
               >
@@ -196,7 +196,7 @@ export function MoneyCalculator() {
         </div>
       </section>
 
-      <section className="rounded-[26px] border border-rule bg-surface-high p-4 shadow-card sm:p-5">
+      <section className="rounded-panel border border-rule bg-surface-high p-4 shadow-card sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-base font-bold text-ink"><History className="h-4 w-4 text-pine" />Riwayat hitungan</h2>
           {history.length ? <button type="button" onClick={clearHistory} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-ink-muted hover:text-ember"><Trash2 className="h-3.5 w-3.5" />Hapus</button> : null}

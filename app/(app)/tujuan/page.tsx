@@ -11,6 +11,7 @@ import { DatePicker } from "@/components/ui/DatePicker";
 
 import React, { useState } from "react";
 import { useApp, useGoals, useAccounts, useRecurringRules } from "@/lib/data/store";
+import { Button } from "@/components/ui/Button";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { GoalContributionModal } from "@/components/tujuan/GoalContributionModal";
 import { formatRupiah, formatDate, calcProgress } from "@/lib/utils/formatter";
@@ -166,111 +167,72 @@ export default function TujuanPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="page-title">
-            Tujuan Finansial & Tabungan
-          </h1>
-          <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-            Pantau dan alokasikan dana untuk rencana masa depanmu
-          </p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="page-title">Tujuan & Tabungan</h1>
+          <p className="mt-0.5 text-xs text-ink-muted sm:text-small">Pantau dan sisihkan dana untuk rencana masa depanmu</p>
         </div>
-
-        <button
-          onClick={openAdd}
-          className={cn(
-            "flex min-h-10 items-center gap-2 px-4 py-2 rounded-card text-small font-semibold shadow-sm",
-            "transition-all duration-200 hover:brightness-105 active:scale-95 group"
-          )}
-          style={{ backgroundColor: "var(--color-pine)", color: "white", fontFamily: "var(--font-ui)" }}
-        >
-          <Plus size={16} strokeWidth={2.5} className="transition-transform group-hover:rotate-90" />
+        <Button onClick={openAdd} className="shrink-0" aria-label="Tujuan baru">
+          <Plus size={16} strokeWidth={2.5} />
           <span className="hidden sm:inline">Tujuan Baru</span>
-        </button>
+        </Button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full min-w-0">
-        <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Total Target</p>
-          <p className="tabular-nums font-mono font-bold text-heading text-ink">{formatRupiah(totalTarget)}</p>
-        </div>
-
-        <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Total Terkumpul</p>
-          <p className="tabular-nums font-mono font-bold text-heading text-pine">{formatRupiah(totalSaved)}</p>
-        </div>
-
-        <div className="card col-span-2 p-4 transition-all hover:border-pine/30 w-full min-w-0 sm:col-span-1" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Kemajuan Kolektif</p>
-          <p className="tabular-nums font-mono font-bold text-heading text-brass">
-            {totalTarget > 0 ? calcProgress(totalSaved, totalTarget) : 0}% ({completedCount}/{goals.length} tercapai)
-          </p>
-        </div>
-      </div>
-
-      {/* Goals Grid */}
-      {goals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center card p-6 w-full min-w-0" style={{ borderColor: "var(--color-rule)" }}>
-          <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
-            <Target size={24} strokeWidth={1.5} />
+      {/* Ringkasan kolektif */}
+      <section className="hero-surface relative overflow-hidden rounded-panel p-5 text-white sm:p-6">
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-white/75">Total terkumpul</p>
+            <p className="figure-display mt-1.5 truncate text-[clamp(2rem,6vw,3rem)] leading-none">{formatRupiah(totalSaved)}</p>
+            <p className="mt-2 text-xs text-white/70 tabular-nums">dari target {formatRupiah(totalTarget)}</p>
           </div>
-          <p className="text-body font-semibold text-ink mb-1" style={{ fontFamily: "var(--font-ui)" }}>
-            Belum ada rencana tujuan tabungan
-          </p>
-          <p className="text-small text-ink-muted mb-4 max-w-sm" style={{ fontFamily: "var(--font-ui)" }}>
-            Mulai rencanakan dana darurat, liburan impian, atau pembelian barang idamanmu.
-          </p>
-          <button
-            onClick={openAdd}
-            className="px-4 py-2 rounded-card text-small font-semibold text-white bg-pine shadow-sm hover:brightness-105 active:scale-95 transition-all"
-          >
-            Buat Tujuan Pertama
-          </button>
+          <div className="shrink-0 text-right">
+            <p className="figure-display text-[2rem] leading-none text-lime">{totalTarget > 0 ? calcProgress(totalSaved, totalTarget) : 0}%</p>
+            <p className="mt-1.5 text-xs text-white/70">{completedCount}/{goals.length} tercapai</p>
+          </div>
+        </div>
+        <div className="progress-track mt-4 bg-white/15" aria-hidden>
+          <span className="progress-fill bg-lime" style={{ width: `${totalTarget > 0 ? Math.min(100, calcProgress(totalSaved, totalTarget)) : 0}%` }} />
+        </div>
+      </section>
+
+      {goals.length === 0 ? (
+        <div className="flex w-full min-w-0 flex-col items-center justify-center rounded-card border border-rule bg-surface-high px-6 py-14 text-center shadow-card">
+          <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-brand-50 text-brand-700"><Target size={24} strokeWidth={1.6} /></div>
+          <p className="text-body font-semibold text-ink">Belum ada tujuan tabungan</p>
+          <p className="mb-4 mt-1 max-w-sm text-small text-ink-muted">Mulai rencanakan dana darurat, liburan impian, atau barang idamanmu.</p>
+          <Button onClick={openAdd}><Plus size={16} />Buat tujuan pertama</Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full min-w-0">
+        <div className="stagger-children grid w-full min-w-0 grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {goals.map((g) => {
             const contributionRule = recurringRules.find((rule) => rule.goalId === g.id);
             return (
-              <div key={g.id} className="space-y-2">
-                <GoalCard
-                  {...g}
-                  monthlySavings={MONTHLY_SAVINGS}
-                  onEdit={() => openEdit(g)}
-                  onDelete={() => setDeleteId(g.id)}
-                />
+              <GoalCard key={g.id} {...g} monthlySavings={MONTHLY_SAVINGS} onEdit={() => openEdit(g)} onDelete={() => setDeleteId(g.id)}>
                 {contributionRule ? (
-                  <div className={cn("flex items-center justify-between gap-2 rounded-[16px] border border-rule bg-surface-high px-3.5 py-2.5", !contributionRule.isActive && "opacity-55")}>
-                    <div className="flex min-w-0 items-center gap-2">
-                      <Repeat size={14} className="shrink-0 text-pine" />
-                      <p className="truncate text-xs font-semibold text-ink">
-                        {formatRupiah(contributionRule.amount)}/{frequencyLabel[contributionRule.frequency]} · berikutnya {formatDate(contributionRule.nextOccurrence, "short")}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <button type="button" onClick={() => toggleContribution(contributionRule)} className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title={contributionRule.isActive ? "Jeda" : "Lanjutkan"} aria-label={contributionRule.isActive ? "Jeda kontribusi" : "Lanjutkan kontribusi"}>
-                        {contributionRule.isActive ? <Pause size={13} /> : <Play size={13} />}
+                  <div className={cn("flex items-center justify-between gap-2 px-4 py-2 sm:px-5", !contributionRule.isActive && "opacity-55")}>
+                    <p className="flex min-w-0 items-center gap-2 text-xs text-ink">
+                      <Repeat size={14} className="shrink-0 text-brand-600" />
+                      <span className="truncate"><b className="font-semibold tabular-nums">{formatRupiah(contributionRule.amount)}</b>/{frequencyLabel[contributionRule.frequency]} · {formatDate(contributionRule.nextOccurrence, "short")}</span>
+                    </p>
+                    <div className="-mr-2 flex shrink-0 items-center">
+                      <button type="button" onClick={() => toggleContribution(contributionRule)} className="grid h-9 w-9 place-items-center rounded-full text-ink-soft transition-colors hover:bg-surface-soft hover:text-ink" title={contributionRule.isActive ? "Jeda" : "Lanjutkan"} aria-label={contributionRule.isActive ? "Jeda kontribusi" : "Lanjutkan kontribusi"}>
+                        {contributionRule.isActive ? <Pause size={14} /> : <Play size={14} />}
                       </button>
-                      <button type="button" onClick={() => setContributionGoal(g)} className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-pine hover:bg-pine-10 transition-colors" title="Edit kontribusi" aria-label="Edit kontribusi otomatis">
-                        <Pencil size={13} />
+                      <button type="button" onClick={() => setContributionGoal(g)} className="grid h-9 w-9 place-items-center rounded-full text-ink-soft transition-colors hover:bg-surface-soft hover:text-ink" title="Edit kontribusi" aria-label="Edit kontribusi otomatis">
+                        <Pencil size={14} />
                       </button>
-                      <button type="button" onClick={() => removeContribution(contributionRule)} className="grid h-9 w-9 place-items-center rounded-card sm:h-auto sm:w-auto sm:p-1.5 text-ink-muted hover:text-ember hover:bg-ember-10 transition-colors" title="Hapus kontribusi" aria-label="Hapus kontribusi otomatis">
-                        <Trash2 size={13} />
+                      <button type="button" onClick={() => removeContribution(contributionRule)} className="grid h-9 w-9 place-items-center rounded-full text-ink-soft transition-colors hover:bg-ember-10 hover:text-ember-ink" title="Hapus kontribusi" aria-label="Hapus kontribusi otomatis">
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => setContributionGoal(g)}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-[16px] border border-dashed border-pine/30 bg-pine-10/40 px-3.5 py-2.5 text-xs font-semibold text-pine transition-colors hover:bg-pine-10"
-                  >
-                    <Repeat size={13} /> Sisihkan otomatis
+                  <button type="button" onClick={() => setContributionGoal(g)} className="flex w-full items-center justify-center gap-1.5 rounded-b-card px-4 py-3 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-50">
+                    <Repeat size={14} /> Sisihkan otomatis
                   </button>
                 )}
-              </div>
+              </GoalCard>
             );
           })}
         </div>

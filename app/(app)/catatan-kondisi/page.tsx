@@ -130,7 +130,7 @@ export default function CatatanKondisiPage() {
             <DatePicker value={date} onValueChange={setDate} max={new Date().toISOString().slice(0, 10)} ariaLabel="Tanggal kondisi saldo" />
           </div>
 
-          <div className="divide-y divide-rule rounded-[16px] border border-rule">
+          <div className="divide-y divide-rule rounded-sm border border-rule">
             {accounts.length === 0 ? (
               <p className="p-6 text-center text-sm text-ink-muted">Belum ada akun aktif untuk direkonsiliasi.</p>
             ) : accounts.map((account) => {

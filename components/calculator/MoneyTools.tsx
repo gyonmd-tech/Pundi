@@ -22,7 +22,7 @@ export function MoneyField({ label, value, onChange, suffix, hint, id }: { label
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">{label}</label>
-      <div className="flex items-center gap-2 rounded-[16px] border border-rule bg-surface px-3.5 focus-within:border-pine focus-within:shadow-[var(--shadow-focus)]">
+      <div className="flex items-center gap-2 rounded-sm border border-rule bg-surface px-3.5 focus-within:border-pine focus-within:shadow-[var(--shadow-focus)]">
         {suffix ? null : <span className="text-sm font-bold text-pine">Rp</span>}
         <input
           id={id}
@@ -45,7 +45,7 @@ function PercentField({ label, value, onChange, id, step = 0.5 }: { label: strin
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">{label}</label>
-      <div className="flex items-center gap-2 rounded-[16px] border border-rule bg-surface px-3.5 focus-within:border-pine focus-within:shadow-[var(--shadow-focus)]">
+      <div className="flex items-center gap-2 rounded-sm border border-rule bg-surface px-3.5 focus-within:border-pine focus-within:shadow-[var(--shadow-focus)]">
         <input
           id={id}
           type="number"
@@ -66,7 +66,7 @@ function PercentField({ label, value, onChange, id, step = 0.5 }: { label: strin
 
 function ResultPanel({ label, value, rows, footer }: { label: string; value: number; rows?: Array<[string, string]>; footer?: React.ReactNode }) {
   return (
-    <div className="rounded-[22px] bg-brand-900 p-5 text-white">
+    <div className="rounded-card bg-brand-900 p-5 text-white">
       <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-white/65">{label}</p>
       <p className="mt-1 break-all font-mono text-[clamp(1.75rem,8vw,2.25rem)] font-bold leading-tight tabular-nums tracking-[-0.04em]">{formatRupiah(value)}</p>
       <p className="mt-1 text-[11px] capitalize text-white/60">{value ? terbilang(value) : ""}</p>
@@ -94,7 +94,7 @@ function RecordButton({ amount }: { amount: number }) {
 function ToolLayout({ form, result }: { form: React.ReactNode; result: React.ReactNode }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start">
-      <section className="space-y-4 rounded-[26px] border border-rule bg-surface-high p-4 shadow-card sm:p-5">{form}</section>
+      <section className="space-y-4 rounded-panel border border-rule bg-surface-high p-4 shadow-card sm:p-5">{form}</section>
       <div className="lg:sticky lg:top-28">{result}</div>
     </div>
   );
@@ -316,7 +316,7 @@ export function LoanCalc() {
             <PercentField id="loan-rate" label="Bunga per tahun" value={rate} onChange={setRate} />
             <div>
               <label htmlFor="loan-months" className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">Tenor</label>
-              <div className="flex items-center gap-2 rounded-[16px] border border-rule bg-surface px-3.5 focus-within:border-pine">
+              <div className="flex items-center gap-2 rounded-sm border border-rule bg-surface px-3.5 focus-within:border-pine">
                 <input id="loan-months" type="number" inputMode="numeric" min={1} max={360} value={months || ""} placeholder="12" data-search-input="true" onChange={(event) => setMonths(Math.max(0, Math.min(360, Number(event.target.value) || 0)))} className="h-12 min-w-0 flex-1 border-0 bg-transparent text-right font-mono text-lg font-bold tabular-nums text-ink outline-none" />
                 <span className="text-sm font-semibold text-ink-muted">bln</span>
               </div>

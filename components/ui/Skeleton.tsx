@@ -28,7 +28,7 @@ export function SkeletonRise({ className, delay = 0, children }: { className?: s
 
 export function ChartSkeleton({ className, variant = "line" }: { className?: string; variant?: "line" | "bars" }) {
   return (
-    <div role="status" aria-label="Memuat grafik" className={cn("relative h-64 overflow-hidden rounded-[18px] bg-brand-50/60", className)}>
+    <div role="status" aria-label="Memuat grafik" className={cn("relative h-64 overflow-hidden rounded-card bg-brand-50/60", className)}>
       <svg viewBox="0 0 320 160" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
         {[32, 64, 96, 128].map((y) => <line key={y} x1="0" x2="320" y1={y} y2={y} stroke="var(--color-brand-200)" strokeDasharray="3 5" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
         {variant === "line" ? (
@@ -70,7 +70,7 @@ export function PenjagaLoader({ className }: { className?: string }) {
   }, []);
 
   return (
-    <div className={cn("flex items-center gap-3 overflow-hidden rounded-[20px] border border-brand-600/10 bg-surface-high px-3 py-2 shadow-card", className)}>
+    <div className={cn("flex items-center gap-3 overflow-hidden rounded-card border border-brand-600/10 bg-surface-high px-3 py-2 shadow-card", className)}>
       <div className="relative h-14 w-12 shrink-0">
         {[0, 1, 2].map((index) => (
           <span
@@ -108,7 +108,7 @@ export function DashboardSkeleton() {
       <PenjagaLoader className="max-w-md" />
       <HeaderSkeleton />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <SkeletonRise delay={120} className="relative min-h-60 overflow-hidden rounded-[28px] bg-brand-600 p-6 shadow-card lg:col-span-6">
+        <SkeletonRise delay={120} className="relative min-h-60 overflow-hidden rounded-panel bg-brand-600 p-6 shadow-card lg:col-span-6">
           <div aria-hidden className="skeleton-spin absolute -right-10 -top-14 h-40 w-40 rounded-full border-[24px] border-dashed border-white/10" />
           <Skeleton onBrand className="h-11 w-11" />
           <Skeleton onBrand className="mt-10 h-4 w-36" delay={100} />
@@ -116,7 +116,7 @@ export function DashboardSkeleton() {
           <div className="mt-7 flex gap-3"><Skeleton onBrand className="h-8 w-32" delay={300} /><Skeleton onBrand className="h-8 w-28" delay={400} /></div>
         </SkeletonRise>
         {[0, 1].map((index) => (
-          <SkeletonRise key={index} delay={200 + index * 80} className="rounded-[22px] border border-brand-600/10 bg-surface-high p-5 shadow-card lg:col-span-3">
+          <SkeletonRise key={index} delay={200 + index * 80} className="rounded-card border border-brand-600/10 bg-surface-high p-5 shadow-card lg:col-span-3">
             <Skeleton className="h-10 w-10" />
             <Skeleton className="mt-8 h-3 w-24" delay={100} />
             <Skeleton className="mt-3 h-8 w-36" delay={200} />
@@ -125,11 +125,11 @@ export function DashboardSkeleton() {
         ))}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <SkeletonRise delay={360} className="rounded-[22px] border border-brand-600/10 bg-surface-high p-5 shadow-card lg:col-span-8">
+        <SkeletonRise delay={360} className="rounded-card border border-brand-600/10 bg-surface-high p-5 shadow-card lg:col-span-8">
           <Skeleton className="h-5 w-48" />
           <ChartSkeleton className="mt-6" />
         </SkeletonRise>
-        <SkeletonRise delay={440} className="rounded-[22px] border border-brand-600/10 bg-surface-high p-5 shadow-card lg:col-span-4">
+        <SkeletonRise delay={440} className="rounded-card border border-brand-600/10 bg-surface-high p-5 shadow-card lg:col-span-4">
           <Skeleton className="h-5 w-36" />
           <div className="mt-6"><DonutSkeleton /></div>
         </SkeletonRise>
@@ -147,10 +147,10 @@ export function ListSkeleton() {
       <SkeletonRise delay={100} className="flex gap-2 overflow-hidden">
         {[0, 1, 2, 3].map((index) => <Skeleton key={index} className="h-10 w-28 shrink-0 rounded-full" delay={index * 80} />)}
       </SkeletonRise>
-      <SkeletonRise delay={180} className="divide-y divide-rule overflow-hidden rounded-[22px] border border-brand-600/10 bg-surface-high shadow-card">
+      <SkeletonRise delay={180} className="divide-y divide-rule overflow-hidden rounded-card border border-brand-600/10 bg-surface-high shadow-card">
         {Array.from({ length: 7 }, (_, index) => (
           <div key={index} className="flex items-center gap-3 p-4">
-            <Skeleton className="h-10 w-10 shrink-0 rounded-[13px]" delay={index * 90} />
+            <Skeleton className="h-10 w-10 shrink-0 rounded-sm" delay={index * 90} />
             <div className="min-w-0 flex-1 space-y-2">
               <Skeleton className="h-3.5 w-2/5" delay={index * 90 + 40} />
               <Skeleton className="h-3 w-1/4" delay={index * 90 + 80} />
@@ -171,9 +171,9 @@ export function CardsSkeleton() {
       <HeaderSkeleton />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }, (_, index) => (
-          <SkeletonRise key={index} delay={120 + index * 70} className="rounded-[22px] border border-brand-600/10 bg-surface-high p-5 shadow-card">
+          <SkeletonRise key={index} delay={120 + index * 70} className="rounded-card border border-brand-600/10 bg-surface-high p-5 shadow-card">
             <div className="flex items-center gap-3">
-              <Skeleton className="h-11 w-11 shrink-0 rounded-[14px]" delay={index * 70} />
+              <Skeleton className="h-11 w-11 shrink-0 rounded-sm" delay={index * 70} />
               <div className="flex-1 space-y-2"><Skeleton className="h-4 w-3/5" delay={index * 70 + 60} /><Skeleton className="h-3 w-2/5" delay={index * 70 + 120} /></div>
             </div>
             <Skeleton className="mt-6 h-7 w-1/2" delay={index * 70 + 180} />
@@ -193,7 +193,7 @@ export function PenjagaSkeleton() {
       <Skeleton className="h-8 w-72 max-w-full" delay={80} />
       <Skeleton className="h-4 w-96 max-w-full" delay={160} />
       <div className="mt-4 grid w-full gap-2.5 sm:grid-cols-3">
-        {[0, 1, 2].map((index) => <Skeleton key={index} className="h-24 w-full rounded-[18px]" delay={220 + index * 90} />)}
+        {[0, 1, 2].map((index) => <Skeleton key={index} className="h-24 w-full rounded-card" delay={220 + index * 90} />)}
       </div>
     </div>
   );
