@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: center;
   background: var(--color-surface-high);
-  padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
+  padding: 1.5rem 1.5rem calc(1.5rem + var(--safe-area-inset-bottom,env(safe-area-inset-bottom)));
 }
 
 .signupForm {

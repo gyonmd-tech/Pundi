@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/providers/PwaRegister";
+import { NativeBridge } from "@/components/providers/NativeBridge";
 
 // Identitas 2026-11: Fraunces (judul & angka besar, serif lembut dengan
 // optical size) + Geist (UI, teks, dan angka tabel dengan tabular numerals).
@@ -81,6 +82,7 @@ export default function RootLayout({
       </head>
       <body className={`${fraunces.variable} ${geist.variable} antialiased`}>
         <PwaRegister />
+        <NativeBridge />
         {children}
       </body>
     </html>

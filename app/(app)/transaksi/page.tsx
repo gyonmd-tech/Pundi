@@ -656,7 +656,7 @@ export default function TransaksiPage() {
               ].map(([label, value]) => <div key={label} className="grid gap-1 border-b border-rule px-4 py-3.5 last:border-b-0 sm:grid-cols-[150px_1fr] sm:items-center"><dt className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-ink-muted">{label}</dt><dd className="text-sm font-bold text-ink sm:text-right">{value}</dd></div>)}
               </dl>
             </div>
-            <footer className="flex justify-end gap-2 border-t border-rule bg-brand-50 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-4">
+            <footer className="flex justify-end gap-2 border-t border-rule bg-brand-50 px-5 py-4 pb-[max(1rem,var(--safe-area-inset-bottom,env(safe-area-inset-bottom)))] sm:px-6 sm:pb-4">
               <Button onClick={() => { setDetailTransaction(null); setDeleteId(detailTransaction.id); }} variant="outline" className="mr-auto text-ember"><Trash2 size={15}/> Hapus</Button>
               <Button onClick={() => setDetailTransaction(null)} variant="outline" className="hidden sm:inline-flex">Tutup</Button>
               {detailTransaction.recordKind !== "balance_adjustment" && <Button onClick={() => { setDetailTransaction(null); setEditTransaction(detailTransaction); }}><Pencil size={15}/> Edit transaksi</Button>}

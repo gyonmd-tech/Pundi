@@ -37,7 +37,7 @@ export function MobileBottomNav({ onQuickAdd }: { onQuickAdd?: () => void }) {
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(15,23,41,.08)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 pb-[var(--safe-area-inset-bottom,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(15,23,41,.08)] backdrop-blur-xl md:hidden"
         aria-label="Navigasi mobile"
       >
         <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-center px-1">
@@ -130,7 +130,7 @@ function MoreSheet({ pathname, items, onClose }: { pathname: string; items: Retu
         role="dialog"
         aria-modal="true"
         aria-label="Menu lainnya"
-        className="absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[28px] border-t border-rule bg-surface-high px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-2 shadow-float animate-in slide-in-from-bottom duration-300"
+        className="absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[28px] border-t border-rule bg-surface-high px-4 pb-[max(1.25rem,var(--safe-area-inset-bottom,env(safe-area-inset-bottom)))] pt-2 shadow-float animate-in slide-in-from-bottom duration-300"
       >
         <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-rule-strong" aria-hidden="true" />
         <header className="mb-4 flex items-center justify-between">

@@ -159,7 +159,7 @@ export function PenjagaComposer() {
   }
 
   return (
-    <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-20 -mx-4 bg-gradient-to-t from-paper via-paper/95 to-transparent px-4 pb-3 pt-6 sm:-mx-6 sm:px-6 md:bottom-0 md:pb-5 lg:-mx-8 lg:px-8">
+    <div className="sticky bottom-[calc(4.25rem+var(--safe-area-inset-bottom,env(safe-area-inset-bottom)))] z-20 -mx-4 bg-gradient-to-t from-paper via-paper/95 to-transparent px-4 pb-3 pt-6 sm:-mx-6 sm:px-6 md:bottom-0 md:pb-5 lg:-mx-8 lg:px-8">
       <form
         className="mx-auto w-full max-w-3xl"
         onSubmit={(event) => { event.preventDefault(); submit(); }}

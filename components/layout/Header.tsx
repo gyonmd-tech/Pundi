@@ -38,7 +38,7 @@ export function Header({ onQuickAdd, selectedAccountId = "all", onSelectAccount 
   }, [onQuickAdd]);
 
   return (
-    <header className="sticky top-0 z-20 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-4 sm:pt-3 lg:px-5">
+    <header className="sticky top-0 z-20 px-3 pt-[max(0.5rem,var(--safe-area-inset-top,env(safe-area-inset-top)))] sm:px-4 sm:pt-3 lg:px-5">
       <div className="rounded-card border border-brand-200/80 bg-surface/95 p-2 shadow-card backdrop-blur-xl sm:rounded-panel sm:p-2.5">
         <div className="flex min-h-11 flex-wrap items-center gap-2 lg:grid lg:min-h-12 lg:grid-cols-[minmax(320px,1fr)_minmax(280px,560px)_minmax(205px,auto)] lg:gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2 lg:col-start-1 lg:row-start-1">

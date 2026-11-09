@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 
@@ -18,6 +19,14 @@ interface RightSidebarProps {
 
 export function RightSidebar({ quickAddOpen, onQuickAddClose }: RightSidebarProps) {
   const { initialAmount } = useQuickAdd();
+  // Escape (dan tombol back Android lewat NativeBridge) menutup panel, juga
+  // saat isi panel masih dimuat.
+  useEffect(() => {
+    if (!quickAddOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onQuickAddClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [quickAddOpen, onQuickAddClose]);
   if (!quickAddOpen) return null;
 
   return (
@@ -28,7 +37,7 @@ export function RightSidebar({ quickAddOpen, onQuickAddClose }: RightSidebarProp
       aria-label="Tambah transaksi"
       onMouseDown={(event) => { if (event.target === event.currentTarget) onQuickAddClose(); }}
     >
-      <aside className="absolute inset-x-0 bottom-0 top-[max(2.5rem,env(safe-area-inset-top))] overflow-hidden rounded-t-[28px] border border-rule bg-surface-high pb-[env(safe-area-inset-bottom)] shadow-clay animate-in slide-in-from-bottom duration-300 sm:inset-x-auto sm:bottom-3 sm:right-3 sm:top-3 sm:w-[calc(100%-1.5rem)] sm:max-w-[440px] sm:rounded-panel sm:pb-0 sm:slide-in-from-right">
+      <aside className="absolute inset-x-0 bottom-0 top-[max(2.5rem,var(--safe-area-inset-top,env(safe-area-inset-top)))] overflow-hidden rounded-t-[28px] border border-rule bg-surface-high pb-[var(--safe-area-inset-bottom,env(safe-area-inset-bottom))] shadow-clay animate-in slide-in-from-bottom duration-300 sm:inset-x-auto sm:bottom-3 sm:right-3 sm:top-3 sm:w-[calc(100%-1.5rem)] sm:max-w-[440px] sm:rounded-panel sm:pb-0 sm:slide-in-from-right">
         <QuickAddPanel onClose={onQuickAddClose} initialAmount={initialAmount} />
       </aside>
     </div>
