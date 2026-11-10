@@ -174,9 +174,9 @@ function MoreSheet({ pathname, items, onClose }: { pathname: string; items: Retu
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-sm bg-white/15"><Download className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold">Pasang aplikasi Pundi</span>
-                <span className="block text-[11px] text-white/70">Buka langsung dari layar utama, tampil layar penuh.</span>
+                <span className="block text-[11px] text-white/80">Buka langsung dari layar utama, tampil layar penuh.</span>
               </span>
-              <ChevronRight className="h-5 w-5 shrink-0 text-white/70" />
+              <ChevronRight className="h-5 w-5 shrink-0 text-white/80" />
             </button>
             {showIosHint ? (
               <p className="mt-3 flex items-start gap-2 rounded-sm bg-white/10 p-3 text-[12px] leading-relaxed text-white/85">

@@ -151,11 +151,11 @@ export function MoneyCalculator() {
     <div className="grid gap-4 lg:grid-cols-[minmax(0,26rem)_1fr] lg:items-start">
       <section className="overflow-hidden rounded-panel border border-rule bg-surface-high shadow-card">
         <div className="bg-brand-900 px-5 pb-4 pt-3 text-white sm:pb-5 sm:pt-4">
-          <p className="min-h-6 break-all text-right font-mono text-sm text-white/65" aria-label="Ekspresi">{expression ? formatExpression(expression) : "0"}</p>
+          <p className="min-h-6 break-all text-right font-mono text-sm text-white/80" aria-label="Ekspresi">{expression ? formatExpression(expression) : "0"}</p>
           <p className="mt-1 break-all text-right font-mono text-[clamp(2rem,9vw,2.6rem)] font-bold leading-tight tabular-nums tracking-[-0.04em]" aria-live="polite">
-            <span className="mr-1 text-lg font-semibold text-white/60">Rp</span>{formatNumber(shown)}
+            <span className="mr-1 text-lg font-semibold text-white/80">Rp</span>{formatNumber(shown)}
           </p>
-          <p className="mt-1 min-h-4 text-right text-[11px] capitalize leading-snug text-white/60">{shown ? terbilang(shown) : ""}</p>
+          <p className="mt-1 min-h-4 text-right text-[11px] capitalize leading-snug text-white/80">{shown ? terbilang(shown) : ""}</p>
         </div>
 
         <div className="flex gap-2 overflow-x-auto border-b border-rule px-3 py-2.5 [scrollbar-width:none]">

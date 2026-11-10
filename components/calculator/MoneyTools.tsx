@@ -67,13 +67,13 @@ function PercentField({ label, value, onChange, id, step = 0.5 }: { label: strin
 function ResultPanel({ label, value, rows, footer }: { label: string; value: number; rows?: Array<[string, string]>; footer?: React.ReactNode }) {
   return (
     <div className="rounded-card bg-brand-900 p-5 text-white">
-      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-white/65">{label}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-white/80">{label}</p>
       <p className="mt-1 break-all font-mono text-[clamp(1.75rem,8vw,2.25rem)] font-bold leading-tight tabular-nums tracking-[-0.04em]">{formatRupiah(value)}</p>
-      <p className="mt-1 text-[11px] capitalize text-white/60">{value ? terbilang(value) : ""}</p>
+      <p className="mt-1 text-[11px] capitalize text-white/80">{value ? terbilang(value) : ""}</p>
       {rows?.length ? (
         <dl className="mt-4 space-y-1.5 border-t border-white/15 pt-3 text-sm">
           {rows.map(([key, val]) => (
-            <div key={key} className="flex items-center justify-between gap-3"><dt className="text-white/70">{key}</dt><dd className="font-mono font-semibold tabular-nums">{val}</dd></div>
+            <div key={key} className="flex items-center justify-between gap-3"><dt className="text-white/80">{key}</dt><dd className="font-mono font-semibold tabular-nums">{val}</dd></div>
           ))}
         </dl>
       ) : null}
@@ -172,18 +172,18 @@ export function CashCounter() {
           value={total}
           footer={
             <div className="mt-4 space-y-2 border-t border-white/15 pt-3">
-              <label htmlFor="cash-account" className="block text-[11px] font-bold uppercase tracking-[0.08em] text-white/65">Cocokkan dengan saldo di Pundi</label>
+              <label htmlFor="cash-account" className="block text-[11px] font-bold uppercase tracking-[0.08em] text-white/80">Cocokkan dengan saldo di Pundi</label>
               <select id="cash-account" value={accountId} onChange={(event) => setAccountId(event.target.value)} className="h-11 w-full rounded-xl border border-white/20 bg-white/10 px-3 text-sm font-semibold text-white outline-none [&>option]:text-ink">
                 <option value="">Pilih rekening / dompet…</option>
                 {accounts.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
               </select>
               {account ? (
                 <div className="rounded-xl bg-white/10 p-3 text-sm">
-                  <p className="flex justify-between gap-3"><span className="text-white/70">Saldo tercatat</span><b className="font-mono tabular-nums">{formatRupiah(account.balance)}</b></p>
-                  <p className="mt-1 flex justify-between gap-3"><span className="text-white/70">Selisih</span><b className={cn("font-mono tabular-nums", difference === 0 ? "text-white" : difference > 0 ? "text-[#7CE7C3]" : "text-[#FFB3BC]")}>{difference > 0 ? "+" : difference < 0 ? "−" : ""}{formatRupiah(Math.abs(difference))}</b></p>
+                  <p className="flex justify-between gap-3"><span className="text-white/80">Saldo tercatat</span><b className="font-mono tabular-nums">{formatRupiah(account.balance)}</b></p>
+                  <p className="mt-1 flex justify-between gap-3"><span className="text-white/80">Selisih</span><b className={cn("font-mono tabular-nums", difference === 0 ? "text-white" : difference > 0 ? "text-[#7CE7C3]" : "text-[#FFB3BC]")}>{difference > 0 ? "+" : difference < 0 ? "−" : ""}{formatRupiah(Math.abs(difference))}</b></p>
                   {difference !== 0 ? (
                     <Link href="/catatan-kondisi" className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-white underline-offset-2 hover:underline">Sesuaikan saldo di Catatan Kondisi <ArrowRight className="h-3.5 w-3.5" /></Link>
-                  ) : <p className="mt-2 text-xs text-white/70">Cocok! Saldo tunai sesuai catatan.</p>}
+                  ) : <p className="mt-2 text-xs text-white/80">Cocok! Saldo tunai sesuai catatan.</p>}
                 </div>
               ) : null}
             </div>

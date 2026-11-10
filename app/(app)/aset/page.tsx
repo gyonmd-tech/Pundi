@@ -23,10 +23,10 @@ import { createAssetAction, deleteAssetAction, updateAssetAction } from "@/actio
 
 
 const assetTypeConfig: Record<AssetType, { label: string; icon: any; color: string }> = {
-  stock:       { label: "Saham",       icon: TrendingUp,       color: "var(--color-pine)" },
-  mutual_fund: { label: "Reksadana",   icon: CircleDollarSign, color: "var(--color-pine-40)" },
-  crypto:      { label: "Kripto",      icon: Coins,            color: "var(--color-ember)" },
-  gold:        { label: "Emas",        icon: Gem,              color: "var(--color-brass)" },
+  stock:       { label: "Saham",       icon: TrendingUp,       color: "var(--color-pine-text)" },
+  mutual_fund: { label: "Reksadana",   icon: CircleDollarSign, color: "var(--color-mint-text)" },
+  crypto:      { label: "Kripto",      icon: Coins,            color: "var(--color-ember-text)" },
+  gold:        { label: "Emas",        icon: Gem,              color: "var(--color-brass-text)" },
   property:    { label: "Properti",    icon: Building,         color: "var(--color-ink-muted)" },
 };
 
@@ -155,6 +155,7 @@ export default function AsetPage() {
 
         <button
           onClick={openAdd}
+          aria-label="Tambah aset"
           className={cn(
             "flex min-h-10 items-center gap-2 px-3.5 xs:px-4 py-2 rounded-card text-xs sm:text-small font-semibold shadow-sm",
             "transition-all duration-200 hover:brightness-105 active:scale-95 group"
@@ -186,7 +187,7 @@ export default function AsetPage() {
                 {totalPnL >= 0
                   ? <TrendingUp size={16} style={{ color: "var(--color-pine)" }} />
                   : <TrendingDown size={16} style={{ color: "var(--color-ember)" }} />}
-                <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnL >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
+                <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnL >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}>
                   {totalPnL >= 0 ? "+" : "−"}{formatRupiah(Math.abs(totalPnL))}
                 </p>
               </div>
@@ -194,7 +195,7 @@ export default function AsetPage() {
 
             <div className="card p-3.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Return Portofolio</p>
-              <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnLPct >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
+              <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnLPct >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}>
                 {totalPnLPct >= 0 ? "+" : ""}{totalPnLPct.toFixed(2)}%
               </p>
             </div>
@@ -273,7 +274,7 @@ export default function AsetPage() {
                     <span
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold mt-1"
                       style={{
-                        backgroundColor: `${typeCfg.color}15`,
+                        backgroundColor: `color-mix(in srgb, ${typeCfg.color} 8%, transparent)`,
                         color: typeCfg.color,
                       }}
                     >
@@ -336,7 +337,7 @@ export default function AsetPage() {
                     <span className="text-[10px] uppercase font-semibold text-ink-muted block">Keuntungan / Rugi</span>
                     <span
                       className="tabular-nums font-mono font-bold text-small"
-                      style={{ color: pnl >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}
+                      style={{ color: pnl >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}
                     >
                       {pnl >= 0 ? "+" : "−"}{formatRupiah(Math.abs(pnl))} ({pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%)
                     </span>
@@ -383,7 +384,7 @@ export default function AsetPage() {
                       <span
                         className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
                         style={{
-                          backgroundColor: `${typeCfg.color}15`,
+                          backgroundColor: `color-mix(in srgb, ${typeCfg.color} 8%, transparent)`,
                           color: typeCfg.color,
                         }}
                       >
@@ -412,13 +413,13 @@ export default function AsetPage() {
                       <div className="flex flex-col items-end">
                         <span
                           className="tabular-nums font-mono font-bold text-small"
-                          style={{ color: pnl >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}
+                          style={{ color: pnl >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}
                         >
                           {pnl >= 0 ? "+" : "−"}{formatRupiah(Math.abs(pnl))}
                         </span>
                         <span
                           className="tabular-nums font-mono text-xs font-semibold"
-                          style={{ color: pnl >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}
+                          style={{ color: pnl >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}
                         >
                           {pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(2)}%
                         </span>

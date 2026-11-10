@@ -170,7 +170,7 @@ export default function ArusKasPage() {
                 : <TrendingDown size={22} className="flex-shrink-0" style={{ color: "var(--color-ember)" }} />}
               <span
                 className="tabular-nums font-mono font-bold text-2xl xs:text-3xl sm:text-display-l truncate"
-                style={{ color: netFlow >= 0 ? "var(--color-pine)" : "var(--color-ember)" }}
+                style={{ color: netFlow >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}
               >
                 {netFlow >= 0 ? "+" : "−"}{formatRupiah(Math.abs(netFlow))}
               </span>
@@ -197,7 +197,7 @@ export default function ArusKasPage() {
             <div className="card p-3.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Pengeluaran</span>
-                <span className="text-xs font-mono font-semibold" style={{ color: expenseDelta <= 0 ? "var(--color-pine)" : "var(--color-ember)" }}>
+                <span className="text-xs font-mono font-semibold" style={{ color: expenseDelta <= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}>
                   {expenseDelta >= 0 ? "▲" : "▼"} {Math.abs(expenseDelta).toFixed(1)}%
                 </span>
               </div>

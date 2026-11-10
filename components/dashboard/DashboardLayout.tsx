@@ -74,6 +74,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {order.map((id) => <div
         key={id}
         draggable={canDrag}
+        role="group"
         aria-label={canDrag ? `${labels[id]}. Tarik untuk memindahkan kartu.` : labels[id]}
         onDragStart={(event) => { setDragged(id); event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", id); }}
         onDragEnd={() => { setDragged(null); setOver(null); }}

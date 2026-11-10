@@ -194,12 +194,15 @@ textarea::placeholder {
   box-shadow: var(--shadow-clay-soft);
 }
 
-.eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-pine);
+@layer components {
+  /* Di dalam layer agar text-ember/text-mint dll. bisa menimpa warnanya. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-pine-text);
+  }
 }
 
 .page-title {
@@ -513,3 +516,10 @@ body:has([aria-modal="true"]) nav[aria-label="Navigasi mobile"] { display: none;
 @media (prefers-reduced-motion: reduce) {
   .modal-scrim, .modal-panel { animation: none !important; }
 }
+
+/* Aksesibilitas: utilitas teks semantik memakai token teks yang lolos
+   kontras AA di tema terang & gelap (warna dasarnya untuk isian/ikon). */
+.text-pine, :root[data-theme="dark"] .text-brand-600 { color: var(--color-pine-text); }
+.text-mint { color: var(--color-mint-text); }
+.text-ember { color: var(--color-ember-text); }
+.text-brass, .text-warning { color: var(--color-brass-text); }

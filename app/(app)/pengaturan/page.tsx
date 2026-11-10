@@ -175,7 +175,7 @@ export default function PengaturanPage() {
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1.5 text-xs font-medium text-lime"><ShieldCheck className="h-3.5 w-3.5" />Terverifikasi</p>
             <h2 className="figure-display mt-1 truncate text-[1.6rem] leading-tight text-white sm:text-[2rem]">{displayName}</h2>
-            <p className="truncate text-sm text-white/70">{displayEmail}</p>
+            <p className="truncate text-sm text-white/80">{displayEmail}</p>
           </div>
           <Button type="button" variant="outline" size="sm" className="hidden shrink-0 border-white/25 bg-white/10 text-white hover:bg-white/20 sm:inline-flex" onClick={() => setProfileOpen(true)}><Pencil className="h-3.5 w-3.5" />Ubah profil</Button>
         </div>
@@ -279,17 +279,15 @@ export default function PengaturanPage() {
             {filteredCategories.map((category) => (
               <div
                 key={category.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => openCategory(category)}
-                onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCategory(category); } }}
-                className="group flex min-w-0 cursor-pointer items-center gap-2.5 rounded-sm border border-brand-600/10 bg-surface-high p-2.5 text-left transition-colors hover:bg-brand-50"
+                className="group flex min-w-0 items-center gap-1 rounded-sm border border-rule bg-surface-high pr-1 transition-colors hover:bg-brand-50"
               >
-                <CategoryIcon icon={category.icon} color={category.color} size={15} containerSize="md" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-extrabold text-ink">{category.name}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-ink-muted">{category.type === "income" ? "Pemasukan" : "Pengeluaran"}</p>
-                </div>
+                <button type="button" onClick={() => openCategory(category)} className="flex min-w-0 flex-1 items-center gap-2.5 rounded-sm p-2.5 text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20">
+                  <CategoryIcon icon={category.icon} color={category.color} size={15} containerSize="md" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-semibold text-ink">{category.name}</span>
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-ink-muted">{category.type === "income" ? "Pemasukan" : "Pengeluaran"}</span>
+                  </span>
+                </button>
                 <IconButton
                   variant="ghost"
                   className="tap-target h-7 min-h-7 w-7 shrink-0 transition-opacity hover:bg-ember-10 hover:text-ember [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100"
