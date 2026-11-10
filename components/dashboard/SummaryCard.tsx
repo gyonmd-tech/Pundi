@@ -82,7 +82,6 @@ export function SummaryCard({
     return (
       <div
         className={cn("card", className)}
-        style={{ borderColor: "var(--color-rule)" }}
       >
         <div className="flex justify-between items-start mb-3">
           <Skeleton className="h-4 w-24 rounded-[6px]" />

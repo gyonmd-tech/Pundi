@@ -15,6 +15,8 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { InsightType } from "@/lib/data/mock";
 import { markAllInsightsReadAction } from "@/actions/insights";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Button } from "@/components/ui/Button";
 
 const filterTabs: { key: InsightType | "all"; label: string; icon: LucideIcon }[] = [
   { key: "all",            label: "Semua",    icon: Sparkles },
@@ -61,36 +63,11 @@ export default function InsightPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2.5">
-        <div>
-          <h1 className="page-title">
-            Insight & Notifikasi Finansial
-          </h1>
-          <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-            {unreadCount > 0 ? (
-              <span>Ada <strong className="text-ember font-semibold">{unreadCount} notifikasi baru</strong> yang memerlukan perhatian</span>
-            ) : (
-              "Semua notifikasi dan tren telah dibaca"
-            )}
-          </p>
-        </div>
-
-        {unreadCount > 0 && (
-          <button
-            onClick={handleMarkAllRead}
-            className={cn(
-              "flex items-center gap-1.5 xs:gap-2 px-3 xs:px-3.5 py-1.5 xs:py-2 rounded-card text-xs sm:text-small font-semibold border shadow-xs",
-              "transition-all duration-200 hover:border-pine hover:bg-pine-10 hover:text-pine active:scale-95",
-              "text-ink-muted bg-surface"
-            )}
-            style={{ borderColor: "var(--color-rule)", fontFamily: "var(--font-ui)" }}
-          >
-            <CheckCheck size={15} strokeWidth={2} />
-            <span>Tandai Semua Dibaca</span>
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Insight"
+        description={unreadCount > 0 ? <><strong className="font-semibold text-ember">{unreadCount} baru</strong> perlu perhatianmu</> : "Semua insight sudah dibaca"}
+        actions={unreadCount > 0 ? <Button variant="outline" size="sm" onClick={handleMarkAllRead} aria-label="Tandai semua dibaca"><CheckCheck size={15} /><span className="hidden sm:inline">Tandai dibaca</span></Button> : null}
+      />
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 touch-pan-x overscroll-x-contain w-full max-w-full">
@@ -115,7 +92,6 @@ export default function InsightPage() {
                 backgroundColor: isSelected ? "var(--color-pine)" : "var(--color-surface)",
                 color: isSelected ? "#FFFFFF" : "var(--color-ink)",
                 borderColor: isSelected ? "var(--color-pine)" : "var(--color-rule)",
-                fontFamily: "var(--font-ui)",
               }}
             >
               <Icon size={14} strokeWidth={2} style={{ color: isSelected ? "#FFFFFF" : "var(--color-pine)" }} />
@@ -136,7 +112,7 @@ export default function InsightPage() {
 
       {/* Unread Section Card */}
       {unreadList.length > 0 && (
-        <div className="card p-4 sm:p-5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="card p-4 sm:p-5">
           <div className="flex items-center gap-2 pb-3 mb-3 border-b border-rule">
             <span className="w-2.5 h-2.5 rounded-full bg-ember animate-pulse" />
             <h2 className="text-small font-bold uppercase tracking-wider text-ember font-ui">
@@ -149,7 +125,7 @@ export default function InsightPage() {
 
       {/* Read Section Card */}
       {readList.length > 0 && (
-        <div className="card p-4 sm:p-5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="card p-4 sm:p-5">
           <div className="pb-3 mb-3 border-b border-rule">
             <h2 className="text-small font-bold uppercase tracking-wider text-ink-muted font-ui">
               Riwayat Insight Sebelumnya
@@ -161,14 +137,14 @@ export default function InsightPage() {
 
       {/* Empty State */}
       {sortedInsights.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 card p-6 text-center" style={{ borderColor: "var(--color-rule)" }}>
+        <div className="flex flex-col items-center justify-center py-16 card p-6 text-center">
           <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
             <Bell size={24} strokeWidth={1.5} />
           </div>
-          <p className="text-body font-semibold text-ink mb-1" style={{ fontFamily: "var(--font-ui)" }}>
+          <p className="text-body font-semibold text-ink mb-1">
             Tidak ada insight pada kategori ini
           </p>
-          <p className="text-small text-ink-muted max-w-sm" style={{ fontFamily: "var(--font-ui)" }}>
+          <p className="text-small text-ink-muted max-w-sm">
             Terus catat mutasi harianmu dan sistem akan otomatis menganalisis kebiasaan finansialmu.
           </p>
         </div>

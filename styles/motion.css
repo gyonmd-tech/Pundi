@@ -181,8 +181,10 @@
   font-variant-numeric: tabular-nums;
 }
 .chart-enter { animation: pundi-enter 420ms var(--ease-out) backwards; --tw-enter-opacity: 0; }
+/* Panjang path dinormalkan lewat pathLength="1" agar garis tergambar merata
+   sepanjang animasi, berapa pun panjang sebenarnya. */
 .chart-line {
-  stroke-dasharray: 2400;
+  stroke-dasharray: 1;
   stroke-dashoffset: 0;
   animation: pundi-draw-in 900ms var(--ease-in-out) backwards;
 }
@@ -210,7 +212,7 @@
 
 @keyframes pundi-grow-x { from { transform: scaleX(0); } }
 @keyframes pundi-grow-y { from { transform: scaleY(0); } }
-@keyframes pundi-draw-in { from { stroke-dashoffset: 2400; } }
+@keyframes pundi-draw-in { from { stroke-dashoffset: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-in,

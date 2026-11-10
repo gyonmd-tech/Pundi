@@ -84,7 +84,7 @@ export function InsightFeed({ insights, compact = false, className }: InsightFee
     return (
       <p
         className="text-body text-center py-4"
-        style={{ fontFamily: "var(--font-ui)", color: "var(--color-ink-muted)" }}
+        style={{ color: "var(--color-ink-muted)" }}
       >
         Belum ada insight. Tambah lebih banyak transaksi untuk mendapatkan wawasan keuangan.
       </p>
@@ -123,7 +123,6 @@ export function InsightFeed({ insights, compact = false, className }: InsightFee
               <p
                 className="text-body"
                 style={{
-                  fontFamily: "var(--font-ui)",
                   color: "var(--color-ink)",
                   lineHeight: "var(--leading-body)",
                 }}
@@ -134,7 +133,7 @@ export function InsightFeed({ insights, compact = false, className }: InsightFee
                 <p
                   suppressHydrationWarning
                   className="text-small mt-1"
-                  style={{ fontFamily: "var(--font-ui)", color: "var(--color-ink-muted)" }}
+                  style={{ color: "var(--color-ink-muted)" }}
                 >
                   {formatDate(insight.createdAt, "time")}
                 </p>

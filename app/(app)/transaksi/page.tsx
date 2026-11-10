@@ -27,6 +27,7 @@ import { Button, IconButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { RecurringRulesCard } from "@/components/transaction/RecurringRulesCard";
 import { SearchField } from "@/components/ui/SearchField";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 // Panel ubah transaksi & kontrol panel filter hanya diunduh saat dibuka.
 const Select = dynamic(() => import("@/components/ui/Select").then((m) => m.Select), { ssr: false });
@@ -239,47 +240,14 @@ export default function TransaksiPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="page-title">
-            Buku Transaksi
-          </h1>
-          <p className="text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-            Menampilkan <strong className="text-ink font-semibold">{filtered.length}</strong> dari {transactions.length} transaksi tercatat
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          {/* Unduh Excel Button */}
-          <button
-            onClick={handleExportExcel}
-            className={cn(
-              "flex items-center gap-2 px-3.5 py-2 rounded-card text-small font-semibold border shadow-2xs",
-              "transition-all duration-200 hover:border-pine hover:bg-pine-10 hover:text-pine active:scale-95",
-              "text-ink-muted bg-surface"
-            )}
-            style={{ borderColor: "var(--color-rule)", fontFamily: "var(--font-ui)" }}
-            title="Unduh mutasi sebagai file Excel (.xlsx) — sudah berformat rapih"
-          >
-            <FileSpreadsheet size={15} strokeWidth={2} />
-            <span className="hidden sm:inline">Unduh Excel</span>
-          </button>
-
-          {/* Add Transaction CTA */}
-          <button
-            onClick={openQuickAdd}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-card text-small font-semibold shadow-sm",
-              "transition-all duration-200 hover:brightness-105 active:scale-95 group"
-            )}
-            style={{ backgroundColor: "var(--color-pine)", color: "white", fontFamily: "var(--font-ui)" }}
-          >
-            <Plus size={16} strokeWidth={2.5} className="transition-transform group-hover:rotate-90" />
-            <span>Tambah Transaksi</span>
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Buku Transaksi"
+        description={<>Menampilkan <strong className="font-semibold text-ink">{filtered.length}</strong> dari {transactions.length} transaksi</>}
+        actions={<>
+          <Button variant="outline" onClick={handleExportExcel} aria-label="Unduh Excel" title="Unduh mutasi sebagai file Excel (.xlsx)" className="px-3"><FileSpreadsheet size={16} /><span className="hidden sm:inline">Unduh Excel</span></Button>
+          <Button onClick={openQuickAdd} aria-label="Tambah transaksi" className="px-3 sm:px-4"><Plus size={16} strokeWidth={2.5} /><span className="hidden sm:inline">Tambah</span></Button>
+        </>}
+      />
 
       {/* Summary 3-Strip Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -353,14 +321,13 @@ export default function TransaksiPage() {
         >
           {/* Filter Tipe */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
               Jenis Mutasi
             </label>
             <Select
               value={filterType}
               onChange={(e) => { setFilterType(e.target.value as TransactionType | "all"); setCurrentPage(1); }}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
-              style={{ borderColor: "var(--color-rule)" }}
             >
               <option value="all">Semua Jenis</option>
               <option value="income">Pemasukan (Masuk)</option>
@@ -371,14 +338,13 @@ export default function TransaksiPage() {
 
           {/* Filter Akun */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
               Akun / Dompet
             </label>
             <Select
               value={filterAccount}
               onChange={(e) => { setFilterAccount(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
-              style={{ borderColor: "var(--color-rule)" }}
             >
               <option value="all">Semua Akun</option>
               {accounts.map((a) => (
@@ -389,14 +355,13 @@ export default function TransaksiPage() {
 
           {/* Filter Kategori */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
               Kategori
             </label>
             <Select
               value={filterCategory}
               onChange={(e) => { setFilterCategory(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 rounded-card border text-small outline-none bg-paper text-ink font-medium focus:border-pine"
-              style={{ borderColor: "var(--color-rule)" }}
             >
               <option value="all">Semua Kategori</option>
               {categories.map((c) => (
@@ -407,7 +372,7 @@ export default function TransaksiPage() {
 
           {/* Date range */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
               Rentang Tanggal
             </label>
             <div className="grid grid-cols-1 gap-2">
@@ -437,10 +402,10 @@ export default function TransaksiPage() {
             <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-3 text-ink-muted">
               <Search size={24} strokeWidth={1.5} />
             </div>
-            <p className="text-body font-semibold text-ink mb-1" style={{ fontFamily: "var(--font-ui)" }}>
+            <p className="text-body font-semibold text-ink mb-1">
               Tidak ada transaksi yang cocok
             </p>
-            <p className="text-small text-ink-muted max-w-sm" style={{ fontFamily: "var(--font-ui)" }}>
+            <p className="text-small text-ink-muted max-w-sm">
               Coba sesuaikan kata kunci pencarian atau reset filter untuk melihat mutasi lainnya.
             </p>
             {activeFilters > 0 && (
@@ -540,7 +505,7 @@ export default function TransaksiPage() {
                           <div className="flex items-center gap-3">
                             <CategoryIcon icon={cat?.icon} color={cat?.color} size={15} containerSize="sm" />
                             <div className="min-w-0">
-                              <p className="truncate text-body font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+                              <p className="truncate text-body font-semibold text-ink">
                                 {tx.note || cat?.name || "Transaksi Tanpa Catatan"}
                               </p>
                               <p className="truncate font-ui text-xs text-ink-muted">
@@ -557,7 +522,7 @@ export default function TransaksiPage() {
                               className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                               style={{ backgroundColor: acc?.colorTag ?? "var(--color-rule)" }}
                             />
-                            <span className="max-w-[190px] truncate text-small font-medium text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+                            <span className="max-w-[190px] truncate text-small font-medium text-ink">
                               {acc?.name ?? "—"}{destination ? ` → ${destination.name}` : ""}
                             </span>
                           </div>
@@ -689,10 +654,10 @@ export default function TransaksiPage() {
               <Trash2 size={20} />
             </div>
 
-            <h3 className="text-heading font-semibold text-ink mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
+            <h3 className="text-heading font-semibold text-ink mb-1.5">
               Hapus Transaksi Ini?
             </h3>
-            <p className="text-small text-ink-muted mb-5 leading-relaxed" style={{ fontFamily: "var(--font-ui)" }}>
+            <p className="text-small text-ink-muted mb-5 leading-relaxed">
               Catatan transaksi ini akan dihapus dari buku kas. Tindakan ini tidak dapat dibatalkan.
             </p>
 
@@ -700,14 +665,13 @@ export default function TransaksiPage() {
               <button
                 onClick={() => setDeleteId(null)}
                 className="flex-1 py-2.5 rounded-card text-small font-medium border text-ink-muted hover:bg-paper transition-colors"
-                style={{ borderColor: "var(--color-rule)", fontFamily: "var(--font-ui)" }}
+                style={{ borderColor: "var(--color-rule)" }}
               >
                 Batal
               </button>
               <button
                 onClick={() => handleDelete(deleteId)}
                 className="flex-1 py-2.5 rounded-card text-small font-semibold text-white bg-ember hover:brightness-110 active:scale-95 transition-all shadow-sm"
-                style={{ fontFamily: "var(--font-ui)" }}
               >
                 Ya, Hapus
               </button>

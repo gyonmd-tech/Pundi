@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowUpRight, Banknote, Calculator, CalendarClock, Landmark,
 import { MoneyCalculator } from "@/components/calculator/MoneyCalculator";
 import { CashCounter, DailyAllowance, DiscountCalc, LoanCalc, SplitBill } from "@/components/calculator/MoneyTools";
 import { cn } from "@/lib/utils/cn";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface Tool {
   id: string;
@@ -19,17 +20,18 @@ interface Tool {
   example: string;
   icon: LucideIcon;
   /** Gradasi kartu — hex karena kartu selalu berwarna di kedua tema. */
+  /** Kelas warna tonal untuk ikon alat. */
   gradient: string;
   Component: React.ComponentType;
 }
 
 const TOOLS: Tool[] = [
-  { id: "kalkulator", label: "Kalkulator", description: "Hitung cepat dalam Rupiah, lengkap dengan terbilang.", example: "200.000 − 10%", icon: Calculator, gradient: "from-[#1D48B5] to-[#2860E6]", Component: MoneyCalculator },
-  { id: "tunai", label: "Uang tunai", description: "Jumlahkan lembar & koin di dompet, cocokkan dengan saldo.", example: "3 × 50rb + 4 × 2rb", icon: Banknote, gradient: "from-[#0B6B54] to-[#159B78]", Component: CashCounter },
-  { id: "patungan", label: "Bagi tagihan", description: "Patungan makan atau liburan, termasuk pajak & servis.", example: "Rp450rb ÷ 4 orang", icon: Users, gradient: "from-[#5B3FD0] to-[#7B61D1]", Component: SplitBill },
-  { id: "diskon", label: "Diskon", description: "Harga akhir diskon bertingkat dan cashback.", example: "50% + 20%", icon: Percent, gradient: "from-[#C2410C] to-[#E95766]", Component: DiscountCalc },
-  { id: "cicilan", label: "Cicilan", description: "Simulasi kredit HP, motor, paylater, atau KTA.", example: "Rp6jt · 12 bulan", icon: Landmark, gradient: "from-[#B87708] to-[#D99418]", Component: LoanCalc },
-  { id: "jatah", label: "Jatah harian", description: "Berapa boleh dipakai per hari sampai gajian.", example: "Rp1,2jt ÷ 11 hari", icon: CalendarClock, gradient: "from-[#0E7490] to-[#0891B2]", Component: DailyAllowance },
+  { id: "kalkulator", label: "Kalkulator", description: "Hitung cepat dalam Rupiah, lengkap dengan terbilang.", example: "200.000 − 10%", icon: Calculator, gradient: "bg-brand-100 text-brand-700", Component: MoneyCalculator },
+  { id: "tunai", label: "Uang tunai", description: "Jumlahkan lembar & koin di dompet, cocokkan dengan saldo.", example: "3 × 50rb + 4 × 2rb", icon: Banknote, gradient: "bg-mint-10 text-mint-ink", Component: CashCounter },
+  { id: "patungan", label: "Bagi tagihan", description: "Patungan makan atau liburan, termasuk pajak & servis.", example: "Rp450rb ÷ 4 orang", icon: Users, gradient: "bg-lavender-10 text-lavender-ink", Component: SplitBill },
+  { id: "diskon", label: "Diskon", description: "Harga akhir diskon bertingkat dan cashback.", example: "50% + 20%", icon: Percent, gradient: "bg-ember-10 text-ember-ink", Component: DiscountCalc },
+  { id: "cicilan", label: "Cicilan", description: "Simulasi kredit HP, motor, paylater, atau KTA.", example: "Rp6jt · 12 bulan", icon: Landmark, gradient: "bg-warning-10 text-warning-ink", Component: LoanCalc },
+  { id: "jatah", label: "Jatah harian", description: "Berapa boleh dipakai per hari sampai gajian.", example: "Rp1,2jt ÷ 11 hari", icon: CalendarClock, gradient: "bg-cyan-10 text-cyan-ink", Component: DailyAllowance },
 ];
 
 function readHash() {
@@ -96,11 +98,7 @@ export default function KalkulatorPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <p className="eyebrow">Alat hitung</p>
-        <h1 className="page-title mt-1">Kalkulator Uang</h1>
-        <p className="page-subtitle">Pilih alat — hasilnya bisa langsung dicatat sebagai transaksi.</p>
-      </header>
+      <PageHeader title="Kalkulator" description="Pilih alat — hasilnya bisa langsung dicatat sebagai transaksi." />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
         {TOOLS.map((item, index) => {
@@ -111,20 +109,16 @@ export default function KalkulatorPage() {
               type="button"
               onClick={() => open(item.id)}
               style={{ animationDelay: `${index * 45}ms` }}
-              className={cn(
-                "group relative isolate flex min-h-[9.5rem] flex-col overflow-hidden rounded-card bg-gradient-to-br p-4 text-left text-white shadow-card transition duration-200 animate-in fade-in slide-in-from-bottom-2 hover:-translate-y-0.5 hover:shadow-float active:scale-[.98] sm:min-h-[11rem] sm:p-5",
-                item.gradient,
-              )}
+              className="pressable group flex min-h-[9rem] flex-col rounded-card border border-rule bg-surface-high p-4 text-left shadow-card animate-in fade-in slide-in-from-bottom-2 hover:border-rule-strong hover:shadow-card-hover sm:min-h-[10.5rem] sm:p-5"
             >
-              <span aria-hidden className="absolute -right-8 -top-10 -z-10 h-32 w-32 rounded-full border-[18px] border-white/10 transition duration-500 group-hover:scale-110" />
               <span className="flex items-start justify-between">
-                <span className="grid h-10 w-10 place-items-center rounded-sm bg-white/15 backdrop-blur-sm"><Icon className="h-5 w-5" /></span>
-                <ArrowUpRight className="h-4 w-4 text-white/80 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
+                <span className={cn("grid h-10 w-10 place-items-center rounded-xs", item.gradient)}><Icon className="h-5 w-5" /></span>
+                <ArrowUpRight className="h-4 w-4 text-ink-soft transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink" />
               </span>
               <span className="mt-auto pt-4">
-                <span className="block text-[15px] font-extrabold leading-tight sm:text-base">{item.label}</span>
-                <span className="mt-1 line-clamp-2 block text-xs leading-snug text-white/80">{item.description}</span>
-                <span className="mt-2 hidden rounded-full bg-white/12 px-2 py-0.5 font-mono text-[11px] text-white/85 sm:inline-block">{item.example}</span>
+                <span className="block text-[15px] font-semibold leading-tight text-ink sm:text-base">{item.label}</span>
+                <span className="mt-1 line-clamp-2 block text-xs leading-snug text-ink-muted">{item.description}</span>
+                <span className="mt-2 hidden rounded-full bg-surface-soft px-2 py-0.5 text-[11px] text-ink-muted tabular-nums sm:inline-block">{item.example}</span>
               </span>
             </button>
           );

@@ -27,8 +27,8 @@ export function resolveTheme(theme: ThemeMode): "light" | "dark" {
  */
 export const ACCENT_PRESETS: Record<AccentColor, { 500: string; 600: string; 700: string } | null> = {
   brand: null,
-  mint: { 500: "#1CB78C", 600: "#159B78", 700: "#0B6B54" },
-  ember: { 500: "#EE7683", 600: "#E95766", 700: "#B83547" },
+  mint: { 500: "#1FB383", 600: "#0E9F6E", 700: "#057A55" },
+  ember: { 500: "#EC6A6E", 600: "#E5484D", 700: "#B4232A" },
   lavender: { 500: "#9483DD", 600: "#7B61D1", 700: "#5E46B8" },
   cyan: { 500: "#25A6BE", 600: "#168AA0", 700: "#0F6B7B" },
 };

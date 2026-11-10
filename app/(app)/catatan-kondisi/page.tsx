@@ -10,7 +10,7 @@
  */
 
 import React, { useState } from "react";
-import { ClipboardCheck, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { useApp, useAccounts, useTransactions } from "@/lib/data/store";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Input } from "@/components/ui/Input";
@@ -21,6 +21,7 @@ import { useToast } from "@/lib/context/ToastContext";
 import { createBalanceAdjustmentAction } from "@/actions/transactions";
 import { computeObservedDelta } from "@/lib/utils/balanceReconciliation";
 import { cn } from "@/lib/utils/cn";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type RowStatus = "idle" | "pending" | "success" | "error";
 
@@ -116,12 +117,7 @@ export default function CatatanKondisiPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="page-title flex items-center gap-2"><ClipboardCheck size={22} className="text-pine" /> Catatan Kondisi</h1>
-        <p className="mt-0.5 text-xs sm:text-small text-ink-muted">
-          Lupa mencatat beberapa hari terakhir? Masukkan saldo nyata tiap akun hari ini — Pundi menghitung selisihnya secara otomatis sebagai penyesuaian, tanpa mengubah riwayat transaksi yang sudah ada.
-        </p>
-      </div>
+      <PageHeader title="Catatan Kondisi" description="Lupa mencatat? Masukkan saldo nyata tiap akun hari ini — Pundi menghitung selisihnya sebagai penyesuaian, tanpa mengubah riwayat transaksi." />
 
       <Card className="p-4 sm:p-5">
         <form onSubmit={submit} className="space-y-4">

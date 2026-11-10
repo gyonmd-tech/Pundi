@@ -61,7 +61,6 @@ export function EmptyState({
       <h3
         className="text-heading font-medium mb-2"
         style={{
-          fontFamily: "var(--font-ui)",
           color: "var(--color-ink)",
         }}
       >
@@ -72,7 +71,6 @@ export function EmptyState({
       <p
         className="text-body mb-6 max-w-xs"
         style={{
-          fontFamily: "var(--font-ui)",
           color: "var(--color-ink-muted)",
           lineHeight: "var(--leading-body)",
         }}
@@ -90,7 +88,6 @@ export function EmptyState({
               style={{
                 backgroundColor: "var(--color-pine)",
                 color: "white",
-                fontFamily: "var(--font-ui)",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "var(--color-pine-hover)";
@@ -109,7 +106,6 @@ export function EmptyState({
               style={{
                 backgroundColor: "transparent",
                 color: "var(--color-ink-muted)",
-                fontFamily: "var(--font-ui)",
                 border: "var(--border-hairline)",
               }}
             >
