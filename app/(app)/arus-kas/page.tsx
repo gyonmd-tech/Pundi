@@ -13,6 +13,7 @@ import { useCategories, useTransactions } from "@/lib/data/store";
 import { useToast } from "@/lib/context/ToastContext";
 import { TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 
 const MONTHS = Array.from({ length: 6 }, (_, monthsAgo) => {
@@ -84,36 +85,13 @@ export default function ArusKasPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div>
-        <h1 className="page-title">
-          Analisis Arus Kas
-        </h1>
-        <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-          Visualisasi tren pemasukan vs pengeluaran dan rasio tabungan
-        </p>
-      </div>
+      <PageHeader title="Arus Kas" description="Tren pemasukan dan pengeluaran, serta rasio tabunganmu." />
 
       {/* Main Cash Flow Chart Card with Ledger Baseline */}
-      <div className="card p-4 sm:p-5 w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
-              <TrendingUp size={15} />
-            </div>
-            <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
-              Tren Arus Kas 6 Bulan Terakhir
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs font-mono text-ink-muted">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-pine" /> Masuk
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-ember" /> Keluar
-            </span>
-          </div>
+      <div className="card w-full min-w-0 overflow-hidden p-4 sm:p-5">
+        <div className="mb-3">
+          <p className="eyebrow">6 bulan terakhir</p>
+          <h2 className="mt-0.5 text-base font-semibold text-ink">Tren arus kas</h2>
         </div>
 
         <CashFlowChart data={cashFlow} />
@@ -121,9 +99,7 @@ export default function ArusKasPage() {
 
       {/* Month Selector Tabs */}
       <div className="w-full min-w-0 overflow-hidden">
-        <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-2 font-ui">
-          Pilih Bulan Analisis Mendalam
-        </p>
+        <p className="eyebrow mb-2">Lihat rincian bulan</p>
         <div className="flex gap-2 overflow-x-auto pb-1 touch-pan-x overscroll-x-contain max-w-full">
           {MONTHS.map((m, i) => {
             const isSelected = i === selectedIdx;
@@ -131,16 +107,11 @@ export default function ArusKasPage() {
               <button
                 key={m.period}
                 onClick={() => handleSelectMonth(i)}
+                aria-pressed={isSelected}
                 className={cn(
-                  "flex-shrink-0 px-3.5 xs:px-4 py-2 xs:py-2.5 rounded-card text-xs xs:text-small font-semibold border transition-all active:scale-95 shadow-2xs",
-                  isSelected ? "shadow-sm" : "hover:text-ink hover:bg-paper"
+                  "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors active:scale-95",
+                  isSelected ? "border-transparent bg-ink text-paper" : "border-rule bg-surface-high text-ink-muted hover:text-ink",
                 )}
-                style={{
-                  backgroundColor: isSelected ? "var(--color-pine)" : "var(--color-surface)",
-                  color: isSelected ? "#FFFFFF" : "var(--color-ink)",
-                  borderColor: isSelected ? "var(--color-pine)" : "var(--color-rule)",
-                  fontFamily: "var(--font-ui)",
-                }}
               >
                 {m.label}
               </button>
@@ -154,61 +125,47 @@ export default function ArusKasPage() {
         {/* Left: Summary Metrics Column */}
         <div className="lg:col-span-2 space-y-3 w-full min-w-0">
           {/* Net Cash Flow Highlight Card */}
-          <div
-            className="card p-4 transition-all"
-            style={{
-              borderColor: netFlow >= 0 ? "var(--color-pine-30)" : "var(--color-ember-30)",
-              backgroundColor: "var(--color-surface)"
-            }}
-          >
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
-              Arus Kas Bersih (Net Cash Flow)
+          <div className={cn("relative overflow-hidden rounded-panel p-5 text-white", netFlow >= 0 ? "hero-surface" : "bg-ember-ink shadow-card")}>
+            <p className="flex items-center gap-1.5 text-xs font-medium text-white/80">
+              {netFlow >= 0 ? <TrendingUp size={15} /> : <TrendingDown size={15} />} Arus kas bersih
             </p>
-            <div className="flex items-center gap-2">
-              {netFlow >= 0
-                ? <TrendingUp size={22} className="flex-shrink-0" style={{ color: "var(--color-pine)" }} />
-                : <TrendingDown size={22} className="flex-shrink-0" style={{ color: "var(--color-ember)" }} />}
-              <span
-                className="tabular-nums font-mono font-bold text-2xl xs:text-3xl sm:text-display-l truncate"
-                style={{ color: netFlow >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}
-              >
-                {netFlow >= 0 ? "+" : "−"}{formatRupiah(Math.abs(netFlow))}
-              </span>
-            </div>
-            <p className="text-xs text-ink-muted mt-1.5 font-ui leading-relaxed">
-              {netFlow >= 0 ? "Surplus kas bulan ini dapat dialokasikan ke tujuan tabungan." : "Defisit kas bulan ini. Tinjau kembali pengeluaran terbesar."}
+            <p className="figure-display mt-1.5 truncate text-[clamp(2rem,6vw,2.75rem)] leading-none">
+              {netFlow >= 0 ? "+" : "−"}{formatRupiah(Math.abs(netFlow))}
+            </p>
+            <p className="mt-2 text-xs text-white/80">
+              {netFlow >= 0 ? "Surplus — bisa dialokasikan ke tujuan tabungan." : "Defisit — tinjau pengeluaran terbesar bulan ini."}
             </p>
           </div>
 
           {/* Income & Expense Row */}
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-            <div className="card p-3.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+            <div className="card p-3.5">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Pemasukan</span>
-                <span className="text-xs font-mono font-semibold text-pine">
+                <span className="text-xs font-medium text-ink-muted">Pemasukan</span>
+                <span className={cn("text-xs font-semibold tabular-nums", incomeDelta >= 0 ? "text-mint-ink" : "text-ember-ink")}>
                   {incomeDelta >= 0 ? "▲" : "▼"} {Math.abs(incomeDelta).toFixed(1)}%
                 </span>
               </div>
-              <p className="tabular-nums font-mono font-bold text-heading text-pine truncate">
+              <p className="truncate text-lg font-semibold text-mint-ink tabular-nums">
                 {formatRupiah(summary.income)}
               </p>
             </div>
 
-            <div className="card p-3.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+            <div className="card p-3.5">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Pengeluaran</span>
-                <span className="text-xs font-mono font-semibold" style={{ color: expenseDelta <= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}>
+                <span className="text-xs font-medium text-ink-muted">Pengeluaran</span>
+                <span className={cn("text-xs font-semibold tabular-nums", expenseDelta <= 0 ? "text-mint-ink" : "text-ember-ink")}>
                   {expenseDelta >= 0 ? "▲" : "▼"} {Math.abs(expenseDelta).toFixed(1)}%
                 </span>
               </div>
-              <p className="tabular-nums font-mono font-bold text-heading text-ember truncate">
+              <p className="truncate text-lg font-semibold text-ember-ink tabular-nums">
                 {formatRupiah(summary.expense)}
               </p>
             </div>
           </div>
 
           {/* Savings Rate Card */}
-          <div className="card p-4 space-y-1.5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+          <div className="card p-4 space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Savings Rate</span>
               <span className="text-xs font-mono font-bold text-brass">
@@ -228,9 +185,9 @@ export default function ArusKasPage() {
         </div>
 
         {/* Right: Category Breakdown Card */}
-        <div className="lg:col-span-3 card p-4 sm:p-5" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="lg:col-span-3 card p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-rule">
-            <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+            <h2 className="text-heading font-semibold text-ink">
               Proporsi Pengeluaran ({selected.label})
             </h2>
             <span className="text-xs font-mono text-ink-muted">

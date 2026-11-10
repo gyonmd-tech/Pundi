@@ -11,7 +11,7 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { frequencyLabel } from "./recurringLabels";
-import { Repeat, Plus, Pencil, Trash2, Pause, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { Repeat, Plus, Pencil, Trash2, Pause, Play, ChevronDown } from "lucide-react";
 import { useApp, useRecurringRules, useAccounts, useCategories, useGoals } from "@/lib/data/store";
 import { formatDate, formatRupiah } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
@@ -21,7 +21,6 @@ import {
 } from "@/actions/recurring";
 import type { RecurringRule } from "@/lib/data/mock";
 import { Button, IconButton } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils/cn";
 
@@ -36,7 +35,9 @@ export function RecurringRulesCard() {
   const goals = useGoals();
   const { showToast } = useToast();
 
-  const [expanded, setExpanded] = useState(true);
+  // Di ponsel tertutup secara default agar daftar transaksi tidak terdorong jauh ke bawah.
+  const [expanded, setExpanded] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 768px)").matches);
+  const [openRuleId, setOpenRuleId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editRule, setEditRule] = useState<RecurringRule | null>(null);
 
@@ -70,71 +71,86 @@ export function RecurringRulesCard() {
     showToast({ type: "info", title: "Aturan Dihapus", message: "Transaksi yang sudah terbentuk sebelumnya tetap tersimpan." });
   }
 
+  const activeRules = rules.filter((rule) => rule.isActive);
+  const monthlyOut = activeRules.filter((rule) => rule.type === "expense").reduce((sum, rule) => sum + (rule.frequency === "weekly" ? rule.amount * 4.33 : rule.frequency === "yearly" ? rule.amount / 12 : rule.amount), 0);
+
   return (
-    <div className="card border-brand-600/10 bg-surface-high !p-0">
+    <section className="rounded-card border border-rule bg-surface-high shadow-card">
       <button
         type="button"
         onClick={() => setExpanded((value) => !value)}
-        className="flex w-full items-center justify-between gap-3 px-5 py-4"
+        aria-expanded={expanded}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left sm:px-5"
       >
-        <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-sm bg-brand-100 text-brand-700">
-            <Repeat size={16} />
-          </div>
-          <div className="text-left">
-            <p className="text-body font-bold text-ink">Transaksi Berulang</p>
-            <p className="text-xs text-ink-muted">{rules.length === 0 ? "Belum ada aturan" : `${rules.filter((r) => r.isActive).length} aktif dari ${rules.length} aturan`}</p>
-          </div>
-        </div>
-        {expanded ? <ChevronUp size={16} className="text-ink-muted" /> : <ChevronDown size={16} className="text-ink-muted" />}
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xs bg-brand-100 text-brand-700"><Repeat size={16} /></span>
+          <span className="min-w-0">
+            <span className="block text-[15px] font-semibold text-ink">Transaksi berulang</span>
+            <span className="block truncate text-xs text-ink-muted">
+              {rules.length === 0 ? "Belum ada aturan" : <>{activeRules.length} aktif{monthlyOut > 0 ? <> · ±{formatRupiah(Math.round(monthlyOut))}/bulan keluar</> : null}</>}
+            </span>
+          </span>
+        </span>
+        <ChevronDown size={16} className={cn("shrink-0 text-ink-muted transition-transform duration-200", expanded && "rotate-180")} />
       </button>
 
       {expanded && (
-        <div className="border-t border-rule px-4 py-4 sm:px-5">
-          <div className="space-y-2">
+        <div className="border-t border-rule animate-in fade-in slide-in-from-top-1">
+          <ul className="divide-y divide-rule">
             {rules.map((rule) => {
               const account = accounts.find((a) => a.id === rule.accountId);
               const category = categories.find((c) => c.id === rule.categoryId);
               const goal = rule.goalId ? goals.find((g) => g.id === rule.goalId) : undefined;
+              const open = openRuleId === rule.id;
+              const actions = (
+                <>
+                  <IconButton variant="ghost" className="h-9 min-h-9 w-9" onClick={() => toggleActive(rule)} aria-label={rule.isActive ? "Jeda aturan" : "Lanjutkan aturan"} title={rule.isActive ? "Jeda" : "Lanjutkan"}>
+                    {rule.isActive ? <Pause size={15} /> : <Play size={15} />}
+                  </IconButton>
+                  <IconButton variant="ghost" className="h-9 min-h-9 w-9" onClick={() => openEdit(rule)} aria-label="Edit aturan" title="Ubah">
+                    <Pencil size={15} />
+                  </IconButton>
+                  <IconButton variant="ghost" className="h-9 min-h-9 w-9 hover:bg-ember-10 hover:text-ember-ink" onClick={() => remove(rule)} aria-label="Hapus aturan" title="Hapus">
+                    <Trash2 size={15} />
+                  </IconButton>
+                </>
+              );
               return (
-                <div key={rule.id} className={cn("flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-sm border border-rule px-3.5 py-3 sm:flex-nowrap", !rule.isActive && "opacity-55")}>
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <CategoryIcon icon={category?.icon} color={category?.color} size={15} containerSize="sm" />
-                    <div className="min-w-0">
-                      <p className="truncate text-small font-semibold text-ink">{rule.note || category?.name || "Transaksi berulang"}</p>
-                      <p className="truncate text-xs text-ink-muted">
-                        {account?.name ?? "—"} · {frequencyLabel[rule.frequency]} · Berikutnya {formatDate(rule.nextOccurrence, "short")}
-                        {goal ? <> · <span className="font-semibold text-pine">Tujuan: {goal.name}</span></> : null}
-                      </p>
-                    </div>
+                <li key={rule.id} className={cn("px-4 sm:px-5", !rule.isActive && "opacity-60")}>
+                  <div className="flex items-center gap-3 py-3">
+                    <button type="button" onClick={() => setOpenRuleId(open ? null : rule.id)} aria-expanded={open} className="flex min-w-0 flex-1 items-center gap-3 text-left sm:cursor-default">
+                      <CategoryIcon icon={category?.icon} color={category?.color} size={15} containerSize="sm" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-ink">{rule.note || category?.name || "Transaksi berulang"}</span>
+                        <span className="block truncate text-xs text-ink-muted">
+                          {frequencyLabel[rule.frequency]} · {formatDate(rule.nextOccurrence, "short")} · {account?.name ?? "—"}
+                          {goal ? <> · <span className="font-medium text-pine">{goal.name}</span></> : null}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span className={cn("block text-sm font-semibold tabular-nums", rule.type === "income" ? "text-mint-ink" : "text-ink")}>
+                          {rule.type === "income" ? "+" : rule.type === "expense" ? "−" : ""}{formatRupiah(rule.amount)}
+                        </span>
+                        {!rule.isActive ? <span className="block text-[11px] text-ink-muted">Dijeda</span> : null}
+                      </span>
+                    </button>
+                    <div className="hidden shrink-0 items-center sm:flex">{actions}</div>
                   </div>
-                  <span className={cn("shrink-0 tabular-nums font-mono text-small font-bold", rule.type === "income" ? "text-mint-ink" : "text-ink")}>
-                    {rule.type === "income" ? "+" : rule.type === "expense" ? "−" : ""}{formatRupiah(rule.amount)}
-                  </span>
-                  <div className="flex w-full shrink-0 items-center justify-end gap-2 border-t border-rule pt-2.5 sm:w-auto sm:border-0 sm:pt-0">
-                    {!rule.isActive && <Badge tone="neutral" className="text-[10px]">Dijeda</Badge>}
-                    <IconButton variant="outline" className="h-10 min-h-10 w-10 sm:h-8 sm:min-h-8 sm:w-8" onClick={() => toggleActive(rule)} aria-label={rule.isActive ? "Jeda aturan" : "Lanjutkan aturan"} title={rule.isActive ? "Jeda" : "Lanjutkan"}>
-                      {rule.isActive ? <Pause size={14} /> : <Play size={14} />}
-                    </IconButton>
-                    <IconButton variant="outline" className="h-10 min-h-10 w-10 sm:h-8 sm:min-h-8 sm:w-8" onClick={() => openEdit(rule)} aria-label="Edit aturan" title="Edit">
-                      <Pencil size={14} />
-                    </IconButton>
-                    <IconButton variant="outline" className="h-10 min-h-10 w-10 sm:h-8 sm:min-h-8 sm:w-8" onClick={() => remove(rule)} aria-label="Hapus aturan" title="Hapus">
-                      <Trash2 size={14} />
-                    </IconButton>
-                  </div>
-                </div>
+                  {open ? <div className="-mt-1 flex justify-end gap-1 pb-2 sm:hidden animate-in fade-in slide-in-from-top-1">{actions}</div> : null}
+                </li>
               );
             })}
-          </div>
+          </ul>
 
-          <Button type="button" variant="outline" size="sm" className="mt-3" onClick={openCreate}>
-            <Plus size={15} /> Tambah aturan
-          </Button>
+          <div className="border-t border-rule px-4 py-3 sm:px-5">
+            <Button type="button" variant="soft" size="sm" onClick={openCreate}>
+              <Plus size={15} /> Tambah aturan
+            </Button>
+          </div>
         </div>
       )}
 
       {showForm ? <RecurringRuleFormModal key={editRule?.id ?? "baru"} editRule={editRule} onClose={() => setShowForm(false)} /> : null}
-    </div>
+    </section>
   );
 }

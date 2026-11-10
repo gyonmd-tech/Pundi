@@ -63,8 +63,8 @@ export function CashFlowChart({ data, className }: { data: CashFlowDataPoint[]; 
             {data.map((item, index) => <text key={item.month} x={xs[index]} y={HEIGHT - 8} textAnchor="middle" className="chart-axis">{item.month}</text>)}
             <path d={area("income")} fill="url(#cf-income)" />
             <path d={area("expense")} fill="url(#cf-expense)" />
-            <path d={line("income")} className="chart-line" fill="none" stroke={INCOME} strokeWidth="2.5" strokeLinecap="round" />
-            <path d={line("expense")} className="chart-line" fill="none" stroke={EXPENSE} strokeWidth="2.5" strokeLinecap="round" />
+            <path d={line("income")} className="chart-line" pathLength={1} fill="none" stroke={INCOME} strokeWidth="2.5" strokeLinecap="round" />
+            <path d={line("expense")} className="chart-line" pathLength={1} fill="none" stroke={EXPENSE} strokeWidth="2.5" strokeLinecap="round" />
             <line x1={PAD.left} x2={width - PAD.right} y1={baseline} y2={baseline} className="chart-baseline" strokeLinecap="square" />
             {active !== null ? (
               <g>

@@ -196,12 +196,14 @@ textarea::placeholder {
 
 @layer components {
   /* Di dalam layer agar text-ember/text-mint dll. bisa menimpa warnanya. */
+  /* Label kecil di atas judul kartu: abu-abu tenang agar tidak bersaing
+     dengan judul & angka (sebelumnya biru di setiap kartu). */
   .eyebrow {
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--color-pine-text);
+    color: var(--color-ink-muted);
   }
 }
 
@@ -418,7 +420,6 @@ input[data-search-input="true"]:focus-visible,
 :root[data-theme="dark"] .text-warning-ink { color: var(--color-text-warning); }
 :root[data-theme="dark"] .text-lavender-ink { color: var(--color-text-lavender); }
 :root[data-theme="dark"] .text-cyan-ink { color: var(--color-text-cyan); }
-:root[data-theme="dark"] .eyebrow:not([class*="text-"]) { color: var(--color-text-brand); }
 
 /* Garis tepi kontrol form memakai warna permukaan (tak terlihat di terang);
    di gelap butuh garis nyata agar kolom input tetap terbaca batasnya. */

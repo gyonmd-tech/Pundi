@@ -69,7 +69,7 @@ export function BudgetProgress({
 }: BudgetProgressProps) {
   if (loading) {
     return (
-      <div className={cn("py-3.5 border-b", className)} style={{ borderColor: "var(--color-rule)" }}>
+      <div className={cn("py-3.5 border-b", className)}>
         <div className="flex justify-between mb-2">
           <Skeleton className="h-4 w-28 rounded-[6px]" />
           <Skeleton className="h-4 w-20 rounded-[6px]" delay={80} />
@@ -88,7 +88,7 @@ export function BudgetProgress({
   const statusBadge = (
     <span
       className="inline-flex items-center gap-1 whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-semibold shadow-2xs"
-      style={{ backgroundColor: cfg.bgColor, color: cfg.textColor, fontFamily: "var(--font-ui)" }}
+      style={{ backgroundColor: cfg.bgColor, color: cfg.textColor }}
     >
       <StatusIcon size={12} strokeWidth={2.2} />
       {cfg.label} ({progress}%)
@@ -102,7 +102,6 @@ export function BudgetProgress({
         "hover:bg-paper/80 group",
         className
       )}
-      style={{ borderColor: "var(--color-rule)" }}
     >
       {/* Header: icon + kategori + status badge + action buttons (Inline & Non-overlapping) */}
       <div className="flex items-center justify-between gap-2 mb-2.5">
@@ -111,7 +110,6 @@ export function BudgetProgress({
           <div className="min-w-0 flex-1">
             <span
               className="text-body font-semibold text-ink truncate block group-hover:text-pine transition-colors leading-snug"
-              style={{ fontFamily: "var(--font-ui)" }}
             >
               {categoryName}
             </span>

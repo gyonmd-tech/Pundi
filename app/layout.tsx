@@ -76,7 +76,7 @@ export default function RootLayout({
             ThemeEffect setelah data bootstrap dimuat. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("pundi-theme-cache");if(t)document.documentElement.dataset.theme=t;var a=localStorage.getItem("pundi-accent-cache");var p={mint:["#1CB78C","#159B78","#0B6B54"],ember:["#EE7683","#E95766","#B83547"],lavender:["#9483DD","#7B61D1","#5E46B8"],cyan:["#25A6BE","#168AA0","#0F6B7B"]}[a];if(p){var r=document.documentElement.style;r.setProperty("--color-brand-500",p[0]);r.setProperty("--color-brand-600",p[1]);r.setProperty("--color-brand-700",p[2]);}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem("pundi-theme-cache")||(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t;var a=localStorage.getItem("pundi-accent-cache");var p={mint:["#1FB383","#0E9F6E","#057A55"],ember:["#EC6A6E","#E5484D","#B4232A"],lavender:["#9483DD","#7B61D1","#5E46B8"],cyan:["#25A6BE","#168AA0","#0F6B7B"]}[a];if(p){var r=document.documentElement.style;r.setProperty("--color-brand-500",p[0]);r.setProperty("--color-brand-600",p[1]);r.setProperty("--color-brand-700",p[2]);}}catch(e){}})();`,
           }}
         />
       </head>

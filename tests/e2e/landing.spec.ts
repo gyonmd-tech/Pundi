@@ -4,7 +4,7 @@ test("ponsel membuka / langsung ke halaman login", async ({ page, isMobile }) =>
   test.skip(!isMobile, "khusus ponsel");
   await page.goto("/");
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Masuk" })).toBeVisible();
 });
 
 test("ponsel tetap bisa melihat landing lewat ?web=1", async ({ page, isMobile }) => {

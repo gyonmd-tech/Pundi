@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { createAssetAction, deleteAssetAction, updateAssetAction } from "@/actions/assets";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Button } from "@/components/ui/Button";
 
 
 const assetTypeConfig: Record<AssetType, { label: string; icon: any; color: string }> = {
@@ -142,68 +144,37 @@ export default function AsetPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="page-title">
-            Portofolio Aset & Investasi
-          </h1>
-          <p className="text-xs sm:text-small text-ink-muted mt-0.5" style={{ fontFamily: "var(--font-ui)" }}>
-            Pantau pertumbuhan nilai bersih (net worth) dan instrumen investasi
-          </p>
-        </div>
-
-        <button
-          onClick={openAdd}
-          aria-label="Tambah aset"
-          className={cn(
-            "flex min-h-10 items-center gap-2 px-3.5 xs:px-4 py-2 rounded-card text-xs sm:text-small font-semibold shadow-sm",
-            "transition-all duration-200 hover:brightness-105 active:scale-95 group"
-          )}
-          style={{ backgroundColor: "var(--color-pine)", color: "white", fontFamily: "var(--font-ui)" }}
-        >
-          <Plus size={16} strokeWidth={2.5} className="transition-transform group-hover:rotate-90" />
-          <span className="hidden sm:inline">Tambah Aset</span>
-        </button>
-      </div>
+      <PageHeader
+        title="Aset & Investasi"
+        description="Pantau nilai bersih dan instrumen investasimu."
+        actions={<Button onClick={openAdd} aria-label="Tambah aset" className="px-3 sm:px-4"><Plus size={16} strokeWidth={2.5} /><span className="hidden sm:inline">Tambah Aset</span></Button>}
+      />
 
       {/* Summary Metrics & Net Worth Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 w-full min-w-0">
         {/* Left: Summary Metrics */}
         <div className="lg:col-span-2 space-y-3 w-full min-w-0">
-          <div className="card p-4 transition-all hover:border-pine/30 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
-              Total Nilai Portofolio
-            </p>
-            <p className="tabular-nums font-mono font-bold text-2xl xs:text-3xl sm:text-display-l text-ink truncate">
-              {formatRupiah(totalValue)}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 w-full min-w-0">
-            <div className="card p-3.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-              <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Total P&L</p>
-              <div className="flex items-center gap-1.5">
-                {totalPnL >= 0
-                  ? <TrendingUp size={16} style={{ color: "var(--color-pine)" }} />
-                  : <TrendingDown size={16} style={{ color: "var(--color-ember)" }} />}
-                <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnL >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}>
+          <section className="hero-surface relative overflow-hidden rounded-panel p-5 text-white">
+            <p className="text-xs font-medium text-white/80">Total nilai portofolio</p>
+            <p className="figure-display mt-1.5 truncate text-[clamp(2rem,6vw,2.75rem)] leading-none">{formatRupiah(totalValue)}</p>
+            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/15 pt-4">
+              <div className="min-w-0">
+                <dt className="text-[11px] text-white/80">Untung / rugi</dt>
+                <dd className="mt-0.5 flex items-center gap-1 truncate text-sm font-semibold tabular-nums">
+                  {totalPnL >= 0 ? <TrendingUp size={14} className="shrink-0 text-lime" /> : <TrendingDown size={14} className="shrink-0 text-[#FFB4B8]" />}
                   {totalPnL >= 0 ? "+" : "−"}{formatRupiah(Math.abs(totalPnL))}
-                </p>
+                </dd>
               </div>
-            </div>
-
-            <div className="card p-3.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-              <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Return Portofolio</p>
-              <p className="whitespace-nowrap tabular-nums font-mono text-sm font-bold sm:text-body" style={{ color: totalPnLPct >= 0 ? "var(--color-pine-text)" : "var(--color-ember-text)" }}>
-                {totalPnLPct >= 0 ? "+" : ""}{totalPnLPct.toFixed(2)}%
-              </p>
-            </div>
-          </div>
+              <div className="min-w-0">
+                <dt className="text-[11px] text-white/80">Return</dt>
+                <dd className={cn("mt-0.5 text-sm font-semibold tabular-nums", totalPnLPct >= 0 ? "text-lime" : "text-[#FFB4B8]")}>{totalPnLPct >= 0 ? "+" : ""}{totalPnLPct.toFixed(2)}%</dd>
+              </div>
+            </dl>
+          </section>
 
           {/* Allocation Progress Breakdown */}
-          <div className="card p-4 space-y-2.5 w-full min-w-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Alokasi Kelas Aset</p>
+          <div className="card p-4 space-y-2.5 w-full min-w-0">
+            <p className="eyebrow mb-1">Alokasi kelas aset</p>
             {(Object.keys(assetTypeConfig) as AssetType[]).map((t) => {
               const typeAssets = assets.filter(a => a.type === t);
               const typeVal   = typeAssets.reduce((s, a) => s + a.units * a.currentPrice, 0);
@@ -232,9 +203,9 @@ export default function AsetPage() {
         </div>
 
         {/* Right: Real Asset Allocation Chart */}
-        <div className="lg:col-span-3 card p-4 sm:p-5 w-full min-w-0 overflow-hidden" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+        <div className="lg:col-span-3 card p-4 sm:p-5 w-full min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+            <h2 className="text-heading font-semibold text-ink">
               Distribusi Nilai per Kelas Aset
             </h2>
             <span className="text-xs font-mono text-ink-muted font-semibold px-2 py-0.5 rounded-full bg-paper">
@@ -246,9 +217,9 @@ export default function AsetPage() {
       </div>
 
       {/* Asset Table / Mobile Card View */}
-      <div className="card overflow-hidden p-0" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-surface)" }}>
+      <div className="card overflow-hidden p-0">
         <div className="px-4 py-3 border-b flex items-center justify-between gap-3" style={{ borderColor: "var(--color-rule)", backgroundColor: "var(--color-paper)" }}>
-          <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+          <h2 className="text-heading font-semibold text-ink">
             Daftar Aset & Valuasi Terkini
           </h2>
           <span className="shrink-0 whitespace-nowrap text-xs font-mono text-ink-muted">
@@ -268,7 +239,7 @@ export default function AsetPage() {
                 {/* Top Row: Name, Class Badge, Actions */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-body font-semibold text-ink truncate leading-tight" style={{ fontFamily: "var(--font-ui)" }}>
+                    <p className="text-body font-semibold text-ink truncate leading-tight">
                       {asset.name}
                     </p>
                     <span
@@ -375,7 +346,7 @@ export default function AsetPage() {
                     className="group transition-colors duration-150 hover:bg-paper/80"
                   >
                     <TableCell className="px-4 py-3.5">
-                      <p className="text-body font-semibold text-ink group-hover:text-pine transition-colors" style={{ fontFamily: "var(--font-ui)" }}>
+                      <p className="text-body font-semibold text-ink group-hover:text-pine transition-colors">
                         {asset.name}
                       </p>
                     </TableCell>
@@ -461,15 +432,14 @@ export default function AsetPage() {
         >
           <div
             className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-card shadow-float overflow-hidden border bg-surface animate-in slide-in-from-bottom-4"
-            style={{ borderColor: "var(--color-rule)" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--color-rule)" }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
                   <Sparkles size={15} />
                 </div>
-                <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+                <h2 className="text-heading font-semibold text-ink">
                   {editAsset ? "Edit Data Aset" : "Tambah Aset Baru"}
                 </h2>
               </div>
@@ -520,7 +490,6 @@ export default function AsetPage() {
                   onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="mis. BBCA, Reksadana Schroder, Logam Mulia..."
                   className="w-full px-3.5 py-2.5 rounded-card border bg-paper text-small text-ink focus:border-pine outline-none font-medium"
-                  style={{ borderColor: "var(--color-rule)" }}
                 />
               </div>
 
@@ -537,7 +506,6 @@ export default function AsetPage() {
                     onChange={(e) => setForm(f => ({ ...f, units: e.target.value }))}
                     placeholder="0"
                     className="w-full px-3 py-2 rounded-card border bg-paper text-small font-mono text-ink focus:border-pine outline-none"
-                    style={{ borderColor: "var(--color-rule)" }}
                   />
                 </div>
 
@@ -551,7 +519,6 @@ export default function AsetPage() {
                     onChange={(e) => setForm(f => ({ ...f, buyPrice: e.target.value.replace(/\D/g, "") }))}
                     placeholder="0"
                     className="w-full px-3 py-2 rounded-card border bg-paper text-small font-mono text-ink focus:border-pine outline-none"
-                    style={{ borderColor: "var(--color-rule)" }}
                   />
                 </div>
 
@@ -565,14 +532,13 @@ export default function AsetPage() {
                     onChange={(e) => setForm(f => ({ ...f, currentPrice: e.target.value.replace(/\D/g, "") }))}
                     placeholder="0"
                     className="w-full px-3 py-2 rounded-card border bg-paper text-small font-mono text-ink focus:border-pine outline-none"
-                    style={{ borderColor: "var(--color-rule)" }}
                   />
                 </div>
               </div>
 
               {/* Live P&L Preview Box */}
               {modalVal > 0 && (
-                <div className="p-3.5 rounded-card border bg-paper/90 flex items-center justify-between" style={{ borderColor: "var(--color-rule)" }}>
+                <div className="p-3.5 rounded-card border bg-paper/90 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] uppercase tracking-wider text-ink-muted font-semibold">Valuasi Terkalkulasi</p>
                     <p className="text-small font-mono font-bold text-ink">{formatRupiah(modalVal)}</p>
@@ -592,7 +558,6 @@ export default function AsetPage() {
                 type="button"
                 onClick={() => setShowForm(false)}
                 className="flex-1 py-2.5 rounded-card text-small font-medium border text-ink-muted hover:bg-surface"
-                style={{ borderColor: "var(--color-rule)" }}
               >
                 Batal
               </button>
@@ -618,23 +583,21 @@ export default function AsetPage() {
         >
           <div
             className="w-full max-w-sm rounded-card p-6 shadow-float border bg-surface"
-            style={{ borderColor: "var(--color-rule)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-10 rounded-full bg-ember-10 flex items-center justify-center text-ember mb-3">
               <Trash2 size={20} />
             </div>
-            <h3 className="text-heading font-semibold text-ink mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
+            <h3 className="text-heading font-semibold text-ink mb-1.5">
               Hapus Aset?
             </h3>
-            <p className="text-small text-ink-muted mb-5 leading-relaxed" style={{ fontFamily: "var(--font-ui)" }}>
+            <p className="text-small text-ink-muted mb-5 leading-relaxed">
               Instrumen aset ini akan dihapus dari perhitungan portofolio dan grafik net worth.
             </p>
             <div className="flex gap-2.5">
               <button
                 onClick={() => setDeleteId(null)}
                 className="flex-1 py-2.5 rounded-card text-small font-medium border text-ink-muted hover:bg-paper"
-                style={{ borderColor: "var(--color-rule)" }}
               >
                 Batal
               </button>

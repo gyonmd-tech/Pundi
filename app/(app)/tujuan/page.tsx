@@ -247,15 +247,14 @@ export default function TujuanPage() {
         >
           <div
             className="w-full sm:max-w-md rounded-t-2xl sm:rounded-card shadow-float overflow-hidden border bg-surface animate-in slide-in-from-bottom-4"
-            style={{ borderColor: "var(--color-rule)" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--color-rule)" }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-sm bg-pine-10 text-pine flex items-center justify-center">
                   <Sparkles size={15} />
                 </div>
-                <h2 className="text-heading font-semibold text-ink" style={{ fontFamily: "var(--font-ui)" }}>
+                <h2 className="text-heading font-semibold text-ink">
                   {editGoal ? "Edit Tujuan Tabungan" : "Tujuan Tabungan Baru"}
                 </h2>
               </div>
@@ -276,7 +275,6 @@ export default function TujuanPage() {
                   onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="mis. Dana Darurat, Liburan Jepang, MacBook M4..."
                   className="w-full px-3.5 py-2.5 rounded-card border bg-paper text-small text-ink focus:border-pine outline-none font-medium"
-                  style={{ borderColor: "var(--color-rule)" }}
                   autoFocus
                 />
               </div>
@@ -293,7 +291,6 @@ export default function TujuanPage() {
                     onChange={(e) => setForm(f => ({ ...f, targetAmount: e.target.value.replace(/\D/g, "") }))}
                     placeholder="0"
                     className="w-full px-3 py-2 rounded-card border bg-paper text-small font-mono font-bold text-ink focus:border-pine outline-none"
-                    style={{ borderColor: "var(--color-rule)" }}
                   />
                 </div>
 
@@ -307,7 +304,6 @@ export default function TujuanPage() {
                     onChange={(e) => setForm(f => ({ ...f, currentAmount: e.target.value.replace(/\D/g, "") }))}
                     placeholder="0"
                     className="w-full px-3 py-2 rounded-card border bg-paper text-small font-mono font-bold text-pine focus:border-pine outline-none"
-                    style={{ borderColor: "var(--color-rule)" }}
                   />
                 </div>
               </div>
@@ -356,7 +352,6 @@ export default function TujuanPage() {
                   value={form.linkedAccountId}
                   onChange={(e) => setForm(f => ({ ...f, linkedAccountId: e.target.value }))}
                   className="w-full px-3 py-2.5 rounded-card border bg-paper text-small text-ink focus:border-pine outline-none font-medium"
-                  style={{ borderColor: "var(--color-rule)" }}
                 >
                   <option value="">Tanpa Rekening Khusus (Manual)</option>
                   {accounts.map((a) => (
@@ -371,7 +366,6 @@ export default function TujuanPage() {
                 type="button"
                 onClick={() => setShowForm(false)}
                 className="flex-1 py-2.5 rounded-card text-small font-medium border text-ink-muted hover:bg-surface"
-                style={{ borderColor: "var(--color-rule)" }}
               >
                 Batal
               </button>
@@ -397,23 +391,21 @@ export default function TujuanPage() {
         >
           <div
             className="w-full max-w-sm rounded-card p-6 shadow-float border bg-surface"
-            style={{ borderColor: "var(--color-rule)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-10 rounded-full bg-ember-10 flex items-center justify-center text-ember mb-3">
               <Trash2 size={20} />
             </div>
-            <h3 className="text-heading font-semibold text-ink mb-1.5" style={{ fontFamily: "var(--font-ui)" }}>
+            <h3 className="text-heading font-semibold text-ink mb-1.5">
               Hapus Tujuan Tabungan?
             </h3>
-            <p className="text-small text-ink-muted mb-5 leading-relaxed" style={{ fontFamily: "var(--font-ui)" }}>
+            <p className="text-small text-ink-muted mb-5 leading-relaxed">
               Tujuan ini dan catatan kemajuannya akan dihapus dari pemantauan.
             </p>
             <div className="flex gap-2.5">
               <button
                 onClick={() => setDeleteId(null)}
                 className="flex-1 py-2.5 rounded-card text-small font-medium border text-ink-muted hover:bg-paper"
-                style={{ borderColor: "var(--color-rule)" }}
               >
                 Batal
               </button>

@@ -61,7 +61,7 @@ export function SpendingMomentumChart({ data }: { data: SpendingPoint[] }) {
               );
             })}
             <line x1={PAD.left} x2={width - PAD.right} y1={y(average)} y2={y(average)} stroke={AVERAGE} strokeWidth="1.5" strokeDasharray="4 5" />
-            <path d={monotonePath(data.map((_, index) => [xs[index], yCumulative(cumulative[index])]))} className="chart-line" fill="none" stroke={LINE} strokeWidth="2.5" strokeLinecap="round" />
+            <path d={monotonePath(data.map((_, index) => [xs[index], yCumulative(cumulative[index])]))} className="chart-line" pathLength={1} fill="none" stroke={LINE} strokeWidth="2.5" strokeLinecap="round" />
             {data.map((_, index) => <circle key={index} cx={xs[index]} cy={yCumulative(cumulative[index])} r={active === index ? 5 : 3.5} fill={active === index ? LINE : "var(--color-surface-high)"} stroke={LINE} strokeWidth="2" />)}
             <line x1={PAD.left} x2={width - PAD.right} y1={baseline} y2={baseline} className="chart-baseline" />
           </svg>

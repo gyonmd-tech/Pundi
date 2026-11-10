@@ -12,6 +12,7 @@ import { formatDate, formatRupiah } from "@/lib/utils/formatter";
 import { useToast } from "@/lib/context/ToastContext";
 import { createDebtAction, deleteDebtAction, recordDebtPaymentAction, updateDebtAction } from "@/actions/debts";
 import { cn } from "@/lib/utils/cn";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type FormState = {
   direction: DebtDirection;
@@ -135,18 +136,27 @@ export default function UtangPage() {
 
   return (
     <div className="space-y-5 font-ui">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div><p className="eyebrow">Komitmen keuangan</p><h1 className="page-title mt-1">Utang & Piutang</h1><p className="page-subtitle">Pantau dana yang harus dibayar dan yang masih harus diterima.</p></div>
-        <Button onClick={() => openForm()} disabled={connection.status === "loading"}><Plus className="h-4 w-4" /> Catat baru</Button>
-      </header>
+      <PageHeader
+        title="Utang & Piutang"
+        description="Dana yang harus dibayar dan yang masih harus diterima."
+        actions={<Button onClick={() => openForm()} disabled={connection.status === "loading"} aria-label="Catat utang atau piutang" className="px-3 sm:px-4"><Plus className="h-4 w-4" /><span className="hidden sm:inline">Catat baru</span></Button>}
+      />
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <article className="card overflow-hidden border-ember/15 bg-ember-10"><div className="flex items-center justify-between"><div><p className="eyebrow text-ember">Harus dibayar</p><p className="mt-3 text-3xl font-black tracking-tight text-ink">{formatRupiah(payable)}</p><p className="mt-1 text-xs text-ink-muted">{openItems.filter((item) => item.direction === "payable").length} catatan aktif</p></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-ember-10 text-ember"><ArrowUpRight /></div></div></article>
-        <article className="card overflow-hidden border-mint/15 bg-mint-10"><div className="flex items-center justify-between"><div><p className="eyebrow text-mint">Harus diterima</p><p className="mt-3 text-3xl font-black tracking-tight text-ink">{formatRupiah(receivable)}</p><p className="mt-1 text-xs text-ink-muted">{openItems.filter((item) => item.direction === "receivable").length} catatan aktif</p></div><div className="grid h-12 w-12 place-items-center rounded-2xl bg-mint-10 text-mint"><ArrowDownLeft /></div></div></article>
+      <section className="grid grid-cols-2 gap-3">
+        <article className="rounded-card border border-rule bg-surface-high p-4 shadow-card">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-ember-ink"><ArrowUpRight className="h-3.5 w-3.5" />Harus dibayar</p>
+          <p className="figure-display mt-2 truncate text-[1.6rem] leading-none text-ink">{formatRupiah(payable)}</p>
+          <p className="mt-1.5 text-xs text-ink-muted">{openItems.filter((item) => item.direction === "payable").length} catatan aktif</p>
+        </article>
+        <article className="rounded-card border border-rule bg-surface-high p-4 shadow-card">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-mint-ink"><ArrowDownLeft className="h-3.5 w-3.5" />Harus diterima</p>
+          <p className="figure-display mt-2 truncate text-[1.6rem] leading-none text-ink">{formatRupiah(receivable)}</p>
+          <p className="mt-1.5 text-xs text-ink-muted">{openItems.filter((item) => item.direction === "receivable").length} catatan aktif</p>
+        </article>
       </section>
 
-      <section className="card border-pine/10 bg-surface-high/85">
-        <div className="flex items-center justify-between gap-3 border-b border-rule pb-4"><div><p className="eyebrow">Daftar catatan</p><h2 className="mt-1 text-lg font-extrabold text-ink">Semua utang dan piutang</h2></div><span className="shrink-0 whitespace-nowrap rounded-full bg-pine-10 px-3 py-1 text-xs font-bold text-pine">{debts.length} catatan</span></div>
+      <section className="card">
+        <div className="flex items-center justify-between gap-3 border-b border-rule pb-4"><div><p className="eyebrow">Daftar catatan</p><h2 className="mt-0.5 text-base font-semibold text-ink">Semua utang dan piutang</h2></div><span className="shrink-0 whitespace-nowrap rounded-full bg-pine-10 px-3 py-1 text-xs font-bold text-pine">{debts.length} catatan</span></div>
         <div className="mt-2 divide-y divide-rule/80">
           {debts.length ? debts.map((item) => {
             const paid = item.status === "paid" || item.remainingAmount === 0;

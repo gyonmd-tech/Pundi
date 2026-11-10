@@ -66,13 +66,14 @@ export function AuthPanel({ mode, active, onSwitch }: AuthPanelProps) {
           <Image src="/PUNDI-brand-assets/pundi-logo-white.svg" alt="Pundi" width={150} height={44} priority className="theme-dark-only h-9 w-auto object-contain sm:h-10" />
         </Link>
 
-        <h1 className="mt-5 text-3xl font-black sm:mt-7 sm:text-4xl tracking-[-0.05em] text-ink">{isSignup ? "Sign up" : "Login"}</h1>
+        <h1 className="mt-6 text-[2rem] text-ink sm:mt-8 sm:text-4xl">{isSignup ? "Buat akun" : "Masuk"}</h1>
+        <p className="mt-1.5 text-sm text-ink-muted">{isSignup ? "Mulai catat dan rencanakan keuanganmu." : "Lanjutkan mengelola keuanganmu."}</p>
 
         <form action={submit} className="mt-5 space-y-3.5 sm:mt-7 sm:space-y-5">
           {isSignup ? <AuthUnderlineInput label="Nama" name="name" icon={UserRound} required autoComplete="name" placeholder="Nama lengkap" tabIndex={active ? 0 : -1} /> : null}
           <AuthUnderlineInput label="Email" name="email" type="email" icon={Mail} required autoComplete="email" inputMode="email" placeholder="nama@email.com" tabIndex={active ? 0 : -1} />
           <AuthUnderlineInput
-            label="Password"
+            label="Kata sandi"
             name="password"
             type={showPassword ? "text" : "password"}
             icon={LockKeyhole}
@@ -86,21 +87,24 @@ export function AuthPanel({ mode, active, onSwitch }: AuthPanelProps) {
 
           {error ? <div role="alert" aria-live="polite" className="rounded-sm bg-ember-10 px-4 py-3 text-left text-xs font-semibold leading-relaxed text-ember">{error}</div> : null}
 
-          <Button type="submit" size="lg" loading={pending} tabIndex={active ? 0 : -1} className="group w-full shadow-[0_12px_28px_rgba(91,74,239,.24)]">
-            {pending ? "Memproses..." : isSignup ? "Sign up" : "Login"}
+          <Button type="submit" size="lg" loading={pending} tabIndex={active ? 0 : -1} className="group w-full">
+            {pending ? "Memproses..." : isSignup ? "Daftar" : "Masuk"}
             {!pending ? <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /> : null}
           </Button>
         </form>
 
-        <div className="my-3 flex items-center gap-3 sm:my-5" aria-hidden><span className="h-px flex-1 bg-rule" /><span className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-ink-muted">atau</span><span className="h-px flex-1 bg-rule" /></div>
+        <div className="my-3 flex items-center gap-3 sm:my-5" aria-hidden><span className="h-px flex-1 bg-rule" /><span className="text-[11px] font-medium text-ink-muted">atau</span><span className="h-px flex-1 bg-rule" /></div>
 
-        <Button type="button" variant="ghost" size="md" loading={demoPending} onClick={enterDemo} tabIndex={active ? 0 : -1} className="w-full text-pine hover:bg-pine-10">
+        <Button type="button" size="md" loading={demoPending} onClick={enterDemo} tabIndex={active ? 0 : -1} className="w-full border-rule bg-surface-high text-ink hover:bg-surface-soft" variant="outline">
           {!demoPending ? <Sparkles className="h-4 w-4" /> : null}{demoPending ? "Membuka..." : "Mode demo"}
         </Button>
 
-        <button type="button" onClick={onSwitch} tabIndex={active ? 0 : -1} className="mt-2 rounded-lg px-3 py-2 sm:mt-4 text-sm font-extrabold text-pine transition hover:bg-pine-10 focus-visible:shadow-none">
-          {isSignup ? "Login" : "Sign up"}
-        </button>
+        <p className="mt-4 text-sm text-ink-muted sm:mt-6">
+          {isSignup ? "Sudah punya akun?" : "Belum punya akun?"}{" "}
+          <button type="button" onClick={onSwitch} tabIndex={active ? 0 : -1} className="rounded-xs px-1 font-semibold text-pine underline-offset-4 transition hover:underline">
+            {isSignup ? "Masuk" : "Daftar"}
+          </button>
+        </p>
       </div>
     </section>
   );
