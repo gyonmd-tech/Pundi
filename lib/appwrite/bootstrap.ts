@@ -11,6 +11,7 @@ import { Query, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getAuthUserAction } from "@/actions/auth";
+import { budgetFromDocument } from "@/lib/appwrite/budgetMapper";
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
 import { generateDueRecurringTransactions } from "@/lib/appwrite/recurringGenerator";
 import { listAllDocuments } from "@/lib/appwrite/pagination";
@@ -85,14 +86,6 @@ interface TransactionFields {
   date: string;
   note?: string;
   tags?: string[];
-}
-interface BudgetFields {
-  categoryId: string;
-  period: string;
-  limitAmount: number;
-  cadence?: "daily" | "weekly" | "monthly" | null;
-  cadenceAmount?: number | null;
-  rollover?: boolean | null;
 }
 interface GoalFields {
   name: string;
@@ -272,18 +265,7 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
         tags: f.tags || [],
       };
     });
-    const mappedBudgets = budgets.documents.map((doc) => {
-      const f = fields<BudgetFields>(doc);
-      return {
-        id: doc.$id,
-        categoryId: f.categoryId,
-        period: f.period,
-        limitAmount: Number(f.limitAmount),
-        cadence: f.cadence ?? "monthly",
-        cadenceAmount: f.cadenceAmount ? Number(f.cadenceAmount) : undefined,
-        rollover: f.rollover ?? true,
-      };
-    });
+    const mappedBudgets = budgets.documents.map(budgetFromDocument);
     const mappedGoals = goals.documents.map((doc) => {
       const f = fields<GoalFields>(doc);
       return {
@@ -343,6 +325,7 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
         budgets: mappedBudgets,
         goals: mappedGoals,
         recurringRules: mappedRecurringRules,
+        cycleDay: preferences.budgetCycleDay,
       },
       existing: insights.documents,
     });

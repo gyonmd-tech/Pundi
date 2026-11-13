@@ -15,7 +15,7 @@ import {
 import { SummarySparkline } from "@/components/dashboard/SummarySparkline";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { cadenceAmountOf, CADENCE_LABEL } from "@/lib/utils/budgetPace";
+import { activeBudgetPaces, cadenceAmountOf, CADENCE_LABEL } from "@/lib/utils/budgetPace";
 import { SafeToSpendCard } from "@/components/dashboard/SafeToSpendCard";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -80,7 +80,7 @@ export default function DashboardPage() {
 
   const now = new Date();
   const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const currentPeriod = now.toISOString().slice(0, 7);
+  const cycleDay = preferences.budgetCycleDay ?? 1;
   const currentMonth = formatDate(now, "month");
 
   const thisMonth = summarize(transactions, now);
@@ -133,21 +133,13 @@ export default function DashboardPage() {
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  const budgetsWithSpent = budgets
-    .filter((budget) => budget.period === currentPeriod)
-    .map((budget) => {
-      const category = categories.find((item) => item.id === budget.categoryId);
-      const spent = transactions
-        .filter(
-          (transaction) =>
-            transaction.type === "expense" &&
-            transaction.recordKind !== "balance_adjustment" &&
-            transaction.categoryId === budget.categoryId &&
-            isSameMonth(new Date(transaction.date), now)
-        )
-        .reduce((sum, transaction) => sum + transaction.amount, 0);
-      return { ...budget, category, spent };
-    });
+  const budgetsWithSpent = activeBudgetPaces(budgets, transactions, { now, cycleDay })
+    .map(({ budget, pace }) => ({
+      ...budget,
+      limitAmount: pace.monthLimit,
+      category: categories.find((item) => item.id === budget.categoryId),
+      spent: pace.monthSpent,
+    }));
 
   const recentTransactions = transactions.slice(0, 5).map((transaction) => ({
     ...transaction,
@@ -173,7 +165,7 @@ export default function DashboardPage() {
   const openPayable = debts.filter((item) => item.status === "open" && item.direction === "payable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const openReceivable = debts.filter((item) => item.status === "open" && item.direction === "receivable").reduce((sum, item) => sum + item.remainingAmount, 0);
   const cashHealth = Math.max(0, Math.min(100, thisMonth.income ? ((thisMonth.income - thisMonth.expense) / thisMonth.income) * 100 : 0));
-  const safeToSpend = computeSafeToSpend(accounts, budgets, transactions, recurringRules, now);
+  const safeToSpend = computeSafeToSpend(accounts, budgets, transactions, recurringRules, now, cycleDay);
 
   return (
     <div className="dashboard-modern space-y-5 font-ui sm:space-y-6">

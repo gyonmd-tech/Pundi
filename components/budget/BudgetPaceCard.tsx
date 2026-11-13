@@ -2,13 +2,15 @@
 
 /**
  * components/budget/BudgetPaceCard.tsx
- * Kartu anggaran berbasis waktu: sisa jatah hari ini / minggu ini / bulan ini,
- * sisa jatah sebelumnya yang terbawa, grafik 7 hari, dan ritme bulanan
- * (lebih hemat / lebih boros dibanding jadwal). Ringkas secara default;
- * rincian dibuka lewat tombol "Rincian" agar daftar anggaran mudah dipindai.
+ * Kartu anggaran (tampilan ponsel/tablet): terpakai vs jatah unit berjalan,
+ * penjelasan jatah dalam kalimat ("Rp35.000 − kelebihan kemarin Rp12.500"),
+ * dan rincian (grafik 7 hari + posisi siklus terhadap jadwal).
+ *
+ * Di layar sentuh kartu bisa digeser ke kiri untuk aksi cepat Ubah/Hapus.
+ * Aksi yang sama selalu tersedia di "Rincian" — geser hanyalah jalan pintas.
  */
-import { useState } from "react";
-import { AlertTriangle, CheckCircle2, ChevronDown, Clock3, Pencil, Repeat, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { useRef, useState } from "react";
+import { AlertTriangle, CheckCircle2, ChevronDown, Clock3, Pencil, Sparkles, Trash2 } from "lucide-react";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { CADENCE_LABEL, type BudgetPace } from "@/lib/utils/budgetPace";
 import { formatRupiah } from "@/lib/utils/formatter";
@@ -19,6 +21,8 @@ interface BudgetPaceCardProps {
   icon?: string;
   color?: string;
   pace: BudgetPace;
+  /** Nama rekening sumber dana; kosong = semua rekening. */
+  sources?: string[];
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -31,117 +35,175 @@ export function paceStatus(pace: BudgetPace): PaceStatus {
   return "safe";
 }
 
-const statusStyle: Record<PaceStatus, { label: string; className: string; bar: string; Icon: typeof CheckCircle2 }> = {
-  safe: { label: "Aman", className: "bg-mint-10 text-mint-ink", bar: "bg-mint", Icon: CheckCircle2 },
-  warning: { label: "Hampir habis", className: "bg-warning-10 text-warning-ink", bar: "bg-warning", Icon: Clock3 },
-  over: { label: "Lewat jatah", className: "bg-ember-10 text-ember-ink", bar: "bg-ember", Icon: AlertTriangle },
+export const STATUS_STYLE: Record<PaceStatus, { label: string; badge: string; bar: string; Icon: typeof CheckCircle2 }> = {
+  safe: { label: "Aman", badge: "bg-mint-ink text-white", bar: "bg-mint", Icon: CheckCircle2 },
+  warning: { label: "Hampir habis", badge: "bg-warning text-[#1A1200]", bar: "bg-warning", Icon: Clock3 },
+  over: { label: "Lewat", badge: "bg-ember-ink text-white", bar: "bg-ember", Icon: AlertTriangle },
 };
 
-const shortDay = new Intl.DateTimeFormat("id-ID", { weekday: "narrow" });
+const shortDay = new Intl.DateTimeFormat("id-ID", { weekday: "short" });
+const shortDate = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short" });
+const ACTIONS_WIDTH = 144;
 
-export function BudgetPaceCard({ name, icon, color, pace, onEdit, onDelete }: BudgetPaceCardProps) {
+/** Kalimat yang menjelaskan dari mana angka jatah unit berjalan berasal. */
+export function allowanceExplanation(pace: BudgetPace) {
+  const labels = CADENCE_LABEL[pace.cadence];
+  const previous = pace.cadence === "daily" ? "kemarin" : pace.cadence === "weekly" ? "minggu lalu" : "sebelumnya";
+  if (pace.carryIn < 0) return `Jatah ${formatRupiah(pace.unitAllowance)} − kelebihan ${previous} ${formatRupiah(Math.abs(pace.carryIn))}.`;
+  if (pace.carryIn > 0) return `Jatah ${formatRupiah(pace.unitAllowance)} + sisa ${previous} ${formatRupiah(pace.carryIn)}.`;
+  if (pace.startedMidCycle && pace.cadence !== "daily") return `Berlaku sejak ${shortDate.format(pace.effectiveStart)} — belanja sebelumnya tidak dihitung.`;
+  if (pace.cadence === "monthly") {
+    return pace.unitRemaining < 0
+      ? "Jatah siklus ini sudah habis — belanja berikutnya menambah kelebihan."
+      : `Aman ${formatRupiah(pace.perDayLeft)}/hari untuk ${pace.daysRemaining} hari lagi.`;
+  }
+  return `Jatah ${formatRupiah(pace.unitAllowance)} ${labels.current}.`;
+}
+
+export function isNewThisCycle(pace: BudgetPace, now = new Date()) {
+  return pace.startedMidCycle && now.getTime() - pace.effectiveStart.getTime() < 7 * 24 * 60 * 60 * 1000;
+}
+
+export function BudgetPaceCard({ name, icon, color, pace, sources, onEdit, onDelete }: BudgetPaceCardProps) {
   const [open, setOpen] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const drag = useRef<{ x: number; y: number; base: number; active: boolean } | null>(null);
+
   const labels = CADENCE_LABEL[pace.cadence];
   const status = paceStatus(pace);
-  const style = statusStyle[status];
-  const unitPct = pace.unitAvailable > 0 ? Math.min(100, (pace.unitSpent / pace.unitAvailable) * 100) : pace.unitSpent > 0 ? 100 : 0;
+  const style = STATUS_STYLE[status];
+  const fresh = isNewThisCycle(pace);
+  const usedPct = pace.unitAvailable > 0 ? Math.min(100, (pace.unitSpent / pace.unitAvailable) * 100) : pace.unitSpent > 0 ? 100 : 0;
+  const overPct = pace.unitRemaining < 0 && pace.unitSpent > 0 ? Math.min(100, (Math.abs(pace.unitRemaining) / pace.unitSpent) * 100) : 0;
   const monthPct = pace.monthLimit > 0 ? Math.min(100, (pace.monthSpent / pace.monthLimit) * 100) : 0;
   const schedulePct = pace.monthLimit > 0 ? Math.min(100, (pace.allowanceToDate / pace.monthLimit) * 100) : 0;
-  const maxBar = Math.max(pace.cadenceAmount && pace.cadence === "daily" ? pace.cadenceAmount : 0, ...pace.lastDays.map((day) => Math.max(day.spent, day.allowance)), 1);
+  const maxBar = Math.max(pace.cadence === "daily" ? pace.cadenceAmount : 0, ...pace.lastDays.map((day) => Math.max(day.spent, day.allowance)), 1);
   const detailsId = `budget-${name.replace(/\W+/g, "-")}-rincian`;
+  const hasActions = Boolean(onEdit || onDelete);
+
+  function onPointerDown(event: React.PointerEvent) {
+    if (event.pointerType !== "touch" || !hasActions) return;
+    drag.current = { x: event.clientX, y: event.clientY, base: offset, active: false };
+  }
+  function onPointerMove(event: React.PointerEvent) {
+    const state = drag.current;
+    if (!state) return;
+    const dx = event.clientX - state.x;
+    const dy = event.clientY - state.y;
+    if (!state.active) {
+      if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 8) return; // biarkan gulir vertikal
+      state.active = true;
+      setDragging(true);
+    }
+    setOffset(Math.max(-ACTIONS_WIDTH, Math.min(0, state.base + dx)));
+  }
+  function onPointerUp() {
+    const state = drag.current;
+    drag.current = null;
+    setDragging(false);
+    if (!state?.active) return;
+    setOffset((value) => (value < -ACTIONS_WIDTH / 2 ? -ACTIONS_WIDTH : 0));
+  }
 
   return (
-    <article className={cn("rounded-card border bg-surface-high p-4 shadow-card transition-colors sm:p-5", status === "over" ? "border-ember/35" : "border-rule")}>
-      <header className="flex items-center gap-3">
-        <CategoryIcon icon={icon} color={color} size={16} containerSize="md" />
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate text-[15px] font-semibold leading-snug text-ink">{name}</h3>
-          <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-ink-muted">
-            {labels.adjective} · {formatRupiah(pace.cadenceAmount)}{labels.per}
-            {pace.rollover ? <Repeat aria-label="Fleksibel: sisa jatah terbawa" className="h-3 w-3 shrink-0" /> : null}
-          </p>
-        </div>
-        <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold", style.className)}>
-          <style.Icon className="h-3 w-3" />{style.label}
-        </span>
-      </header>
-
-      <div className="mt-4 flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs text-ink-muted">{pace.unitRemaining >= 0 ? `Sisa ${labels.current}` : `Lewat ${labels.current}`}</p>
-          <p className={cn("figure-display mt-0.5 text-[1.75rem] leading-none", pace.unitRemaining >= 0 ? "text-ink" : "text-ember-ink")}>
-            {pace.unitRemaining < 0 ? "−" : ""}{formatRupiah(Math.abs(pace.unitRemaining))}
-          </p>
-        </div>
-        <p className="shrink-0 pb-0.5 text-right text-xs text-ink-muted tabular-nums">
-          <b className="font-semibold text-ink">{formatRupiah(pace.unitSpent)}</b>
-          <br />dari {formatRupiah(pace.unitAvailable)}
-        </p>
-      </div>
-
-      <div className="progress-track mt-3" role="progressbar" aria-valuenow={Math.round(unitPct)} aria-valuemin={0} aria-valuemax={100} aria-label={`Pemakaian jatah ${labels.current}`}>
-        <span className={cn("progress-fill", style.bar)} style={{ width: `${unitPct}%` }} />
-      </div>
-
-      <div className="mt-3 flex items-center justify-between gap-2">
-        {pace.aheadBy >= 0 ? (
-          <span className="inline-flex min-w-0 items-center gap-1 truncate text-xs font-medium text-mint-ink"><TrendingDown className="h-3.5 w-3.5 shrink-0" />Hemat {formatRupiah(pace.aheadBy)} dari jadwal</span>
-        ) : (
-          <span className="inline-flex min-w-0 items-center gap-1 truncate text-xs font-medium text-ember-ink"><TrendingUp className="h-3.5 w-3.5 shrink-0" />Boros {formatRupiah(Math.abs(pace.aheadBy))} dari jadwal</span>
-        )}
-        <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls={detailsId} className="-mr-2 inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-50">
-          Rincian<ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", open && "rotate-180")} />
-        </button>
-      </div>
-
-      {open ? (
-        <div id={detailsId} className="mt-3 space-y-4 border-t border-rule pt-4 animate-in fade-in slide-in-from-top-1">
-          <p className="text-xs text-ink-muted">
-            {pace.cadence === "weekly" && pace.unitRemaining > 0 && pace.unitDaysRemaining > 1 ? <>±{formatRupiah(Math.round(pace.unitRemaining / pace.unitDaysRemaining))}/hari untuk {pace.unitDaysRemaining} hari lagi.</> : null}
-            {pace.cadence === "monthly" ? <>Aman {formatRupiah(pace.perDayLeft)}/hari untuk {pace.daysRemaining} hari lagi.</> : null}
-            {pace.cadence === "daily" ? <>Jatah harian {formatRupiah(pace.cadenceAmount)}.</> : null}
-          </p>
-          {pace.rollover && pace.carryIn !== 0 ? (
-            <p className={cn("inline-flex items-center gap-1 rounded-xs px-2 py-1 text-[11px] font-semibold", pace.carryIn > 0 ? "bg-mint-10 text-mint-ink" : "bg-ember-10 text-ember-ink")}>
-              <Repeat className="h-3 w-3" />
-              {pace.carryIn > 0 ? `+${formatRupiah(pace.carryIn)} sisa jatah sebelumnya ikut terbawa` : `−${formatRupiah(Math.abs(pace.carryIn))} kelebihan sebelumnya mengurangi jatah`}
-            </p>
-          ) : null}
-
-          {pace.cadence === "daily" && pace.lastDays.length > 1 ? (
-            <div className="flex items-end gap-1.5" aria-label="Pengeluaran 7 hari terakhir">
-              {pace.lastDays.map((day, index) => {
-                const isToday = index === pace.lastDays.length - 1;
-                const over = day.spent > pace.cadenceAmount;
-                return (
-                  <div key={day.date.toISOString()} className="flex flex-1 flex-col items-center gap-1" title={`${day.date.toLocaleDateString("id-ID", { day: "numeric", month: "short" })}: ${formatRupiah(day.spent)}`}>
-                    <div className="relative h-14 w-full max-w-7 overflow-hidden rounded-md bg-surface-soft">
-                      <div className="absolute inset-x-0 border-t border-dashed border-ink-soft/60" style={{ bottom: `${(pace.cadenceAmount / maxBar) * 100}%` }} />
-                      <div className={cn("chart-bar absolute inset-x-0 bottom-0 rounded-md", over ? "bg-ember" : isToday ? "bg-brand-500" : "bg-mint")} style={{ height: `${Math.min(100, (day.spent / maxBar) * 100)}%`, animationDelay: `${index * 35}ms` }} />
-                    </div>
-                    <span className={cn("text-[10px] font-semibold capitalize", isToday ? "text-ink" : "text-ink-soft")}>{shortDay.format(day.date)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
-
-          <div>
-            <p className="text-xs text-ink-muted">Bulan ini <b className="font-semibold text-ink">{formatRupiah(pace.monthSpent)}</b> / {formatRupiah(pace.monthLimit)}</p>
-            <div className="relative mt-2 h-1.5 rounded-full bg-surface-soft">
-              <div className={cn("h-full rounded-full", pace.monthSpent > pace.monthLimit ? "bg-ember" : "bg-brand-500")} style={{ width: `${monthPct}%` }} />
-              <span className="absolute -top-1 h-3.5 w-0.5 rounded-full bg-ink" style={{ left: `calc(${schedulePct}% - 1px)` }} title="Posisi jadwal hari ini" />
-            </div>
-          </div>
-
-          {(onEdit || onDelete) ? (
-            <div className="flex gap-2">
-              {onEdit ? <button type="button" onClick={onEdit} aria-label={`Edit anggaran ${name}`} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-sm border border-rule px-3 py-2 text-xs font-semibold text-ink transition-colors hover:bg-surface-soft"><Pencil className="h-3.5 w-3.5" />Ubah</button> : null}
-              {onDelete ? <button type="button" onClick={onDelete} aria-label={`Hapus anggaran ${name}`} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-sm border border-rule px-3 py-2 text-xs font-semibold text-ember-ink transition-colors hover:bg-ember-10"><Trash2 className="h-3.5 w-3.5" />Hapus</button> : null}
-            </div>
-          ) : null}
+    <div className="relative overflow-hidden rounded-card bg-brand-950">
+      {hasActions ? (
+        <div className="absolute inset-y-0 right-0 flex" style={{ width: ACTIONS_WIDTH }} aria-hidden={offset === 0}>
+          {onEdit ? <button type="button" tabIndex={offset === 0 ? -1 : 0} onClick={() => { setOffset(0); onEdit(); }} className="flex flex-1 flex-col items-center justify-center gap-1 bg-brand-700 text-xs font-bold text-white"><Pencil className="h-5 w-5" />Ubah</button> : null}
+          {onDelete ? <button type="button" tabIndex={offset === 0 ? -1 : 0} onClick={() => { setOffset(0); onDelete(); }} className="flex flex-1 flex-col items-center justify-center gap-1 bg-ember-ink text-xs font-bold text-white"><Trash2 className="h-5 w-5" />Hapus</button> : null}
         </div>
       ) : null}
-    </article>
+
+      <article
+        className={cn(
+          "relative touch-pan-y rounded-card border bg-surface-high p-4 transition-transform duration-200 sm:p-5",
+          status === "over" ? "border-2 border-ember" : "border-rule",
+        )}
+        style={{ transform: `translateX(${offset}px)`, transitionDuration: dragging ? "0ms" : undefined }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <header className="flex items-center gap-3">
+          <CategoryIcon icon={icon} color={color} size={18} containerSize="md" />
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-base font-bold leading-snug text-ink">{name}</h3>
+            <p className="mt-0.5 truncate text-xs font-medium text-ink-muted">
+              {labels.adjective} · {formatRupiah(pace.cadenceAmount)} · {sources?.length ? sources.join(", ") : "semua rekening"}
+            </p>
+          </div>
+          <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-[8px] px-2.5 py-1 text-xs font-bold", fresh && status === "safe" ? "bg-brand-950 text-white" : style.badge)}>
+            {fresh && status === "safe" ? <><Sparkles className="h-3.5 w-3.5" />Baru</> : <><style.Icon className="h-3.5 w-3.5" />{style.label}</>}
+          </span>
+        </header>
+
+        <p className="mt-4 flex flex-wrap items-baseline gap-x-1.5">
+          <span className={cn("text-2xl font-bold tabular-nums", status === "over" ? "text-ember-ink" : "text-ink")}>{formatRupiah(pace.unitSpent)}</span>
+          <span className="text-sm font-semibold tabular-nums text-ink-muted">/ {formatRupiah(Math.max(0, pace.unitAvailable))} {labels.current}</span>
+        </p>
+
+        <div className="mt-2.5 flex h-2.5 overflow-hidden rounded-full bg-surface-soft" role="progressbar" aria-valuenow={Math.round(usedPct)} aria-valuemin={0} aria-valuemax={100} aria-label={`Pemakaian jatah ${labels.current}`}>
+          <span className={cn("h-full", status === "over" ? "bg-ink" : style.bar)} style={{ width: `${usedPct - overPct}%` }} />
+          {overPct > 0 ? <span className="h-full bg-ember" style={{ width: `${overPct}%` }} /> : null}
+        </div>
+
+        <p className={cn("mt-2.5 text-sm leading-snug", status === "over" ? "font-semibold text-ember-ink" : "text-ink-muted")}>
+          {pace.unitRemaining < 0 ? `Lewat ${formatRupiah(Math.abs(pace.unitRemaining))}. ` : null}{allowanceExplanation(pace)}
+        </p>
+
+        <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls={detailsId} className="-mx-1 mt-1 inline-flex min-h-10 items-center gap-1 rounded-sm px-1 text-sm font-bold text-brand-700">
+          Rincian<ChevronDown className={cn("h-4 w-4 transition-transform duration-200", open && "rotate-180")} />
+        </button>
+
+        {open ? (
+          <div id={detailsId} className="mt-2 space-y-4 border-t border-rule pt-4 animate-in fade-in slide-in-from-top-1">
+            {pace.cadence === "daily" && pace.lastDays.length > 1 ? (
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.08em] text-ink-muted">7 hari terakhir</p>
+                <div role="img" aria-label={`Pengeluaran 7 hari terakhir, jatah ${formatRupiah(pace.cadenceAmount)} per hari`}>
+                  <div className="relative flex h-20 items-end gap-1.5">
+                    <div aria-hidden className="absolute inset-x-0 border-t-2 border-dashed border-ink/60" style={{ bottom: `${(pace.cadenceAmount / maxBar) * 100}%` }} />
+                    {pace.lastDays.map((day, index) => {
+                      const isToday = index === pace.lastDays.length - 1;
+                      const over = day.spent > pace.cadenceAmount;
+                      return (
+                        <div key={day.date.toISOString()} className="flex h-full flex-1 items-end justify-center">
+                          <div className={cn("w-full max-w-8 rounded-t-[6px]", over ? "bg-ember" : "bg-brand-600", isToday && "ring-2 ring-ink ring-offset-1 ring-offset-surface-high")} style={{ height: `${Math.max(3, (day.spent / maxBar) * 100)}%` }} title={`${shortDate.format(day.date)}: ${formatRupiah(day.spent)}`} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div aria-hidden className="mt-1 flex gap-1.5">
+                    {pace.lastDays.map((day, index) => (
+                      <span key={day.date.toISOString()} className={cn("flex-1 text-center text-[11px] font-semibold capitalize", index === pace.lastDays.length - 1 ? "text-ink" : "text-ink-muted")}>{index === pace.lastDays.length - 1 ? "Ini" : shortDay.format(day.date)}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            <div>
+              <p className="text-sm text-ink-muted">Siklus ini <b className="font-bold tabular-nums text-ink">{formatRupiah(pace.monthSpent)}</b> / {formatRupiah(pace.monthLimit)}</p>
+              <div className="relative mt-2 h-2.5 rounded-full bg-surface-soft">
+                <div className={cn("h-full rounded-full", pace.monthSpent > pace.monthLimit ? "bg-ember" : "bg-brand-600")} style={{ width: `${monthPct}%` }} />
+                <span className="absolute -top-1 h-[18px] w-[3px] rounded-full bg-ink" style={{ left: `calc(${schedulePct}% - 1px)` }} title="Target hari ini" />
+              </div>
+              <p className={cn("mt-2 text-sm font-semibold", pace.aheadBy >= 0 ? "text-mint-ink" : "text-ember-ink")}>
+                {pace.aheadBy >= 0 ? `Hemat ${formatRupiah(pace.aheadBy)} dari jadwal` : `Boros ${formatRupiah(Math.abs(pace.aheadBy))} dari jadwal`} · garis = target hari ini
+              </p>
+            </div>
+
+            {hasActions ? (
+              <div className="flex gap-2">
+                {onEdit ? <button type="button" onClick={onEdit} aria-label={`Ubah anggaran ${name}`} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-sm border border-rule-strong text-sm font-bold text-ink transition-colors hover:bg-surface-soft"><Pencil className="h-4 w-4" />Ubah</button> : null}
+                {onDelete ? <button type="button" onClick={onDelete} aria-label={`Hapus anggaran ${name}`} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-sm border border-rule-strong text-sm font-bold text-ember-ink transition-colors hover:bg-ember-10"><Trash2 className="h-4 w-4" />Hapus</button> : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </article>
+    </div>
   );
 }

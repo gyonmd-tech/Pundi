@@ -8,41 +8,51 @@
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { getOwnedDocument } from "@/lib/appwrite/ownership";
-import { Permission, Role, ID, Query, type Models } from "node-appwrite";
+import { Permission, Role, ID, Query } from "node-appwrite";
 import { getAuthUserAction } from "./auth";
 import { mockBudgets, type Budget } from "@/lib/data/mock";
 import { createBudgetSchema } from "@/lib/validations/budget";
 import { recordAuditLog } from "@/lib/appwrite/auditLog";
-
-interface BudgetFields {
-  categoryId: string;
-  period: string;
-  limitAmount: number;
-  cadence?: Budget["cadence"] | null;
-  cadenceAmount?: number | null;
-  rollover?: boolean | null;
-}
-
-const CADENCE_KEYS = ["cadence", "cadenceAmount", "rollover"] as const;
+import { budgetFromDocument } from "@/lib/appwrite/budgetMapper";
 
 /**
- * Database lama (sebelum `npm run db:setup` dijalankan ulang) belum punya
- * atribut cadence/cadenceAmount/rollover. Daripada gagal total, simpan versi
- * bulanan saja dan beri tahu pengguna lewat `warning`.
+ * Atribut opsional yang mungkin belum ada di database lama (sebelum
+ * `npm run db:setup` dijalankan ulang). Daripada gagal total, simpan tanpa
+ * kelompok atribut yang ditolak dan beri tahu pengguna lewat `warning`.
  */
-function isUnknownAttributeError(err: unknown) {
+const OPTIONAL_GROUPS = [
+  { keys: ["startDate", "repeat", "accountIds"], warning: "Tanggal mulai, pengulangan, dan sumber dana belum tersimpan. Jalankan `npm run db:setup` sekali untuk menambah kolomnya." },
+  { keys: ["cadence", "cadenceAmount", "rollover"], warning: "Anggaran tersimpan sebagai per siklus. Jalankan `npm run db:setup` sekali agar jatah harian/mingguan bisa disimpan." },
+] as const;
+
+function rejectedGroup(err: unknown) {
   const message = err instanceof Error ? err.message : String(err);
-  return /unknown attribute/i.test(message) && CADENCE_KEYS.some((key) => message.includes(key));
+  if (!/unknown attribute/i.test(message)) return null;
+  return OPTIONAL_GROUPS.find((group) => group.keys.some((key) => message.includes(key))) ?? null;
 }
 
-function withoutCadence<T extends Record<string, unknown>>(data: T) {
-  const copy: Record<string, unknown> = { ...data };
-  for (const key of CADENCE_KEYS) delete copy[key];
+function without(data: Record<string, unknown>, keys: readonly string[]) {
+  const copy = { ...data };
+  for (const key of keys) delete copy[key];
   return copy;
 }
 
-const SCHEMA_WARNING =
-  "Anggaran tersimpan sebagai bulanan. Jalankan `npm run db:setup` sekali agar jatah harian/mingguan bisa disimpan di database.";
+/** Tulis dokumen; bila atribut belum ada di database, ulangi tanpa kelompok itu (maks. 2 kali). */
+async function writeWithFallback(write: (data: Record<string, unknown>) => Promise<string>, data: Record<string, unknown>) {
+  let current = data;
+  const warnings: string[] = [];
+  for (let attempt = 0; attempt <= OPTIONAL_GROUPS.length; attempt++) {
+    try {
+      return { id: await write(current), warning: warnings.join(" ") || undefined };
+    } catch (err) {
+      const group = rejectedGroup(err);
+      if (!group || warnings.includes(group.warning)) throw err;
+      warnings.push(group.warning);
+      current = without(current, group.keys);
+    }
+  }
+  throw new Error("Anggaran gagal disimpan.");
+}
 
 export async function getBudgetsAction(period?: string): Promise<{ data: Budget[]; error?: string }> {
   const user = await getAuthUserAction();
@@ -57,20 +67,7 @@ export async function getBudgetsAction(period?: string): Promise<{ data: Budget[
 
     const response = await databases.listDocuments(DATABASE_ID, COLLECTIONS.BUDGETS, queries);
 
-    const mapped: Budget[] = response.documents.map((doc: Models.Document) => {
-      const fields = doc as unknown as BudgetFields;
-      return {
-        id: doc.$id,
-        categoryId: fields.categoryId,
-        period: fields.period,
-        limitAmount: fields.limitAmount,
-        cadence: fields.cadence ?? "monthly",
-        cadenceAmount: fields.cadenceAmount ?? undefined,
-        rollover: fields.rollover ?? true,
-      };
-    });
-
-    return { data: mapped };
+    return { data: response.documents.map(budgetFromDocument) };
   } catch (err: unknown) {
     return { data: mockBudgets, error: err instanceof Error ? err.message : String(err) };
   }
@@ -89,6 +86,9 @@ export async function upsertBudgetAction(payload: Budget) {
     cadence: payload.cadence ?? "monthly",
     cadenceAmount: payload.cadence && payload.cadence !== "monthly" ? payload.cadenceAmount : undefined,
     rollover: payload.rollover ?? true,
+    startDate: payload.startDate,
+    repeat: payload.repeat ?? true,
+    accountIds: payload.accountIds ?? [],
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? "Data anggaran tidak valid." };
@@ -96,19 +96,26 @@ export async function upsertBudgetAction(payload: Budget) {
 
   try {
     const { databases } = await createAdminServerClient();
+    await getOwnedDocument(databases, COLLECTIONS.CATEGORIES, parsed.data.categoryId, user.id);
+    // Sumber dana hanya boleh rekening milik pengguna sendiri.
+    for (const accountId of parsed.data.accountIds) {
+      await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, accountId, user.id);
+    }
+    const data: Record<string, unknown> = {
+      ...parsed.data,
+      cadenceAmount: parsed.data.cadenceAmount ?? null,
+      startDate: parsed.data.startDate ? parsed.data.startDate.toISOString() : null,
+    };
+
     if (payload.id && !payload.id.startsWith("bud-")) {
       const previous = await getOwnedDocument(databases, COLLECTIONS.BUDGETS, payload.id, user.id);
-      let warning: string | undefined;
-      try {
-        await databases.updateDocument(DATABASE_ID, COLLECTIONS.BUDGETS, payload.id, { ...parsed.data, cadenceAmount: parsed.data.cadenceAmount ?? null });
-      } catch (err) {
-        if (!isUnknownAttributeError(err)) throw err;
-        await databases.updateDocument(DATABASE_ID, COLLECTIONS.BUDGETS, payload.id, withoutCadence(parsed.data));
-        warning = SCHEMA_WARNING;
-      }
+      const { warning } = await writeWithFallback(async (body) => {
+        await databases.updateDocument(DATABASE_ID, COLLECTIONS.BUDGETS, payload.id, body);
+        return payload.id;
+      }, data);
       await recordAuditLog(databases, user.id, {
         entityType: "budget", entityId: payload.id, action: "update",
-        summary: `Mengubah anggaran periode ${parsed.data.period}`, before: previous, after: parsed.data,
+        summary: `Mengubah anggaran mulai ${parsed.data.period}`, before: previous, after: parsed.data,
       });
       return { success: true, id: payload.id, warning };
     }
@@ -118,20 +125,13 @@ export async function upsertBudgetAction(payload: Budget) {
       Permission.update(Role.user(user.id)),
       Permission.delete(Role.user(user.id)),
     ];
-    let warning: string | undefined;
-    let documentId: string;
-    try {
-      const created = await databases.createDocument(DATABASE_ID, COLLECTIONS.BUDGETS, ID.unique(), { userId: user.id, ...parsed.data } as Record<string, unknown>, permissions);
-      documentId = created.$id;
-    } catch (err) {
-      if (!isUnknownAttributeError(err)) throw err;
-      const created = await databases.createDocument(DATABASE_ID, COLLECTIONS.BUDGETS, ID.unique(), { userId: user.id, ...withoutCadence(parsed.data) }, permissions);
-      documentId = created.$id;
-      warning = SCHEMA_WARNING;
-    }
+    const { id: documentId, warning } = await writeWithFallback(async (body) => {
+      const created = await databases.createDocument(DATABASE_ID, COLLECTIONS.BUDGETS, ID.unique(), { userId: user.id, ...body }, permissions);
+      return created.$id;
+    }, data);
     await recordAuditLog(databases, user.id, {
       entityType: "budget", entityId: documentId, action: "create",
-      summary: `Membuat anggaran periode ${parsed.data.period}`, after: parsed.data,
+      summary: `Membuat anggaran mulai ${parsed.data.period}`, after: parsed.data,
     });
     return { success: true, id: documentId, warning };
   } catch (err: unknown) {
