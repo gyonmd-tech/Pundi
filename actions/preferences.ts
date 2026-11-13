@@ -18,13 +18,13 @@ import { InputFile } from "node-appwrite/file";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { getAuthUserAction } from "./auth";
 import { DEFAULT_PREFERENCES, type UserPreferences } from "@/lib/data/mock";
+import { normalizeCycleDay } from "@/lib/utils/budgetCycle";
 import { AVATAR_BUCKET_ID, ALLOWED_AVATAR_TYPES, MAX_AVATAR_SIZE_BYTES } from "@/lib/appwrite/storage";
 
 function sanitize(raw: Partial<UserPreferences>): UserPreferences {
-  return {
-    ...DEFAULT_PREFERENCES,
-    ...raw,
-  };
+  const merged = { ...DEFAULT_PREFERENCES, ...raw };
+  if (merged.budgetCycleDay !== undefined) merged.budgetCycleDay = normalizeCycleDay(merged.budgetCycleDay);
+  return merged;
 }
 
 export async function getPreferencesAction(): Promise<UserPreferences> {

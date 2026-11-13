@@ -20,6 +20,14 @@ export const createBudgetSchema = z.object({
     .max(999_999_999_999, "Nominal terlalu besar")
     .optional(),
   rollover: z.boolean().default(true),
+  /** Mulai berlaku; belanja sebelum tanggal ini tidak dihitung. */
+  startDate: z.coerce.date().optional(),
+  /** Lanjut otomatis ke siklus berikutnya. */
+  repeat: z.boolean().default(true),
+  /** Sumber dana (rekening). Kosong = semua rekening. */
+  accountIds: z.array(z.string().min(1).max(36)).max(20, "Maksimal 20 rekening").default([]),
+  /** Sisa jatah akhir siklus disetor ke tujuan ini. */
+  leftoverGoalId: z.string().min(1).max(36).optional(),
 });
 
 export const updateBudgetSchema = createBudgetSchema.extend({

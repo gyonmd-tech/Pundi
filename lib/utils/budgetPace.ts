@@ -1,21 +1,22 @@
 /**
  * lib/utils/budgetPace.ts
- * Perhitungan anggaran berbasis waktu: jatah per hari / minggu / bulan.
+ * Perhitungan anggaran berbasis waktu: jatah per hari / minggu / siklus.
  *
- * `limitAmount` pada Budget tetap berarti total sebulan (dipakai dashboard,
- * insight, dan safe-to-spend). Untuk anggaran harian/mingguan, nilai itu
- * diturunkan dari `cadenceAmount` lewat monthlyLimitFor(), sehingga semua
- * fitur lama tetap konsisten.
+ * Semua dihitung di dalam SIKLUS berjalan (lib/utils/budgetCycle.ts) dan
+ * hanya sejak anggaran berlaku (`startDate`): tidak ada jatah "mundur" dan
+ * belanja sebelum anggaran dibuat tidak ikut dihitung. Bila anggaran punya
+ * sumber dana (`accountIds`), hanya belanja dari rekening itu yang dihitung.
  *
- * Minggu dihitung Senin–Minggu dan dipotong di batas bulan; jatah minggu
- * parsial di awal/akhir bulan diprorata per hari.
+ * Minggu dihitung Senin–Minggu dan dipotong di batas siklus/masa berlaku;
+ * jatah minggu parsial diprorata per hari.
  */
-import type { Budget, BudgetCadence, Transaction } from "@/lib/data/mock";
+import type { Budget, BudgetCadence, BudgetTransfer, Transaction } from "@/lib/data/mock";
+import { activeBudgetsFor, budgetStart, cycleFor, dailyRateFor, daysBetween, DEFAULT_CYCLE_DAY, startOfDay } from "@/lib/utils/budgetCycle";
 
 export const CADENCE_LABEL: Record<BudgetCadence, { unit: string; per: string; current: string; adjective: string }> = {
   daily: { unit: "hari", per: "/hari", current: "hari ini", adjective: "Harian" },
   weekly: { unit: "minggu", per: "/minggu", current: "minggu ini", adjective: "Mingguan" },
-  monthly: { unit: "bulan", per: "/bulan", current: "bulan ini", adjective: "Bulanan" },
+  monthly: { unit: "siklus", per: "/siklus", current: "siklus ini", adjective: "Per siklus" },
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -53,99 +54,145 @@ export function cadenceAmountOf(budget: Pick<Budget, "cadence" | "cadenceAmount"
   return Math.round(cadence === "daily" ? budget.limitAmount / days : (budget.limitAmount * 7) / days);
 }
 
-function dayIndex(date: Date, monthStart: Date) {
-  const local = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  return Math.round((local.getTime() - monthStart.getTime()) / DAY_MS);
-}
-
 export interface BudgetPace {
   cadence: BudgetCadence;
   cadenceAmount: number;
   rollover: boolean;
-  /** Tanggal acuan: hari ini, dibatasi ke dalam periode anggaran. */
+  /** Tanggal acuan: hari ini, dibatasi ke dalam masa berlaku di siklus ini. */
   refDate: Date;
+  cycleStart: Date;
+  cycleEnd: Date;
+  /** Hari anggaran mulai dihitung di siklus ini (awal siklus atau startDate). */
+  effectiveStart: Date;
+  /** true bila anggaran baru mulai di tengah siklus berjalan. */
+  startedMidCycle: boolean;
+  /** Jumlah hari siklus (dipertahankan dengan nama lama). */
   daysInMonth: number;
+  activeDays: number;
   /** Termasuk hari ini. */
   daysRemaining: number;
+  /** Total terpakai di siklus ini (sejak berlaku). */
   monthSpent: number;
+  /** Total jatah di siklus ini (prorata bila mulai di tengah siklus). */
   monthLimit: number;
   /** Jatah yang "seharusnya" sudah terpakai sampai akhir hari ini. */
   allowanceToDate: number;
   spentToDate: number;
   /** > 0 berarti lebih hemat dari jadwal, < 0 lebih boros. */
   aheadBy: number;
-  /** Unit berjalan (hari ini / minggu ini / bulan ini). */
+  /** Unit berjalan (hari ini / minggu ini / siklus ini). */
   unitAllowance: number;
   unitSpent: number;
-  /** Sisa/lebih dari unit-unit sebelumnya yang terbawa (0 bila rollover mati). */
+  /** Sisa (+) atau kelebihan (−) dari unit-unit sebelumnya yang terbawa (0 bila rollover mati). */
   carryIn: number;
   unitAvailable: number;
   unitRemaining: number;
   unitDaysRemaining: number;
-  /** Rekomendasi pemakaian per hari agar sisa bulan aman. */
+  /** Rekomendasi pemakaian per hari agar sisa siklus aman. */
   perDayLeft: number;
-  /** Bisa dipakai hari ini — dipakai untuk ringkasan "jatah hari ini". */
+  /** Bisa dipakai hari ini — dipakai untuk ringkasan "aman hari ini". */
   todayAvailable: number;
-  /** Pengeluaran 7 hari terakhir dalam periode (lama → baru), untuk grafik mini. */
+  /** Pengeluaran 7 hari terakhir sejak berlaku (lama → baru), untuk grafik mini. */
   lastDays: Array<{ date: Date; spent: number; allowance: number }>;
+  /** Pengeluaran per hari sepanjang siklus (index 0 = awal siklus). */
+  perDay: number[];
+  /** Jatah bersih yang masuk (+) / keluar (−) lewat pemindahan di siklus ini. */
+  transferNet: number;
 }
 
-export function computeBudgetPace(budget: Budget, transactions: Transaction[], now: Date = new Date()): BudgetPace {
+export interface PaceOptions {
+  now?: Date;
+  cycleDay?: number;
+  /** Pemindahan jatah: menambah/mengurangi jatah anggaran di hari pemindahan. */
+  transfers?: BudgetTransfer[];
+}
+
+/** Apakah transaksi dihitung untuk anggaran (kategori, jenis, sumber dana). */
+export function countsForBudget(budget: Pick<Budget, "categoryId" | "accountIds">, transaction: Transaction) {
+  if (transaction.type !== "expense" || transaction.categoryId !== budget.categoryId) return false;
+  if (transaction.recordKind === "balance_adjustment") return false;
+  if (budget.accountIds && budget.accountIds.length > 0 && !budget.accountIds.includes(transaction.accountId)) return false;
+  return true;
+}
+
+export function computeBudgetPace(budget: Budget, transactions: Transaction[], nowOrOptions: Date | PaceOptions = {}): BudgetPace {
+  const options = nowOrOptions instanceof Date ? { now: nowOrOptions } : nowOrOptions;
+  const now = options.now ?? new Date();
+  const cycleDay = options.cycleDay ?? DEFAULT_CYCLE_DAY;
+  const cycle = cycleFor(now, cycleDay);
   const cadence = budgetCadence(budget);
   const cadenceAmount = cadenceAmountOf(budget);
   const rollover = cadence !== "monthly" && budget.rollover !== false;
-  const { start, end, days } = periodBounds(budget.period);
-  const monthLimit = budget.limitAmount;
-  const dailyRate = monthLimit / days;
+  const { start, end, days } = cycle;
 
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const refDate = today < start ? start : today > end ? end : today;
-  const refIdx = dayIndex(refDate, start);
+  const startDate = budgetStart(budget, cycleDay);
+  const startIdx = Math.min(days - 1, Math.max(0, daysBetween(start, startDate)));
+  const effectiveStart = new Date(start.getFullYear(), start.getMonth(), start.getDate() + startIdx);
+  const activeDays = days - startIdx;
+  const dailyRate = dailyRateFor(cadence, cadenceAmount, days);
+
+  const today = startOfDay(now);
+  const refDate = today < effectiveStart ? effectiveStart : today > end ? end : today;
+  const refIdx = daysBetween(start, refDate);
   const daysRemaining = days - refIdx;
 
-  // Pengeluaran per hari dalam bulan ini untuk kategori anggaran.
+  // Pengeluaran per hari dalam siklus, hanya sejak anggaran berlaku.
   const perDay = new Array<number>(days).fill(0);
+  const endOfCycle = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999);
   for (const transaction of transactions) {
-    if (transaction.type !== "expense" || transaction.categoryId !== budget.categoryId) continue;
+    if (!countsForBudget(budget, transaction)) continue;
     const date = new Date(transaction.date);
-    if (date < start || date > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999)) continue;
-    perDay[dayIndex(date, start)] += transaction.amount;
+    if (date < effectiveStart || date > endOfCycle) continue;
+    perDay[daysBetween(start, date)] += transaction.amount;
   }
-  const sumRange = (from: number, to: number) => perDay.slice(Math.max(0, from), Math.max(0, to + 1)).reduce((a, b) => a + b, 0);
+  // Pemindahan jatah di siklus ini, ditempatkan di hari pemindahannya.
+  const moved = new Array<number>(days).fill(0);
+  for (const transfer of options.transfers ?? []) {
+    if (transfer.kind === "goal") continue; // setoran sisa ke tujuan, bukan pemindahan jatah
+    const sign = transfer.toBudgetId === budget.id ? 1 : transfer.fromBudgetId === budget.id ? -1 : 0;
+    if (!sign) continue;
+    const date = new Date(transfer.date);
+    if (date < effectiveStart || date > endOfCycle) continue;
+    moved[daysBetween(start, date)] += sign * transfer.amount;
+  }
+  const transferNet = moved.reduce((a, b) => a + b, 0);
 
-  const monthSpent = sumRange(0, days - 1);
-  const spentToDate = sumRange(0, refIdx);
-  const allowanceToDate = Math.round(dailyRate * (refIdx + 1));
+  const sumRange = (from: number, to: number) => perDay.slice(Math.max(startIdx, from), Math.max(startIdx, to + 1)).reduce((a, b) => a + b, 0);
+  const movedRange = (from: number, to: number) => moved.slice(Math.max(startIdx, from), Math.max(startIdx, to + 1)).reduce((a, b) => a + b, 0);
+  const allowance = (from: number, to: number) => Math.round(dailyRate * Math.max(0, to - Math.max(startIdx, from) + 1)) + movedRange(from, to);
 
-  // Unit berjalan.
-  let unitStart = 0;
+  const monthLimit = Math.round(dailyRate * activeDays) + transferNet;
+  const monthSpent = sumRange(startIdx, days - 1);
+  const spentToDate = sumRange(startIdx, refIdx);
+  const allowanceToDate = allowance(startIdx, refIdx);
+
+  // Unit berjalan (hari / minggu Senin–Minggu / siklus), dipotong ke masa berlaku.
+  let unitStart = startIdx;
   let unitEnd = days - 1;
   if (cadence === "daily") {
     unitStart = refIdx;
     unitEnd = refIdx;
   } else if (cadence === "weekly") {
     const weekday = (refDate.getDay() + 6) % 7; // Senin = 0
-    unitStart = Math.max(0, refIdx - weekday);
+    unitStart = Math.max(startIdx, refIdx - weekday);
     unitEnd = Math.min(days - 1, refIdx + (6 - weekday));
   }
-  const unitLength = unitEnd - unitStart + 1;
-  const unitAllowance = cadence === "monthly" ? monthLimit : Math.round(dailyRate * unitLength);
+  const unitAllowance = cadence === "monthly" ? monthLimit : allowance(unitStart, unitEnd);
   const unitSpent = sumRange(unitStart, unitEnd);
-  const carryIn = rollover ? Math.round(dailyRate * unitStart) - sumRange(0, unitStart - 1) : 0;
+  const carryIn = rollover && unitStart > startIdx ? allowance(startIdx, unitStart - 1) - sumRange(startIdx, unitStart - 1) : 0;
   const unitAvailable = unitAllowance + carryIn;
   const unitRemaining = unitAvailable - unitSpent;
   const unitDaysRemaining = unitEnd - refIdx + 1;
 
-  // Sisa anggaran per awal hari ini dibagi rata ke hari-hari yang tersisa.
-  const perDayLeft = Math.max(0, Math.round((monthLimit - sumRange(0, refIdx - 1)) / Math.max(1, daysRemaining)));
+  const perDayLeft = Math.max(0, Math.round((monthLimit - sumRange(startIdx, refIdx - 1)) / Math.max(1, daysRemaining)));
   const todayAvailable =
     cadence === "monthly"
       ? Math.max(0, perDayLeft - perDay[refIdx])
       : Math.max(0, Math.round(unitRemaining / Math.max(1, cadence === "daily" ? 1 : unitDaysRemaining)));
 
   const lastDays = [];
-  for (let i = Math.max(0, refIdx - 6); i <= refIdx; i += 1) {
-    lastDays.push({ date: new Date(start.getFullYear(), start.getMonth(), i + 1), spent: perDay[i], allowance: Math.round(dailyRate) });
+  for (let i = Math.max(startIdx, refIdx - 6); i <= refIdx; i += 1) {
+    lastDays.push({ date: new Date(start.getFullYear(), start.getMonth(), start.getDate() + i), spent: perDay[i], allowance: Math.round(dailyRate) });
   }
 
   return {
@@ -153,7 +200,12 @@ export function computeBudgetPace(budget: Budget, transactions: Transaction[], n
     cadenceAmount,
     rollover,
     refDate,
+    cycleStart: start,
+    cycleEnd: end,
+    effectiveStart,
+    startedMidCycle: startIdx > 0,
     daysInMonth: days,
+    activeDays,
     daysRemaining,
     monthSpent,
     monthLimit,
@@ -169,6 +221,8 @@ export function computeBudgetPace(budget: Budget, transactions: Transaction[], n
     perDayLeft,
     todayAvailable,
     lastDays,
+    perDay,
+    transferNet,
   };
 }
 
@@ -192,4 +246,15 @@ export function averageSpendFor(categoryId: string, cadence: BudgetCadence, tran
   const raw = cadence === "daily" ? perDay : cadence === "weekly" ? perDay * 7 : total / 3;
   // Bulatkan ke ribuan terdekat agar enak dibaca.
   return Math.max(1000, Math.round(raw / 1000) * 1000);
+}
+
+/** Anggaran aktif di siklus berjalan beserta lajunya — satu sumber untuk semua halaman. */
+export function activeBudgetPaces<T extends Budget>(budgets: T[], transactions: Transaction[], options: PaceOptions = {}) {
+  const now = options.now ?? new Date();
+  const cycleDay = options.cycleDay ?? DEFAULT_CYCLE_DAY;
+  const cycle = cycleFor(now, cycleDay);
+  return activeBudgetsFor(budgets, cycle, cycleDay).map((budget) => ({
+    budget,
+    pace: computeBudgetPace(budget, transactions, { now, cycleDay, transfers: options.transfers }),
+  }));
 }

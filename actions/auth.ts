@@ -81,12 +81,8 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
     return { success: false, error: "Email dan password wajib diisi." };
   }
 
-  const ip = getClientIpFromHeaders(await headers());
-  const loginCheck = await checkSharedRateLimit(`login:${ip}:${email}`, LOGIN_LIMIT, LOGIN_WINDOW_MS);
-  if (!loginCheck.allowed) {
-    return { success: false, error: RATE_LIMIT_MESSAGE };
-  }
-
+  // Akun demo tidak punya rahasia untuk ditebak (data contoh, tanpa password
+  // asli), jadi tidak dihitung oleh pembatas percobaan login.
   if (email === DEMO_EMAIL) {
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, "demo-session-token", {
@@ -97,6 +93,12 @@ export async function loginAction(formData: FormData): Promise<{ success: boolea
       maxAge: 60 * 60 * 24 * 7,
     });
     return { success: true };
+  }
+
+  const ip = getClientIpFromHeaders(await headers());
+  const loginCheck = await checkSharedRateLimit(`login:${ip}:${email}`, LOGIN_LIMIT, LOGIN_WINDOW_MS);
+  if (!loginCheck.allowed) {
+    return { success: false, error: RATE_LIMIT_MESSAGE };
   }
 
   try {

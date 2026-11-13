@@ -14,6 +14,8 @@ import { createAdminServerClient } from "@/lib/appwrite/server";
 import { DATABASE_ID, COLLECTIONS } from "@/lib/appwrite/collections";
 import { createHash } from "node:crypto";
 import { getBudgetStatus } from "@/lib/utils/formatter";
+import { cycleFor } from "@/lib/utils/budgetCycle";
+import { activeBudgetPaces } from "@/lib/utils/budgetPace";
 import type { Budget, Category, Goal, Insight, RecurringRule, Transaction } from "@/lib/data/mock";
 import { recordAuditLog } from "@/lib/appwrite/auditLog";
 
@@ -23,6 +25,8 @@ export interface InsightGeneratorContext {
   budgets: Budget[];
   goals: Goal[];
   recurringRules: RecurringRule[];
+  /** Tanggal mulai siklus anggaran pengguna (preferensi). */
+  cycleDay?: number;
 }
 
 const GOAL_MILESTONES = [100, 75, 50, 25];
@@ -94,18 +98,19 @@ export async function generateInsights(
   }
 
   // 1. Anggaran mendekati/lewat limit.
-  for (const budget of ctx.budgets) {
-    if (budget.period !== period) continue;
-    const spent = categorySpend(ctx.transactions, budget.categoryId, now);
-    const status = getBudgetStatus(spent, budget.limitAmount);
+  const cycleKey = cycleFor(now, ctx.cycleDay).key;
+  for (const { budget, pace } of activeBudgetPaces(ctx.budgets, ctx.transactions, { now, cycleDay: ctx.cycleDay })) {
+    const spent = pace.monthSpent;
+    const limit = pace.monthLimit;
+    const status = getBudgetStatus(spent, limit);
     if (status === "safe") continue;
     const category = ctx.categories.find((c) => c.id === budget.categoryId);
-    const pct = budget.limitAmount > 0 ? Math.round((spent / budget.limitAmount) * 100) : 0;
+    const pct = limit > 0 ? Math.round((spent / limit) * 100) : 0;
     const name = category?.name ?? "kategori ini";
     const message = status === "over"
-      ? `Pengeluaran ${name} sudah melebihi batas anggaran (${pct}% dari limit). Pertimbangkan menahan pengeluaran non-esensial hingga akhir bulan.`
-      : `Pengeluaran ${name} sudah mendekati batas anggaran bulan ini (${pct}% dari limit). Cek lagi rencana belanjamu.`;
-    await tryCreate(`budget:${budget.id}:${period}`, "budget_warning", message);
+      ? `Pengeluaran ${name} sudah melebihi batas anggaran (${pct}% dari limit). Pertimbangkan menahan pengeluaran non-esensial hingga akhir siklus.`
+      : `Pengeluaran ${name} sudah mendekati batas anggaran siklus ini (${pct}% dari limit). Cek lagi rencana belanjamu.`;
+    await tryCreate(`budget:${budget.id}:${cycleKey}`, "budget_warning", message);
   }
 
   // 2. Tren pengeluaran kategori vs rata-rata 3 bulan terakhir.

@@ -7,7 +7,7 @@ import { expect, test, type Page } from "@playwright/test";
  * "critical" — termasuk kontras teks < 4,5:1. Warna teks semantik memakai
  * token --color-*-text (styles/tokens.css), bukan warna isian.
  */
-const ROUTES = ["/dashboard", "/transaksi", "/anggaran", "/arus-kas", "/aset", "/utang", "/tujuan", "/insight", "/catatan-kondisi", "/penjaga", "/kalkulator", "/pengaturan", "/pengaturan/log-aktivitas"];
+const ROUTES = ["/dashboard", "/transaksi", "/anggaran", "/anggaran/bud-1", "/anggaran/bud-3", "/arus-kas", "/aset", "/utang", "/tujuan", "/insight", "/catatan-kondisi", "/penjaga", "/kalkulator", "/pengaturan", "/pengaturan/log-aktivitas"];
 
 async function audit(page: Page, label: string) {
   const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();

@@ -11,10 +11,12 @@ import { Query, type Models } from "node-appwrite";
 import { createAdminServerClient } from "@/lib/appwrite/server";
 import { COLLECTIONS, DATABASE_ID } from "@/lib/appwrite/collections";
 import { getAuthUserAction } from "@/actions/auth";
+import { budgetFromDocument, budgetTransferFromDocument } from "@/lib/appwrite/budgetMapper";
 import { recurringRuleFromDocument } from "@/lib/appwrite/recurringMapper";
 import { generateDueRecurringTransactions } from "@/lib/appwrite/recurringGenerator";
 import { listAllDocuments } from "@/lib/appwrite/pagination";
 import { seedDefaultsForUser } from "@/lib/appwrite/seedDefaults";
+import { sweepBudgetLeftovers } from "@/lib/appwrite/budgetLeftover";
 import { generateInsights } from "@/lib/appwrite/insightGenerator";
 import { getPreferencesAction } from "@/actions/preferences";
 import {
@@ -27,6 +29,7 @@ import {
   mockTransactions,
   mockDebts,
   mockRecurringRules,
+  mockBudgetTransfers,
   DEFAULT_PREFERENCES,
   type Account,
   type Asset,
@@ -37,6 +40,7 @@ import {
   type Transaction,
   type Debt,
   type RecurringRule,
+  type BudgetTransfer,
   type UserPreferences,
 } from "@/lib/data/mock";
 
@@ -50,6 +54,7 @@ export interface AppBootstrapData {
   insights: Insight[];
   debts: Debt[];
   recurringRules: RecurringRule[];
+  budgetTransfers: BudgetTransfer[];
   preferences: UserPreferences;
 }
 
@@ -85,14 +90,6 @@ interface TransactionFields {
   date: string;
   note?: string;
   tags?: string[];
-}
-interface BudgetFields {
-  categoryId: string;
-  period: string;
-  limitAmount: number;
-  cadence?: "daily" | "weekly" | "monthly" | null;
-  cadenceAmount?: number | null;
-  rollover?: boolean | null;
 }
 interface GoalFields {
   name: string;
@@ -133,6 +130,7 @@ const demoData: AppBootstrapData = {
   insights: mockInsights,
   debts: mockDebts,
   recurringRules: mockRecurringRules,
+  budgetTransfers: mockBudgetTransfers,
   preferences: DEFAULT_PREFERENCES,
 };
 
@@ -205,7 +203,7 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
       listAllDocuments(databases, collectionId, queries, { maxDocuments }).then((documents) => ({ documents }));
     const byUser = [Query.equal("userId", user.id)];
 
-    const [initialAccounts, initialCategories, transactions, budgets, goals, assets, insights, debts, recurringRules, preferences] = await Promise.all([
+    const [initialAccounts, initialCategories, transactions, budgets, goals, assets, insights, debts, recurringRules, preferences, budgetTransfers] = await Promise.all([
       all(COLLECTIONS.ACCOUNTS, byUser),
       all(COLLECTIONS.CATEGORIES, byUser),
       all(COLLECTIONS.TRANSACTIONS, [...byUser, Query.orderDesc("date")]),
@@ -216,6 +214,8 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
       all(COLLECTIONS.DEBTS, [...byUser, Query.orderDesc("$createdAt")]),
       all(COLLECTIONS.RECURRING_RULES, [...byUser, Query.orderAsc("nextOccurrence")]),
       getPreferencesAction(),
+      // Koleksi baru: database yang belum menjalankan db:setup belum punya — anggap kosong.
+      all(COLLECTIONS.BUDGET_TRANSFERS, [...byUser, Query.orderDesc("date")]).catch(() => ({ documents: [] })),
     ]);
 
     let accounts = initialAccounts;
@@ -272,18 +272,7 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
         tags: f.tags || [],
       };
     });
-    const mappedBudgets = budgets.documents.map((doc) => {
-      const f = fields<BudgetFields>(doc);
-      return {
-        id: doc.$id,
-        categoryId: f.categoryId,
-        period: f.period,
-        limitAmount: Number(f.limitAmount),
-        cadence: f.cadence ?? "monthly",
-        cadenceAmount: f.cadenceAmount ? Number(f.cadenceAmount) : undefined,
-        rollover: f.rollover ?? true,
-      };
-    });
+    const mappedBudgets = budgets.documents.map(budgetFromDocument);
     const mappedGoals = goals.documents.map((doc) => {
       const f = fields<GoalFields>(doc);
       return {
@@ -334,6 +323,23 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
     });
     const mappedRecurringRules = recurringRules.documents.map(recurringRuleFromDocument);
 
+    // Sisa jatah siklus yang sudah berakhir → tujuan tabungan (idempoten).
+    const mappedTransfers = budgetTransfers.documents.map(budgetTransferFromDocument);
+    if (mappedBudgets.some((budget) => budget.leftoverGoalId)) {
+      try {
+        const deposits = await sweepBudgetLeftovers(databases, user.id, {
+          budgets: mappedBudgets, goals: mappedGoals, transactions: mappedTransactions, transfers: mappedTransfers, cycleDay: preferences.budgetCycleDay,
+        });
+        for (const deposit of deposits) {
+          const goal = mappedGoals.find((item) => item.id === deposit.goalId);
+          if (goal) goal.currentAmount += deposit.amount;
+          mappedTransfers.unshift(deposit.record);
+        }
+      } catch (error) {
+        console.error("Gagal menyetor sisa jatah ke tujuan:", error instanceof Error ? error.message : error);
+      }
+    }
+
     provideInsightInputs({
       databases,
       userId: user.id,
@@ -343,6 +349,7 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
         budgets: mappedBudgets,
         goals: mappedGoals,
         recurringRules: mappedRecurringRules,
+        cycleDay: preferences.budgetCycleDay,
       },
       existing: insights.documents,
     });
@@ -361,12 +368,13 @@ async function loadInitialData(provideInsightInputs: (inputs: InsightInputs | nu
         insights: mappedExistingInsights,
         debts: mappedDebts,
         recurringRules: mappedRecurringRules,
+        budgetTransfers: mappedTransfers,
         preferences,
       },
     };
   } catch (error: unknown) {
     provideInsightInputs(null);
     const message = error instanceof Error ? error.message : "Data cloud tidak dapat dimuat.";
-    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [], recurringRules: [], preferences: DEFAULT_PREFERENCES }, userName: user.name, userEmail: user.email, error: message };
+    return { mode: "cloud", data: { accounts: [], categories: [], transactions: [], budgets: [], goals: [], assets: [], insights: [], debts: [], recurringRules: [], budgetTransfers: [], preferences: DEFAULT_PREFERENCES }, userName: user.name, userEmail: user.email, error: message };
   }
 }

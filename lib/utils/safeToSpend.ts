@@ -2,11 +2,12 @@
  * lib/utils/safeToSpend.ts
  * "Aman Dibelanjakan Hari Ini" — angka tunggal yang menjawab pertanyaan
  * paling sering ditanyakan sebelum belanja: uang bebas (di luar tagihan
- * dan rencana anggaran yang sudah dijanjikan) dibagi rata sisa hari bulan
- * ini. Murni perhitungan turunan dari data yang sudah dimuat di client
- * store — tidak ada query/skema baru.
+ * dan sisa jatah anggaran yang sudah dijanjikan) dibagi rata sisa hari
+ * siklus anggaran berjalan (lib/utils/budgetCycle.ts). Murni perhitungan
+ * turunan dari data yang sudah dimuat di client store.
  */
-import { daysInMonth } from "@/lib/utils/recurrence";
+import { cycleFor, daysBetween, DEFAULT_CYCLE_DAY } from "@/lib/utils/budgetCycle";
+import { activeBudgetPaces } from "@/lib/utils/budgetPace";
 import type { Account, Budget, RecurringRule, Transaction } from "@/lib/data/mock";
 
 const LIQUID_ACCOUNT_TYPES: Account["type"][] = ["bank", "ewallet", "cash"];
@@ -21,46 +22,32 @@ export interface SafeToSpendResult {
   isOverExtended: boolean;
 }
 
-function isSameMonth(date: Date, target: Date) {
-  return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth();
-}
-
 export function computeSafeToSpend(
   accounts: Account[],
   budgets: Budget[],
   transactions: Transaction[],
   recurringRules: RecurringRule[],
   now: Date = new Date(),
+  cycleDay: number = DEFAULT_CYCLE_DAY,
 ): SafeToSpendResult {
+  const cycle = cycleFor(now, cycleDay);
   const liquidBalance = accounts
     .filter((account) => account.isActive && LIQUID_ACCOUNT_TYPES.includes(account.type))
     .reduce((sum, account) => sum + account.balance, 0);
 
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth(), daysInMonth(now.getFullYear(), now.getMonth()), 23, 59, 59);
+  const endOfCycle = new Date(cycle.end.getFullYear(), cycle.end.getMonth(), cycle.end.getDate(), 23, 59, 59);
   const upcomingBills = recurringRules
     .filter((rule) => rule.isActive && rule.type === "expense")
     .filter((rule) => {
       const next = new Date(rule.nextOccurrence);
-      return next >= now && next <= endOfMonth;
+      return next >= now && next <= endOfCycle;
     })
     .reduce((sum, rule) => sum + rule.amount, 0);
 
-  const period = now.toISOString().slice(0, 7);
-  const budgetReserved = budgets
-    .filter((budget) => budget.period === period)
-    .reduce((sum, budget) => {
-      const spent = transactions
-        .filter((t) =>
-          t.type === "expense" &&
-          t.recordKind !== "balance_adjustment" &&
-          t.categoryId === budget.categoryId &&
-          isSameMonth(new Date(t.date), now)
-        )
-        .reduce((s, t) => s + t.amount, 0);
-      return sum + Math.max(0, budget.limitAmount - spent);
-    }, 0);
+  const budgetReserved = activeBudgetPaces(budgets, transactions, { now, cycleDay })
+    .reduce((sum, { pace }) => sum + Math.max(0, pace.monthLimit - pace.monthSpent), 0);
 
-  const daysRemaining = daysInMonth(now.getFullYear(), now.getMonth()) - now.getDate() + 1;
+  const daysRemaining = daysBetween(now, cycle.end) + 1;
   const freeAmount = liquidBalance - upcomingBills - budgetReserved;
   const isOverExtended = freeAmount < 0;
   const perDay = isOverExtended || daysRemaining <= 0 ? 0 : Math.floor(freeAmount / daysRemaining);

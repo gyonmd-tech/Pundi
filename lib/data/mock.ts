@@ -103,6 +103,27 @@ export interface Budget {
   cadenceAmount?: number;
   /** Sisa (atau kelebihan) jatah sebelumnya terbawa ke hari/minggu berikutnya. */
   rollover?: boolean;
+  /** Mulai berlaku (kosong = awal siklus `period`). Belanja sebelumnya tidak dihitung. */
+  startDate?: Date;
+  /** Lanjut otomatis ke siklus berikutnya. Kosong = ya. */
+  repeat?: boolean;
+  /** Sumber dana: hanya belanja dari rekening ini yang dihitung. Kosong = semua. */
+  accountIds?: string[];
+  /** Sisa jatah di akhir setiap siklus ditambahkan ke tujuan tabungan ini. */
+  leftoverGoalId?: string;
+}
+
+/** Pemindahan jatah antar anggaran di dalam satu siklus (bukan perpindahan uang). */
+export interface BudgetTransfer {
+  id: string;
+  fromBudgetId: string;
+  toBudgetId: string;
+  amount: number;
+  /** Hari jatah dipindahkan; menambah/mengurangi jatah di hari itu. */
+  date: Date;
+  note?: string;
+  /** "goal" = catatan sisa jatah yang sudah disetor ke tujuan (bukan pemindahan antar anggaran). */
+  kind?: "budget" | "goal";
 }
 
 export interface Goal {
@@ -148,6 +169,8 @@ export interface UserPreferences {
   theme: ThemeMode;
   accentColor: AccentColor;
   avatarFileId?: string;
+  /** Tanggal mulai siklus anggaran (1–28, 31 = akhir bulan). Default 1. */
+  budgetCycleDay?: number;
 }
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
@@ -291,13 +314,17 @@ function monthlyFromWeekly(amount: number) { return Math.round((amount * daysInC
 
 export const mockBudgets: Budget[] = [
   { id: "bud-1", categoryId: "cat-e1", period: CURRENT_PERIOD, limitAmount: monthlyFromDaily(65_000), cadence: "daily", cadenceAmount: 65_000, rollover: true },
-  { id: "bud-2", categoryId: "cat-e2", period: CURRENT_PERIOD, limitAmount: monthlyFromWeekly(225_000), cadence: "weekly", cadenceAmount: 225_000, rollover: true },
+  // Contoh sumber dana: transportasi hanya dihitung dari OVO dan dompet tunai.
+  { id: "bud-2", categoryId: "cat-e2", period: CURRENT_PERIOD, limitAmount: monthlyFromWeekly(225_000), cadence: "weekly", cadenceAmount: 225_000, rollover: true, accountIds: ["acc-2", "acc-3"] },
   { id: "bud-3", categoryId: "cat-e3", period: CURRENT_PERIOD, limitAmount: 1_200_000 },
   { id: "bud-4", categoryId: "cat-e4", period: CURRENT_PERIOD, limitAmount: 600_000 },
   { id: "bud-5", categoryId: "cat-e5", period: CURRENT_PERIOD, limitAmount: 300_000 },
   { id: "bud-6", categoryId: "cat-e6", period: CURRENT_PERIOD, limitAmount: 250_000 },
-  { id: "bud-7", categoryId: "cat-e10", period: CURRENT_PERIOD, limitAmount: monthlyFromWeekly(100_000), cadence: "weekly", cadenceAmount: 100_000, rollover: false },
+  // Contoh anggaran yang baru dibuat di tengah siklus: tidak ada jatah mundur.
+  { id: "bud-7", categoryId: "cat-e10", period: CURRENT_PERIOD, limitAmount: monthlyFromWeekly(100_000), cadence: "weekly", cadenceAmount: 100_000, rollover: false, startDate: new Date(new Date().getFullYear(), new Date().getMonth(), Math.max(1, new Date().getDate() - 2)) },
 ];
+
+export const mockBudgetTransfers: BudgetTransfer[] = [];
 
 // ── Goals ──────────────────────────────────────────────────────────────
 
