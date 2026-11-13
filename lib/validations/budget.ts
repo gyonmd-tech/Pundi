@@ -26,6 +26,8 @@ export const createBudgetSchema = z.object({
   repeat: z.boolean().default(true),
   /** Sumber dana (rekening). Kosong = semua rekening. */
   accountIds: z.array(z.string().min(1).max(36)).max(20, "Maksimal 20 rekening").default([]),
+  /** Sisa jatah akhir siklus disetor ke tujuan ini. */
+  leftoverGoalId: z.string().min(1).max(36).optional(),
 });
 
 export const updateBudgetSchema = createBudgetSchema.extend({

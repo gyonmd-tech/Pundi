@@ -30,6 +30,7 @@ import {
   useTransactions,
   useDebts,
   usePreferences,
+  useBudgetTransfers,
   useRecurringRules,
  useApp } from "@/lib/data/store";
 import { deferUntilVisible } from "@/components/ui/deferUntilVisible";
@@ -76,6 +77,7 @@ export default function DashboardPage() {
   const categories = useCategories();
   const debts = useDebts();
   const preferences = usePreferences();
+  const budgetTransfers = useBudgetTransfers();
   const recurringRules = useRecurringRules();
 
   const now = new Date();
@@ -133,7 +135,7 @@ export default function DashboardPage() {
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  const budgetsWithSpent = activeBudgetPaces(budgets, transactions, { now, cycleDay })
+  const budgetsWithSpent = activeBudgetPaces(budgets, transactions, { now, cycleDay, transfers: budgetTransfers })
     .map(({ budget, pace }) => ({
       ...budget,
       limitAmount: pace.monthLimit,

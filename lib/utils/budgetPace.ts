@@ -10,7 +10,7 @@
  * Minggu dihitung Senin–Minggu dan dipotong di batas siklus/masa berlaku;
  * jatah minggu parsial diprorata per hari.
  */
-import type { Budget, BudgetCadence, Transaction } from "@/lib/data/mock";
+import type { Budget, BudgetCadence, BudgetTransfer, Transaction } from "@/lib/data/mock";
 import { activeBudgetsFor, budgetStart, cycleFor, dailyRateFor, daysBetween, DEFAULT_CYCLE_DAY, startOfDay } from "@/lib/utils/budgetCycle";
 
 export const CADENCE_LABEL: Record<BudgetCadence, { unit: string; per: string; current: string; adjective: string }> = {
@@ -96,11 +96,15 @@ export interface BudgetPace {
   lastDays: Array<{ date: Date; spent: number; allowance: number }>;
   /** Pengeluaran per hari sepanjang siklus (index 0 = awal siklus). */
   perDay: number[];
+  /** Jatah bersih yang masuk (+) / keluar (−) lewat pemindahan di siklus ini. */
+  transferNet: number;
 }
 
 export interface PaceOptions {
   now?: Date;
   cycleDay?: number;
+  /** Pemindahan jatah: menambah/mengurangi jatah anggaran di hari pemindahan. */
+  transfers?: BudgetTransfer[];
 }
 
 /** Apakah transaksi dihitung untuk anggaran (kategori, jenis, sumber dana). */
@@ -126,7 +130,6 @@ export function computeBudgetPace(budget: Budget, transactions: Transaction[], n
   const effectiveStart = new Date(start.getFullYear(), start.getMonth(), start.getDate() + startIdx);
   const activeDays = days - startIdx;
   const dailyRate = dailyRateFor(cadence, cadenceAmount, days);
-  const monthLimit = Math.round(dailyRate * activeDays);
 
   const today = startOfDay(now);
   const refDate = today < effectiveStart ? effectiveStart : today > end ? end : today;
@@ -142,9 +145,23 @@ export function computeBudgetPace(budget: Budget, transactions: Transaction[], n
     if (date < effectiveStart || date > endOfCycle) continue;
     perDay[daysBetween(start, date)] += transaction.amount;
   }
-  const sumRange = (from: number, to: number) => perDay.slice(Math.max(startIdx, from), Math.max(startIdx, to + 1)).reduce((a, b) => a + b, 0);
-  const allowance = (from: number, to: number) => Math.round(dailyRate * Math.max(0, to - Math.max(startIdx, from) + 1));
+  // Pemindahan jatah di siklus ini, ditempatkan di hari pemindahannya.
+  const moved = new Array<number>(days).fill(0);
+  for (const transfer of options.transfers ?? []) {
+    if (transfer.kind === "goal") continue; // setoran sisa ke tujuan, bukan pemindahan jatah
+    const sign = transfer.toBudgetId === budget.id ? 1 : transfer.fromBudgetId === budget.id ? -1 : 0;
+    if (!sign) continue;
+    const date = new Date(transfer.date);
+    if (date < effectiveStart || date > endOfCycle) continue;
+    moved[daysBetween(start, date)] += sign * transfer.amount;
+  }
+  const transferNet = moved.reduce((a, b) => a + b, 0);
 
+  const sumRange = (from: number, to: number) => perDay.slice(Math.max(startIdx, from), Math.max(startIdx, to + 1)).reduce((a, b) => a + b, 0);
+  const movedRange = (from: number, to: number) => moved.slice(Math.max(startIdx, from), Math.max(startIdx, to + 1)).reduce((a, b) => a + b, 0);
+  const allowance = (from: number, to: number) => Math.round(dailyRate * Math.max(0, to - Math.max(startIdx, from) + 1)) + movedRange(from, to);
+
+  const monthLimit = Math.round(dailyRate * activeDays) + transferNet;
   const monthSpent = sumRange(startIdx, days - 1);
   const spentToDate = sumRange(startIdx, refIdx);
   const allowanceToDate = allowance(startIdx, refIdx);
@@ -205,6 +222,7 @@ export function computeBudgetPace(budget: Budget, transactions: Transaction[], n
     todayAvailable,
     lastDays,
     perDay,
+    transferNet,
   };
 }
 
@@ -237,6 +255,6 @@ export function activeBudgetPaces<T extends Budget>(budgets: T[], transactions: 
   const cycle = cycleFor(now, cycleDay);
   return activeBudgetsFor(budgets, cycle, cycleDay).map((budget) => ({
     budget,
-    pace: computeBudgetPace(budget, transactions, { now, cycleDay }),
+    pace: computeBudgetPace(budget, transactions, { now, cycleDay, transfers: options.transfers }),
   }));
 }

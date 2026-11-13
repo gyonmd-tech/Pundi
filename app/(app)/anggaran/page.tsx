@@ -13,8 +13,9 @@
 
 import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { AlertTriangle, CalendarRange, ChevronDown, Pencil, PieChart, Plus, Trash2 } from "lucide-react";
-import { useAccounts, useApp, useBudgets, useCategories, usePreferences, useRecurringRules, useTransactions } from "@/lib/data/store";
+import Link from "next/link";
+import { AlertTriangle, ArrowLeftRight, CalendarRange, ChevronDown, Pencil, PieChart, Plus, Trash2 } from "lucide-react";
+import { useAccounts, useApp, useBudgetTransfers, useBudgets, useCategories, usePreferences, useRecurringRules, useTransactions } from "@/lib/data/store";
 import { deleteBudgetAction } from "@/actions/budgets";
 import { useToast } from "@/lib/context/ToastContext";
 import { Button } from "@/components/ui/Button";
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils/cn";
 
 // Dialog baru diunduh saat dibuka — tidak menambah JS tampilan pertama.
 const BudgetWizard = dynamic(() => import("@/components/budget/BudgetWizard").then((m) => m.BudgetWizard), { ssr: false });
+const BudgetTransferSheet = dynamic(() => import("@/components/budget/BudgetTransferSheet").then((m) => m.BudgetTransferSheet), { ssr: false });
 const BudgetCycleSheet = dynamic(() => import("@/components/budget/BudgetCycleSheet").then((m) => m.BudgetCycleSheet), { ssr: false });
 
 const STATUS_ORDER: Record<PaceStatus, number> = { over: 0, warning: 1, safe: 2 };
@@ -43,6 +45,7 @@ export default function AnggaranPage() {
   const accounts = useAccounts();
   const recurringRules = useRecurringRules();
   const preferences = usePreferences();
+  const transfers = useBudgetTransfers();
   const { showToast } = useToast();
   const cycleDay = preferences.budgetCycleDay ?? 1;
 
@@ -51,13 +54,14 @@ export default function AnggaranPage() {
   const [editing, setEditing] = useState<Budget | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [transfer, setTransfer] = useState<{ to?: string; from?: string } | null>(null);
 
   const now = useMemo(() => new Date(), []);
   const cycle = useMemo(() => cycleFor(now, cycleDay), [now, cycleDay]);
   const dayOfCycle = daysBetween(cycle.start, now) + 1;
 
   const accountName = useMemo(() => new Map(accounts.map((account) => [account.id, account.name])), [accounts]);
-  const rows = useMemo(() => activeBudgetPaces(budgets, transactions, { now, cycleDay })
+  const rows = useMemo(() => activeBudgetPaces(budgets, transactions, { now, cycleDay, transfers })
     .map(({ budget, pace }) => ({
       budget,
       pace,
@@ -65,7 +69,7 @@ export default function AnggaranPage() {
       category: categories.find((category) => category.id === budget.categoryId),
       sources: (budget.accountIds ?? []).map((id) => accountName.get(id)).filter((name): name is string => Boolean(name)),
     }))
-    .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]), [budgets, transactions, now, cycleDay, categories, accountName]);
+    .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]), [budgets, transactions, now, cycleDay, transfers, categories, accountName]);
   const scheduled = useMemo(() => scheduledBudgets(budgets, cycle, cycleDay), [budgets, cycle, cycleDay]);
 
   const totalLimit = rows.reduce((sum, row) => sum + row.pace.monthLimit, 0);
@@ -180,12 +184,18 @@ export default function AnggaranPage() {
             <p className="font-bold">{overRows.map((row) => row.category?.name).filter(Boolean).join(", ")} lewat jatah</p>
             <p className="mt-0.5 text-sm text-white/85">
               {donor ? <>{donor.category?.name} masih sisa {formatRupiah(donor.pace.monthLimit - donor.pace.monthSpent)} siklus ini. </> : null}
-              Kelebihan akan mengurangi jatah berikutnya bila sisa jatah terbawa.
+              Pindahkan sebagian jatahnya untuk menutup kelebihan — saldo rekening tidak berubah.
             </p>
           </div>
-          <button type="button" onClick={() => openEdit(overRows[0].budget)} className="inline-flex min-h-10 items-center rounded-sm bg-white px-3.5 text-sm font-bold text-[#B4232A]">
-            Atur ulang jatah
-          </button>
+          {donor ? (
+            <button type="button" onClick={() => setTransfer({ to: overRows[0].budget.id, from: donor.budget.id })} className="inline-flex min-h-10 items-center gap-1.5 rounded-sm bg-white px-3.5 text-sm font-bold text-[#B4232A]">
+              <ArrowLeftRight className="h-4 w-4" />Tutup dari {donor.category?.name ?? "anggaran lain"}
+            </button>
+          ) : (
+            <button type="button" onClick={() => openEdit(overRows[0].budget)} className="inline-flex min-h-10 items-center rounded-sm bg-white px-3.5 text-sm font-bold text-[#B4232A]">
+              Atur ulang jatah
+            </button>
+          )}
         </section>
       ) : null}
 
@@ -231,11 +241,13 @@ export default function AnggaranPage() {
                     sources={row.sources}
                     onEdit={() => openEdit(row.budget)}
                     onDelete={() => setDeleteId(row.budget.id)}
+                    onTransfer={rows.length > 1 ? () => setTransfer({ to: row.budget.id }) : undefined}
+                    href={`/anggaran/${row.budget.id}`}
                   />
                 ))}
               </div>
               <p className="text-xs text-ink-muted lg:hidden">Di layar sentuh, geser kartu ke kiri untuk Ubah atau Hapus.</p>
-              <BudgetTable rows={visibleRows} onEdit={openEdit} onDelete={setDeleteId} />
+              <BudgetTable rows={visibleRows} onEdit={openEdit} onDelete={setDeleteId} onTransfer={rows.length > 1 ? (id) => setTransfer({ to: id }) : undefined} />
             </>
           )}
         </section>
@@ -262,6 +274,7 @@ export default function AnggaranPage() {
 
       {wizardOpen ? <BudgetWizard open onClose={() => setWizardOpen(false)} editing={editing} /> : null}
       {cycleOpen ? <BudgetCycleSheet open onClose={() => setCycleOpen(false)} /> : null}
+      {transfer ? <BudgetTransferSheet open onClose={() => setTransfer(null)} toBudgetId={transfer.to} fromBudgetId={transfer.from} /> : null}
 
       {deleteId ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-scrim)] p-4 backdrop-blur-[3px] animate-in fade-in" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}>
@@ -364,7 +377,7 @@ type Row = {
   sources: string[];
 };
 
-function BudgetTable({ rows, onEdit, onDelete }: { rows: Row[]; onEdit: (budget: Budget) => void; onDelete: (id: string) => void }) {
+function BudgetTable({ rows, onEdit, onDelete, onTransfer }: { rows: Row[]; onEdit: (budget: Budget) => void; onDelete: (id: string) => void; onTransfer?: (id: string) => void }) {
   return (
     <div className="hidden overflow-hidden rounded-panel border border-rule bg-surface-high lg:block">
       <table className="w-full border-collapse text-sm">
@@ -391,7 +404,7 @@ function BudgetTable({ rows, onEdit, onDelete }: { rows: Row[]; onEdit: (budget:
                   <div className="flex items-center gap-3">
                     <CategoryIcon icon={row.category?.icon} color={row.category?.color} size={16} containerSize="md" />
                     <div className="min-w-0">
-                      <p className="truncate text-[15px] font-bold text-ink">{row.category?.name ?? "Kategori"}</p>
+                      <Link href={`/anggaran/${row.budget.id}`} className="block truncate text-[15px] font-bold text-ink hover:underline">{row.category?.name ?? "Kategori"}</Link>
                       <p className="truncate text-xs text-ink-muted">{labels.adjective} · {formatRupiah(row.pace.cadenceAmount)}</p>
                     </div>
                   </div>
@@ -416,6 +429,7 @@ function BudgetTable({ rows, onEdit, onDelete }: { rows: Row[]; onEdit: (budget:
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex justify-end gap-1">
+                    {onTransfer ? <button type="button" onClick={() => onTransfer(row.budget.id)} aria-label={`Pindahkan jatah ke ${row.category?.name ?? "anggaran ini"}`} className="grid h-10 w-10 place-items-center rounded-sm text-ink-muted hover:bg-surface-soft hover:text-ink"><ArrowLeftRight className="h-4 w-4" /></button> : null}
                     <button type="button" onClick={() => onEdit(row.budget)} aria-label={`Ubah anggaran ${row.category?.name ?? ""}`} className="grid h-10 w-10 place-items-center rounded-sm text-ink-muted hover:bg-surface-soft hover:text-ink"><Pencil className="h-4 w-4" /></button>
                     <button type="button" onClick={() => onDelete(row.budget.id)} aria-label={`Hapus anggaran ${row.category?.name ?? ""}`} className="grid h-10 w-10 place-items-center rounded-sm text-ink-muted hover:bg-ember-10 hover:text-ember-ink"><Trash2 className="h-4 w-4" /></button>
                   </div>

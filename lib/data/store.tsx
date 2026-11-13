@@ -13,6 +13,7 @@ import {
   type Insight,
   type Debt,
   type RecurringRule,
+  type BudgetTransfer,
   type UserPreferences,
 } from "./mock";
 
@@ -28,6 +29,7 @@ interface AppState extends AppBootstrapData {
   insights: Insight[];
   debts: Debt[];
   recurringRules: RecurringRule[];
+  budgetTransfers: BudgetTransfer[];
   preferences: UserPreferences;
 }
 
@@ -41,6 +43,7 @@ const initialState: AppState = {
   insights: [],
   debts: [],
   recurringRules: [],
+  budgetTransfers: [],
   preferences: DEFAULT_PREFERENCES,
 };
 
@@ -72,6 +75,8 @@ type Action =
   | { type: "ADD_RECURRING_RULE"; payload: RecurringRule }
   | { type: "UPDATE_RECURRING_RULE"; payload: RecurringRule }
   | { type: "DELETE_RECURRING_RULE"; payload: string }
+  | { type: "ADD_BUDGET_TRANSFER"; payload: BudgetTransfer }
+  | { type: "DELETE_BUDGET_TRANSFER"; payload: string }
   | { type: "UPDATE_PREFERENCES"; payload: UserPreferences };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -169,6 +174,10 @@ function reducer(state: AppState, action: Action): AppState {
       };
     case "DELETE_RECURRING_RULE":
       return { ...state, recurringRules: state.recurringRules.filter((rule) => rule.id !== action.payload) };
+    case "ADD_BUDGET_TRANSFER":
+      return { ...state, budgetTransfers: [action.payload, ...state.budgetTransfers] };
+    case "DELETE_BUDGET_TRANSFER":
+      return { ...state, budgetTransfers: state.budgetTransfers.filter((transfer) => transfer.id !== action.payload) };
     case "UPDATE_PREFERENCES":
       return { ...state, preferences: action.payload };
     default:
@@ -285,6 +294,10 @@ export function useDebts() {
 
 export function useRecurringRules() {
   return useApp().state.recurringRules;
+}
+
+export function useBudgetTransfers() {
+  return useApp().state.budgetTransfers ?? [];
 }
 
 export function usePreferences() {

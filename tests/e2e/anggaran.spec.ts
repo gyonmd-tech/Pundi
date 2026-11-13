@@ -46,3 +46,38 @@ test("siklus gajian: pilih tanggal 25, rentang siklus ikut berubah", async ({ pa
   await expect(dialog).toBeHidden();
   await expect(page.getByRole("button", { name: /^Siklus gajian · 25 / })).toBeVisible();
 });
+
+test("pindahkan jatah menutup kelebihan, lalu bisa dibatalkan", async ({ page }) => {
+  await openBudgets(page);
+  const banner = page.locator("section[role=alert]");
+  await expect(banner).toBeVisible();
+  await banner.getByRole("button", { name: /^Tutup dari / }).click();
+  const dialog = page.getByRole("dialog", { name: "Pindahkan jatah" });
+  await expect(dialog.getByRole("button", { name: /^Tutup Rp/ })).toHaveAttribute("aria-pressed", "true");
+  await dialog.getByRole("button", { name: /^Pindahkan Rp/ }).click();
+  await expect(dialog).toBeHidden();
+  await expect(banner).toHaveCount(0);
+  await expect(page.getByRole("radio", { name: /^Lewat · 0/ })).toBeVisible();
+
+  // Batalkan dari daftar pemindahan siklus ini.
+  await page.getByRole("radio", { name: /^Semua/ }).click();
+  const firstCard = page.getByRole("button", { name: "Rincian" }).first();
+  await firstCard.click();
+  await page.getByRole("button", { name: /dari anggaran lain/ }).first().click();
+  const sheet = page.getByRole("dialog", { name: "Pindahkan jatah" });
+  await sheet.getByRole("button", { name: /^Batalkan pemindahan/ }).first().click();
+  await expect(page.locator("section[role=alert]")).toBeVisible();
+});
+
+test("halaman detail: penjelasan jatah dan grafik", async ({ page }) => {
+  await openBudgets(page);
+  await page.getByRole("link", { name: "Makan & Minum" }).first().click();
+  await expect(page).toHaveURL(/\/anggaran\/[^/]+$/);
+  await expect(page.getByRole("heading", { name: "Makan & Minum", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Kenapa jatahnya/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Pengeluaran \d+ hari terakhir/ })).toBeVisible();
+  await page.getByRole("radio", { name: "Laju siklus" }).click();
+  await expect(page.getByRole("img", { name: /^Terpakai Rp/ })).toBeVisible();
+  await page.getByRole("link", { name: /^Anggaran ·/ }).click();
+  await expect(page).toHaveURL(/\/anggaran$/);
+});

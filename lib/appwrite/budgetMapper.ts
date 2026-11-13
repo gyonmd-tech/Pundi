@@ -7,7 +7,7 @@
  * Bukan file "use server".
  */
 import type { Models } from "node-appwrite";
-import type { Budget } from "@/lib/data/mock";
+import type { Budget, BudgetTransfer } from "@/lib/data/mock";
 
 export interface BudgetFields {
   categoryId: string;
@@ -19,6 +19,7 @@ export interface BudgetFields {
   startDate?: string | null;
   repeat?: boolean | null;
   accountIds?: string[] | null;
+  leftoverGoalId?: string | null;
 }
 
 export function budgetFromDocument(doc: Models.Document): Budget {
@@ -34,5 +35,19 @@ export function budgetFromDocument(doc: Models.Document): Budget {
     startDate: f.startDate ? new Date(f.startDate) : undefined,
     repeat: f.repeat ?? true,
     accountIds: f.accountIds?.length ? f.accountIds : undefined,
+    leftoverGoalId: f.leftoverGoalId || undefined,
+  };
+}
+
+export function budgetTransferFromDocument(doc: Models.Document): BudgetTransfer {
+  const f = doc as unknown as { fromBudgetId: string; toBudgetId: string; amount: number; date: string; note?: string | null; kind?: BudgetTransfer["kind"] | null };
+  return {
+    id: doc.$id,
+    fromBudgetId: f.fromBudgetId,
+    toBudgetId: f.toBudgetId,
+    amount: Number(f.amount),
+    date: new Date(f.date),
+    note: f.note || undefined,
+    kind: f.kind ?? "budget",
   };
 }

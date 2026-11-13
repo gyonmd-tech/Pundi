@@ -10,7 +10,8 @@
  * Aksi yang sama selalu tersedia di "Rincian" — geser hanyalah jalan pintas.
  */
 import { useRef, useState } from "react";
-import { AlertTriangle, CheckCircle2, ChevronDown, Clock3, Pencil, Sparkles, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, ArrowLeftRight, CheckCircle2, ChevronDown, Clock3, Pencil, Sparkles, Trash2 } from "lucide-react";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { CADENCE_LABEL, type BudgetPace } from "@/lib/utils/budgetPace";
 import { formatRupiah } from "@/lib/utils/formatter";
@@ -25,6 +26,10 @@ interface BudgetPaceCardProps {
   sources?: string[];
   onEdit?: () => void;
   onDelete?: () => void;
+  /** Buka "pindahkan jatah" dengan anggaran ini sebagai penerima. */
+  onTransfer?: () => void;
+  /** Tautan ke halaman detail anggaran. */
+  href?: string;
 }
 
 export type PaceStatus = "safe" | "warning" | "over";
@@ -47,6 +52,12 @@ const ACTIONS_WIDTH = 144;
 
 /** Kalimat yang menjelaskan dari mana angka jatah unit berjalan berasal. */
 export function allowanceExplanation(pace: BudgetPace) {
+  const moved = pace.transferNet > 0 ? ` (termasuk +${formatRupiah(pace.transferNet)} dipindahkan)` : pace.transferNet < 0 ? ` (−${formatRupiah(Math.abs(pace.transferNet))} dipindahkan ke anggaran lain)` : "";
+  const base = baseExplanation(pace);
+  return moved ? `${base.replace(/\.$/, "")}${moved}.` : base;
+}
+
+function baseExplanation(pace: BudgetPace) {
   const labels = CADENCE_LABEL[pace.cadence];
   const previous = pace.cadence === "daily" ? "kemarin" : pace.cadence === "weekly" ? "minggu lalu" : "sebelumnya";
   if (pace.carryIn < 0) return `Jatah ${formatRupiah(pace.unitAllowance)} − kelebihan ${previous} ${formatRupiah(Math.abs(pace.carryIn))}.`;
@@ -64,7 +75,7 @@ export function isNewThisCycle(pace: BudgetPace, now = new Date()) {
   return pace.startedMidCycle && now.getTime() - pace.effectiveStart.getTime() < 7 * 24 * 60 * 60 * 1000;
 }
 
-export function BudgetPaceCard({ name, icon, color, pace, sources, onEdit, onDelete }: BudgetPaceCardProps) {
+export function BudgetPaceCard({ name, icon, color, pace, sources, onEdit, onDelete, onTransfer, href }: BudgetPaceCardProps) {
   const [open, setOpen] = useState(false);
   const [offset, setOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -129,7 +140,9 @@ export function BudgetPaceCard({ name, icon, color, pace, sources, onEdit, onDel
         <header className="flex items-center gap-3">
           <CategoryIcon icon={icon} color={color} size={18} containerSize="md" />
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-base font-bold leading-snug text-ink">{name}</h3>
+            <h3 className="truncate text-base font-bold leading-snug text-ink">
+              {href ? <Link href={href} className="hover:underline">{name}</Link> : name}
+            </h3>
             <p className="mt-0.5 truncate text-xs font-medium text-ink-muted">
               {labels.adjective} · {formatRupiah(pace.cadenceAmount)} · {sources?.length ? sources.join(", ") : "semua rekening"}
             </p>
@@ -195,8 +208,12 @@ export function BudgetPaceCard({ name, icon, color, pace, sources, onEdit, onDel
               </p>
             </div>
 
+            {onTransfer ? (
+              <button type="button" onClick={onTransfer} className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-sm bg-brand-700 text-sm font-bold text-white"><ArrowLeftRight className="h-4 w-4" />{pace.unitRemaining < 0 ? "Tutup kelebihan dari anggaran lain" : "Tambah jatah dari anggaran lain"}</button>
+            ) : null}
             {hasActions ? (
               <div className="flex gap-2">
+                {href ? <Link href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-sm border border-rule-strong text-sm font-bold text-ink transition-colors hover:bg-surface-soft">Detail</Link> : null}
                 {onEdit ? <button type="button" onClick={onEdit} aria-label={`Ubah anggaran ${name}`} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-sm border border-rule-strong text-sm font-bold text-ink transition-colors hover:bg-surface-soft"><Pencil className="h-4 w-4" />Ubah</button> : null}
                 {onDelete ? <button type="button" onClick={onDelete} aria-label={`Hapus anggaran ${name}`} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-sm border border-rule-strong text-sm font-bold text-ember-ink transition-colors hover:bg-ember-10"><Trash2 className="h-4 w-4" />Hapus</button> : null}
               </div>

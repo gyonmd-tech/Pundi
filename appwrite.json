@@ -87,7 +87,8 @@
             { "key": "rollover", "type": "boolean", "required": false, "default": true },
             { "key": "startDate", "type": "datetime", "required": false },
             { "key": "repeat", "type": "boolean", "required": false, "default": true },
-            { "key": "accountIds", "type": "string", "size": 36, "required": false, "array": true }
+            { "key": "accountIds", "type": "string", "size": 36, "required": false, "array": true },
+            { "key": "leftoverGoalId", "type": "string", "size": 36, "required": false }
           ],
           "indexes": [
             { "key": "idx_user_period", "type": "key", "attributes": ["userId", "period"] }
@@ -295,6 +296,25 @@
           "indexes": [
             { "key": "idx_thread", "type": "key", "attributes": ["threadId", "$createdAt"] },
             { "key": "idx_user", "type": "key", "attributes": ["userId"] }
+          ]
+        },
+        {
+          "$id": "budget_transfers",
+          "name": "budget_transfers",
+          "$permissions": [],
+          "documentSecurity": true,
+          "enabled": true,
+          "attributes": [
+            { "key": "userId", "type": "string", "size": 36, "required": true },
+            { "key": "fromBudgetId", "type": "string", "size": 36, "required": true },
+            { "key": "toBudgetId", "type": "string", "size": 36, "required": true },
+            { "key": "amount", "type": "integer", "required": true },
+            { "key": "date", "type": "datetime", "required": true },
+            { "key": "note", "type": "string", "size": 200, "required": false },
+            { "key": "kind", "type": "enum", "elements": ["budget", "goal"], "required": false, "default": "budget" }
+          ],
+          "indexes": [
+            { "key": "idx_user_date", "type": "key", "attributes": ["userId", "date"] }
           ]
         },
         {

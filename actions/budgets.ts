@@ -21,6 +21,7 @@ import { budgetFromDocument } from "@/lib/appwrite/budgetMapper";
  * kelompok atribut yang ditolak dan beri tahu pengguna lewat `warning`.
  */
 const OPTIONAL_GROUPS = [
+  { keys: ["leftoverGoalId"], warning: "Sisa jatah ke tujuan belum tersimpan. Jalankan `npm run db:setup` sekali untuk menambah kolomnya." },
   { keys: ["startDate", "repeat", "accountIds"], warning: "Tanggal mulai, pengulangan, dan sumber dana belum tersimpan. Jalankan `npm run db:setup` sekali untuk menambah kolomnya." },
   { keys: ["cadence", "cadenceAmount", "rollover"], warning: "Anggaran tersimpan sebagai per siklus. Jalankan `npm run db:setup` sekali agar jatah harian/mingguan bisa disimpan." },
 ] as const;
@@ -89,6 +90,7 @@ export async function upsertBudgetAction(payload: Budget) {
     startDate: payload.startDate,
     repeat: payload.repeat ?? true,
     accountIds: payload.accountIds ?? [],
+    leftoverGoalId: payload.leftoverGoalId || undefined,
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? "Data anggaran tidak valid." };
@@ -101,10 +103,12 @@ export async function upsertBudgetAction(payload: Budget) {
     for (const accountId of parsed.data.accountIds) {
       await getOwnedDocument(databases, COLLECTIONS.ACCOUNTS, accountId, user.id);
     }
+    if (parsed.data.leftoverGoalId) await getOwnedDocument(databases, COLLECTIONS.GOALS, parsed.data.leftoverGoalId, user.id);
     const data: Record<string, unknown> = {
       ...parsed.data,
       cadenceAmount: parsed.data.cadenceAmount ?? null,
       startDate: parsed.data.startDate ? parsed.data.startDate.toISOString() : null,
+      leftoverGoalId: parsed.data.leftoverGoalId ?? null,
     };
 
     if (payload.id && !payload.id.startsWith("bud-")) {

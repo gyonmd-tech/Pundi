@@ -16,7 +16,7 @@ import { ArrowLeft, ArrowRight, Check, Gift, Lightbulb } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
-import { useAccounts, useApp, useBudgets, useCategories, usePreferences, useTransactions } from "@/lib/data/store";
+import { useAccounts, useApp, useBudgets, useCategories, useGoals, usePreferences, useTransactions } from "@/lib/data/store";
 import { upsertBudgetAction } from "@/actions/budgets";
 import { createCategoryAction } from "@/actions/categories";
 import { useToast } from "@/lib/context/ToastContext";
@@ -57,6 +57,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
   const categories = useCategories();
   const transactions = useTransactions();
   const accounts = useAccounts();
+  const goals = useGoals();
   const preferences = usePreferences();
   const { showToast } = useToast();
   const cycleDay = preferences.budgetCycleDay ?? 1;
@@ -73,6 +74,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
   const [accountIds, setAccountIds] = useState<string[]>(editing?.accountIds ?? []);
   const [repeat, setRepeat] = useState(editing ? editing.repeat !== false : true);
   const [rollover, setRollover] = useState(editing ? editing.rollover !== false : true);
+  const [leftoverGoalId, setLeftoverGoalId] = useState(editing?.leftoverGoalId ?? "");
   const [saving, setSaving] = useState(false);
 
   const expense = categories.filter((category) => category.type === "expense");
@@ -147,6 +149,7 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
       startDate,
       repeat,
       accountIds: accountIds.length ? accountIds : undefined,
+      leftoverGoalId: leftoverGoalId || undefined,
     };
     setSaving(true);
     const result = await upsertBudgetAction(draft);
@@ -345,6 +348,17 @@ function WizardBody({ onClose, editing }: { onClose: () => void; editing: Budget
                 </p>
               ) : null}
             </fieldset>
+
+            {goals.length > 0 ? (
+              <label className="block text-xs font-bold uppercase tracking-[0.08em] text-ink-muted">
+                Sisa di akhir siklus
+                <select value={leftoverGoalId} onChange={(event) => setLeftoverGoalId(event.target.value)} className="mt-1 h-12 w-full rounded-sm border border-rule-strong bg-surface-high px-3 text-[15px] font-semibold normal-case tracking-normal text-ink">
+                  <option value="">Biarkan (tidak disetor ke mana pun)</option>
+                  {goals.map((goal) => <option key={goal.id} value={goal.id}>Setor ke tujuan: {goal.name}</option>)}
+                </select>
+                <span className="mt-1 block text-xs font-medium normal-case tracking-normal text-ink-muted">Sisa jatah siklus yang sudah berakhir otomatis ditambahkan ke progres tujuan.</span>
+              </label>
+            ) : null}
 
             <div className="divide-y divide-rule rounded-sm border border-rule">
               <SwitchRow label="Ulangi tiap siklus" hint={`Lanjut otomatis ${shortDate.format(upcoming.start)} dan seterusnya`} checked={repeat} onChange={setRepeat} />

@@ -109,6 +109,21 @@ export interface Budget {
   repeat?: boolean;
   /** Sumber dana: hanya belanja dari rekening ini yang dihitung. Kosong = semua. */
   accountIds?: string[];
+  /** Sisa jatah di akhir setiap siklus ditambahkan ke tujuan tabungan ini. */
+  leftoverGoalId?: string;
+}
+
+/** Pemindahan jatah antar anggaran di dalam satu siklus (bukan perpindahan uang). */
+export interface BudgetTransfer {
+  id: string;
+  fromBudgetId: string;
+  toBudgetId: string;
+  amount: number;
+  /** Hari jatah dipindahkan; menambah/mengurangi jatah di hari itu. */
+  date: Date;
+  note?: string;
+  /** "goal" = catatan sisa jatah yang sudah disetor ke tujuan (bukan pemindahan antar anggaran). */
+  kind?: "budget" | "goal";
 }
 
 export interface Goal {
@@ -308,6 +323,8 @@ export const mockBudgets: Budget[] = [
   // Contoh anggaran yang baru dibuat di tengah siklus: tidak ada jatah mundur.
   { id: "bud-7", categoryId: "cat-e10", period: CURRENT_PERIOD, limitAmount: monthlyFromWeekly(100_000), cadence: "weekly", cadenceAmount: 100_000, rollover: false, startDate: new Date(new Date().getFullYear(), new Date().getMonth(), Math.max(1, new Date().getDate() - 2)) },
 ];
+
+export const mockBudgetTransfers: BudgetTransfer[] = [];
 
 // ── Goals ──────────────────────────────────────────────────────────────
 

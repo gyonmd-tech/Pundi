@@ -56,6 +56,10 @@ Perintah ini aman dijalankan ulang: koleksi/atribut yang sudah ada dilewati, yan
 
 Anggaran dihitung per **siklus** yang dimulai di tanggal gajian pengguna (preferensi `budgetCycleDay`, default tanggal 1; diatur dari tombol siklus di halaman Anggaran). Setiap anggaran adalah aturan yang berlaku sejak `startDate` dan lanjut otomatis tiap siklus, sehingga tidak hilang di bulan baru. Jatah dihitung sejak tanggal mulai saja (tidak ada jatah mundur), dan bila `accountIds` diisi hanya belanja dari rekening tersebut yang dihitung. Logikanya ada di `lib/utils/budgetCycle.ts` dan `lib/utils/budgetPace.ts`.
 
+- **Pindahkan jatah** antar anggaran di siklus berjalan dicatat di koleksi `budget_transfers` (hanya batas belanja yang bergeser, saldo rekening tidak). Pemindahan bisa dibatalkan.
+- **Sisa ke tujuan**: anggaran dengan `leftoverGoalId` menyetor sisa jatah siklus yang sudah berakhir ke tujuan tabungan saat aplikasi dibuka (`lib/appwrite/budgetLeftover.ts`, idempoten per anggaran + siklus).
+- **Detail anggaran** di `/anggaran/[id]`: penjelasan jatah, grafik per hari dan laju siklus, riwayat siklus, dan transaksi yang dihitung.
+
 API key hanya dipakai oleh skrip setup/server. Jangan memasukkan `.env` atau `.env.local` ke Git; keduanya sudah diabaikan melalui `.gitignore`.
 Di Vercel, masukkan nilai environment sebagai teks polos tanpa tanda kutip pembuka/penutup. Pastikan proyek Appwrite berstatus aktif dan API key memiliki izin `users.write`, `databases.read`, serta `databases.write`.
 
