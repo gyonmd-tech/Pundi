@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Pundi Cover</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500&display=block" rel="stylesheet">
+<style>
+:root{--cobalt:#2D4FE6;--navy:#0E1A5C;--lime:#C5F04A;--ink:#0F1729;--paper:#F3F4F7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1200px;height:1600px;overflow:hidden;background:var(--cobalt);font-family:Geist,sans-serif;-webkit-font-smoothing:antialiased}
+.poster{position:relative;width:1200px;height:1600px;overflow:hidden;background:var(--cobalt)}
+.grain{position:absolute;inset:0;z-index:20;pointer-events:none;opacity:.16;mix-blend-mode:overlay}
+.mono{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.16em;text-transform:uppercase}
+
+/* background shapes */
+.ring{position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.18)}
+.blob{position:absolute;right:-300px;top:640px;width:980px;height:980px;border-radius:50%;background:var(--navy)}
+.lime-dot{position:absolute;left:560px;top:760px;width:150px;height:150px;border-radius:50%;background:var(--lime)}
+
+/* top */
+.top{position:absolute;left:64px;right:64px;top:56px;display:flex;justify-content:space-between;align-items:center;color:#fff;z-index:6}
+.top img{height:44px}
+.top .meta{display:flex;gap:34px;opacity:.9}
+
+/* headline */
+h1{position:absolute;left:56px;top:150px;z-index:2;color:#fff;
+  font-family:"Bricolage Grotesque",sans-serif;font-variation-settings:"wdth" 88,"opsz" 96;font-weight:800;
+  font-size:212px;line-height:.86;letter-spacing:-.04em}
+h1 .it{display:block;font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;font-variation-settings:normal;
+  color:var(--lime);font-size:218px;letter-spacing:-.03em;line-height:.9;margin-top:4px;margin-left:-4px}
+h1 .row{display:block}
+h1 .row small{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;font-size:120px;letter-spacing:-.02em;vertical-align:.35em;margin-left:16px;color:#fff;opacity:.95}
+
+/* devices */
+.phone{position:absolute;border-radius:58px;padding:13px;background:#0B1238;box-shadow:0 60px 120px rgba(5,10,40,.55),inset 0 0 0 2px rgba(255,255,255,.08)}
+.phone img{display:block;width:100%;border-radius:46px}
+.p1{width:390px;left:640px;top:800px;rotate:-7deg;z-index:5}
+.p2{width:320px;left:905px;top:690px;rotate:8deg;z-index:3}
+
+/* floating UI chips */
+.chip{position:absolute;z-index:7;display:flex;align-items:center;gap:14px;border-radius:22px;padding:16px 22px;box-shadow:0 24px 50px rgba(5,10,40,.35);font-weight:700}
+.toast{left:505px;top:1190px;background:#057A55;color:#fff;rotate:-4deg}
+.toast .ic{width:42px;height:42px;border-radius:50%;background:#fff;color:#057A55;display:grid;place-items:center;font-size:22px;font-weight:900}
+.toast b{display:block;font-size:21px}
+.toast span{display:block;font-size:15px;font-weight:500;opacity:.9}
+.days{left:955px;top:1300px;background:#fff;color:var(--ink);rotate:6deg;flex-direction:column;align-items:flex-start;gap:2px;padding:18px 24px}
+.days .n{font-family:"Bricolage Grotesque";font-variation-settings:"wdth" 75;font-weight:800;font-size:64px;line-height:.9;letter-spacing:-.03em;color:var(--cobalt)}
+.days .l{font-size:15px;font-weight:600;color:#556075}
+.badge{left:540px;top:1445px;background:var(--lime);color:var(--navy);rotate:3deg;font-size:20px;padding:14px 20px;border-radius:999px}
+.badge s{opacity:.55;font-weight:600}
+
+/* sticker */
+.sticker{position:absolute;left:930px;top:205px;width:190px;height:190px;z-index:8;rotate:-12deg}
+.sticker .disc{position:absolute;inset:0;border-radius:50%;background:var(--lime)}
+.sticker svg{position:absolute;inset:0}
+.sticker .arrow{position:absolute;inset:0;display:grid;place-items:center;font-size:52px;color:var(--navy);font-weight:800}
+
+/* bottom copy */
+.lede{position:absolute;left:64px;top:820px;width:420px;z-index:6;color:#fff}
+.lede p{font-size:25px;line-height:1.4;font-weight:500;letter-spacing:-.01em}
+.lede p em{font-family:"Instrument Serif",serif;font-style:italic;font-size:31px;color:var(--lime);font-weight:400}
+.feat{margin-top:34px;display:flex;flex-wrap:wrap;gap:10px}
+.feat span{border:1.5px solid rgba(255,255,255,.55);border-radius:999px;padding:9px 16px;font-size:16px;font-weight:600}
+.cta{position:absolute;left:64px;bottom:120px;z-index:6;display:inline-flex;align-items:center;gap:18px;background:#fff;color:var(--navy);border-radius:999px;padding:12px 12px 12px 30px;font-size:22px;font-weight:700}
+.cta i{width:52px;height:52px;border-radius:50%;background:var(--navy);color:var(--lime);display:grid;place-items:center;font-style:normal;font-size:26px}
+.foot{position:absolute;left:64px;width:420px;bottom:50px;z-index:6;display:flex;justify-content:space-between;color:#fff;opacity:.85;border-top:1.5px solid rgba(255,255,255,.3);padding-top:20px}
+.stats{position:absolute;left:64px;top:1165px;width:400px;z-index:6;display:grid;grid-template-columns:1fr 1fr;gap:26px 30px;color:#fff;border-top:1.5px solid rgba(255,255,255,.3);padding-top:26px}
+.stats b{display:block;font-family:"Bricolage Grotesque";font-variation-settings:"wdth" 88;font-weight:800;font-size:58px;line-height:.9;letter-spacing:-.03em}
+.stats b em{font-family:"Instrument Serif";font-style:italic;font-weight:400;color:var(--lime);font-size:48px;letter-spacing:0}
+.stats span{display:block;margin-top:6px;font-size:16px;font-weight:500;opacity:.85}
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="ring" style="left:-300px;top:-380px;width:900px;height:900px"></div>
+  <div class="ring" style="left:-200px;top:-280px;width:700px;height:700px"></div>
+  <div class="blob"></div>
+  <div class="lime-dot"></div>
+
+  <div class="top">
+    <img src="logo-white.svg" alt="Pundi">
+    <div class="meta mono"><span>Studi kasus UI/UX</span><span>Web · iOS · Android</span><span>© 2026</span></div>
+  </div>
+
+  <h1>
+    <span class="row">Gajian ke</span>
+    <span class="row">gajian,</span>
+    <span class="it">tetap tenang.</span>
+  </h1>
+
+  <div class="sticker">
+    <div class="disc"></div>
+    <svg viewBox="0 0 190 190"><defs><path id="c" d="M95,95 m-70,0 a70,70 0 1,1 140,0 a70,70 0 1,1 -140,0"/></defs>
+      <text font-family="Geist Mono" font-size="15.5" font-weight="500" letter-spacing="3.4" fill="#0E1A5C"><textPath href="#c">COBA GRATIS ✦ ANGGARAN JUJUR ✦ </textPath></text></svg>
+    <div class="arrow">↗</div>
+  </div>
+
+  <div class="phone p2"><img src="shots/m-anggaran-bud-1.png"></div>
+  <div class="phone p1"><img src="shots/m-anggaran.png"></div>
+
+  <div class="chip toast"><span class="ic">✓</span><span><b>Jatah dipindahkan Rp 310.000</b><span>Saldo rekening tidak berubah</span></span></div>
+  <div class="chip days"><span class="n">16</span><span class="l">hari lagi ke gajian</span></div>
+  <div class="chip badge">Belanja <s>Lewat</s> → Aman</div>
+
+  <div class="lede">
+    <p>Anggaran yang ikut <em>tanggal gajianmu,</em> bukan kalender. Lewat jatah? Tutup dari anggaran lain dalam dua ketukan.</p>
+    <div class="feat"><span>Siklus gajian</span><span>Jatah jujur</span><span>Pindahkan jatah</span><span>Asisten Penjaga</span></div>
+  </div>
+
+  <div class="stats">
+    <div><b>2 <em>ketuk</em></b><span>untuk menutup jatah yang lewat</span></div>
+    <div><b>0 <em>drama</em></b><span>anggaran tidak hilang tiap tanggal 1</span></div>
+  </div>
+  <a class="cta">Coba Pundi gratis <i>→</i></a>
+  <div class="foot mono"><span>pundi-theta.vercel.app</span><span></span></div>
+
+  <svg class="grain" width="1200" height="1600"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Pundi Carousel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500&display=block" rel="stylesheet">
+<style>
+:root{--cobalt:#2D4FE6;--navy:#0E1A5C;--lime:#C5F04A;--ink:#0F1729;--paper:#F3F4F7;--muted:#556075;--mint:#057A55;--ember:#B4232A}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1200px;background:#222;font-family:Geist,sans-serif;-webkit-font-smoothing:antialiased}
+.poster{position:relative;width:1200px;height:1500px;overflow:hidden;margin-bottom:40px}
+.poster.tall{height:1600px}
+.mono{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.16em;text-transform:uppercase}
+.grain{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:.14;mix-blend-mode:overlay}
+
+.top{position:absolute;left:64px;right:64px;top:56px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+.top img{height:42px}
+.idx{display:flex;align-items:center;gap:18px}
+.idx b{font-family:"Bricolage Grotesque";font-variation-settings:"wdth" 88;font-weight:800;font-size:30px;letter-spacing:-.02em}
+
+h2{position:absolute;left:58px;top:150px;z-index:4;font-family:"Bricolage Grotesque",sans-serif;font-variation-settings:"wdth" 88,"opsz" 96;font-weight:800;font-size:160px;line-height:.88;letter-spacing:-.04em}
+h2 .it{display:block;font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;font-variation-settings:normal;font-size:172px;letter-spacing:-.03em;line-height:.92;margin-left:-4px}
+.lede{position:absolute;left:64px;z-index:6;width:440px;font-size:25px;line-height:1.42;font-weight:500;letter-spacing:-.01em}
+.lede em{font-family:"Instrument Serif";font-style:italic;font-size:31px;font-weight:400}
+
+.foot{position:absolute;left:64px;right:64px;bottom:52px;z-index:10;display:flex;justify-content:space-between;align-items:center}
+.dots{display:flex;gap:8px}
+.dots i{width:10px;height:10px;border-radius:50%;background:currentColor;opacity:.3}
+.dots i.on{width:34px;border-radius:6px;opacity:1}
+.swipe{display:flex;align-items:center;gap:14px}
+.swipe span{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:700}
+
+.phone{position:absolute;border-radius:58px;padding:13px;background:#0B1238;box-shadow:0 60px 120px rgba(5,10,40,.45),inset 0 0 0 2px rgba(255,255,255,.08)}
+.phone img{display:block;width:100%;border-radius:46px}
+.chip{position:absolute;z-index:8;display:flex;align-items:center;gap:14px;border-radius:22px;padding:16px 22px;box-shadow:0 24px 50px rgba(5,10,40,.28);font-weight:700}
+.ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:21px;font-weight:900;flex-shrink:0}
+.chip small{display:block;font-size:15px;font-weight:500;opacity:.85}
+.chip b{display:block;font-size:21px}
+
+/* premium laptop */
+.laptop{position:absolute;--w:960px;width:var(--w)}
+.lid{position:relative;border-radius:calc(var(--w)*.032) calc(var(--w)*.032) 6px 6px;padding:calc(var(--w)*.017) calc(var(--w)*.017) calc(var(--w)*.026);
+  background:#07080c;box-shadow:0 0 0 2px #3a3f4b,0 0 0 4px #c9ced6,0 0 0 5px #8b919c}
+.lid::before{content:"";position:absolute;left:50%;top:calc(var(--w)*.007);width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:#1d2230;box-shadow:inset 0 0 0 1.5px #2e3547}
+.lid .scr{position:relative;border-radius:4px;overflow:hidden}
+.lid .scr img{display:block;width:100%}
+.lid .scr::after{content:"";position:absolute;inset:0;background:linear-gradient(118deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 32%,transparent 33%)}
+.hinge{height:calc(var(--w)*.012);margin:0 2%;background:linear-gradient(#1a1d24,#4a505c);border-radius:0 0 4px 4px}
+.base{position:relative;height:calc(var(--w)*.026);width:114%;margin-left:-7%;margin-top:-2px;
+  background:linear-gradient(180deg,#f4f5f7 0%,#d9dce2 35%,#aeb3bc 75%,#7d838e 100%);
+  border-radius:3px 3px calc(var(--w)*.05) calc(var(--w)*.05)/3px 3px calc(var(--w)*.03) calc(var(--w)*.03);
+  box-shadow:0 2px 0 #5c626d}
+.base::before{content:"";position:absolute;left:50%;top:0;width:15%;height:45%;transform:translateX(-50%);
+  background:linear-gradient(#a7acb5,#c7cbd2);border-radius:0 0 12px 12px}
+.shadow{position:absolute;left:-4%;right:-4%;height:60px;bottom:-42px;border-radius:50%;background:rgba(3,6,25,.55);filter:blur(22px);z-index:-1}
+
+.sticker{position:absolute;width:180px;height:180px;z-index:9}
+.sticker .disc{position:absolute;inset:0;border-radius:50%;background:var(--lime)}
+.sticker svg{position:absolute;inset:0}
+.sticker .arrow{position:absolute;inset:0;display:grid;place-items:center;font-size:50px;color:var(--navy);font-weight:800}
+.cta{position:absolute;z-index:10;display:inline-flex;align-items:center;gap:18px;border-radius:999px;padding:12px 12px 12px 30px;font-size:22px;font-weight:700}
+.cta i{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:26px}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0"/></filter></svg>
+
+<!-- 02 SIKLUS · paper -->
+<section class="poster" id="s2" style="background:var(--paper);color:var(--ink)">
+  <div style="position:absolute;right:-50px;top:250px;font-family:'Bricolage Grotesque';font-variation-settings:'wdth' 80;font-weight:800;font-size:760px;line-height:.8;letter-spacing:-.06em;color:#DDE3FD">25</div>
+  <div class="top"><img src="logo-color.svg"><div class="idx" style="color:var(--cobalt)"><span class="mono" style="color:var(--muted)">Siklus gajian</span><b>02<span style="opacity:.35">/06</span></b></div></div>
+  <h2 style="color:var(--ink)">Mulai di hari<span class="it" style="color:var(--cobalt)">uangmu masuk.</span></h2>
+  <p class="lede" style="top:590px;color:var(--ink)">Pilih tanggal gajianmu sekali. Anggaran berjalan <em style="color:var(--cobalt)">25 Okt – 24 Nov,</em> lalu lanjut sendiri tiap bulan.</p>
+  <div class="chip" style="left:64px;top:860px;background:#fff;color:var(--muted);rotate:-3deg;box-shadow:0 14px 30px rgba(14,26,92,.1)"><span style="font-size:20px;text-decoration:line-through;text-decoration-color:#E5484D;text-decoration-thickness:3px">Bulanan · 1 Nov – 30 Nov</span></div>
+  <div class="chip" style="left:90px;top:950px;background:var(--navy);color:#fff;rotate:2deg;font-size:23px"><span class="ic" style="background:var(--cobalt);color:#fff">▦</span>Siklus gajian · 25 Okt – 24 Nov</div>
+  <div class="chip" style="left:64px;top:1060px;background:var(--lime);color:var(--navy);rotate:-2deg;font-size:21px;border-radius:999px"><span class="ic" style="background:var(--navy);color:var(--lime);width:36px;height:36px;font-size:18px">✓</span>Berikutnya 25 Nov · lanjut otomatis</div>
+  <div class="phone" style="width:400px;left:660px;top:560px;rotate:-5deg;z-index:5"><img src="shots/m-anggaran.png"></div>
+  <div class="foot" style="color:var(--cobalt)"><div class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="swipe"><span class="mono" style="width:auto;height:auto;color:var(--muted)">Geser</span><span style="background:var(--cobalt);color:#fff">→</span></div></div>
+</section>
+
+<!-- 03 JATAH JUJUR · navy -->
+<section class="poster" id="s3" style="background:var(--navy);color:#fff">
+  <div style="position:absolute;left:520px;top:520px;width:900px;height:900px;border-radius:50%;background:var(--cobalt)"></div>
+  <div class="top"><img src="logo-white.svg"><div class="idx" style="color:var(--lime)"><span class="mono" style="color:#A3B5FA">Jatah yang jujur</span><b>03<span style="opacity:.4">/06</span></b></div></div>
+  <h2 style="color:#fff">Tanpa angka<span class="it" style="color:var(--lime)">misterius.</span></h2>
+  <p class="lede" style="top:590px;color:#E6EBFE">Jatah dihitung sejak anggaran dibuat, dan setiap angka <em style="color:var(--lime)">dijelaskan dengan kalimat</em> yang bisa dibaca siapa saja.</p>
+  <div class="chip" style="left:64px;top:870px;background:transparent;box-shadow:none;padding:0;color:#A3B5FA;font-size:24px;font-weight:600;rotate:-2deg"><span style="text-decoration:line-through;text-decoration-color:#E5484D;text-decoration-thickness:3px">Dulu: “sisa −Rp 6.701”</span></div>
+  <div class="chip" style="left:64px;top:930px;width:470px;background:#fff;color:var(--ink);flex-direction:column;align-items:stretch;gap:0;padding:26px 28px;rotate:-2deg;border-radius:26px">
+    <span class="mono" style="font-size:12px;color:var(--muted);margin-bottom:14px">Kenapa jatahnya Rp 712.500?</span>
+    <span style="display:flex;justify-content:space-between;font-size:20px;font-weight:600;padding:8px 0;border-bottom:1px solid #E3E6EE"><span>Jatah hari ini</span><span>Rp 65.000</span></span>
+    <span style="display:flex;justify-content:space-between;font-size:20px;font-weight:600;padding:8px 0;border-bottom:1px solid #E3E6EE"><span>Sisa kemarin</span><span style="color:var(--mint)">+ Rp 647.500</span></span>
+    <span style="display:flex;justify-content:space-between;font-size:26px;font-weight:800;padding:12px 0 0"><span>Total</span><span style="color:var(--cobalt)">Rp 712.500</span></span>
+  </div>
+  <div class="phone" style="width:400px;left:690px;top:560px;rotate:5deg;z-index:5"><img src="shots/m-anggaran-bud-1.png"></div>
+  <div class="foot" style="color:var(--lime)"><div class="dots"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="swipe"><span class="mono" style="width:auto;height:auto;color:#A3B5FA">Geser</span><span style="background:var(--lime);color:var(--navy)">→</span></div></div>
+</section>
+
+<!-- 04 PINDAHKAN · lime -->
+<section class="poster" id="s4" style="background:var(--lime);color:var(--navy)">
+  <div style="position:absolute;left:600px;top:470px;width:820px;height:820px;border-radius:50%;background:var(--navy)"></div>
+  <div class="top"><img src="logo-color.svg"><div class="idx"><span class="mono" style="color:#3F5A00">Pindahkan jatah</span><b>04<span style="opacity:.35">/06</span></b></div></div>
+  <h2 style="color:var(--navy)">Lewat jatah?<span class="it" style="color:var(--cobalt)">geser saja.</span></h2>
+  <p class="lede" style="top:590px;color:var(--navy)">Tutup kelebihan belanja dari sisa anggaran lain. <em style="color:var(--cobalt)">Batasnya yang bergeser,</em> uang di rekeningmu tetap.</p>
+  <div class="chip" style="left:64px;top:880px;background:var(--ember);color:#fff;rotate:-3deg"><span class="ic" style="background:#fff;color:var(--ember)">!</span><span><b>Belanja lewat Rp 310.000</b><small>Tutup dari Makan &amp; Minum</small></span></div>
+  <div style="position:absolute;left:250px;top:985px;font-size:46px;font-weight:800;z-index:8">↓</div>
+  <div class="chip" style="left:90px;top:1050px;background:var(--mint);color:#fff;rotate:2deg"><span class="ic" style="background:#fff;color:var(--mint)">✓</span><span><b>Jatah dipindahkan Rp 310.000</b><small>Saldo rekening tidak berubah</small></span></div>
+  <div class="chip" style="left:64px;top:1180px;background:var(--navy);color:var(--lime);border-radius:999px;font-family:'Bricolage Grotesque';font-variation-settings:'wdth' 88;font-size:40px;font-weight:800;letter-spacing:-.02em;padding:12px 30px">2 <span style="font-family:'Instrument Serif';font-style:italic;font-weight:400;font-size:38px;color:#fff;letter-spacing:0">ketukan</span></div>
+  <div class="phone" style="width:400px;left:690px;top:560px;rotate:-4deg;z-index:5"><img src="transfer-sheet.png"></div>
+  <div class="foot" style="color:var(--navy)"><div class="dots"><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div><div class="swipe"><span class="mono" style="width:auto;height:auto">Geser</span><span style="background:var(--navy);color:var(--lime)">→</span></div></div>
+</section>
+
+<!-- 05 PENJAGA · cobalt -->
+<section class="poster" id="s5" style="background:var(--cobalt);color:#fff">
+  <div style="position:absolute;left:560px;top:600px;width:900px;height:900px;border-radius:50%;background:var(--navy)"></div>
+  <div class="top"><img src="logo-white.svg"><div class="idx" style="color:var(--lime)"><span class="mono" style="color:#E6EBFE">Asisten Penjaga</span><b>05<span style="opacity:.4">/06</span></b></div></div>
+  <h2 style="color:#fff">Cerita saja,<span class="it" style="color:var(--lime)">biar dicatat.</span></h2>
+  <p class="lede" style="top:590px;color:#E6EBFE">Tulis belanjamu seperti chat biasa. Penjaga menyusun <em style="color:var(--lime)">draft transaksi,</em> kamu tinggal setujui.</p>
+  <div class="chip" style="left:64px;top:850px;max-width:450px;background:#fff;color:var(--ink);border-radius:26px 26px 26px 6px;font-size:21px;font-weight:600;line-height:1.4;rotate:-2deg">“Sarapan 15rb, soto 25rb, bensin 30rb pakai cash”</div>
+  <div class="chip" style="left:100px;top:990px;width:430px;background:var(--navy);color:#fff;flex-direction:column;align-items:stretch;gap:0;padding:22px 24px;rotate:2deg;border-radius:24px;box-shadow:0 24px 50px rgba(5,10,40,.4),inset 0 0 0 1.5px rgba(163,181,250,.35)">
+    <span class="mono" style="font-size:12px;color:var(--lime);margin-bottom:10px">Draft · 3 transaksi</span>
+    <span style="display:flex;justify-content:space-between;font-size:19px;font-weight:600;padding:7px 0"><span>Sarapan</span><span>−Rp 15.000</span></span>
+    <span style="display:flex;justify-content:space-between;font-size:19px;font-weight:600;padding:7px 0"><span>Soto</span><span>−Rp 25.000</span></span>
+    <span style="display:flex;justify-content:space-between;font-size:19px;font-weight:600;padding:7px 0 14px"><span>Bensin</span><span>−Rp 30.000</span></span>
+    <span style="background:var(--lime);color:var(--navy);border-radius:14px;text-align:center;padding:12px;font-size:19px;font-weight:800">✓ Setujui semua</span>
+  </div>
+  <div class="phone" style="width:400px;left:690px;top:560px;rotate:5deg;z-index:5"><img src="shots/m-penjaga.png"></div>
+  <div class="foot" style="color:var(--lime)"><div class="dots"><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div><div class="swipe"><span class="mono" style="width:auto;height:auto;color:#E6EBFE">Geser</span><span style="background:var(--lime);color:var(--navy)">→</span></div></div>
+</section>
+
+<!-- 06 WEB · navy laptop -->
+<section class="poster" id="s6" style="background:var(--navy);color:#fff">
+  <div style="position:absolute;left:-200px;top:820px;width:1600px;height:1600px;border-radius:50%;background:var(--cobalt)"></div>
+  <div class="top"><img src="logo-white.svg"><div class="idx" style="color:var(--lime)"><span class="mono" style="color:#A3B5FA">Web &amp; mobile</span><b>06<span style="opacity:.4">/06</span></b></div></div>
+  <h2 style="color:#fff">Di laptop,<span class="it" style="color:var(--lime)">sama rapinya.</span></h2>
+  <p class="lede" style="top:150px;left:auto;right:64px;width:300px;font-size:22px;color:#E6EBFE;text-align:right;top:560px">Satu akun, sinkron di web, PWA, Android &amp; iOS.</p>
+  <div class="laptop" style="--w:900px;left:150px;top:650px;z-index:5"><div class="lid"><div class="scr"><img src="shots/d-dashboard.png"></div></div><div class="hinge"></div><div class="base"></div><div class="shadow"></div></div>
+  <div class="phone" style="width:230px;left:900px;top:820px;rotate:6deg;z-index:7;border-radius:40px;padding:9px"><img src="shots/m-dashboard.png" style="border-radius:32px"></div>
+  <a class="cta" style="left:64px;bottom:108px;background:var(--lime);color:var(--navy)">Coba gratis · pundi-theta.vercel.app <i style="background:var(--navy);color:var(--lime)">→</i></a>
+  <div class="foot" style="color:var(--lime)"><div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div><span class="mono" style="color:#fff">Ringan ✦ Jujur ✦ Tenang</span></div>
+</section>
+
+<!-- WEB POSTER 3:4 · cobalt -->
+<section class="poster tall" id="web" style="background:var(--cobalt);color:#fff">
+  <div style="position:absolute;left:-300px;top:-380px;width:900px;height:900px;border-radius:50%;border:1.5px solid rgba(255,255,255,.18)"></div>
+  <div style="position:absolute;left:-150px;top:860px;width:1500px;height:1500px;border-radius:50%;background:var(--navy)"></div>
+  <div style="position:absolute;left:880px;top:680px;width:170px;height:170px;border-radius:50%;background:var(--lime)"></div>
+  <div class="top"><img src="logo-white.svg"><div class="mono" style="display:flex;gap:34px;color:#fff"><span>Studi kasus UI/UX</span><span>Dashboard web</span><span>© 2026</span></div></div>
+  <h2 style="color:#fff;font-size:172px;top:150px">Semua uangmu,<span class="it" style="color:var(--lime);font-size:196px">satu layar.</span></h2>
+  <div class="sticker" style="left:960px;top:400px;rotate:-12deg"><div class="disc"></div>
+    <svg viewBox="0 0 180 180"><defs><path id="c2" d="M90,90 m-66,0 a66,66 0 1,1 132,0 a66,66 0 1,1 -132,0"/></defs><text font-family="Geist Mono" font-size="15" font-weight="500" letter-spacing="3.2" fill="#0E1A5C"><textPath href="#c2">VERSI WEB ✦ COBA GRATIS ✦ </textPath></text></svg>
+    <div class="arrow">↗</div></div>
+  <p class="lede" style="top:610px;color:#fff;width:600px">Saldo, anggaran siklus, dan arus kas dalam satu dashboard. <em style="color:var(--lime)">Sidebar rapi,</em> pencarian Ctrl K, dan tambah transaksi selalu di tempatnya.</p>
+  <div class="laptop" style="--w:980px;left:110px;top:780px;z-index:5"><div class="lid"><div class="scr"><img src="shots/d-dashboard.png"></div></div><div class="hinge"></div><div class="base"></div><div class="shadow"></div></div>
+  <div class="chip" style="left:40px;top:1040px;background:#fff;color:var(--ink);rotate:-4deg;flex-direction:column;align-items:flex-start;gap:4px;padding:20px 26px"><small style="color:var(--muted);font-size:15px;font-weight:600">Aman dibelanjakan hari ini</small><span style="font-family:'Bricolage Grotesque';font-variation-settings:'wdth' 88;font-size:46px;font-weight:800;letter-spacing:-.03em;color:var(--cobalt);line-height:1">Rp 683.605</span></div>
+  <div class="chip" style="left:905px;top:1250px;background:var(--lime);color:var(--navy);rotate:5deg;flex-direction:column;align-items:flex-start;gap:2px;padding:18px 24px"><small style="font-size:15px;font-weight:600;opacity:.8">Arus kas bulan ini</small><span style="font-family:'Bricolage Grotesque';font-variation-settings:'wdth' 88;font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1">+Rp 6,19 jt</span></div>
+  <a class="cta" style="left:64px;bottom:40px;background:#fff;color:var(--navy)">Coba Pundi gratis <i style="background:var(--navy);color:var(--lime)">→</i></a>
+  <span class="mono" style="position:absolute;right:64px;bottom:64px;color:#fff;z-index:10">pundi-theta.vercel.app</span>
+</section>
+
+<script>
+document.querySelectorAll('.poster').forEach(p=>{const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('class','grain');s.setAttribute('width','1200');s.setAttribute('height',p.offsetHeight);s.innerHTML='<rect width="100%" height="100%" filter="url(#n)"/>';p.appendChild(s)});
+</script>
+</body>
+</html>
