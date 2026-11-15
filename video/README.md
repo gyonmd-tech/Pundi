@@ -1,3 +1,25 @@
+# Video Pundi (Remotion)
+
+## "Dari Gajian ke Gajian" (identitas 2026-11: kobalt + lime, Fraunces + Geist)
+
+Sumber di `src/jujur/`. Tujuh adegan: hook → janji → siklus gajian → jatah yang jujur → pindahkan jatah → bukti → ajakan.
+
+| Komposisi | Ukuran | Durasi | Untuk |
+|---|---|---|---|
+| `Gajian` | 1920×1080 | ±37,6 dtk | Portofolio, YouTube, landing |
+| `GajianVertikal` | 1080×1920 | ±37,6 dtk | Story, Reels panjang |
+| `GajianReels15` | 1080×1920 | ±14,2 dtk | Reels/TikTok (masalah → pindahkan jatah → ajakan) |
+
+Setiap adegan juga terdaftar sendiri di folder Studio `Gajian-Adegan`. Screenshot aplikasi ada di `public/jujur/` (diambil dari mode demo).
+
+```console
+npx remotion render Gajian out/pundi-gajian.mp4
+```
+
+Belum ada musik: tambahkan `<Audio>` dari `@remotion/media` di `src/jujur/GajianVideo.tsx` dengan lagu yang lisensinya aman.
+
+---
+
 # Remotion video
 
 <p align="center">
