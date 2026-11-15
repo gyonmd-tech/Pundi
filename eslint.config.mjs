@@ -12,7 +12,6 @@ const eslintConfig = defineConfig([
     ".next/**",
     ".agents/**",
     "video/**",
-    "portfolio/**",
     ".claude/**",
     "design-system/**",
     "out/**",
